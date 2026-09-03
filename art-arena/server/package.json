@@ -1,0 +1,17 @@
+{
+  "name": "art-arena-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Art Arena — Phase 1 Foundation: Authentication service (dev)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file=.env server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^4.21.2",
+    "multer": "^2.3.0",
+    "pg": "^8.13.1",
+    "ws": "^8.21.3"
+  }
+}
