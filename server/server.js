@@ -98,6 +98,9 @@ const ACCOUNT_STATUS_MSG = {
 // ---------------------------------------------------------------------------
 // App
 // ---------------------------------------------------------------------------
+// v45: post-migration schema check result (read by /api/health).
+let schemaState = null; // null = not checked yet; [] = all good
+
 const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '64kb' }));
@@ -129,7 +132,15 @@ app.use((req, res, next) => {
 // ----------------------------- health --------------------------------------
 app.get('/api/health', ah(async (req, res) => {
   const { rows } = await pool.query('SELECT 1');
-  res.json({ ok: true, db: rows.length ? 'up' : 'down', dev: DEV });
+  res.json({
+    ok: true,
+    db: rows.length ? 'up' : 'down',
+    dev: DEV,
+    // v45: schema migration state — 'ok', or the missing objects by name.
+    // (Surfaced so a permissions-blocked migration on a managed DB is
+    // visible in Render logs/dashboards instead of surfacing as 500s.)
+    schema: Array.isArray(schemaState) ? (schemaState.length ? 'incomplete: ' + schemaState.join(', ') : 'ok') : 'unchecked',
+  });
 }));
 
 // --------------------- 0b. UI VERSION GUARD --------------------------------
@@ -704,47 +715,70 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     await pool.query(`ALTER TYPE result_method ADD VALUE IF NOT EXISTS 'none'`);
     console.log("MIGRATE v36: result_method enum gained 'none' (no-voting battles)");
   } catch (e) { console.error('[migrate] v36 enum migration failed:', e.message); }
-  // v44: idempotent schema migrations — one active room per artist, the
-  // rematch request box, room archiving (delete-with-history), and the
-  // single-challenge guard.
-  //  - uq_one_active_seat_per_user: a PARTIAL UNIQUE INDEX — a user may hold
-  //    at most ONE 'waiting'/'ready' seat across ALL rooms. This is the
-  //    server-side (DB-level) guarantee behind "one active room or match per
-  //    artist": even two racing tabs/devices cannot create two active seats.
-  //  - rematch_requests: the request/accept/decline box for post-battle
-  //    rematches (one PENDING request per room at a time).
-  //  - battle_rooms.deleted_at: archive marker — deleting a room that owns
-  //    battle history removes the ROOM container but preserves battles,
-  //    results, submissions and stats (hard delete would cascade them away).
-  //  - uq_one_challenge_per_battle: the randomizer's integrity guarantee —
-  //    a battle can ever hold exactly ONE official challenge row.
-  try {
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_one_active_seat_per_user
-                        ON room_participants (user_id) WHERE state IN ('waiting','ready')`);
-    await pool.query(`ALTER TABLE battle_rooms ADD COLUMN IF NOT EXISTS deleted_at timestamptz`);
-    // v44 fix: battle_rooms shipped from the original dump with NO primary
-    // key (and zero indexes). The rematch_requests FK needs a unique
-    // constraint on battle_rooms(id) — add the PK idempotently (ids are
-    // verified unique), plus a lookup index on code (roomByCode was a
-    // full table scan until now).
-    await pool.query(`DO $$ BEGIN
+  // v44/v45 migrations — ordered, INDEPENDENTLY guarded steps.
+  //
+  // WHY this shape (the production incident): v44 ran all migrations in one
+  // try-block whose FIRST statement was the one-active-seat unique index.
+  // Production Neon held real pre-v44 data — users with several active
+  // seats (legal then) and orphaned seat rows — so that index creation
+  // threw, the catch swallowed it, and `ALTER TABLE battle_rooms ADD COLUMN
+  // deleted_at` (statement #2) NEVER RAN. Every query referencing
+  // r.deleted_at then failed ("column r.deleted_at does not exist") across
+  // Rooms + matchmaking.
+  //
+  // The fix, in order:
+  //   1. REPAIR the data first (sweep orphaned seats, then de-duplicate
+  //      active seats keeping the user's most-live room) — never destroys
+  //      rooms, battles or history; retired seats just become 'left'.
+  //   2. Apply each schema change as its own step — one failure can never
+  //      hide another again.
+  //   3. VERIFY afterwards: the exact objects the runtime queries depend on
+  //      are checked; the result is logged and exposed via /api/health
+  //      (`schema`), so a permission/ownership problem on a managed DB is
+  //      diagnosable at a glance instead of surfacing as a mystery 500.
+  // `server/migrations-v45.sql` carries the same steps for manual runs.
+  const MIGRATION_STEPS = [
+    ['v45 sweep orphaned seats (pre-FK-schema deletes left these)',
+     `DELETE FROM room_participants rp
+        WHERE NOT EXISTS (SELECT 1 FROM battle_rooms r WHERE r.id = rp.room_id)`],
+    ['v45 sweep orphaned spectators',
+     `DELETE FROM room_spectators rs
+        WHERE NOT EXISTS (SELECT 1 FROM battle_rooms r WHERE r.id = rs.room_id)`],
+    ['v45 de-duplicate active seats (keep the user\'s most-live room)',
+     `WITH ranked AS (
+        SELECT rp.ctid AS ctid,
+               row_number() OVER (
+                 PARTITION BY rp.user_id
+                 ORDER BY (CASE r.status WHEN 'in_battle' THEN 3 WHEN 'starting' THEN 2
+                                         WHEN 'lobby' THEN 1 ELSE 0 END) DESC,
+                          rp.joined_at DESC NULLS LAST,
+                          r.created_at DESC NULLS LAST
+               ) AS rn
+          FROM room_participants rp
+          LEFT JOIN battle_rooms r ON r.id = rp.room_id
+         WHERE rp.state IN ('waiting','ready'))
+      UPDATE room_participants SET state = 'left', left_at = now()
+       WHERE ctid IN (SELECT ctid FROM ranked WHERE rn > 1)`],
+    ['v44 battle_rooms.deleted_at (room archive marker)',
+     `ALTER TABLE battle_rooms ADD COLUMN IF NOT EXISTS deleted_at timestamptz`],
+    ['v44 battle_rooms primary key (dump shipped without PKs)',
+     `DO $$ BEGIN
         IF NOT EXISTS (SELECT 1 FROM pg_constraint
                         WHERE conrelid = 'battle_rooms'::regclass AND contype = 'p') THEN
           ALTER TABLE battle_rooms ADD CONSTRAINT battle_rooms_pkey PRIMARY KEY (id);
         END IF;
-      END $$;`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_battle_rooms_code ON battle_rooms (code)`);
-    // v44 fix (same cause): users.id also shipped WITHOUT a primary key —
-    // the rematch_requests FKs need it. (Discovered: the original dump
-    // dropped PKs schema-wide; this migration restores them only where the
-    // v44 constraints need them — a full restore is a separate task.)
-    await pool.query(`DO $$ BEGIN
+      END $$;`],
+    ['v44 battle_rooms code lookup index',
+     `CREATE INDEX IF NOT EXISTS idx_battle_rooms_code ON battle_rooms (code)`],
+    ['v44 users primary key',
+     `DO $$ BEGIN
         IF NOT EXISTS (SELECT 1 FROM pg_constraint
                         WHERE conrelid = 'users'::regclass AND contype = 'p') THEN
           ALTER TABLE users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
         END IF;
-      END $$;`);
-    await pool.query(`CREATE TABLE IF NOT EXISTS rematch_requests (
+      END $$;`],
+    ['v44 rematch_requests table',
+     `CREATE TABLE IF NOT EXISTS rematch_requests (
           id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
           room_id uuid NOT NULL REFERENCES battle_rooms(id) ON DELETE CASCADE,
           from_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -752,45 +786,72 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
           status text NOT NULL DEFAULT 'pending',
           created_at timestamptz NOT NULL DEFAULT now(),
           responded_at timestamptz
-        )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_rematch_pending_per_room
-                        ON rematch_requests (room_id) WHERE status = 'pending'`);
-    // belt-and-braces (randomizer audit): drop any duplicated challenge rows
-    // (keep the oldest per battle), then enforce ONE challenge per battle.
-    // (DISTINCT ON + ctid — uuid has no min() aggregate.)
-    await pool.query(`DELETE FROM battle_challenge_elements bce
+        )`],
+    ['v44 one pending rematch per room',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_rematch_pending_per_room
+        ON rematch_requests (room_id) WHERE status = 'pending'`],
+    ['v44 challenge dedupe (elements of duplicated challenges)',
+     `DELETE FROM battle_challenge_elements bce
         USING battle_challenges bc
         WHERE bce.challenge_id = bc.id
           AND bc.ctid NOT IN (SELECT DISTINCT ON (battle_id) ctid
-                                FROM battle_challenges ORDER BY battle_id, generated_at)`);
-    await pool.query(`DELETE FROM battle_challenges bc
+                                FROM battle_challenges ORDER BY battle_id, generated_at)`],
+    ['v44 challenge dedupe (keep the oldest row per battle)',
+     `DELETE FROM battle_challenges bc
         WHERE bc.ctid NOT IN (SELECT DISTINCT ON (battle_id) ctid
-                                FROM battle_challenges ORDER BY battle_id, generated_at)`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_one_challenge_per_battle
-                        ON battle_challenges (battle_id)`);
-    // v44 (stats exactly-once): a battle can ever hold exactly ONE result
-    // row — DB-level insurance on top of the finish-transaction's status
-    // re-check, so a race or replay can never double-record a result.
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_one_result_per_battle
-                        ON battle_results (battle_id)`);
-    // v44 fix (orphaned seats): pre-v44 hard deletes removed only the room
-    // row (no FK cascades exist in this schema), leaving 'waiting' seats
-    // pointing at nothing — invisible to room lookups but blocking the
-    // one-active-seat index. Sweep them (idempotent).
-    await pool.query(`DELETE FROM room_participants rp
-        WHERE NOT EXISTS (SELECT 1 FROM battle_rooms r WHERE r.id = rp.room_id)`);
-    await pool.query(`DELETE FROM room_spectators rs
-        WHERE NOT EXISTS (SELECT 1 FROM battle_rooms r WHERE r.id = rs.room_id)`);
-    console.log('MIGRATE v44: one-active-seat guard, rematch_requests, room archive (deleted_at), single-challenge guard, one-result-per-battle');
-  } catch (e) { console.error('[migrate] v44 migration failed:', e.message); }
-      // v44.1 (deploy fix): seed.js upserts the word pool with ON CONFLICT
-    // (category, name) — existing databases need the matching unique index
-    // or a fresh wipe + re-seed would silently fail.
+                                FROM battle_challenges ORDER BY battle_id, generated_at)`],
+    ['v44 one challenge per battle (randomizer integrity)',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_challenge_per_battle
+        ON battle_challenges (battle_id)`],
+    ['v44.1 randomizer pool unique index (seed.js ON CONFLICT target)',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_randomizer_element_name
+        ON randomizer_elements (category, name)`],
+    ['v45 result dedupe (keep the oldest row per battle)',
+     `DELETE FROM battle_results br
+        WHERE br.ctid NOT IN (SELECT DISTINCT ON (battle_id) ctid
+                               FROM battle_results ORDER BY battle_id, decided_at)`],
+    ['v44 one result per battle (stats exactly-once insurance)',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_result_per_battle
+        ON battle_results (battle_id)`],
+    ['v44 one active seat per artist (the one-room rule)',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_active_seat_per_user
+        ON room_participants (user_id) WHERE state IN ('waiting','ready')`],
+  ];
+  const migrationFailures = [];
+  for (const [label, sql] of MIGRATION_STEPS) {
     try {
-      await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_randomizer_element_name
-                          ON randomizer_elements (category, name)`);
-      console.log('MIGRATE v44.1: randomizer pool unique index ready (seed.js ON CONFLICT target)');
-    } catch (e) { console.error('[migrate] v44.1 pool index failed (duplicates?):', e.message); }
+      const r = await pool.query(sql);
+      const n = (r.command === 'UPDATE' || r.command === 'DELETE') ? ` (${r.rowCount} rows)` : '';
+      console.log(`MIGRATE ${label}${n}`);
+    } catch (e) {
+      migrationFailures.push(label);
+      console.error(`[migrate] FAILED — ${label}: ${e.message}`);
+    }
+  }
+  // Post-migration verification: everything the runtime queries depend on.
+  try {
+    const v = await pool.query(`SELECT
+        EXISTS(SELECT 1 FROM information_schema.columns
+                WHERE table_name='battle_rooms' AND column_name='deleted_at') AS deleted_at,
+        EXISTS(SELECT 1 FROM information_schema.tables
+                WHERE table_name='rematch_requests') AS rematch_table,
+        EXISTS(SELECT 1 FROM pg_indexes WHERE indexname='uq_one_active_seat_per_user') AS seat_guard,
+        EXISTS(SELECT 1 FROM pg_indexes WHERE indexname='uq_one_challenge_per_battle') AS challenge_guard,
+        EXISTS(SELECT 1 FROM pg_indexes WHERE indexname='uq_one_result_per_battle') AS result_guard,
+        EXISTS(SELECT 1 FROM pg_indexes WHERE indexname='uq_randomizer_element_name') AS pool_guard`);
+    const s = v.rows[0];
+    schemaState = Object.entries(s).filter(([, ok]) => !ok).map(([k]) => k);
+    if (schemaState.length === 0 && migrationFailures.length === 0) {
+      console.log('MIGRATE v44/v45: schema verified OK (deleted_at, rematch_requests, seat/challenge/result/pool guards all present)');
+    } else {
+      console.error('[migrate] SCHEMA INCOMPLETE after startup — missing: ' +
+        (schemaState.join(', ') || 'none') +
+        (migrationFailures.length ? '; failed steps: ' + migrationFailures.join(' | ') : '') +
+        '. If this is a permissions problem, run server/migrations-v45.sql as the database owner.');
+    }
+  } catch (e) {
+    console.error('[migrate] verification query failed:', e.message);
+  }
   // Phase 6: self-seed the randomizer word pool (no-op when already loaded).
   try { await ensureRandomizerSeed(); }
   catch (e) { console.error('[seed] randomizer pool seeding failed:', e.message); }

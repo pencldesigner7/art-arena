@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="44">
+<meta name="aa-ui-version" content="46">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -15,7 +15,28 @@ try {
 } catch (_) {}
 </script>
 <style>
-  :root { --surface:#0d0917; --surface-hover:#110b1d; --surface-2:#1b1330; --bg:#09070d; --panel:#161022; --line:#2c2142; --pink:#FF3CAC; --purple:#7B2CFF; --text:#f4f0fa; --muted:#9b8fb5; }
+  :root {
+    --surface:#0d0917; --surface-hover:#110b1d; --surface-2:#1b1330; --bg:#09070d; --panel:#161022;
+    --line:#2c2142; --pink:#FF3CAC; --purple:#7B2CFF; --text:#f4f0fa; --muted:#9b8fb5;
+    /* v45 theme tokens — chrome + status families (Light Mode overrides these,
+       nothing else). --icon-strong is for icons/text ON surfaces (the Apple
+       logo etc.); white-on-brand-gradient text stays white in both themes. */
+    /* v46 FIX: these were accidentally self-referential in v45 (a CSS custom
+       property referring to itself is a cycle, invalid at computed-value
+       time, so dark mode silently lost its header/nav glass, scrims and
+       status tints). The values below are the exact v44 dark literals;
+       --header-bg is the dark twin of the v45 light glass header;
+       --auth-card/--auth-page-bg theme the auth card + backdrop. */
+    --header-bg:rgba(9,7,13,.88); --nav-bg:rgba(13,9,23,.97);
+    --auth-card:rgba(13,9,23,.82); --auth-page-bg:#070115;
+    --scrim:rgba(5,3,10,.74); --scrim-soft:rgba(5,3,10,.62);
+    --ok-bg:#10241a; --ok-tx:#7fe0a8; --ok-bd:#1f5c3a;
+    --warn-bg:#2a1e10; --warn-tx:#ffd27f; --warn-bd:#6e5325;
+    --danger-bg:#2a1218; --danger-tx:#ff9db1; --danger-bd:#6e2536;
+    --info-bg:#101b2e; --info-tx:#8fc7ff; --info-bd:#274a75;
+    --canvas-bg:#150f26; --canvas-tx:#cbb7ff; --canvas-bd:#4a3670;
+    --icon-strong:#ffffff; --on-accent:#0b0612;
+  }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,sans-serif; }
   header { display:flex; justify-content:space-between; align-items:center; padding:14px 22px; border-bottom:1px solid var(--line); }
@@ -41,8 +62,8 @@ try {
   .msg { display:none; padding:10px 12px; border-radius:8px; margin:10px 0; font-size:14px; }
   /* v37: messages fade in and fade OUT (no instant pop, no instant
      disappearance) — keyframe animations retrigger cleanly on re-show. */
-  .msg.ok  { display:block; background:#10241a; border:1px solid #1f5c3a; color:#7fe0a8; animation:msg-in .3s ease both; }
-  .msg.err { display:block; background:#2a1218; border:1px solid #6e2536; color:#ff9db1; animation:msg-in .3s ease both; }
+  .msg.ok  { display:block; background:var(--ok-bg); border:1px solid var(--ok-bd); color:var(--ok-tx); animation:msg-in .3s ease both; }
+  .msg.err { display:block; background:var(--danger-bg); border:1px solid var(--danger-bd); color:var(--danger-tx); animation:msg-in .3s ease both; }
   .msg.msg-out { animation:msg-out .3s ease both; }
   @keyframes msg-in  { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
   @keyframes msg-out { from { opacity:1; } to { opacity:0; transform:translateY(-4px); } }
@@ -53,9 +74,9 @@ try {
   .card { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:12px; }
   .card .big { font-size:20px; font-weight:800; }
   .badge { display:inline-block; margin-top:8px; font-size:12px; padding:3px 10px; border-radius:999px; }
-  .badge.ok   { background:#10241a; color:#7fe0a8; border:1px solid #1f5c3a; }
-  .badge.warn { background:#2a1e10; color:#ffd27f; border:1px solid #6e5325; }
-  .badge.next { background:#101b2e; color:#8fc7ff; border:1px solid #274a75; margin-top:16px; }
+  .badge.ok   { background:var(--ok-bg); color:var(--ok-tx); border:1px solid var(--ok-bd); }
+  .badge.warn { background:var(--warn-bg); color:var(--warn-tx); border:1px solid var(--warn-bd); }
+  .badge.next { background:var(--info-bg); color:var(--info-tx); border:1px solid var(--info-bd); margin-top:16px; }
   .stats { display:flex; gap:14px; margin-top:10px; font-size:13px; color:var(--muted); flex-wrap:wrap; }
   .row { display:flex; gap:10px; align-items:flex-end; }
   .row label { flex:1; margin:0; }
@@ -68,7 +89,7 @@ try {
   .pw-toggle:hover { color:var(--text); filter:none; background:rgba(123,44,255,.15); border-radius:6px; }
   .check { display:flex; align-items:center; gap:8px; }
   .check input { width:auto; margin:0; }
-  .banner { background:#2a1e10; border:1px solid #6e5325; color:#ffd27f; padding:10px 12px; border-radius:8px; margin-bottom:12px; font-size:14px; }
+  .banner { background:var(--warn-bg); border:1px solid var(--warn-bd); color:var(--warn-tx); padding:10px 12px; border-radius:8px; margin-bottom:12px; font-size:14px; }
   #nav-right { display:flex; align-items:center; gap:12px; }
 
   /* ------------------------- arena home (main screen) ------------------- */
@@ -92,7 +113,7 @@ try {
   .dest-desc { margin:10px 0 0; }
 
   /* ------------------------------ bottom nav ---------------------------- */
-  #bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(13,9,23,.97); border-top:1px solid var(--line); display:flex; z-index:20; }
+  #bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--nav-bg); border-top:1px solid var(--line); display:flex; z-index:20; }
   #bottom-nav button.tab { flex:1; background:none; border:0; border-top:2px solid transparent; margin:0; padding:9px 4px 10px; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11px; font-weight:700; letter-spacing:.5px; }
   #bottom-nav button.tab .ico { font-size:20px; }
   #bottom-nav button.tab:hover { filter:none; color:var(--text); }
@@ -120,8 +141,8 @@ try {
 
   /* ---------------------- realtime: LIVE chip + toasts (Phase 5) -------- */
   #rt-chip { font-size:11px; font-weight:700; letter-spacing:.5px; padding:3px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
-  #rt-chip.on  { color:#7fe0a8; border-color:#1f5c3a; background:#10241a; }
-  #rt-chip.off { color:#ffd27f; border-color:#6e5325; background:#2a1e10; }
+  #rt-chip.on  { color:var(--ok-tx); border-color:var(--ok-bd); background:var(--ok-bg); }
+  #rt-chip.off { color:var(--warn-tx); border-color:var(--warn-bd); background:var(--warn-bg); }
   /* v34: smooth toasts — springy ease-out on entry; on exit the toast fades,
      drifts up AND collapses its own margin, so the stack never "jumps". */
   #toasts { position:fixed; top:64px; left:50%; transform:translateX(-50%); z-index:50; display:flex; flex-direction:column; width:min(92vw,420px); pointer-events:none; }
@@ -131,8 +152,8 @@ try {
 
   /* ---------------------- player state chips (Phase 5) ------------------ */
   .state-chip { font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
-  .state-chip.ready { color:#7fe0a8; border-color:#1f5c3a; background:#10241a; }
-  button.ready-on { background:#10241a; border:1px solid #7fe0a8; color:#7fe0a8; }
+  .state-chip.ready { color:var(--ok-tx); border-color:var(--ok-bd); background:var(--ok-bg); }
+  button.ready-on { background:var(--ok-bg); border:1px solid var(--ok-tx); color:var(--ok-tx); }
   button.ready-on:hover { filter:none; background:rgba(127,224,168,.15); }
   /* ---------------- randomizer / challenge (Phase 6) --------------------- */
   .cat-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; margin-top:6px; }
@@ -145,7 +166,7 @@ try {
   .time-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
   .time-chip { padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:13px; cursor:pointer; }
   .time-chip:hover { border-color:var(--pink); }
-  .time-chip.on { background:var(--pink); border-color:var(--pink); color:#0b0612; font-weight:700; }
+  .time-chip.on { background:var(--pink); border-color:var(--pink); color:var(--on-accent); font-weight:700; }
   .time-block { display:block; margin:12px 0; font-size:14px; color:var(--muted); }
   .time-error { display:block; margin-top:4px; font-size:12px; color:var(--pink); }
   .time-edit { border-style:dashed; }
@@ -153,7 +174,7 @@ try {
   /* ---------------- custom time modal (v15) ------------------------------ */
   /* v34: modals ease in/out with a slow-out curve (260 ms both ways,
      matched by the close timers in the JS) — no snappy snap. */
-  .time-modal-backdrop { position:fixed; inset:0; z-index:60; background:rgba(5,3,10,.74); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; transition:opacity .26s ease; }
+  .time-modal-backdrop { position:fixed; inset:0; z-index:60; background:var(--scrim); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; transition:opacity .26s ease; }
   .time-modal-backdrop.open { opacity:1; }
   .time-modal { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; width:min(380px,100%); box-shadow:0 24px 70px rgba(0,0,0,.55); transform:translateY(16px) scale(.95); transition:transform .26s cubic-bezier(.22,1,.36,1); }
   .time-modal-backdrop.open .time-modal { transform:none; }
@@ -182,14 +203,14 @@ try {
   .canvas-body { flex:1; min-width:0; }
   .canvas-name { font-size:15px; font-weight:800; letter-spacing:.3px; }
   .canvas-status { font-size:12px; color:var(--muted); display:block; margin-top:1px; }
-  .canvas-status.connected { color:#7fe0a8; }
+  .canvas-status.connected { color:var(--ok-tx); }
   .canvas-preferred { position:absolute; top:-8px; right:12px; font-size:9px; font-weight:800; letter-spacing:1px; padding:2px 8px; border-radius:999px; background:linear-gradient(90deg,var(--pink),var(--purple)); color:#fff; box-shadow:0 2px 10px rgba(255,60,172,.4); white-space:nowrap; }
   .canvas-check { flex:0 0 auto; display:none; color:var(--pink); }
   .canvas-card.selected .canvas-check { display:inline-flex; }
   .canvas-change { margin:12px 0 0; background:transparent; border:1px solid var(--line); color:var(--muted); font-size:12px; padding:6px 12px; border-radius:999px; }
   .canvas-change:hover { color:var(--text); border-color:var(--pink); filter:none; background:rgba(255,60,172,.08); }
   .canvas-hint { font-size:12px; color:var(--muted); margin:10px 0 0; }
-  .state-chip.canvas { color:#cbb7ff; border-color:#4a3670; background:#150f26; }
+  .state-chip.canvas { color:var(--canvas-tx); border-color:var(--canvas-bd); background:var(--canvas-bg); }
   .battle-canvas-line { font-size:14px; font-weight:700; }
   #ui-version-badge { position:fixed; right:8px; bottom:6px; z-index:70; font-size:10px; color:var(--muted); opacity:.55; pointer-events:none; }
   /* ------------------ auth screens (v21: mockup rebuild) ---------------- */
@@ -204,16 +225,20 @@ try {
   .field:focus-within { box-shadow:0 0 0 1px rgba(123,44,255,.5), 0 0 14px rgba(255,60,172,.3), 0 0 30px rgba(123,44,255,.28); transform:translateY(-2px); }
   .login-btn:hover { box-shadow:0 0 12px rgba(255,60,172,.5), 0 0 28px rgba(123,44,255,.4); transform:translateY(-2px); }
   /* NOTE: .social-btn (Google/Apple/Discord) deliberately has NO glow hover. */
-  /* ---------------- v36: login background structure -------------------------
-     The Arch Corridor animation (user-supplied, arch-corridor.js + vendored
-     three.js) renders its canvas into #login-bg: a full-viewport FIXED layer
-     sitting BEHIND the entire auth page — z-index 0 and pointer-events:none,
-     so it can never intercept a click or a keystroke. The auth views are
-     positioned above it (z-index 1). The layer is display:none unless an
-     auth view is on screen, so it costs nothing while logged in. */
-  #login-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:#070115; display:none; }
+  /* ---------------- login background structure -----------------------------
+     The Glitter Wrap starfield (glitter-wrap.js, the vanilla port of the
+     user-supplied component) renders its canvas into #login-bg: a full-
+     viewport FIXED layer sitting BEHIND the entire auth page (z-index 0,
+     pointer-events:none, so it can never intercept a click or a keystroke).
+     The auth views are positioned above it (z-index 1). The layer is
+     display:none unless an auth view is on screen, so it costs nothing while
+     logged in. v46: the backdrop follows the THEME via --auth-page-bg (the
+     starfield's brand hues read on both dark and light). The old Arch
+     Corridor effect (arch-corridor.js + three.min.js) is gone; nothing
+     referenced it anymore. */
+  #login-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--auth-page-bg); display:none; }
   #login-bg.on { display:block; }
-  #view-login, #view-register, #view-forgot { position:relative; z-index:1; background:rgba(13,9,23,.82); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
+  #view-login, #view-register, #view-forgot { position:relative; z-index:1; background:var(--auth-card); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
   /* v36: full-screen 3-2-1 battle countdown — rendered above everything
      (z-index 200) but pointer-events:none, so it never blocks a click.
      Shown while battle.status === 'countdown'; the number is re-derived
@@ -241,7 +266,7 @@ try {
   .social-divider { display:flex; align-items:center; gap:12px; margin:24px 0 14px; color:var(--muted); font-size:13px; white-space:nowrap; }
   .social-divider::before, .social-divider::after { content:''; flex:1; height:1px; background:var(--line); }
   .social-row { display:flex; justify-content:center; gap:18px; }
-  .social-btn { width:56px; height:56px; border-radius:50%; border:1px solid var(--line); background:var(--surface); padding:0; margin-top:0; display:flex; align-items:center; justify-content:center; }
+  .social-btn { width:56px; height:56px; border-radius:50%; border:1px solid var(--line); background:var(--surface); padding:0; margin-top:0; display:flex; align-items:center; justify-content:center; color:var(--icon-strong); }
   .social-btn:hover { border-color:var(--purple); filter:none; background:rgba(123,44,255,.12); }
   /* v28: the Google button is "armed" only when the server reports real
      credentials (GET /api/auth/google/status) — no deployment can show a
@@ -253,14 +278,14 @@ try {
   .pw-toggle svg { display:block; }
   /* ================= v29: profile page (mockup) + back button ============= */
   .prof-head { display:flex; align-items:center; gap:18px; margin-top:6px; }
-  .prof-ava { position:relative; width:88px; height:88px; border-radius:50%; flex:0 0 auto; cursor:pointer; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(255,60,172,.28), rgba(123,44,255,.28)); box-shadow:0 0 0 3px #09070d, 0 0 0 5px var(--pink), 0 0 20px rgba(255,60,172,.3); }
+  .prof-ava { position:relative; width:88px; height:88px; border-radius:50%; flex:0 0 auto; cursor:pointer; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(255,60,172,.28), rgba(123,44,255,.28)); box-shadow:0 0 0 3px var(--bg), 0 0 0 5px var(--pink), 0 0 20px rgba(255,60,172,.3); }
   .prof-ava-init { font-size:34px; font-weight:800; color:#fff; }
   /* v32: no photo → one big app-style camera fills the picture space (no label text) */
   .prof-ava-cam { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.95); pointer-events:none; }
   .prof-ava-img { position:absolute; inset:0; border-radius:50%; overflow:hidden; }
   .prof-ava-img img { width:100%; height:100%; object-fit:cover; display:block; }
-  .prof-ava-chip { position:absolute; bottom:-2px; right:-2px; width:27px; height:27px; border-radius:50%; background:var(--purple); border:2px solid #09070d; display:flex; align-items:center; justify-content:center; font-size:13px; }
-  .prof-ava-remove { position:absolute; top:-5px; right:-5px; width:22px; height:22px; border-radius:50%; background:var(--pink); color:#0b0612; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; border:2px solid #09070d; margin:0; padding:0; cursor:pointer; }
+  .prof-ava-chip { position:absolute; bottom:-2px; right:-2px; width:27px; height:27px; border-radius:50%; background:var(--purple); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center; font-size:13px; }
+  .prof-ava-remove { position:absolute; top:-5px; right:-5px; width:22px; height:22px; border-radius:50%; background:var(--pink); color:var(--on-accent); font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; border:2px solid var(--bg); margin:0; padding:0; cursor:pointer; }
   .prof-id { flex:1; min-width:0; }
   .prof-name { margin:0; font-size:24px; }
   .prof-sub { color:var(--muted); font-size:14px; margin-top:2px; }
@@ -269,7 +294,6 @@ try {
   /* v30: verified = small green circle with a white tick (verified only — no text badge) */
   .verified-tick { width:18px; height:18px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,.55); display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
 
-  .edit-profile { margin-top:10px; background:transparent; border:1px solid var(--pink); color:var(--text); border-radius:999px; padding:9px 18px; font-size:14px; font-weight:600; letter-spacing:.3px; display:inline-flex; align-items:center; gap:7px; }
   .edit-profile:hover { background:rgba(123,44,255,.15); filter:none; }
   .stats-card { margin-top:18px; border:1px solid rgba(255,60,172,.35); border-radius:14px; display:grid; grid-template-columns:repeat(3,1fr); overflow:hidden; background:var(--surface); }
   .stat-col { padding:16px 4px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px; }
@@ -291,7 +315,7 @@ try {
 
   /* ================= v26: mockup homepage (arena hp.png) ================= */
   /* --- top bar: hamburger (menu drawer) · small logo · notification bell --- */
-  header { padding:9px 14px; position:sticky; top:0; z-index:30; background:rgba(9,7,13,.88); backdrop-filter:blur(10px); gap:10px; }
+  header { padding:9px 14px; position:sticky; top:0; z-index:30; background:var(--header-bg); backdrop-filter:blur(10px); gap:10px; }
   .top-brand { flex:1; display:flex; justify-content:center; }
   .top-brand img { height:26px; width:auto; }
   /* v27: true centering — 1fr / auto / 1fr grid, brand in the middle track */
@@ -307,7 +331,7 @@ try {
   .icon-btn svg { display:block; }
   .notif-dot { position:absolute; top:5px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--pink); box-shadow:0 0 7px rgba(255,60,172,.9); }
   /* --- slide-in menu (hamburger drawer) --- */
-  .drawer-backdrop { position:fixed; inset:0; z-index:90; background:rgba(5,3,10,.62); opacity:0; transition:opacity .26s ease; }
+  .drawer-backdrop { position:fixed; inset:0; z-index:90; background:var(--scrim-soft); opacity:0; transition:opacity .26s ease; }
   .drawer-backdrop.open { opacity:1; }
   .drawer { position:absolute; top:0; left:0; bottom:0; width:min(320px,86vw); background:var(--panel); border-right:1px solid var(--line); padding:14px 14px 18px; display:flex; flex-direction:column; transform:translateX(-103%); transition:transform .26s cubic-bezier(.22,1,.36,1); box-shadow:14px 0 44px rgba(0,0,0,.5); }
   .drawer-backdrop.open .drawer { transform:none; }
@@ -349,6 +373,14 @@ try {
   #bottom-nav button.tab.active::after { background:var(--pink); }
   /* --- homepage (arena home = the main screen) --- */
   .home-view { background:transparent; border:0; border-radius:0; padding:6px 0 0; text-align:center; }
+  /* v46: the homepage Line Ripple background (line-ripple.js) - a layer
+     inside the already-transparent home view; all other children are lifted
+     above it. min-height keeps the animation spanning the viewport even
+     when the content itself is short. */
+  #view-arena { position:relative; min-height:calc(100vh - 150px); min-height:calc(100dvh - 150px); }
+  #home-bg { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); display:none; }
+  #home-bg.on { display:block; }
+  #view-arena > *:not(#home-bg) { position:relative; z-index:1; }
   .home-logo { margin:14px 0 0; display:flex; justify-content:center; }
   .home-logo img { width:min(352px,100%); height:auto; display:block; }
   .home-tagline { margin:20px 0 28px; }
@@ -368,7 +400,7 @@ try {
   .live-strip:hover { border-color:rgba(255,60,172,.5); transform:translateY(-2px); }
   .live-badge { display:inline-flex; flex-direction:column; align-items:center; gap:3px; color:var(--pink); font-size:9px; font-weight:800; letter-spacing:1.5px; flex:0 0 auto; }
   .live-avas { display:flex; align-items:center; gap:6px; min-width:0; }
-  .live-ava { width:40px; height:40px; border-radius:50%; background:var(--surface-2); border:2px solid rgba(123,44,255,.65); display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; flex:0 0 auto; }
+  .live-ava { width:40px; height:40px; border-radius:50%; background:var(--surface-2); border:2px solid rgba(123,44,255,.65); display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:var(--icon-strong); flex:0 0 auto; }
   .live-vs { font-size:9px; font-weight:800; letter-spacing:1px; color:var(--muted); }
   .live-more { width:40px; height:40px; border-radius:50%; border:1px solid rgba(123,44,255,.65); background:var(--surface); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--purple); flex:0 0 auto; }
   .live-info { margin-left:auto; text-align:right; font-size:11px; line-height:1.4; color:var(--muted); white-space:nowrap; }
@@ -392,8 +424,8 @@ try {
   /* ================= v35: room & battle flow updates =====================
      matchmaking page · join page (public vs private) · creator controls ·
      full→spectate · spectator banner. Brand language unchanged. */
-  .badge.pub { background:#10241a; color:#7fe0a8; border:1px solid #1f5c3a; margin-top:0; }
-  .badge.priv { background:#2a1e10; color:#ffd27f; border:1px solid #6e5325; margin-top:0; }
+  .badge.pub { background:var(--ok-bg); color:var(--ok-tx); border:1px solid var(--ok-bd); margin-top:0; }
+  .badge.priv { background:var(--warn-bg); color:var(--warn-tx); border:1px solid var(--warn-bd); margin-top:0; }
   /* --- creator controls: battle-mode chips + max-players stepper --- */
   .mode-chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
   .mode-chip { flex:1; min-width:96px; padding:9px 10px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--text); font:inherit; font-weight:800; font-size:14px; letter-spacing:.5px; cursor:pointer; text-align:center; margin:0; transition:border-color .18s ease, box-shadow .18s ease, background-color .18s ease; }
@@ -411,59 +443,39 @@ try {
   .join-code-row button { margin:0 0 1px; flex:0 0 auto; }
   .join-hint { font-size:13px; color:var(--muted); margin:8px 0 0; }
   /* --- room detail: spectator banner --- */
-  .spec-banner { background:#101b2e; border:1px solid #274a75; color:#8fc7ff; padding:10px 12px; border-radius:8px; margin:10px 0; font-size:14px; }
+  .spec-banner { background:var(--info-bg); border:1px solid var(--info-bd); color:var(--info-tx); padding:10px 12px; border-radius:8px; margin:10px 0; font-size:14px; }
   /* --- matchmaking page (the "Battle" destination) --- */
   /* v43: slimmer side padding (22px → 8px) — the stage (profiles + planet)
      needs every pixel of the app's 560px shell column to keep the profile
      circles clear of the globe. Text stays centered; nothing else changes. */
   #view-matchmaking { text-align:center; padding:30px 8px 40px; position:relative; overflow:hidden; }
-  /* v43: the searching layer — ONE light-blue beacon dot at a time, ON THE
-     PLANET: the canvas lives INSIDE the globe layer (it covers only the
-     planet box), above the globe and its scrim (z-index 2), so the dot is
-     always on the planet — never on the surrounding card. */
-  #mm-scan-layer { position:absolute; inset:0; z-index:2; pointer-events:none; }
-  #view-matchmaking > :not(.mm-globe-layer) { position:relative; z-index:1; }
-  /* v41: the globe is a SMALLER central element — sized to sit
-     comfortably between the two players inside the stage (the card
-     keeps its existing background/structure). Profiles and the
-     connection line render above it (z-index 1); the layer is
-     pointer-events:none so it can never intercept a click, and a soft
-     centre scrim keeps the connection line legible over the dots. */
-  .mm-stage { position:relative; }
-  .mm-stage > :not(.mm-globe-layer) { position:relative; z-index:1; }
-  /* v43: base planet size 300→240 (see the tier table below — the planet
-     is sized so both profile circles always clear it with a visible gap). */
-  .mm-globe-layer { position:absolute; left:50%; top:50%; width:240px; height:240px; transform:translate(-50%,-50%); z-index:0; overflow:hidden; pointer-events:none; }
-  /* v41: Art Arena look — subtle atmospheric opacity (overrides the
-     component's inline reveal) + a soft, restrained pink glow.
-     v43: the veil must NOT dim the scanning beacon — it only styles the
-     planet itself (the globe's own canvases), not #mm-scan-layer. */
-  .mm-globe-layer canvas:not(#mm-scan-layer) { opacity:.62 !important; filter:drop-shadow(0 0 12px rgba(255,60,172,.30)) drop-shadow(0 0 30px rgba(255,60,172,.12)); }
-  .mm-globe-layer::after { content:''; position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(ellipse 46% 40% at 50% 50%, rgba(22,16,34,.55) 0%, rgba(22,16,34,0) 72%); }
-  /* v43 (profiles ↔ planet separation): the slots are pinned to the stage
-     edges (space-between) and the planet is sized to the width the stage
-     actually has inside the app's 560px shell column — avatar radius 48 +
-     a visible gap at every tier. Sizing rule per tier:
-     gap = stage/2 − 75 (slot centre) − globeR − 48 (avatar) ≥ ~6px. */
-  .mm-stage { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:34px auto 6px; max-width:660px; }
+  /* v45: the SEARCHING LINE — the planet/globe effect is GONE. Between the
+     two player slots a connection line carries the "actively searching"
+     story: the dashes flow and a runner dot travels from the artist toward
+     the empty seat; the moment an opponent is found the line locks solid
+     green (connected). Pure CSS — no canvas, no three.js, no d3. */
+  .mm-stage { position:relative; display:flex; align-items:center; justify-content:space-between; gap:12px; margin:34px auto 6px; max-width:660px; }
   .mm-slot { display:flex; flex-direction:column; align-items:center; gap:10px; flex:0 0 auto; width:150px; }
-  /* width tiers (viewport → globe, verified gap > 0 at every step):
-     ≥561 → 240 (slot 150, gap ≈13px) · ≤560 → 170 (slot 130, ≈17-57px) ·
-     ≤460 → 160 (≈12px) · ≤420 → 110 (≈8px) · ≤390 → 96 (≈9px) ·
-     ≤360 → 80 (≈2px — the floor; below this the planet is a marble). */
+  .mm-link { flex:1 1 auto; align-self:flex-start; margin-top:47px; height:4px; position:relative; min-width:40px; }
+  .mm-link-track { position:absolute; left:0; right:0; top:0; height:3px; border-radius:99px; background:linear-gradient(90deg, var(--purple), var(--pink)); opacity:.18; }
+  .mm-link-runner { position:absolute; top:-3px; left:0; width:10px; height:10px; border-radius:50%; background:var(--pink); box-shadow:0 0 12px rgba(255,60,172,.8); opacity:0; }
+  .mm-link[data-mode="search"] .mm-link-track { opacity:.5; background:repeating-linear-gradient(90deg, var(--pink) 0 12px, transparent 12px 24px); animation:mm-line-flow .7s linear infinite; }
+  .mm-link[data-mode="search"] .mm-link-runner { animation:mm-run 1.5s cubic-bezier(.45,0,.55,1) infinite; }
+  .mm-link[data-mode="connected"] .mm-link-track { opacity:1; background:linear-gradient(90deg, #22c55e, #4ade80); box-shadow:0 0 12px rgba(74,222,128,.5); }
+  .mm-link[data-mode="connected"] .mm-link-runner { left:calc(50% - 5px); opacity:1; background:#4ade80; box-shadow:0 0 14px rgba(74,222,128,.95); }
+  .mm-link[data-mode="off"] .mm-link-track { opacity:.12; }
+  #mm-stage.cancelled .mm-link { opacity:.4; }
+  #mm-stage.cancelled .mm-link-runner { animation:none; opacity:0; }
+  @keyframes mm-line-flow { to { background-position:24px 0; } }
+  @keyframes mm-run { 0% { left:0; opacity:0; } 10% { opacity:1; } 90% { opacity:1; } 100% { left:calc(100% - 10px); opacity:0; } }
   @media (max-width: 560px) {
-    .mm-globe-layer { width:170px; height:170px; }
     .mm-slot { width:130px; }      /* the profiles keep their 96px circles —
                                       only the column padding narrows */
     .mm-name { max-width:130px; }
   }
-  @media (max-width: 460px) { .mm-globe-layer { width:160px; height:160px; } }
-  @media (max-width: 420px) { .mm-globe-layer { width:110px; height:110px; } }
-  @media (max-width: 390px) { .mm-globe-layer { width:96px; height:96px; } }
-  @media (max-width: 360px) { .mm-globe-layer { width:80px; height:80px; } }
-  .mm-ava { width:96px; height:96px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(255,60,172,.30), rgba(123,44,255,.30)); box-shadow:0 0 0 3px #09070d, 0 0 0 5px var(--pink), 0 0 26px rgba(255,60,172,.35); font-size:38px; font-weight:800; color:#fff; overflow:visible; }
+  .mm-ava { width:96px; height:96px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(255,60,172,.30), rgba(123,44,255,.30)); box-shadow:0 0 0 3px var(--bg), 0 0 0 5px var(--pink), 0 0 26px rgba(255,60,172,.35); font-size:38px; font-weight:800; color:#fff; overflow:visible; }
   .mm-ava img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:50%; }
-  .mm-ava-empty { background:var(--surface); box-shadow:0 0 0 3px #09070d, 0 0 0 2px dashed var(--line); font-size:30px; color:var(--muted); }
+  .mm-ava-empty { background:var(--surface); box-shadow:0 0 0 3px var(--bg), 0 0 0 2px dashed var(--line); font-size:30px; color:var(--muted); }
   .mm-op-q { position:relative; z-index:1; }
   .mm-pulse { position:absolute; inset:-9px; border-radius:50%; border:2px solid rgba(123,44,255,.55); animation:mm-pulse 1.7s ease-out infinite; }
   .mm-pulse2 { animation-delay:.85s; border-color:rgba(255,60,172,.45); }
@@ -474,7 +486,7 @@ try {
   .mm-name-empty { color:var(--muted); font-weight:600; }
   .mm-status { margin-top:26px; }
   .mm-status-main { font-size:27px; font-weight:800; letter-spacing:2px; background:linear-gradient(90deg,var(--pink),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  #mm-status.found .mm-status-main { background-image:linear-gradient(90deg,#7fe0a8,#4ade80); -webkit-background-clip:text; background-clip:text; }
+  #mm-status.found .mm-status-main { background-image:linear-gradient(90deg,var(--ok-tx),#4ade80); -webkit-background-clip:text; background-clip:text; }
   #mm-status.failed .mm-status-main { background:none; -webkit-background-clip:initial; background-clip:initial; color:var(--pink); }
   /* v37: cancelled state — the connecting animation stops (not a dimmed
      "still searching"), the status reads plainly, Back / Try Again below */
@@ -487,48 +499,32 @@ try {
   .mm-dots span:nth-child(3) { animation-delay:.4s; }
   @keyframes mm-dot { 0%,60%,100% { opacity:.2; } 30% { opacity:1; } }
   .mm-status-sub { margin-top:6px; font-size:14px; color:var(--muted); }
-  .mm-status-sub.ok { color:#7fe0a8; font-weight:700; }
+  .mm-status-sub.ok { color:var(--ok-tx); font-weight:700; }
   .mm-timer { margin-top:12px; font-size:12px; color:var(--muted); letter-spacing:3px; }
   .mm-actions { margin-top:24px; display:flex; gap:10px; justify-content:center; }
   .mm-actions button { margin:0; min-width:130px; }
 
-  /* ============ v44: LIGHT MODE (optional — Dark stays the default) ============
-     An intentional Art Arena light theme: the brand keeps its Arena
-     pink→purple accents on a soft lilac-tinted paper; this is NOT a
-     blanket invert. Status colors become light tints; the dramatic dark
-     canvases (login backdrop, globe, countdown overlay) stay dark by
-     design — they are artwork moments, not UI surfaces. */
+  /* ============ v45: LIGHT MODE (optional — Dark stays the default) ============
+     Fully token-driven: every surface, status color, scrim and nav chrome in
+     the app reads from CSS variables, so Light Mode is ONE palette swap —
+     no per-rule patches, nothing half-dark. The dramatic dark canvases
+     (login backdrop effect, 3-2-1 countdown) stay dark by design: they are
+     artwork moments, not UI surfaces. */
   html[data-theme="light"] {
     --bg:#f5f2fa; --panel:#ffffff; --line:#e3daf0; --text:#241a3d; --muted:#6e6390;
     --surface:#f7f4fc; --surface-hover:#efe8f9; --surface-2:#ece5f7;
+    --header-bg:rgba(255,255,255,.92); --nav-bg:rgba(255,255,255,.97); --auth-card:rgba(255,255,255,.88); --auth-page-bg:#f5f2fa;
+    --scrim:rgba(36,26,61,.45); --scrim-soft:rgba(36,26,61,.4);
+    --ok-bg:#e9f9f0; --ok-tx:#137a4a; --ok-bd:#9fe0c2;
+    --warn-bg:#fdf4e0; --warn-tx:#8a6116; --warn-bd:#ecd39a;
+    --danger-bg:#fdeef1; --danger-tx:#b02a53; --danger-bd:#f3b8c6;
+    --info-bg:#eaf3ff; --info-tx:#2b6cb0; --info-bd:#a9cdf0;
+    --canvas-bg:#f3edfd; --canvas-tx:#5b3fa8; --canvas-bd:#cbb9ec;
+    --icon-strong:#241a3d;
   }
-  html[data-theme="light"] body { background:#f5f2fa; }
-  html[data-theme="light"] input, html[data-theme="light"] textarea, html[data-theme="light"] select { background:#fff; }
-  html[data-theme="light"] #bottom-nav { background:rgba(255,255,255,.97); }
-  html[data-theme="light"] header { background:rgba(255,255,255,.9); }
-  html[data-theme="light"] .msg.ok   { background:#e9f9f0; border-color:#9fe0c2; color:#137a4a; }
-  html[data-theme="light"] .msg.err  { background:#fdeef1; border-color:#f3b8c6; color:#b02a53; }
-  html[data-theme="light"] .badge.ok   { background:#e9f9f0; color:#137a4a; border-color:#9fe0c2; }
-  html[data-theme="light"] .badge.warn { background:#fdf4e0; color:#8a6116; border-color:#ecd39a; }
-  html[data-theme="light"] .badge.next { background:#eaf3ff; color:#2b6cb0; border-color:#a9cdf0; }
-  html[data-theme="light"] .badge.pub  { background:#e9f9f0; color:#137a4a; border-color:#9fe0c2; }
-  html[data-theme="light"] .badge.priv { background:#fdf4e0; color:#8a6116; border-color:#ecd39a; }
-  html[data-theme="light"] #rt-chip.on  { color:#137a4a; border-color:#9fe0c2; background:#e9f9f0; }
-  html[data-theme="light"] #rt-chip.off { color:#8a6116; border-color:#ecd39a; background:#fdf4e0; }
-  html[data-theme="light"] .banner { background:#fdf4e0; border-color:#ecd39a; color:#7a5510; }
-  html[data-theme="light"] .spec-banner { background:#eaf3ff; border-color:#a9cdf0; color:#27568b; }
-  html[data-theme="light"] .state-chip.ready { color:#137a4a; border-color:#9fe0c2; background:#e9f9f0; }
-  html[data-theme="light"] button.ready-on { background:#e9f9f0; border-color:#2fae72; color:#137a4a; }
-  html[data-theme="light"] .state-chip.canvas { color:#5b3fa8; border-color:#cbb9ec; background:#f3edfd; }
-  html[data-theme="light"] .challenge-row { background:#f7f4fc; }
-  html[data-theme="light"] .time-modal-backdrop { background:rgba(36,26,61,.45); }
-  html[data-theme="light"] .drawer-backdrop { background:rgba(36,26,61,.42); }
-  html[data-theme="light"] .toast { box-shadow:0 8px 24px rgba(36,26,61,.22); }
+  html[data-theme="light"] input, html[data-theme="light"] textarea, html[data-theme="light"] select { background:#ffffff; }
   html[data-theme="light"] .time-modal { box-shadow:0 24px 70px rgba(36,26,61,.3); }
-  html[data-theme="light"] .mm-ava { box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--pink), 0 0 26px rgba(255,60,172,.25); }
-  html[data-theme="light"] .mm-ava-empty { background:#fff; box-shadow:0 0 0 3px #fff, 0 0 0 2px dashed var(--line); }
-  html[data-theme="light"] .live-ava { color:#fff; }
-  /* Appearance setting (the control lives in Edit Profile) */
+  html[data-theme="light"] .toast { box-shadow:0 8px 24px rgba(36,26,61,.22); }
   .theme-row { display:flex; gap:8px; margin-top:6px; }
   .theme-opt { flex:1; margin:0; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--text); font:inherit; font-weight:700; font-size:13px; letter-spacing:.4px; cursor:pointer; }
   .theme-opt.active { border-color:var(--pink); box-shadow:0 0 0 1px var(--pink), 0 0 14px rgba(255,60,172,.25); }
@@ -579,7 +575,7 @@ try {
     <div class="social-divider">Or continue with</div>
     <div class="social-row">
       <button type="button" class="social-btn" data-social="google" title="Continue with Google"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg></button>
-      <button type="button" class="social-btn" data-social="apple" title="Continue with Apple"><svg viewBox="0 0 24 24" width="24" height="24" fill="#fff" aria-hidden="true"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></button>
+      <button type="button" class="social-btn" data-social="apple" title="Continue with Apple"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></button>
       <button type="button" class="social-btn" data-social="discord" title="Continue with Discord"><svg viewBox="0 0 24 24" width="24" height="24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></button>
     </div>
     <p class="auth-signup">Don't have an account? <a href="#" data-view="register">Sign up</a></p>
@@ -649,6 +645,7 @@ try {
        three action cards, LIVE BATTLES strip. App shell: hamburger + bell
        top bar, drawer menu, SVG bottom nav. -->
   <section id="view-arena" class="view home-view hidden">
+    <div id="home-bg" aria-hidden="true"></div>
     <div class="home-logo"><img src="/logo.png" alt="Art Arena" width="352" height="145"></div>
     <div class="auth-tagline home-tagline">WELCOME TO THE <span>ARENA.</span></div>
 
@@ -744,24 +741,17 @@ try {
        Dedicated player-connection page — NOT the create-room page. Real
        queue on the server; the animation below is the searching state. -->
   <section id="view-matchmaking" class="view hidden">
-    <!-- v43: searching layer — ONE light-blue beacon dot at a time, ON THE
-         PLANET (the canvas lives inside the globe layer and covers only
-         it); when the next dot appears the previous fades. The moment a
-         player is found the current dot stops and turns light green.
-         Rendered by /mm-scan-wrap.js (pointer-events:none). -->
     <h1 style="letter-spacing:2px">FIND YOUR OPPONENT</h1>
 
     <div class="mm-stage" id="mm-stage">
-      <!-- v41: the provided globe effect (ported to /globe-wrap.js) — a
-           smaller central element between the two players. z-index 0,
-           clipped by the card; profiles render at z-index 1.
-           v43: the scan-beacon canvas sits INSIDE this layer (above the
-           globe + its scrim) so the searching dot is always on the planet. -->
-      <div class="mm-globe-layer" id="mm-globe-layer" aria-hidden="true"><canvas id="mm-scan-layer" aria-hidden="true"></canvas></div>
+      <!-- v45: the searching LINE (pure CSS) — dashes flow and a runner dot
+           travels between the two seats while Art Arena searches; it locks
+           solid green the moment an opponent is found. -->
       <div class="mm-slot">
         <div class="mm-ava" id="mm-me-ava">•</div>
         <div class="mm-name" id="mm-me-name">—</div>
       </div>
+      <div class="mm-link" id="mm-link" data-mode="off" aria-hidden="true"><i class="mm-link-track"></i><i class="mm-link-runner"></i></div>
       <div class="mm-slot">
         <div class="mm-ava mm-ava-empty" id="mm-op-ava"><span class="mm-pulse"></span><span class="mm-pulse mm-pulse2"></span><span class="mm-op-q">?</span></div>
         <div class="mm-name mm-name-empty" id="mm-op-name">Searching…</div>
@@ -771,7 +761,7 @@ try {
     <div class="mm-status" id="mm-status">
       <div class="mm-status-main" id="mm-status-main">Connecting<span class="mm-dots"><span>.</span><span>.</span><span>.</span></span></div>
       <div class="mm-status-sub" id="mm-status-sub">Art Arena is searching for an artist</div>
-      <div class="mm-timer" id="mm-timer">3:00</div>
+      <div class="mm-timer" id="mm-timer">00:00</div>
     </div>
 
     <div class="mm-actions hidden" id="mm-actions"><button type="button" class="secondary" id="mm-cancel">Cancel Search</button></div>
@@ -1016,8 +1006,7 @@ try {
         <div class="prof-sub" id="card-sub">@…</div>
         <!-- v34: bio now actually shows (saved via Edit Profile → bio field) -->
         <p id="card-bio" class="card-bio hidden"></p>
-        <button type="button" id="btn-edit-profile" class="edit-profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5h4L19.6 8.4a2.3 2.3 0 0 0-3.2-3.2L5.3 16.3z"/><path d="m13.5 6.5 3.2 3.2"/></svg><span>Edit Profile</span></button>
-      </div>
+              </div>
     </div>
     <input type="file" id="avatar-input" accept="image/png,image/jpeg,image/webp" class="hidden">
     <div class="msg" id="msg-account"></div>
@@ -1032,9 +1021,16 @@ try {
       <button type="button" class="list-row" data-view="battlehistory"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg><span>Battle History</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
       <div class="list-sep"></div>
       <button type="button" class="list-row" data-view="savedartworks"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 4.5-4 3.5 3 3-2.5 4 3.5"/></svg><span>Saved Artworks</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
+      <button type="button" class="list-row" data-view="settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg><span>Settings</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
     </div>
 
-    <div id="profile-edit-panel" class="hidden">
+  </section>
+
+  <!-- ================== SETTINGS (v45: its own dedicated page) ============= -->
+  <section id="view-settings" class="view hidden">
+    <h1>SETTINGS</h1>
+    <div class="msg" id="msg-settings"></div>
+    <div id="profile-edit-panel">
       <form id="form-profile">
         <h2>Edit Profile</h2>
         <label>Display name<input name="display_name" maxlength="50"></label>
@@ -1195,11 +1191,11 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v44</span>
+  <span id="ui-version-badge">v46</span>
 
 <script>
 'use strict';
-console.log('Art Arena UI v44 (appearance: dark default + optional light; fresh-tab init fixed; one active room per artist; Go Live coming-soon; single-challenge guarantee; rematch requests; exactly-once battle stats; post-battle leave; archive-on-delete)');
+console.log('Art Arena UI v46 (theme & matchmaking pass: dark chrome tokens repaired, theme-aware login backdrop + light/dark auth page, adaptive social icons, theme preserved across logout, Settings keeps the theme controls, matchmaking timer counts UP from 00:00, homepage Line Ripple background in both themes, planet stays gone)');
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -1218,15 +1214,15 @@ const NAV = [
   // Later phase — livestream system (YouTube + Twitch), e.g.:
   // { id: 'live', label: 'Live', view: 'live' },
 ];
-// v38 (dashboard reference): the drawer carries the full menu — the bottom
-// nav stays the three main tabs. Settings opens the real account settings
-// form; Notifications/Help/About are real destinations (honest status).
+// v38/v45 (dashboard reference): the drawer carries the full menu — the
+// bottom nav stays the three main tabs. Settings is its own dedicated page;
+// Notifications/Help/About are real destinations (honest status).
 const DRAWER_NAV = [
   { id: 'arena',         label: 'Arena',         view: 'arena' },
   { id: 'community',     label: 'Community',     view: 'community' },
   { id: '__divider' },
   { id: 'profile',       label: 'Profile',       view: 'account' },
-  { id: 'settings',      label: 'Settings',      view: 'account', action: 'open-profile-edit' },
+  { id: 'settings',      label: 'Settings',      view: 'settings' },
   { id: 'notifications', label: 'Notifications', view: 'notifications' },
   { id: 'help',          label: 'Help',          view: 'help' },
   { id: 'about',         label: 'About',         view: 'about' },
@@ -1248,11 +1244,11 @@ const BACK_TARGETS = {
   rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena',
   account: 'arena', quickmatch: 'arena', findartist: 'arena', grandarena: 'arena',
   notifications: 'arena', help: 'arena', about: 'arena',
-  battlehistory: 'account', savedartworks: 'account',
+  battlehistory: 'account', savedartworks: 'account', settings: 'account',
 };
 
 // Destination screens that live UNDER a tab (they keep that tab highlighted).
-const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', battlehistory: 'profile', savedartworks: 'profile', notifications: 'arena', help: 'arena', about: 'arena' };
+const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena' };
 
 function renderNav() {
   $('#bottom-nav').innerHTML = NAV.map((t) =>
@@ -1293,6 +1289,8 @@ function applyTheme(t) {
   try { localStorage.setItem('aa-theme', light ? 'light' : 'dark'); } catch (_) {}
   const d = $('#theme-dark'), l = $('#theme-light');
   if (d && l) { d.classList.toggle('active', !light); l.classList.toggle('active', light); }
+  // v46: the homepage Line Ripple follows the theme switch in place.
+  try { if (homeBgScene) homeBgScene.setStroke(light ? '#F200FF' : '#EA69F1'); } catch (_) {}
 }
 $('#theme-dark').addEventListener('click', () => applyTheme('dark'));
 $('#theme-light').addEventListener('click', () => applyTheme('light'));
@@ -1460,6 +1458,52 @@ function stopLoginBg() {
 // very first frame; init()/show() will dispose it if the user is logged in.
 if (!$('#view-login').classList.contains('hidden')) startLoginBg();
 
+// v46: the homepage Line Ripple background (line-ripple.js, the vanilla
+// port of the Originkit component the user supplied, in a dark and a light
+// palette). Same lifecycle discipline as the auth starfield: mounted ONLY
+// while the arena (home) view is on screen AND the user is logged in,
+// disposed on leave - exactly one background animation is ever active. The
+// stroke follows the theme (dark #EA69F1 / light #F200FF) and the layer
+// paints var(--bg) so it can never seam against the page.
+var homeBgScene = null;
+function homeBgStroke() {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? '#F200FF' : '#EA69F1';
+}
+function startHomeBg() {
+  const host = $('#home-bg');
+  if (!host) return;
+  host.classList.add('on');
+  if (homeBgScene) { homeBgScene.setStroke(homeBgStroke()); return; }
+  if (!window.LineRipple) {
+    // same fresh-tab race guard as the auth starfield: the app script runs
+    // before the effect scripts at the bottom of <body>; retry until they
+    // arrive, then mount if the home view is still the one on screen.
+    if (!startHomeBg._armed) {
+      startHomeBg._armed = true;
+      const wantIt = () => currentView === 'arena' && !!sessionToken;
+      window.addEventListener('load', () => { if (wantIt()) startHomeBg(); });
+      let tries = 0;
+      const t = setInterval(() => {
+        tries++;
+        if (homeBgScene || !wantIt() || tries > 40) { clearInterval(t); return; }
+        if (window.LineRipple) { clearInterval(t); startHomeBg(); }
+      }, 250);
+    }
+    return; // script missing/blocked; plain bg (retry armed above)
+  }
+  try {
+    homeBgScene = new window.LineRipple(host, { strokeColor: homeBgStroke() });
+  } catch (e) {
+    console.warn('[home-bg] animation unavailable:', e.message);
+    homeBgScene = null;
+  }
+}
+function stopHomeBg() {
+  if (homeBgScene) { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
+  const host = $('#home-bg');
+  if (host) host.classList.remove('on');
+}
+
 // v38: About shows the REAL app version (the same source the silent guard
 // compares against — never a hardcoded string).
 function paintAbout() {
@@ -1490,18 +1534,19 @@ function show(name) {
     startPolling(refreshRoomsList);
     }
   else if (name === 'room') startPolling(refreshRoom);
-  else if (name === 'matchmaking') { mmOnEnter(); mmGlobeOn(); mmScanOn(); } // v35 + v40 + v42: real search, globe, scanning dots
+  else if (name === 'matchmaking') { mmOnEnter(); } // v35: real search (v45: the searching LINE carries the visual)
   else if (name === 'join') refreshJoinList();              // v35: live public list
   else if (name === 'battlehistory') loadBattleHistory();
   else if (name === 'savedartworks') loadSavedArtworks();
   else if (name === 'account') refreshAccount(); // v34: profile card is always fresh
+  else if (name === 'settings') refreshAccount(); // v45: settings form always reflects the server
   else if (name === 'about') paintAbout(); // v38: About shows the real version
-  if (name !== 'matchmaking') { mmGlobeOff(); mmScanOff(); } // v40 + v42: the effects stop the moment the card is left
   window.scrollTo(0, 0);
   rtSyncSubscriptions();
   // v38: any route into an auth view also closes the drawer (defense in
   // depth — the dashboard chrome can never linger beside the login page).
-  if (AUTH_BG_VIEWS.includes(name)) { closeDrawer(); startLoginBg(); } else stopLoginBg();
+  if (AUTH_BG_VIEWS.includes(name)) { closeDrawer(); startLoginBg(); stopHomeBg(); }
+  else { stopLoginBg(); if (name === 'arena' && sessionToken) startHomeBg(); else stopHomeBg(); }
 }
 
 async function api(path, body, method) {
@@ -2714,13 +2759,7 @@ $('#avatar-remove').addEventListener('click', async () => {
   } catch (err) { msg('msg-account', err.message, false); }
 });
 
-// v29: "Edit Profile" opens the (same, existing) profile form as a panel.
-$('#btn-edit-profile').addEventListener('click', () => {
-  const p = $('#profile-edit-panel');
-  const open = p.classList.toggle('hidden') === false;
-  // v30: only the label swaps — the pencil SVG stays in the button.
-  $('#btn-edit-profile span').textContent = open ? '✕ Close' : 'Edit Profile';
-});
+// v45: the Edit Profile pill is gone — the form lives on the Settings page.
 
 // v29: Battle History + Saved Artworks — REAL data from the user's own
 // battles/submissions. Zero rows today = the honest empty state; the Phase
@@ -2774,11 +2813,24 @@ async function refreshAccount() {
 
 // The Arena home is the main screen after login.
 async function enterAccount() {
-  const d = await api('/api/auth/me');
-  show('arena'); // instant main screen — the profile tab fills in behind it
-  await renderAccount(d);
+  // v45 (login transition fix): the homepage renders the INSTANT
+  // authentication state exists — no awaited network call sits between the
+  // login success and the app shell, so the login card can never linger.
+  // Profile data fills in right behind it (placeholders until it lands);
+  // a rejected session still bounces back to login with a clear message.
+  show('arena');
   rtConnect();
-  startNotifDotPolling(); // v38: real unread indicator for this session
+  try {
+    const d = await api('/api/auth/me');
+    await renderAccount(d);
+    startNotifDotPolling(); // v38: real unread indicator for this session
+  } catch (err) {
+    setSessionToken(null);
+    rtClose();
+    rt.status = 'off'; rtChip();
+    show('login');
+    throw err; // the caller (login/init) shows the right message
+  }
 }
 
 // Social sign-in (v21 mockup → v28 real Google). Apple/Discord remain
@@ -3062,16 +3114,19 @@ const mm = (() => {
   let opponent = null;
 
   const fmtClock = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  // v46: the matchmaking search clock counts UP from zero.
+  const fmtSearchClock = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 
   function clearTimers() {
     for (const t of [tickT, pollT]) { if (t) clearInterval(t); }
     tickT = pollT = null;
   }
-  // v42: deadline-based clock — the displayed countdown is ALWAYS derived
-  // from (deadlineAt - now), never decremented. deadlineAt comes from the
-  // SERVER (queued_at + exactly 180 s), so the display and the server's own
-  // 180 s expiry share one anchor: the timeout can only trigger once the
-  // full 3 minutes have genuinely elapsed.
+  // v46: the timer COUNTS UP - it shows how long the artist has been
+  // searching (00:00, 00:01, ...) until an opponent is found, the search is
+  // cancelled, or the session ends. The server's 180 s queue expiry stays
+  // the single anchor (deadlineAt, = queued_at + exactly 180 s); the display
+  // now derives the ELAPSED time from it instead of showing a countdown,
+  // and the timeout itself is unchanged.
   function tickClock() {
     if (state !== 'searching' || !deadlineAt) return;
     const remainMs = deadlineAt - Date.now();
@@ -3079,7 +3134,8 @@ const mm = (() => {
       fail('No available artists in the last 3 minutes \u2014 give it another try.');
       return;
     }
-    $('#mm-timer').textContent = fmtClock(Math.max(0, Math.floor(remainMs / 1000)));
+    const elapsed = Math.max(0, Math.floor(180 - remainMs / 1000));
+    $('#mm-timer').textContent = fmtSearchClock(elapsed);
   }
   function paintMySlot() {
     const ava = $('#mm-me-ava');
@@ -3121,7 +3177,7 @@ const mm = (() => {
     $('#mm-status-sub').textContent = 'Art Arena is searching for an artist';
     $('#mm-status-sub').classList.remove('ok');
     $('#mm-timer').classList.remove('hidden');
-    $('#mm-timer').textContent = fmtClock(180); // full 3:00 — counts DOWN to 0:00
+    $('#mm-timer').textContent = '00:00'; // v46: counts UP from zero
     $('#mm-actions').classList.remove('hidden');
     $('#mm-fail-actions').classList.add('hidden');
   }
@@ -3185,11 +3241,9 @@ const mm = (() => {
     state = 'found';
     opponent = opp;
     clearTimers();
-    // Freeze the countdown at the real remaining time (deadline-derived).
-    $('#mm-timer').textContent = deadlineAt
-      ? fmtClock(Math.max(0, Math.floor((deadlineAt - Date.now()) / 1000)))
-      : '0:00';
-    mmScanSet('connected'); // v42: scanning dots stop moving + turn light green
+    // v46: leave the timer showing the ELAPSED search time (it counts UP
+    // now); ticking is already stopped, so the value simply freezes here.
+    mmLinkSet('connected'); // v45: the line locks solid green
     paintFound();
     // A brief, intentional "Connected" beat \u2192 straight into the room,
     // then the Choose Your Canvas step for my role (host = start, player =
@@ -3212,8 +3266,8 @@ const mm = (() => {
     state = 'failed';
     clearTimers();
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
-    $('#mm-timer').textContent = '0:00'; // the full window has run out
-    mmScanSet('off'); // v42: the searching dots fade away
+    $('#mm-timer').textContent = '03:00'; // v46: the full window has run out (elapsed, not a countdown)
+    mmLinkSet('off'); // v45: the line goes quiet
     api('/api/matchmaking/cancel', {}).catch(() => {}); // never leave a ghost queue row
     paintFailed(why, title);
   }
@@ -3225,7 +3279,7 @@ const mm = (() => {
     resetOppSlot();
     paintMySlot();
     paintSearching();
-    mmScanSet('search'); // v42: the light-blue scanning dots begin
+    mmLinkSet('search'); // v45: the dashes start flowing
     // v42: no more 1 s decrement — one 250 ms display tick that always
     // re-derives the remaining time from the server deadline (no drift).
     tickT = setInterval(tickClock, 250);
@@ -3257,7 +3311,7 @@ const mm = (() => {
     if (state !== 'searching') return;
     state = 'cancelling'; // blocks enter()/found()/poll for the whole call
     clearTimers();        // stop the countdown tick
-    mmScanSet('off');     // v42: the searching dots fade away
+    mmLinkSet('off');     // v45: the line goes quiet
     try {
       await api('/api/matchmaking/cancel', {});
     } catch (_) { /* 404 = nothing queued — already out; either way we stay out */ }
@@ -3288,7 +3342,7 @@ const mm = (() => {
     state = 'idle';
     clearTimers();
     deadlineAt = null;
-    mmScanSet('off');
+    mmLinkSet('off');
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
   }
   $('#mm-cancel').addEventListener('click', cancel);
@@ -3305,61 +3359,15 @@ function mmOnEnter() { mm.onEnter(); }
 function mmOnWs(m) { mm.onWs(m); }
 function mmOnLogout() { mm.onLogout(); }
 
-// ============ v40: matchmaking globe background (provided Originkit) ====
-// The Globe component provided for this feature (React + three.js + d3-geo)
-// ported 1:1 to vanilla JS in /globe-wrap.js (preset defaults unchanged).
-// It runs INSIDE the matchmaking card as its internal background layer:
-// #mm-globe-layer (absolute, z-index 0, clipped to the card), behind the
-// avatars, usernames, connection line and status (all z-index 1). The
-// card keeps its existing background/structure and every UI element and
-// interaction stays fully above the effect. Lazy: created on first entry
-// into the view, disposed on exit (no GPU work off-view, no leaks).
-let mmGlobe = null;
-function mmGlobeOn() {
-  const layer = $('#mm-globe-layer');
-  if (!layer || mmGlobe) return;
-  if (!window.GlobeWrap || typeof window.GlobeWrap.create !== 'function') return; // vendor libs not loaded → card stays plain
-  // v41: Art Arena styling on top of the provided component defaults —
-  // continents (dots + outlines) in the brand pink, grid in white. The
-  // subtle opacity + soft pink glow are applied by the card CSS.
-  try { mmGlobe = window.GlobeWrap.create(layer, { dots: { color: '#FF3CAC', size: 5, density: 8, allDots: false }, outlineColor: '#FF3CAC', graticuleColor: '#ffffff' }); } catch (e) { console.warn('matchmaking globe disabled:', (e && e.message) || e); }
-}
-function mmGlobeOff() {
-  if (!mmGlobe) return;
-  try { mmGlobe.dispose(); } catch (_) {}
-  mmGlobe = null;
-}
-
-// ============ v43: matchmaking planet scanner (light blue → light green) ==
-// window.MmScanWrap (mm-scan-wrap.js) replaces the old connection line:
-// ONE light-blue beacon dot at a time, ON THE PLANET (the canvas lives
-// inside #mm-globe-layer, so the dot always renders on the globe — never
-// on the surrounding card); when the next dot appears the previous fades.
-// The moment a player is found the current dot stops on the planet and
-// smoothly shifts to light green.
-// Lazy like the globe: created on first entry into the view, disposed on
-// exit (no GPU work off-view, no leaks).
-let mmScan = null;
-let mmScanMode = null;
-function mmScanSet(mode) {
-  mmScanMode = mode;
-  if (mmScan) { try { mmScan.setMode(mode); } catch (_) {} }
-}
-function mmScanOn() {
-  const c = $('#mm-scan-layer');
-  if (!c || mmScan) return;
-  if (!window.MmScanWrap || typeof window.MmScanWrap.create !== 'function') return; // module not loaded → plain background
-  try {
-    // v43: the HOST is the globe layer (the planet box) — the canvas is
-    // sized to it and every dot is born inside its circle.
-    mmScan = window.MmScanWrap.create(c, $('#mm-globe-layer'));
-    if (mmScanMode) mmScan.setMode(mmScanMode); // state may already be searching/found
-  } catch (e) { console.warn('matchmaking scan dots disabled:', (e && e.message) || e); mmScan = null; }
-}
-function mmScanOff() {
-  if (!mmScan) return;
-  try { mmScan.dispose(); } catch (_) {}
-  mmScan = null;
+// ============ v45: the matchmaking SEARCHING LINE ===========================
+// Replaces the v40 planet/globe + v43 beacon-dot scanner (both removed with
+// their scripts). Pure CSS driven by one data-mode attribute:
+//   'off'       idle — a quiet gradient line between the two seats
+//   'search'    dashes flow + a runner dot travels toward the empty seat
+//   'connected' the line locks solid green — an opponent was found
+function mmLinkSet(mode) {
+  const el = $('#mm-link');
+  if (el) el.dataset.mode = mode;
 }
 
 
@@ -3648,15 +3656,8 @@ $('#drawer-backdrop').addEventListener('click', (e) => { if (e.target.id === 'dr
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 // The global [data-view] handler already routes the drawer's nav buttons —
 // this just closes the panel when one is used.
-document.querySelectorAll('#drawer-nav [data-view]').forEach((b) =>
-  b.addEventListener('click', () => {
-    closeDrawer();
-    if (b.dataset.action === 'open-profile-edit') {
-      // Settings = the real account settings form: open it right away.
-      $('#profile-edit-panel').classList.remove('hidden');
-      $('#btn-edit-profile span').textContent = '\u2715 Close';
-    }
-  }));
+// v45: Settings is a real view — the generic [data-view] routing (below)
+// handles the drawer's Settings button; no special case needed.
 
 // v38: the red dot reflects REAL unread data only (the notifications
 // table) — zero unread = no dot, never a fake/demo indicator.
@@ -3705,13 +3706,10 @@ $('#form-login').addEventListener('submit', async (e) => {
   try {
     const d = await api('/api/auth/login', { login: loginVal, password: pwVal });
     setSessionToken(d.session_token);
-    // Prove the session actually works BEFORE showing the app.
-    const payload = await api('/api/auth/me');
-    show('arena'); // instant main screen — the profile tab fills in behind it
-    await renderAccount(payload);
-    rtConnect();
+    // v45: IMMEDIATE clean transition — enterAccount paints the homepage
+    // first, then verifies the session behind it (bounce-back on failure).
+    await enterAccount();
   } catch (err) {
-    setSessionToken(null);
     msg('msg-login', err.message === 'Not authenticated.'
       ? 'Login succeeded but the session did not start — please try logging in again.'
       : err.message, false);
@@ -3772,10 +3770,9 @@ $('#form-reset').addEventListener('submit', async (e) => {
 
 // ---------------------------- profile settings -----------------------------
 function closeProfileEdit() {
-  // v38: the edit panel closes by itself after a successful save — the
-  // updated profile is what the user sees next.
-  $('#profile-edit-panel').classList.add('hidden');
-  $('#btn-edit-profile span').textContent = 'Edit Profile';
+  // v45: the form lives on the Settings page — after a successful save it
+  // locks (the button reads "Edit profile"); the success message shows on
+  // the Settings page itself.
   setProfileEditing(false); // lock form, button becomes "Edit profile"
 }
 $('#form-profile').addEventListener('submit', async (e) => {
@@ -3791,8 +3788,8 @@ $('#form-profile').addEventListener('submit', async (e) => {
       is_discoverable: f.get('is_discoverable') === 'on',
     }, 'PUT');
     await renderAccount(d); // updated profile information, immediately
-    closeProfileEdit();     // v38: success → panel closes automatically
-    msg('msg-account', 'Profile saved.', true);
+    closeProfileEdit();     // v45: lock the form; success message on THIS page
+    msg('msg-settings', 'Profile saved.', true);
   } catch (err) {
     // v38: failure → the panel STAYS open with the error visible (retryable).
     if (!handleAuthError(err)) msg('msg-account', err.message, false);
@@ -3963,13 +3960,10 @@ window.__aaGoogleHandoff = null;
 })();
 </script>
 <script src="/glitter-wrap.js"></script>
-<!-- v40: matchmaking globe background — the provided Originkit Globe
-     component (three.js + d3-geo), ported to vanilla JS in globe-wrap.js.
-     Loaded after the app script: GlobeWrap is used lazily on first entry
-     into the matchmaking view (and disposed on exit). -->
-<script src="/vendor/three.min.js"></script>
-<script src="/vendor/d3.min.js"></script>
-<script src="/globe-wrap.js"></script>
-<script src="/mm-scan-wrap.js"></script>
+<script src="/line-ripple.js"></script>
+<!-- v45: the matchmaking globe (globe-wrap.js + d3) and the beacon scanner
+     (mm-scan-wrap.js) are REMOVED; the searching line is pure CSS.
+     v46: arch-corridor.js + vendor/three.min.js are removed too (nothing
+     referenced THREE anymore). line-ripple.js is the homepage background. -->
 </body>
 </html>
