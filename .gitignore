@@ -1,0 +1,14 @@
+# secrets — never commit (server/.env.example IS the template, keep it)
+.env
+*.env
+!*.env.example
+
+# runtime / user data
+node_modules/
+dev-outbox.json
+server/avatars/
+*.log
+
+# local DB dumps (the sanitized first-boot seed lives in backups/latest.sql)
+latest.sql
+*.sql.dump
