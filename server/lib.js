@@ -139,21 +139,72 @@ function authUserPayload(u) {
   };
 }
 
+// ---------------- v52: PREMIUM ENTITLEMENTS ----------------
+// Payments-agnostic by design: the entitlement TABLE is the single source of
+// truth. Today only the test-mode endpoints write rows (source='test'); a
+// future Paystack webhook writes the SAME rows with source='paystack' after
+// a verified payment — feature access, gating, badge and themes never change.
+const PREMIUM_THEMES = [
+  // ALL 2D interface treatments (colour / border / background only — no 3D,
+  // no perspective, no depth effects; Art Arena stays a clean 2D UI).
+  { key: 'neon_grid',    name: 'Neon Grid',     hint: 'Dark base · cyan & magenta accents · subtle grid', premium: true },
+  { key: 'sakura',       name: 'Sakura Bloom',  hint: 'Soft light base · warm pink accents', premium: true },
+  { key: 'retro_arcade', name: 'Retro Arcade',  hint: 'Dark base · arcade yellow/red · pixel-edge borders', premium: true },
+  { key: 'midnight',     name: 'Midnight Ink',  hint: 'Deep indigo base · violet accents', premium: true },
+  { key: 'sunset',       name: 'Sunset Fade',   hint: 'Warm gradient accents · dusk tones', premium: true },
+  { key: 'mono',         name: 'Mono Minimal',  hint: 'Greyscale minimal · pure 2D flat', premium: true },
+];
+const FREE_THEMES = [
+  { key: 'default', name: 'Art Arena', hint: 'Light / Dark mode (built in)', premium: false },
+];
+function themeCatalog() { return [...FREE_THEMES, ...PREMIUM_THEMES]; }
+async function premiumOf(userId) {
+  const { rows } = await pool.query(
+    `SELECT plan, source, started_at FROM premium_subscriptions
+      WHERE user_id = $1 AND status = 'active'
+        AND (ended_at IS NULL OR ended_at > now())
+      ORDER BY started_at DESC LIMIT 1`, [userId]);
+  return rows[0]
+    ? { active: true, plan: rows[0].plan, source: rows[0].source, started_at: rows[0].started_at }
+    : { active: false, plan: null, source: null, started_at: null };
+}
+// A stored theme is only honored while entitled — a revoked Premium account
+// safely falls back to the free Light/Dark system (server truth, never a
+// client-side check).
+async function sanitizeTheme(userId, theme) {
+  if (!theme || theme === 'default') return null;
+  if (!PREMIUM_THEMES.some((t) => t.key === theme)) return null; // unknown key → fallback
+  const p = await premiumOf(userId);
+  return p.active ? theme : null;
+}
+
 async function fullUser(u) {
   const { rows } = await pool.query(
     `SELECT p.bio, p.country_code, p.drawing_app_key, p.is_discoverable,
             p.avatar_storage_key, p.updated_at,
             da.display_name AS drawing_app_name,
-            s.battles, s.wins, s.losses, s.draws, s.win_streak, s.best_streak, s.rating
+            s.battles, s.wins, s.losses, s.draws, s.win_streak, s.best_streak, s.rating,
+            u.ui_theme,
+            ps.plan AS premium_plan, ps.source AS premium_source, ps.started_at AS premium_started_at
        FROM user_profiles p
        JOIN user_statistics s ON s.user_id = p.user_id
+       JOIN users u ON u.id = p.user_id
        LEFT JOIN drawing_apps da ON da.app_key = p.drawing_app_key
+       LEFT JOIN premium_subscriptions ps
+              ON ps.user_id = p.user_id AND ps.status = 'active'
+             AND (ps.ended_at IS NULL OR ps.ended_at > now())
       WHERE p.user_id = $1`,
     [u.id]
   );
   const p = rows[0] || {};
+  // v52: entitlement + sanitized theme travel with the session user — the
+  // badge, theme application and re-roll gating all read THIS (server truth).
+  const premium = { active: !!p.premium_plan, plan: p.premium_plan || null, source: p.premium_source || null, started_at: p.premium_started_at || null };
+  const ui_theme = (p.ui_theme && p.ui_theme !== 'default' && PREMIUM_THEMES.some((t) => t.key === p.ui_theme) && premium.active) ? p.ui_theme : null;
   return {
     user: authUserPayload(u),
+    premium,
+    ui_theme,
     profile: {
       bio: p.bio || '',
       country_code: p.country_code || null,
@@ -212,5 +263,9 @@ module.exports = {
   requireAuth,
   authUserPayload,
   fullUser,
+  PREMIUM_THEMES,
+  themeCatalog,
+  premiumOf,
+  sanitizeTheme,
   cookieOpts,
 };

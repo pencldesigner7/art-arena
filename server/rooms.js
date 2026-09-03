@@ -38,9 +38,11 @@
  * ============================================================================
  */
 const express = require('express');
-const { pool, HttpError, ah, requireAuth } = require('./lib');
+const { pool, HttpError, ah, requireAuth, premiumOf,
+} = require('./lib');
 const rt = require('./realtime');
 const { lockChallengeCore } = require('./challenge');
+const { notifyUser } = require('./notify'); // v52: the ONE notifier (rematch requests)
 const { finishBattleIfDue } = require('./battle-end');
 
 const router = express.Router();
@@ -264,8 +266,12 @@ async function roomPayload(code, me) {
         start_time: r.start_time,
         official_end_time: new Date(new Date(r.start_time).getTime() + r.time_limit_seconds * 1000),
       });
-      battle = await latestBattle(room.id);
     }
+    // v52 (countdown bug): ALWAYS re-read after the flip attempt. When the
+    // sweeper wins the race the UPDATE returns nothing — falling through with
+    // the STALE 'countdown' row (a clock already in the past) made clients
+    // restart the overlay and flash "GO!" twice. The fresh row is the truth.
+    battle = await latestBattle(room.id);
   }
   const challenge = battle ? await battleChallengePayload(battle.id) : null;
   // v44: a pending rematch request (post-battle UI state) — null when none.
@@ -285,6 +291,22 @@ async function roomPayload(code, me) {
         WHERE r.room_id = $1 AND r.status = 'pending'
         ORDER BY r.created_at DESC LIMIT 1`, [room.id]);
     rematch = rr[0] || null;
+  }
+  // v52: Premium re-roll window — server truth for the REQUESTING user
+  // (free users get allowed:false; the button routes to the upgrade prompt).
+  let reroll = null;
+  if (battle && battle.status === 'active' && battle.start_time) {
+    const deadline = new Date(new Date(battle.start_time).getTime() + 60000);
+    const { rows: rc } = await pool.query(
+      `SELECT count(*)::int AS n FROM battle_event_log
+        WHERE battle_id = $1 AND event_type = 'challenge_rerolled'`, [battle.id]);
+    const prem = me ? await premiumOf(me) : { active: false };
+    reroll = {
+      used: rc[0].n,
+      max: 3,
+      deadline: deadline.toISOString(),
+      allowed: !!(prem.active && rc[0].n < 3 && Date.now() < deadline.getTime()),
+    };
   }
   return {
     code: room.code,
@@ -338,6 +360,7 @@ async function roomPayload(code, me) {
       official_end_time: battle.official_end_time || null,
       countdown_ends_at: battle.countdown_ends_at || null,
       result: battle.result || null, // v44: official result (winner NULL = draw)
+      reroll, // v52: Premium re-roll window (server-computed for THIS user)
       challenge,
     } : null,
   };
@@ -1161,6 +1184,76 @@ router.post('/:code/close', ah(async (req, res) => {
 // the seat is released in the DB and everyone is told to refetch — a kicked
 // player can never linger as a ghost participant.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// v52: PREMIUM RE-ROLL — regenerate the locked challenge from the SAME strict
+// single-concept pool, never repeating the outgoing picks (data-level rule).
+// Window: the first 60 s of the battle, max 3 per battle, Premium only —
+// enforced HERE, so a free client can never bypass the gate.
+// ---------------------------------------------------------------------------
+router.post('/:code/challenge/reroll', ah(async (req, res) => {
+  const room = await roomByCode(req.params.code);
+  if (!room) throw new HttpError(404, 'Room not found.');
+  const prem = await premiumOf(req.user.id);
+  if (!prem.active)
+    throw new HttpError(403, 'Re-roll is an Art Arena Premium feature — upgrade to re-roll the challenge.');
+  const battle = await latestBattleRow(room.id);
+  if (!battle || battle.status !== 'active')
+    throw new HttpError(409, 'There is no live battle to re-roll.');
+  if (!battle.start_time || Date.now() > new Date(battle.start_time).getTime() + 60000)
+    throw new HttpError(409, 'The re-roll window (the first 60 seconds) has closed.');
+  const { rows: cnt } = await pool.query(
+    `SELECT count(*)::int AS n FROM battle_event_log
+      WHERE battle_id = $1 AND event_type = 'challenge_rerolled'`, [battle.id]);
+  if (cnt[0].n >= 3) throw new HttpError(409, 'This battle has used all its re-rolls.');
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    // the outgoing challenge: keep its categories, exclude its elements
+    const { rows: prev } = await client.query(
+      `SELECT bce.category, bce.element_id
+         FROM battle_challenge_elements bce
+         JOIN battle_challenges bc ON bc.id = bce.challenge_id
+        WHERE bc.battle_id = $1`, [battle.id]);
+    if (!prev.length) throw new HttpError(409, 'No challenge to re-roll.');
+    const prevIds = prev.map((r) => r.element_id);
+    const picks = [];
+    for (const cat of prev.map((r) => r.category)) {
+      const { rows: el } = await client.query(
+        `SELECT id, name FROM randomizer_elements
+          WHERE category = $1 AND status = 'active' AND id <> ALL($2::uuid[])
+          ORDER BY random() LIMIT 1`, [cat, prevIds]);
+      if (!el[0]) throw new HttpError(500, `No elements available for "${cat}".`);
+      picks.push({ category: cat, element_id: el[0].id, value: el[0].name });
+    }
+    await client.query(
+      `DELETE FROM battle_challenge_elements WHERE challenge_id IN
+        (SELECT id FROM battle_challenges WHERE battle_id = $1)`, [battle.id]);
+    await client.query(`DELETE FROM battle_challenges WHERE battle_id = $1`, [battle.id]);
+    const summary = picks.map((x) => x.value).join(' · ');
+    const { rows: ch } = await client.query(
+      `INSERT INTO battle_challenges (battle_id, summary_text) VALUES ($1, $2) RETURNING id`,
+      [battle.id, summary]);
+    for (const x of picks) {
+      await client.query(
+        `INSERT INTO battle_challenge_elements (challenge_id, category, element_id, value)
+         VALUES ($1, $2, $3, $4)`, [ch[0].id, x.category, x.element_id, x.value]);
+    }
+    await client.query(
+      `INSERT INTO battle_event_log (battle_id, event_type, actor_id, payload)
+       VALUES ($1, 'challenge_rerolled', $2, $3)`,
+      [battle.id, req.user.id, JSON.stringify({ summary, elements: picks })]);
+    await client.query('COMMIT');
+    rt.emitRoom(room.code, { action: 'challenge_rerolled', by: req.user.username, summary });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+  res.json(await roomPayload(req.params.code, req.user.id));
+}));
+
 router.post('/:code/kick', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
@@ -1306,7 +1399,7 @@ router.post('/:code/start', ah(async (req, res) => {
 // ---------------------------------------------------------------------------
 async function latestBattleRow(roomId, q) {
   const { rows } = await (q || pool).query(
-    `SELECT id, status FROM battles WHERE room_id = $1 ORDER BY created_at DESC LIMIT 1`, [roomId]
+    `SELECT id, status, start_time FROM battles WHERE room_id = $1 ORDER BY created_at DESC LIMIT 1`, [roomId]
   );
   return rows[0] || null;
 }
@@ -1363,6 +1456,17 @@ router.post('/:code/rematch', ah(async (req, res) => {
     throw e;
   }
   rt.emitRoom(room.code, { action: 'rematch_requested', username: req.user.username, display_name: req.user.display_name });
+  // v52: the request ALSO lands in the opponent's notification system (the
+  // ONE architecture — persisted, 24 h TTL, WS push, bell + unread badge,
+  // Accept/Decline straight from the panel).
+  try {
+    await notifyUser(opponent.user_id, 'rematch_request', {
+      room_code: room.code,
+      from_user_id: req.user.id,
+      from_username: req.user.username,
+      from_display_name: req.user.display_name || req.user.username,
+    });
+  } catch (e) { console.error('[rematch-notify]', e.message); }
   res.json(await roomPayload(req.params.code, req.user.id)); // v44: room payload (client re-renders)
 }));
 
@@ -1442,7 +1546,18 @@ router.post('/:code/rematch/accept', ah(async (req, res) => {
   rt.emitRoom(room.code, { action: 'started', by: 'rematch' });
   if (summary) rt.emitRoom(room.code, { action: 'challenge_locked', by: 'randomizer', summary });
   await emitCountdownIfArmed(room.code);
-  res.json(await roomPayload(req.params.code, req.user.id));
+  // v52: the rematch notification updates in place (buttons → outcome) —
+    // it stays listed (persistence) but can never be acted on twice.
+    try {
+      await pool.query(
+        `UPDATE notifications
+            SET payload = payload || jsonb_build_object('handled', 'accepted'::text),
+                read_at = COALESCE(read_at, now())
+          WHERE user_id = $1 AND type = 'rematch_request'
+            AND payload->>'room_code' = $2 AND payload->>'handled' IS NULL`,
+        [req.user.id, room.code]);
+    } catch (_) {}
+    res.json(await roomPayload(req.params.code, req.user.id));
 }));
 
 router.post('/:code/rematch/decline', ah(async (req, res) => {
@@ -1465,7 +1580,17 @@ router.post('/:code/rematch/decline', ah(async (req, res) => {
   );
   rt.emitRoom(room.code, { action: 'rematch_declined', username: req.user.username, display_name: req.user.display_name });
   if (goneRows[0]) rt.emitRoom(room.code, { action: 'left', username: req.user.username, display_name: req.user.display_name, why: 'rematch_declined' });
-  res.json(await roomPayload(req.params.code, req.user.id));
+  // v52: decline also resolves the notification in place.
+    try {
+      await pool.query(
+        `UPDATE notifications
+            SET payload = payload || jsonb_build_object('handled', 'declined'::text),
+                read_at = COALESCE(read_at, now())
+          WHERE user_id = $1 AND type = 'rematch_request'
+            AND payload->>'room_code' = $2 AND payload->>'handled' IS NULL`,
+        [req.user.id, room.code]);
+    } catch (_) {}
+    res.json(await roomPayload(req.params.code, req.user.id));
 }));
 
 router.post('/:code/rematch/cancel', ah(async (req, res) => {

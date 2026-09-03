@@ -1504,3 +1504,29 @@ CREATE TABLE IF NOT EXISTS public.friendships (
 
 ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'friend_request';
 ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'friend_accepted';
+
+-- ============================================================================
+-- v52 — PREMIUM ENTITLEMENTS + UI THEMES + REMATCH NOTIFICATIONS
+-- ============================================================================
+-- Payments-agnostic entitlement table: today only test-mode rows (source
+-- 'test'); a future Paystack webhook writes the same rows with source
+-- 'paystack' after verified payment. Feature access reads ONLY this table.
+CREATE TABLE IF NOT EXISTS premium_subscriptions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  plan text NOT NULL DEFAULT 'premium',
+  status text NOT NULL DEFAULT 'active',      -- active | ended | revoked
+  source text NOT NULL DEFAULT 'test',       -- test | paystack (future)
+  started_at timestamptz NOT NULL DEFAULT now(),
+  ended_at timestamptz,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_one_active_premium_per_user
+  ON premium_subscriptions (user_id) WHERE status = 'active';
+
+-- Persisted UI customization (server-sanitized: a revoked Premium account
+-- reads back NULL and safely falls back to the free Light/Dark system).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS ui_theme text;
+
+-- Rematch requests join the ONE notification system (24 h TTL, bell, panel).
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'rematch_request';

@@ -625,6 +625,65 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v52 — countdown hardened (no double GO), Premium system in Test Mode, rematch notifications, strict single-concept randomizer
+
+Part A — critical fixes:
+
+- **Countdown (spec 1)**: two root causes found. (a) `roomPayload` fell through
+  with a STALE 'countdown' row (clock already past) when its self-heal flip
+  raced the sweeper — clients restarted the overlay and flashed "GO!" twice,
+  or joined late and saw GO! only. The read now ALWAYS re-reads the fresh
+  row. (b) The client could restart an already-flashed countdown on a stale
+  poll replay; `lastFlashedKey` makes one-GO-per-countdown structural.
+  The room view also polls at 1 s (was 10 s when WS was up), so a client
+  with a DEAD WebSocket still discovers the 3-second window in time —
+  verified live: full 3→2→1→GO! with WS off, in-room, poll-only.
+- **Go Live (spec 4)**: eligibility now keyed to the HOST ROW (not the seat)
+  and the pre-battle states (lobby/starting, no countdown/active battle).
+  Missing YouTube credentials never hide the button — clicking opens the
+  honest setup state (verified).
+- **Rematch notifications (spec 3)**: rematch requests now flow through the
+  ONE notification system (`rematch_request` type, persisted, 24 h TTL, WS
+  push → bell shake + unread badge, Accept/Decline straight from the panel).
+  Accepting/declining marks the notification handled IN PLACE (still listed,
+  buttons gone, outcome shown) — the room endpoints stay the source of truth.
+- **Randomizer (spec 5)**: the REAL data source was an adjective
+  cross-product (~60 modifiers × base nouns) — "Humble Mage", "Wet Lantern".
+  The pool is now the curated base list only: 1,189 single concepts /
+  established compounds (Dragon, Samurai, Art Deco, Golden Hour…), plus a
+  boot migration that purges existing pools and re-seeds from the JSON.
+  Composed challenges verified clean; re-rolls draw from the same pool and
+  never repeat the outgoing elements.
+
+Part B — Premium (Test Mode, payments NOT integrated):
+
+- **Entitlements**: `premium_subscriptions` table (plan/status/source,
+  one-active-per-user index) is the single source of truth. Test-mode
+  endpoints (`/api/premium/test-activate`, `test-revoke`, gated by
+  `PREMIUM_TEST_MODE≠0`) are the only writers today; a future Paystack
+  webhook writes the same rows with `source='paystack'` — gating, badge,
+  themes and re-roll never change.
+- **The two real benefits**: (1) UI customization — six exclusive **2D**
+  themes (Neon Grid, Sakura Bloom, Retro Arcade, Midnight Ink, Sunset Fade,
+  Mono Minimal; pure colour/border/background treatments, no 3D) persisted
+  server-side on `users.ui_theme`, sanitized on read so a revoked account
+  safely falls back; (2) randomizer re-roll — first 60 s of a battle, max 3,
+  server-enforced (403 + upgrade prompt for Free).
+- **Premium page** (`#view-premium`, drawer entry): honest 3-row Free/Premium
+  comparison, theme gallery with live apply, clearly-labelled TEST MODE
+  activation + confirmation, and a revoke tool for downgrade testing.
+- **Badge**: ★ PREMIUM chip on the drawer, own profile card and View Profile
+  modal — always the real backend flag.
+- **Gating**: enforced server-side (theme PUT, re-roll POST); the client
+  shows locked states that route to a tasteful upgrade prompt.
+
+Verified: `e2e/v52-browser` **40/40** (countdown sampled per-page via
+MutationObserver across TWO battles incl. a poll-only run; Go Live ×5;
+rematch notification round trip ×2; premium upgrade/persist/re-roll/
+downgrade end-to-end in the browser). Regression sweep: v51 53/53, v50 25/25,
+v49 29/29, v48 21/21, v47 14/14, v46 41/41, v45 33/33, v44-browser 27/27,
+v44 50/50, regress 20/20 — **353/353 total**.
+
 ## v51 — pre-match Go Live, server-time countdown, friends + notifications backend, owner tools, app-wide ambient layer
 
 Client (`server/public/index.html`, v51):

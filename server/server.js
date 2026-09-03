@@ -40,6 +40,9 @@ const {
   sha256, HttpError, ah, parseCookies, maskToken,
   sessionTokenFromRequest, requireAuth,
   authUserPayload, fullUser, cookieOpts,
+  premiumOf,
+  themeCatalog,
+  sanitizeTheme,
 } = require('./lib');
 const rooms = require('./rooms');
 const matchmaking = require('./matchmaking');
@@ -655,17 +658,10 @@ async function sweepExpiredNotifications() {
 }
 setInterval(() => { sweepExpiredNotifications().catch(() => {}); }, 5 * 60 * 1000).unref();
 
-async function notifyUser(userId, type, payload) {
-  const { rows } = await pool.query(
-    `INSERT INTO notifications (user_id, type, payload) VALUES ($1, $2, $3) RETURNING id, created_at`,
-    [userId, type, JSON.stringify(payload || {})]
-  );
-  rtHub.sendToUser(userId, {
-    type: 'notification',
-    notification: { id: rows[0].id, type, payload: payload || {}, created_at: rows[0].created_at },
-  });
-  return rows[0];
-}
+// v52: notifyUser moved to ./notify — the ONE notifier shared by the friends
+// backend (here) and the room/rematch backend (rooms.js). One notification
+// architecture, one persistence rule (24 h server-side TTL), one WS shape.
+const { notifyUser } = require('./notify');
 
 app.get('/api/notifications', requireAuth, ah(async (req, res) => {
   await sweepExpiredNotifications();
@@ -716,6 +712,60 @@ app.get('/api/notifications/unread', requireAuth, ah(async (req, res) => {
 // v51: PUBLIC PROFILE READING (room context menu → View Profile). LIVE data
 // straight from the tables — never a cached snapshot.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// v52: PREMIUM — entitlement endpoints (TEST MODE). No payment integration:
+// activation writes source='test' rows. A future Paystack webhook writes the
+// SAME table with source='paystack' after verified payment — gating, badge,
+// themes and re-roll read ONLY the entitlement, never the button.
+// ---------------------------------------------------------------------------
+const PREMIUM_TEST_MODE = process.env.PREMIUM_TEST_MODE !== '0'; // set PREMIUM_TEST_MODE=0 in production
+app.get('/api/premium/status', requireAuth, ah(async (req, res) => {
+  res.json({ ...(await premiumOf(req.user.id)), test_mode: PREMIUM_TEST_MODE });
+}));
+app.post('/api/premium/test-activate', requireAuth, ah(async (req, res) => {
+  if (!PREMIUM_TEST_MODE) throw new HttpError(403, 'Test activation is disabled on this deployment.');
+  const c = await pool.connect();
+  try {
+    await c.query('BEGIN');
+    await c.query(
+      `UPDATE premium_subscriptions SET status = 'ended', ended_at = now(), updated_at = now()
+        WHERE user_id = $1 AND status = 'active'`, [req.user.id]);
+    await c.query(
+      `INSERT INTO premium_subscriptions (user_id, plan, status, source)
+       VALUES ($1, 'premium', 'active', 'test')`, [req.user.id]);
+    await c.query('COMMIT');
+  } catch (e) { await c.query('ROLLBACK').catch(() => {}); throw e; } finally { c.release(); }
+  res.json({ ...(await premiumOf(req.user.id)), test_mode: PREMIUM_TEST_MODE });
+}));
+app.post('/api/premium/test-revoke', requireAuth, ah(async (req, res) => {
+  if (!PREMIUM_TEST_MODE) throw new HttpError(403, 'Test revocation is disabled on this deployment.');
+  await pool.query(
+    `UPDATE premium_subscriptions SET status = 'revoked', ended_at = now(), updated_at = now()
+      WHERE user_id = $1 AND status = 'active'`, [req.user.id]);
+  // Safe fallback: a revoked account can never keep a Premium-only theme.
+  await pool.query(`UPDATE users SET ui_theme = NULL WHERE id = $1`, [req.user.id]);
+  res.json({ ...(await premiumOf(req.user.id)), test_mode: PREMIUM_TEST_MODE });
+}));
+app.get('/api/premium/themes', requireAuth, ah(async (req, res) => {
+  const { rows } = await pool.query('SELECT ui_theme FROM users WHERE id = $1', [req.user.id]);
+  res.json({
+    themes: themeCatalog(),
+    premium: (await premiumOf(req.user.id)).active,
+    ui_theme: await sanitizeTheme(req.user.id, rows[0] ? rows[0].ui_theme : null),
+  });
+}));
+app.put('/api/premium/theme', requireAuth, ah(async (req, res) => {
+  const key = String((req.body || {}).theme || '');
+  const t = themeCatalog().find((x) => x.key === key);
+  if (!t) throw new HttpError(400, 'Unknown theme.');
+  if (t.premium) {
+    const p = await premiumOf(req.user.id);
+    if (!p.active) throw new HttpError(403, 'Art Arena Premium is required for that theme.');
+  }
+  await pool.query('UPDATE users SET ui_theme = $1 WHERE id = $2', [key === 'default' ? null : key, req.user.id]);
+  res.json({ ok: true, ui_theme: key === 'default' ? null : key, premium: (await premiumOf(req.user.id)).active });
+}));
+
 app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
   const id = String(req.params.id || '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Invalid user id.');
@@ -731,11 +781,13 @@ app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
   );
   if (!rows[0]) throw new HttpError(404, 'That artist does not exist.');
   const r = rows[0];
+  const prem = await premiumOf(r.id); // v52: badge = REAL entitlement, never a client flag
   res.json({
     user: {
       id: r.id, username: r.username, display_name: r.display_name, joined_at: r.joined_at,
       bio: r.bio || null,
       avatar_url: r.avatar_storage_key ? '/avatars/' + r.avatar_storage_key : null,
+      premium: prem.active, // v52: Premium badge on View Profile
     },
     statistics: {
       battles_played: r.battles || 0, wins: r.wins || 0,
@@ -1115,6 +1167,34 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
        WHERE array_length(string_to_array(lower(trim(name)), ' '), 1) > 2
           OR string_to_array(lower(trim(name)), ' ') && ARRAY['in','on','with','under','over','the','a','an','of','at','by','from','into','onto','and','or','his','her','their','its','while','during','as','holding','standing','sitting','wearing','carrying','riding','walking','running','flying','sad','angry','happy','lonely','terrified','shocked','surprised','bored','tired','sleepy','crying','smiling','laughing','screaming','sleeping','dancing']::text[]
           OR name ~* '\m\w+(ing|ed)\M'`],
+    // ---------------- v52 ----------------
+    // Premium entitlements — payments-agnostic: a future Paystack webhook
+    // writes the SAME rows with source='paystack' after verified payment;
+    // feature access reads only this table.
+    ['v52 premium_subscriptions table',
+     `CREATE TABLE IF NOT EXISTS premium_subscriptions (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        plan text NOT NULL DEFAULT 'premium',
+        status text NOT NULL DEFAULT 'active',
+        source text NOT NULL DEFAULT 'test',
+        started_at timestamptz NOT NULL DEFAULT now(),
+        ended_at timestamptz,
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )`],
+    ['v52 one active premium subscription per user',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_active_premium_per_user
+        ON premium_subscriptions (user_id) WHERE status = 'active'`],
+    ['v52 users.ui_theme (persisted UI customization)',
+     `ALTER TABLE users ADD COLUMN IF NOT EXISTS ui_theme text`],
+    ['v52 notification types: rematch_request',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'rematch_request'`],
+    // v52 (randomizer spec, stricter): ONE concise concept per category. The
+    // pool is emptied and re-seeded at boot from the re-curated base list in
+    // randomizer_seed.json (single nouns / established compounds only — the
+    // adjective cross-product variants are gone at the DATA source).
+    ['v52 randomizer: single-concept pool (re-seed from curated base list)',
+     `DELETE FROM randomizer_elements`],
   ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

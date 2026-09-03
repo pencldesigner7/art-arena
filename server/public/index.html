@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="51">
+<meta name="aa-ui-version" content="52">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -218,6 +218,39 @@ try {
   .canvas-hint { font-size:12px; color:var(--muted); margin:10px 0 0; }
   .state-chip.canvas { color:var(--canvas-tx); border-color:var(--canvas-bd); background:var(--canvas-bg); }
   .battle-canvas-line { font-size:14px; font-weight:700; }
+  /* ============ v52: PREMIUM (2D themes only — no 3D, ever) ============ */
+  .prem-chip { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:800; letter-spacing:.6px; padding:2px 8px; border-radius:999px; background:linear-gradient(90deg, var(--pink), var(--purple)); color:#fff; vertical-align:2px; }
+  .prem-chip.big { font-size:12px; padding:5px 14px; }
+  body[data-ptheme="neon_grid"] { --pink:#00E5FF; --purple:#FF2BD1; --surface:#07121a; --surface-hover:#0a1822; --surface-2:#0d2130; --bg:#040a10; --panel:#08151f; --line:#12384a; --muted:#6fa7bd; --btn-line:#12384a; }
+  body[data-ptheme="sakura"] { --pink:#E86A92; --purple:#B45BD4; --surface:#fdf3f6; --surface-hover:#fdeaf0; --surface-2:#f9dfe8; --bg:#fff7f9; --panel:#fdeef3; --line:#f0cbd7; --text:#43242f; --muted:#9d6f80; --header-bg:rgba(255,247,249,.9); --nav-bg:rgba(253,243,246,.97); --btn-line:#f0cbd7; }
+  body[data-ptheme="retro_arcade"] { --pink:#FFD23F; --purple:#FF4365; --surface:#12060e; --surface-hover:#1a0913; --surface-2:#241019; --bg:#0b0308; --panel:#170a11; --line:#4a1f33; --muted:#c98da4; --btn-line:#4a1f33; }
+  body[data-ptheme="retro_arcade"] .card, body[data-ptheme="retro_arcade"] .time-modal { border-style:dashed; border-radius:4px; }
+  body[data-ptheme="midnight"] { --pink:#8A7CFF; --purple:#4C39B8; --surface:#0d0d24; --surface-hover:#11112e; --surface-2:#191940; --bg:#07071a; --panel:#101030; --line:#2b2b5e; --muted:#8f8fc9; --btn-line:#2b2b5e; }
+  body[data-ptheme="sunset"] { --pink:#FF7A59; --purple:#D24FD6; --surface:#1d1220; --surface-hover:#241628; --surface-2:#301c36; --bg:#140b17; --panel:#1e1222; --line:#4a2a4e; --muted:#c39acb; --btn-line:#4a2a4e; }
+  body[data-ptheme="mono"] { --pink:#c9c9c9; --purple:#8f8f8f; --surface:#141414; --surface-hover:#1a1a1a; --surface-2:#222222; --bg:#0c0c0c; --panel:#161616; --line:#3a3a3a; --muted:#9a9a9a; --btn-line:#3a3a3a; }
+  .prem-hero { text-align:center; padding:22px 16px 10px; }
+  .prem-hero h1 { font-size:clamp(26px, 6vw, 40px); background:linear-gradient(90deg, var(--pink), var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:1px; }
+  .prem-table { width:100%; border-collapse:collapse; margin-top:14px; font-size:13.5px; }
+  .prem-table th, .prem-table td { padding:10px 12px; border-bottom:1px solid var(--line); text-align:center; }
+  .prem-table td:first-child, .prem-table th:first-child { text-align:left; }
+  .prem-table th { color:var(--muted); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; }
+  .theme-swatch { position:relative; display:flex; flex-direction:column; gap:4px; padding:12px; border:1px solid var(--line); border-radius:12px; cursor:pointer; background:var(--surface); transition:border-color .15s, transform .15s; }
+  .theme-swatch:hover { border-color:var(--pink); transform:translateY(-2px); }
+  .theme-swatch.active { border-color:var(--pink); box-shadow:0 0 0 1px var(--pink) inset; }
+  .theme-swatch.locked { opacity:.6; }
+  .swatch-preview { height:44px; border-radius:8px; border:1px solid var(--line); }
+  .swatch-name { font-weight:800; font-size:13px; }
+  .swatch-hint { font-size:11px; color:var(--muted); }
+  .swatch-lock { position:absolute; top:8px; right:10px; font-size:13px; }
+  .sw-neon_grid { background:linear-gradient(135deg,#040a10 60%, #00E5FF33 60.1%, #FF2BD133); }
+  .sw-sakura { background:linear-gradient(135deg,#fff7f9 55%, #f9dfe8 55.1%, #E86A92); }
+  .sw-retro_arcade { background:repeating-linear-gradient(45deg,#12060e 0 8px,#241019 8px 16px); border-bottom:4px solid #FFD23F; }
+  .sw-midnight { background:linear-gradient(135deg,#07071a 60%, #4C39B8 60.1%, #8A7CFF); }
+  .sw-sunset { background:linear-gradient(135deg,#140b17 45%, #FF7A59 45.1%, #D24FD6); }
+  .sw-mono { background:linear-gradient(135deg,#0c0c0c 50%, #3a3a3a 50.1%, #c9c9c9); }
+  .sw-default { background:linear-gradient(135deg,#09070d 50%, #FF3CAC 50.1%, #7B2CFF); }
+  #btn-reroll { width:100%; margin-top:10px; }
+  #btn-reroll.locked { opacity:.75; }
   #ui-version-badge { position:fixed; right:8px; bottom:6px; z-index:70; font-size:10px; color:var(--muted); opacity:.55; pointer-events:none; }
   /* ------------------ auth screens (v21: mockup rebuild) ---------------- */
   .auth-logo { text-align:center; margin:6px 0 0; }
@@ -1167,6 +1200,9 @@ try {
         <div class="challenge-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> CHALLENGE LOCKED</div>
         <div id="challenge-elements"></div>
         <div class="muted" id="challenge-summary" style="margin-top:6px; font-size:12px"></div>
+        <!-- v52: PREMIUM re-roll — server-gated (battle.reroll); free users see
+             the locked state that routes to the upgrade prompt. -->
+        <button type="button" id="btn-reroll" class="secondary hidden"></button>
       </div>
       <p class="muted" id="battle-note" style="margin-top:8px">The host locks the challenge — the 3-2-1 countdown starts the battle.</p>
       <!-- v44 (Go Live): honest coming-soon entry point. It lives in the
@@ -1260,6 +1296,7 @@ try {
           <span id="card-verified" class="verified-tick hidden" title="Email verified"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
         </div>
         <div class="prof-sub" id="card-sub">@…</div>
+        <div style="margin-top:6px"><span id="card-prem" class="prem-chip hidden">★ PREMIUM</span></div>
         <!-- v34: bio now actually shows (saved via Edit Profile → bio field) -->
         <p id="card-bio" class="card-bio hidden"></p>
         <button type="button" id="btn-edit-profile" class="edit-profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5h4L19.6 8.4a2.3 2.3 0 0 0-3.2-3.2L5.3 16.3z"/><path d="m13.5 6.5 3.2 3.2"/></svg><span>Edit Profile</span></button>
@@ -1313,6 +1350,53 @@ try {
       <p class="muted" style="font-size:13px; text-align:center; margin:14px 0 0">Dark is the classic Art Arena look; Light is easier on the eyes in bright rooms. Saved on this device.</p>
     </div>
   </section>
+  <!-- ============ v52: PREMIUM (test mode — no real payments yet) =========
+       Honest comparison, the TWO real Premium benefits (2D UI themes +
+       randomizer re-roll), and a clearly-labelled TEST activation flow that
+       a future Paystack checkout replaces without touching entitlements. -->
+  <section id="view-premium" class="view hidden">
+    <div class="prem-hero">
+      <h1>ART ARENA PREMIUM</h1>
+      <div id="prem-status" style="margin-top:8px"></div>
+    </div>
+    <div class="card" style="margin-top:6px">
+      <table class="prem-table">
+        <thead><tr><th>Feature</th><th>Free</th><th>Premium</th></tr></thead>
+        <tbody>
+          <tr><td>Light / Dark mode</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Exclusive 2D UI customization</td><td>—</td><td>✓</td></tr>
+          <tr><td>Randomizer re-roll</td><td>—</td><td>✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="big" style="font-size:15px">🎨 UI CUSTOMIZATION</div>
+      <p class="muted" style="font-size:13px; margin:6px 0 0">Exclusive 2D interface themes — colour, accents, borders and backgrounds. Your theme persists across refreshes and logins, on every page.</p>
+      <div id="prem-themes" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-top:12px"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="big" style="font-size:15px">🎲 RANDOMIZER RE-ROLL</div>
+      <p class="muted" style="font-size:13px; margin:6px 0 0">Don't like the challenge? Re-roll it for a fresh set of clean, concise concepts — up to 3 times in the first 60 seconds of a battle.</p>
+    </div>
+    <div class="card" style="margin-top:12px" id="prem-activate-wrap">
+      <div class="big" style="font-size:15px">Activate Premium</div>
+      <p class="muted" style="font-size:12.5px; margin:6px 0 0">Payments are not integrated yet — this button activates Premium in <b>TEST MODE</b> for development and testing. No payment is taken and nothing is charged.</p>
+      <button type="button" id="prem-activate" style="width:100%; margin-top:12px">Activate Premium (Test Mode)</button>
+      <div id="prem-confirm" class="hidden" style="margin-top:10px; padding:10px; border:1px dashed var(--purple); border-radius:10px; font-size:13px">
+        <b>TEST MODE CONFIRMATION</b><br><span class="muted">This is a development mechanism — it will NOT charge anything and will be replaced by Paystack checkout later. Activate?</span>
+        <div style="display:flex; gap:8px; margin-top:10px">
+          <button type="button" class="secondary" id="prem-confirm-no" style="flex:1">Cancel</button>
+          <button type="button" id="prem-confirm-yes" style="flex:1">Yes, activate (Test)</button>
+        </div>
+      </div>
+    </div>
+    <div class="card hidden" style="margin-top:12px" id="prem-revoke-wrap">
+      <div class="big" style="font-size:15px">Premium active</div>
+      <p class="muted" style="font-size:12.5px; margin:6px 0 0">Development tool: revoke this test Premium to verify downgrade behaviour (badge disappears, themes lock, re-roll locks, UI falls back safely).</p>
+      <button type="button" class="danger" id="prem-revoke" style="width:100%; margin-top:12px">Revoke Test Premium</button>
+    </div>
+  </section>
+
 
   <!-- ================== BATTLE HISTORY (v29, real data) ================== -->
   <section id="view-battlehistory" class="view hidden">
@@ -1356,7 +1440,7 @@ try {
       <span class="drawer-ava" id="drawer-avatar">•</span>
       <span class="drawer-who">
         <span class="drawer-name" id="drawer-name">…</span>
-        <span class="drawer-username" id="drawer-username">@…</span>
+        <span class="drawer-username" id="drawer-username">@…</span> <span id="drawer-prem" class="prem-chip hidden">★ PREMIUM</span>
       </span>
     </div>
     <nav id="drawer-nav" aria-label="Main"></nav>
@@ -1427,6 +1511,17 @@ try {
       </div>
     </div>
   </div>
+  <!-- v52: Premium upgrade prompt (tasteful lock — never silent blocking) -->
+  <div id="premium-upsell" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true">
+      <h3 id="ups-title">Art Arena Premium</h3>
+      <p class="muted" id="ups-text" style="margin:6px 0 0; font-size:14px"></p>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="ups-close">Not now</button>
+        <button type="button" id="ups-cta" style="flex:1">See Premium</button>
+      </div>
+    </div>
+  </div>
   <!-- v51: kick confirmation (owner moderation — never accidental) -->
   <div id="kick-confirm-modal" class="time-modal-backdrop hidden">
     <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="kc-title">
@@ -1486,7 +1581,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v51</span>
+  <span id="ui-version-badge">v52</span>
 
 <script>
 'use strict';
@@ -1517,6 +1612,7 @@ const DRAWER_NAV = [
   { id: 'arena',         label: 'Arena',         view: 'arena' },
   { id: 'community',     label: 'Community',     view: 'community' },
   { id: 'live',          label: 'LIVE',           view: 'live' },
+  { id: 'premium',       label: 'Premium ★',       view: 'premium' },
   { id: '__divider' },
   { id: 'profile',       label: 'Profile',       view: 'account' },
   { id: 'settings',      label: 'Settings',      view: 'settings' },
@@ -1541,12 +1637,12 @@ const NAV_ICONS = {
 const BACK_TARGETS = {
   rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena', live: 'arena',
   account: 'arena', quickmatch: 'arena', findartist: 'arena', grandarena: 'arena',
-  notifications: 'arena', help: 'arena', about: 'arena',
+  notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena',
   battlehistory: 'account', savedartworks: 'account', settings: 'account',
 };
 
 // Destination screens that live UNDER a tab (they keep that tab highlighted).
-const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena' };
+const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena' };
 
 function renderNav() {
   $('#bottom-nav').innerHTML = NAV.map((t) =>
@@ -1596,6 +1692,22 @@ try {
   if (localStorage.getItem('aa-theme') === 'light') applyTheme('light');
 } catch (_) {}
 
+// ============ v52: PREMIUM (entitlement comes from the server only) ============
+// mePremium mirrors /api/auth/me → premium.active (server truth). The theme
+// is PERSISTED server-side (users.ui_theme, sanitized on read — a revoked
+// account falls back to the free Light/Dark system automatically).
+let mePremium = false;
+function applyPremiumTheme(key) {
+  if (key && key !== 'default') document.body.setAttribute('data-ptheme', key);
+  else document.body.removeAttribute('data-ptheme');
+}
+async function refreshMe() {
+  try {
+    const d = await api('/api/auth/me');
+    await renderAccount(d);
+  } catch (_) {}
+}
+
 function setSessionToken(t) {
   sessionToken = t || null;
   try {
@@ -1630,7 +1742,10 @@ function startPolling(fn) {
   stopPolling();
   pollFn = fn;
   fn(); // instant first render — no waiting for the first tick
-  pollTimer = setInterval(fn, currentPollMs());
+  // v52: the ROOM view polls at 1s — the 3-second countdown window must be
+  // discoverable even with the WebSocket down (10s was too coarse: late
+  // clients saw "GO!" only, or nothing). Event-driven clients are unaffected.
+  pollTimer = setInterval(fn, fn === refreshRoom ? 1000 : currentPollMs());
 }
 function reschedulePoll() { // WS status changed → adjust the safety-net interval
   if (!pollTimer || !pollFn) return;
@@ -1648,8 +1763,10 @@ function reschedulePoll() { // WS status changed → adjust the safety-net inter
 // exists anywhere. The battle clock (once 'active') is derived from
 // official_end_time = start_time + time_limit_seconds.
 let countdownTarget = null; // { battleId, endsAt, timer, flashing }
+let lastFlashedKey = null; // v52: this countdown already ended with GO! — never again
 function startCountdownOverlay(endsAt, battleId) {
   if (countdownTarget && countdownTarget.battleId === battleId && countdownTarget.endsAt === endsAt) return;
+  if (battleId === lastFlashedKey) return; // v52 (double-GO fix): a stale poll/WS replay of an already-flashed countdown is ignored
   stopCountdownOverlay(true);
   countdownTarget = { battleId, endsAt, timer: setInterval(countdownTick, 100), flashing: false };
   $('#countdown-overlay').classList.remove('hidden');
@@ -1677,6 +1794,7 @@ function countdownTick() {
       // clears itself the moment the room payload says 'active' (the server
       // flipped it at exactly countdown_ends_at), with a short fallback.
       countdownTarget.flashing = true;
+      lastFlashedKey = countdownTarget.battleId; // v52: one GO! per countdown, ever
       numEl.textContent = 'GO!';
       numEl.classList.remove('draw');
       numEl.classList.add('go');
@@ -1841,6 +1959,7 @@ function show(name) {
     }
   else if (name === 'live') { startPolling(refreshLive); startLiveTicker(); } // v50: LIVE feed + countdowns
   else if (name === 'room') startPolling(refreshRoom);
+  else if (name === 'premium') renderPremiumPage(); // v52: entitlement + catalog, server truth
   else if (name === 'matchmaking') { mmOnEnter(); } // v35: real search (v45: the searching LINE carries the visual)
   else if (name === 'join') refreshJoinList();              // v35: live public list
   else if (name === 'battlehistory') loadBattleHistory();
@@ -2447,8 +2566,23 @@ function renderRoom(d) {
         '<span class="challenge-val">' + esc(el.value) + '</span></div>'
       ).join('');
       $('#challenge-summary').textContent = d.battle.challenge.summary_text;
+      // v52: PREMIUM RE-ROLL — the window is SERVER-computed for THIS user
+      // (battle.reroll.allowed). Free users see a locked button that routes
+      // to the upgrade prompt — gating is never hide-only.
+      const rr = d.battle.reroll;
+      const rrOpen = !!(rr && rr.used < rr.max && serverNow() < new Date(rr.deadline).getTime());
+      const rrMine = d.players.some((x) => x.is_you);
+      const rrBtn = $('#btn-reroll');
+      rrBtn.classList.toggle('hidden', !(rrOpen && rrMine));
+      if (rrOpen && rrMine) {
+        rrBtn.classList.toggle('locked', !rr.allowed);
+        rrBtn.innerHTML = rr.allowed
+          ? IC.dice + ' RE-ROLL · ' + (rr.max - rr.used) + ' left'
+          : IC.lock + ' RE-ROLL <span class="muted">· Premium</span>';
+      }
     } else {
       $('#challenge-box').classList.add('hidden');
+      $('#btn-reroll').classList.add('hidden');
     }
     // v36: the battle clock is only ever shown while the battle is
     // 'active' (the server flips it there only AFTER the 3-2-1 countdown
@@ -2545,10 +2679,17 @@ function renderRoom(d) {
     pb.classList.add('hidden');
   }
 
-  // ---------- v51 (spec 1): GO LIVE — ROOM OWNER ONLY, PRE-MATCH ----------
-  // The button lives in the lobby (before the match starts); once the battle
-  // begins it disappears — stream management happened pre-match by design.
-  $('#btn-go-live').classList.toggle('hidden', !(isHost && d.status === 'lobby'));
+  // ---------- v51/v52 (spec 1): GO LIVE — ROOM OWNER ONLY, PRE-MATCH ----------
+  // Identity is the HOST ROW (not the seat), so the button is stable even if
+  // the owner's seat changed; pre-battle = lobby/starting with no live
+  // countdown/active battle. Missing YouTube credentials NEVER hide the
+  // button — clicking opens the honest setup state instead.
+  {
+    const glvOwner = !!(d.host && me && d.host.user_id === me.id);
+    const glvPre = d.status === 'lobby' || d.status === 'starting';
+    const glvBattleLive = !!(d.battle && ['countdown', 'active'].includes(d.battle.status));
+    $('#btn-go-live').classList.toggle('hidden', !(glvOwner && glvPre && !glvBattleLive));
+  }
 
   const canStart = isHost && isInLobby && d.player_count === d.max_players;
   $('#btn-start').classList.toggle('hidden', !canStart);
@@ -2856,6 +2997,7 @@ function rtToastText(ev) {
     case 'battle_active':    return null; // GO! + the battle clock cover this
     case 'battle_ended':      return '🏁 The battle has ended — see the result!';
     case 'rematch_requested': return '⚔️ ' + who + ' requested a rematch';
+    case 'challenge_rerolled': return '🎲 ' + who + ' re-rolled the challenge';
     case 'rematch_accepted':  return '⚔️ Rematch on! A new battle is starting';
     case 'rematch_declined':  return '⚪ ' + who + ' declined the rematch';
     case 'rematch_cancelled': return '⚪ The rematch request was cancelled';
@@ -2929,6 +3071,7 @@ function rtHandle(msg) {
     return;
   }
   if (ev.action === 'rematch_expired') { refreshRoom(); toast('The rematch request expired.'); return; }
+  if (ev.action === 'challenge_rerolled') { refreshRoom(); return; } // v52: new challenge renders; the toast above explains
   // v51 quiet mode: while the countdown overlay is up (or the battle is in
   // countdown), decorative room toasts are suppressed — errors still pass.
   const inCountdown = !!countdownTarget ||
@@ -3068,6 +3211,12 @@ async function renderAccount(d) {
   me = d.user;
   meProfile = d.profile; // v33: remembered preferred canvas for Choose Your Canvas
   accountEmail = d.user.email;
+  // v52: Premium entitlement + the persisted UI theme arrive with the session
+  // (fullUser). Badge chips and gating read THIS — never a local override.
+  mePremium = !!(d.premium && d.premium.active);
+  applyPremiumTheme(d.ui_theme || null);
+  $('#drawer-prem').classList.toggle('hidden', !mePremium);
+  $('#card-prem').classList.toggle('hidden', !mePremium);
   // v26: the signed-in user is shown in the hamburger drawer.
   const who = d.user.display_name || d.user.username;
   $('#drawer-name').textContent = who;
@@ -4216,7 +4365,7 @@ async function doLogout() {
   setSessionToken(null);
   mmOnLogout(); // v35: never leave a ghost queue entry behind
   currentRoomCode = null;
-  me = null; meProfile = null; // v38: clear cached user/dashboard state
+  me = null; meProfile = null; mePremium = false; applyPremiumTheme(null); // v38+v52: clear cached user/dashboard/premium state
   stopNotifDotPolling();      // v38: dot is data for a SESSION — gone with it
   closeDrawer();              // v38: the drawer must not stay open over login
   resetDrawerCard();
@@ -4358,6 +4507,7 @@ setInterval(pingUnread, 30000); // catches missed pushes (reconnects, sleep)
 const NOTIF_TEXT = {
   friend_request: (p) => (p.display_name || '@' + p.username) + ' wants to be your friend.',
   friend_accepted: (p) => (p.display_name || '@' + p.username) + ' accepted your friend request — you are now friends!',
+  rematch_request: (p) => (p.from_display_name || '@' + p.from_username) + ' wants a rematch.',
   battle_invitation: (p) => 'Battle invitation.', room_invitation: (p) => 'Room invitation.',
   message: (p) => 'New message.', livestream_start: (p) => 'A livestream is starting.',
 };
@@ -4376,12 +4526,16 @@ async function loadNotifications() {
   list.innerHTML = (d.notifications || []).map((n) => {
     const txt = (NOTIF_TEXT[n.type] || (() => n.type.replace(/_/g, ' ')))(n.payload || {});
     const isReq = n.type === 'friend_request' && n.payload && n.payload.request_id;
+    const isRR = n.type === 'rematch_request' && n.payload && n.payload.room_code && !n.payload.handled;
+    const rrDone = n.type === 'rematch_request' && n.payload && n.payload.handled;
     return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '">' +
       '<span class="notif-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
       (n.type.startsWith('friend') ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
       '</svg></span>' +
       '<div class="notif-body"><div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
       (isReq ? '<div class="notif-actions"><button type="button" data-fr-accept="' + esc(n.payload.request_id) + '">Accept</button><button type="button" class="secondary" data-fr-decline="' + esc(n.payload.request_id) + '">Decline</button></div>' : '') +
+      (isRR ? '<div class="notif-actions"><button type="button" data-rr-accept="' + esc(n.payload.room_code) + '">Accept</button><button type="button" class="secondary" data-rr-decline="' + esc(n.payload.room_code) + '">Decline</button></div>' : '') +
+      (rrDone ? '<div class="notif-when" style="color:var(--ok-tx)">' + (n.payload.handled === 'accepted' ? '✓ accepted — battle starting' : '✓ declined') + '</div>' : '') +
       '</div></div>';
   }).join('');
   empty.classList.toggle('hidden', (d.notifications || []).length > 0);
@@ -4390,6 +4544,19 @@ async function loadNotifications() {
   if (d.unread > 0) { try { await api('/api/notifications/read', {}, 'POST'); lastUnread = 0; paintNotifBadge(0); } catch (_) {} }
 }
 $('#notif-list').addEventListener('click', async (e) => {
+  // v52: rematch requests resolve straight from the panel (same endpoints as
+  // the room card — one architecture, the notification just surfaces it).
+  const rra = e.target.closest('[data-rr-accept]');
+  const rrd = e.target.closest('[data-rr-decline]');
+  if (rra || rrd) {
+    const rc = (rra || rrd).dataset[rra ? 'rrAccept' : 'rrDecline'];
+    try {
+      await api('/api/rooms/' + rc + '/rematch/' + (rra ? 'accept' : 'decline'), {}, 'POST');
+      toast(rra ? 'Rematch accepted — the new battle is starting!' : 'Rematch declined.');
+    } catch (err) { toast(err.message); }
+    loadNotifications(); // item re-renders in its handled state (still listed)
+    return;
+  }
   const acc = e.target.closest('[data-fr-accept]');
   const dec = e.target.closest('[data-fr-decline]');
   if (!acc && !dec) return;
@@ -4427,7 +4594,7 @@ async function openProfile(userId) {
   $('#pm-body').innerHTML =
     '<div style="display:flex; align-items:center; gap:12px; margin:8px 0 2px">' +
     (u.avatar_url ? '<img class="prof-modal-ava" src="' + esc(u.avatar_url) + '" alt="">' : '<span class="prof-modal-ava-fallback">' + esc((u.display_name || u.username || '?').charAt(0).toUpperCase()) + '</span>') +
-    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + '</div>' +
+    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + (u.premium ? ' <span class="prem-chip">★ PREMIUM</span>' : '') + '</div>' +
     '<div class="muted" style="font-size:13px">@' + esc(u.username) + '</div></div></div>' +
     (u.bio ? '<p class="muted" style="margin:10px 0 0; font-size:13.5px">' + esc(u.bio) + '</p>' : '') +
     '<div class="prof-stats-row">' +
@@ -4519,6 +4686,95 @@ setInterval(() => {
   const left = Math.floor((new Date(el.dataset.expires).getTime() - serverNow()) / 1000);
   el.textContent = left > 0 ? 'Expires in ' + String(Math.floor(left / 60)).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0') : 'Expiring…';
 }, 1000);
+
+// ================= v52: PREMIUM PAGE (test mode; Paystack-ready) ===========
+// The page renders from the SERVER's catalog + entitlement — the client never
+// invents themes or unlocks. Test-mode activation/revoke is clearly labelled
+// and exists only until Paystack replaces the activation flow.
+async function renderPremiumPage() {
+  let d = null;
+  try { d = await api('/api/premium/themes'); } catch (e) { toast(e.message); return; }
+  mePremium = !!d.premium;
+  applyPremiumTheme(d.ui_theme || null);
+  $('#prem-status').innerHTML = d.premium
+    ? '<span class="prem-chip big">★ PREMIUM ACTIVE</span> <span class="muted" style="font-size:12px; margin-left:8px">test mode — no payment was taken</span>'
+    : '<span class="muted" style="font-size:13px">You are on the <b>Free</b> plan.</span>';
+  $('#prem-activate-wrap').classList.toggle('hidden', d.premium);
+  $('#prem-revoke-wrap').classList.toggle('hidden', !d.premium);
+  $('#prem-confirm').classList.add('hidden');
+  const activeKey = d.ui_theme || 'default';
+  $('#prem-themes').innerHTML = d.themes.map((t) => {
+    const locked = t.premium && !d.premium;
+    const active = t.key === activeKey;
+    return '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" data-theme-key="' + esc(t.key) + '" data-locked="' + (locked ? '1' : '') + '">' +
+      '<span class="swatch-preview sw-' + esc(t.key) + '"></span>' +
+      '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip">P</span>' : '') + '</span>' +
+      '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
+      (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
+      (locked ? '<span class="swatch-lock">🔒</span>' : '') + '</div>';
+  }).join('');
+}
+$('#prem-themes').addEventListener('click', async (e) => {
+  const sw = e.target.closest('.theme-swatch');
+  if (!sw) return;
+  if (sw.dataset.locked) { openUpsell('Premium theme', 'Exclusive 2D UI themes are part of Art Arena Premium — unlock all six, applied across the whole app.'); return; }
+  try {
+    const r = await api('/api/premium/theme', { theme: sw.dataset.themeKey }, 'PUT');
+    applyPremiumTheme(r.ui_theme);
+    toast(sw.dataset.themeKey === 'default' ? 'Back to the standard Art Arena look.' : 'Theme applied — it persists across refresh and login.');
+    renderPremiumPage();
+  } catch (err) { toast(err.message); }
+});
+$('#prem-activate').addEventListener('click', () => {
+  $('#prem-confirm').classList.remove('hidden');
+});
+$('#prem-confirm-no').addEventListener('click', () => {
+  $('#prem-confirm').classList.add('hidden');
+});
+$('#prem-confirm-yes').addEventListener('click', async () => {
+  $('#prem-confirm').classList.add('hidden');
+  try {
+    const r = await api('/api/premium/test-activate', {}, 'POST');
+    mePremium = !!r.active;
+    toast('Premium activated (TEST MODE) — no payment was taken.');
+    await refreshMe();          // badge + entitlement refresh from the server
+    renderPremiumPage();
+  } catch (err) { toast(err.message); }
+});
+$('#prem-revoke').addEventListener('click', async () => {
+  try {
+    const r = await api('/api/premium/test-revoke', {}, 'POST');
+    mePremium = !!r.active;
+    applyPremiumTheme(null);    // safe fallback to the free Light/Dark system
+    toast('Test Premium revoked — back on the Free plan.');
+    await refreshMe();
+    renderPremiumPage();
+  } catch (err) { toast(err.message); }
+});
+
+// The re-roll button — one handler, gated by the SERVER truth (mePremium
+// mirrors the entitlement; the API is the final word either way).
+$('#btn-reroll').addEventListener('click', async () => {
+  if (!mePremium) {
+    openUpsell('Re-roll is a Premium feature', 'Premium members re-roll the challenge for a fresh set of clean, concise concepts — up to 3 times in the first 60 seconds of a battle.');
+    return;
+  }
+  try {
+    const d = await api('/api/rooms/' + currentRoomCode + '/challenge/reroll', {}, 'POST');
+    renderRoom(d);
+    toast('🎲 Challenge re-rolled!');
+  } catch (e) { toast(e.message); }
+});
+
+// The upgrade prompt every locked feature routes to (tasteful, never silent).
+function openUpsell(title, body) {
+  $('#ups-title').textContent = title || 'Art Arena Premium';
+  $('#ups-text').textContent = body || 'Upgrade to unlock exclusive 2D UI themes and challenge re-rolls.';
+  modalOpen('#premium-upsell');
+}
+$('#ups-close').addEventListener('click', () => modalClose('#premium-upsell'));
+$('#ups-cta').addEventListener('click', () => { modalClose('#premium-upsell'); show('premium'); });
+$('#premium-upsell').addEventListener('click', (e) => { if (e.target.id === 'premium-upsell') modalClose('#premium-upsell'); });
 
 // ================== v50: LIVE PAGE + GO LIVE VIA YOUTUBE ===================
 // LIVE cards render ONLY from real /api/live data — a battle is "live" only
