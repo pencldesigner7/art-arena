@@ -11,11 +11,10 @@
 // DPR capped at 2. The only adaptation: the frame background is the app's
 // page color instead of pure black (same look, no seam against the page).
 //
-// LIGHT version (adapted, per request): identical motion/timing/layout —
-// only colors/visibility change. It clears to TRANSPARENT so the light
-// page shows through, uses deeper violet-magenta tones that read on a
-// light background (#A63CD8 sparks, #8B5CF6 horizon at reduced alpha) and
-// dark violet cores instead of white ones. Subtle, not overpowering.
+// light background shows through. v50 (user request): the light streaks are
+// now PINK — the Art Arena brand pink family (#FF3CAC stems, #FF49B8 horizon)
+// at dark-parity opacity (brighter than the old violet, which read grey on
+// white) — with deep-pink cores so bright cores don't wash out.
 //
 // setTheme('dark'|'light') swaps the palette LIVE — same canvas, same
 // particles, no rebuild, no refresh.
@@ -54,11 +53,11 @@
     },
     light: {
       bg: null,                 // transparent — the light page is the backdrop
-      color: '#A63CD8',         // deeper violet-magenta, readable on light
-      horizonColor: '#8B5CF6',
-      opacity: 0.26,            // a touch softer than dark
-      horizonOpacity: 0.55,
-      core: [109, 40, 217]      // dark violet cores (white would vanish)
+      color: '#FF3CAC',         // v50: Art Arena brand pink (was violet #A63CD8)
+      horizonColor: '#FF49B8',  // v50: warm pink horizon glow
+      opacity: 0.30,            // v50: dark-parity — brighter than the old 0.26
+      horizonOpacity: 0.62,
+      core: [214, 13, 130]      // v50: deep-pink cores (#D60D82)
     }
   };
 

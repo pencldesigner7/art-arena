@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="49">
+<meta name="aa-ui-version" content="50">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -241,6 +241,30 @@ try {
   .legal-foot .links { margin-top:14px; }
   .legal-back { display:block; padding:11px 20px; border:1px solid var(--pink); border-radius:8px; color:var(--text); font-weight:700; margin-top:12px; }
   .legal-back:hover { background:rgba(255,60,172,.12); }
+  /* v50: LIVE page + Go Live modal. Token-based throughout (Dark/Light for
+     free); one restrained animation — the pulsing live dot. */
+  .live-grid { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+  .live-card { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
+  .live-card.is-live { border-color:var(--pink); box-shadow:0 0 0 1px rgba(255,60,172,.35), 0 0 18px rgba(255,60,172,.16); }
+  .live-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .live-dot { flex:0 0 auto; width:9px; height:9px; border-radius:50%; background:var(--pink); animation:livepulse 1.6s ease-out infinite; }
+  @keyframes livepulse { 0% { box-shadow:0 0 0 0 rgba(255,60,172,.55); } 70% { box-shadow:0 0 0 9px rgba(255,60,172,0); } 100% { box-shadow:0 0 0 0 rgba(255,60,172,0); } }
+  .live-badge { font-size:11px; font-weight:800; letter-spacing:1.5px; color:var(--pink); }
+  .live-badge.soon { color:var(--muted); }
+  .live-title { font-weight:800; font-size:15.5px; }
+  .live-meta { font-size:13.5px; color:var(--muted); }
+  .live-challenge { font-size:13px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:6px 10px; }
+  .live-platform { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--muted); border:1px solid var(--btn-line); border-radius:999px; padding:2px 9px; }
+  .live-count { font-variant-numeric:tabular-nums; font-weight:800; font-size:13px; color:var(--text); }
+  .live-empty { text-align:center; padding:26px 14px; border:1px dashed var(--line); border-radius:12px; margin-top:8px; }
+  .live-empty b { display:block; font-size:15.5px; margin-bottom:4px; }
+  .live-empty span { font-size:13.5px; color:var(--muted); }
+  .glv-channel { display:flex; align-items:center; gap:10px; margin:10px 0 4px; }
+  .glv-channel img { width:36px; height:36px; border-radius:50%; border:1px solid var(--line); }
+  .glv-channel .nm { font-weight:800; font-size:14.5px; }
+  .glv-note { font-size:12.5px; color:var(--muted); margin:8px 0 0; }
+  .glv-setup { font-size:13.5px; background:var(--surface); border:1px dashed var(--line); border-radius:8px; padding:10px 12px; margin:10px 0 0; }
+  .glv-status { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; letter-spacing:1px; padding:3px 10px; border-radius:999px; border:1px solid var(--btn-line); }
   .field { position:relative; border-radius:12px; border:1px solid transparent; background:linear-gradient(var(--surface),var(--surface)) padding-box, linear-gradient(90deg, rgba(255,60,172,.75), rgba(123,44,255,.75)) border-box; transition:box-shadow .45s ease, transform .25s ease; }
   .field input { margin-top:0; padding:13px 44px 13px 42px; background:transparent; border:0; border-radius:0; }
   .field input:focus { border-color:transparent; }
@@ -699,6 +723,12 @@ try {
       <ul>
         <li>If you use "Continue with Google", we receive your Google account ID, Google email address and display name to create or sign you in to your account. We do not receive or store your Google password, and we do not post anything to your Google account.</li>
       </ul>
+      <h3>YouTube connection for LIVE (optional)</h3>
+      <ul>
+        <li>If you use "Go Live via YouTube", we connect to your YouTube channel so you can create and manage live broadcasts from eligible battles. We store your channel ID, channel name and channel picture, plus authorization tokens that are kept server-side only — tokens are never returned to your browser.</li>
+        <li>For broadcasts you create we store the details you provide (title, privacy setting, scheduled start) and the broadcast status YouTube reports, so streams can be linked to battles and listed on the LIVE page. Art Arena does not transmit or store video today.</li>
+        <li>You can disconnect YouTube at any time — this revokes our access at Google and deletes the connection.</li>
+      </ul>
       <h3>Battle activity</h3>
       <ul>
         <li>Art Arena records the battle activity needed to run the Service: rooms you create or join (room name and settings), matchmaking entries, the battles you take part in, their results, your battle history and your statistics (such as battles played).</li>
@@ -764,6 +794,9 @@ try {
       <p>Art Arena coordinates timed art battles: you can create or join battle rooms, get matched with a random artist, receive random challenge elements, pick the drawing application you want to battle in, and see results, battle history and statistics.</p>
       <p>Some honesty about what the Service is today: your artwork itself is created in the drawing application you choose — Art Arena coordinates the battle (timing, matchmaking, challenge elements, results) and does not currently collect or store your artwork files. Features marked "coming soon" in the interface are not part of the Service yet, and the Service involves no payments, prizes or money.</p>
 
+      <h2>LIVE and YouTube broadcasts</h2>
+      <p>If you connect your YouTube account, a broadcast you create is a real broadcast on <strong>your own YouTube channel</strong>: Art Arena manages its metadata (title, privacy setting, schedule), links it to your battle and tracks its status. Creating a broadcast is not streaming — Art Arena does not transmit, record or store video today; sending your screen or audio to YouTube is a future feature and, until then, requires your own encoder. Broadcasts are also subject to YouTube's own terms, and going live from Art Arena requires an eligible battle.</p>
+
       <h2>Your account</h2>
       <ul>
         <li>Give accurate registration information and keep your password private. You're responsible for activity under your account.</li>
@@ -808,6 +841,21 @@ try {
       <a class="legal-back" href="/">← Back to Art Arena</a>
       <p class="links">See also our <a href="/privacy">Privacy Policy</a></p>
     </div>
+  </section>
+
+  <!-- ==================== v50: LIVE (discovery + YouTube) ================= -->
+  <!-- Public battles with a GENUINE YouTube livestream. Cards render only
+       from real /api/live data (live only when YouTube actually reports
+       the broadcast live — never from a broadcast object merely existing). -->
+  <section id="view-live" class="view hidden">
+    <h1>LIVE</h1>
+    <p class="muted" style="margin:0 0 14px; font-size:14px">Watch Art Arena battles broadcast live on YouTube.</p>
+    <h2>LIVE NOW</h2>
+    <div id="live-now-list" class="live-grid"></div>
+    <div id="live-now-empty" class="live-empty hidden"><b>No battles are live right now</b><span>When artists go live, their battles will appear here.</span></div>
+    <h2 style="margin-top:24px">UPCOMING LIVE BATTLES</h2>
+    <div id="live-upcoming-list" class="live-grid"></div>
+    <div id="live-upcoming-empty" class="live-empty hidden"><b>No upcoming live battles yet</b><span>Scheduled livestream battles will appear here with a countdown.</span></div>
   </section>
 
   <!-- ======================= ARENA HOME (main) — v26 ===================== -->
@@ -1089,7 +1137,7 @@ try {
       <!-- v44 (Go Live): honest coming-soon entry point. It lives in the
            battle UI where a livestream would start — but it is a
            placeholder, NOT streaming: no LIVE tab, no video infra yet. -->
-      <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M7.4 7.4a6.5 6.5 0 0 0 0 9.2M16.6 16.6a6.5 6.5 0 0 0 0-9.2M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></svg> Go Live</button>
+      <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M7.4 7.4a6.5 6.5 0 0 0 0 9.2M16.6 16.6a6.5 6.5 0 0 0 0-9.2M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></svg> GO LIVE VIA YOUTUBE</button>
     </div>
 
     <!-- v44: post-battle panel — the honest outcome + the two things an
@@ -1330,6 +1378,19 @@ try {
       </div>
     </div>
   </div>
+  <!-- ============ v50: GO LIVE VIA YOUTUBE modal ==========================
+       States: setup (no credentials on this deployment) / connect (OAuth
+       entry) / prepare (connected: real broadcast form) / status (existing
+       broadcast). Never fakes a connection or a broadcast. -->
+  <div id="live-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="glv-title" style="width:min(430px,100%)">
+      <h3 id="glv-title"><span class="live-dot"></span> GO LIVE VIA YOUTUBE</h3>
+      <div id="glv-body"></div>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="glv-close">Close</button>
+      </div>
+    </div>
+  </div>
   <!-- ============ v42: READY confirmation ("Continue with [App]?") ========
        Same rule as every modal above: MUST stay above the app script tag. -->
   <div id="ready-confirm-modal" class="time-modal-backdrop hidden">
@@ -1365,7 +1426,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v49</span>
+  <span id="ui-version-badge">v50</span>
 
 <script>
 'use strict';
@@ -1383,10 +1444,11 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 // app knows about tabs, so no restructuring is ever needed.
 const NAV = [
   { id: 'arena',     label: 'Arena',     view: 'arena' },
+  // v50 (shipped): the LIVE destination — real YouTube livestream discovery,
+  // right where discovery happens (between Arena and Community).
+  { id: 'live',      label: 'LIVE',      view: 'live' },
   { id: 'community', label: 'Community', view: 'community' },
   { id: 'profile',   label: 'Profile',   view: 'account' },
-  // Later phase — livestream system (YouTube + Twitch), e.g.:
-  // { id: 'live', label: 'Live', view: 'live' },
 ];
 // v38/v45 (dashboard reference): the drawer carries the full menu — the
 // bottom nav stays the three main tabs. Settings is its own dedicated page;
@@ -1394,6 +1456,7 @@ const NAV = [
 const DRAWER_NAV = [
   { id: 'arena',         label: 'Arena',         view: 'arena' },
   { id: 'community',     label: 'Community',     view: 'community' },
+  { id: 'live',          label: 'LIVE',           view: 'live' },
   { id: '__divider' },
   { id: 'profile',       label: 'Profile',       view: 'account' },
   { id: 'settings',      label: 'Settings',      view: 'settings' },
@@ -1411,11 +1474,12 @@ const NAV_ICONS = {
   notifications: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
   help: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.3 9.2a2.9 2.9 0 0 1 5.5 1c0 1.9-2.7 2.3-2.7 3.9"/><line x1="12" y1="17.3" x2="12.01" y2="17.4"/></svg>',
   about: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><line x1="12" y1="11" x2="12" y2="16.5"/><line x1="12" y1="7.8" x2="12.01" y2="7.9"/></svg>',
+  live: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M7.4 7.4a6.5 6.5 0 0 0 0 9.2M16.6 16.6a6.5 6.5 0 0 0 0-9.2M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></svg>',
 };
 // v29: back button throughout the app. Every non-home view has a parent;
 // the header's back chevron returns to it. Arena (home) has none.
 const BACK_TARGETS = {
-  rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena',
+  rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena', live: 'arena',
   account: 'arena', quickmatch: 'arena', findartist: 'arena', grandarena: 'arena',
   notifications: 'arena', help: 'arena', about: 'arena',
   battlehistory: 'account', savedartworks: 'account', settings: 'account',
@@ -1501,7 +1565,7 @@ let appsCache = null; // v33: /api/drawing-apps registry (fetched once, cached)
 const POLL_MS_WS_DOWN = 2500, POLL_MS_WS_LIVE = 10000;
 let pollTimer = null, pollFn = null;
 function currentPollMs() { return rt.status === 'on' ? POLL_MS_WS_LIVE : POLL_MS_WS_DOWN; }
-function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } pollFn = null; }
+function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } pollFn = null; stopLiveTicker(); } // v50: the LIVE countdown ticker dies with the poll (no leaked intervals)
 function startPolling(fn) {
   stopPolling();
   pollFn = fn;
@@ -1709,6 +1773,7 @@ function show(name) {
   if (name === 'rooms' || name === 'arena') {
     startPolling(refreshRoomsList);
     }
+  else if (name === 'live') { startPolling(refreshLive); startLiveTicker(); } // v50: LIVE feed + countdowns
   else if (name === 'room') startPolling(refreshRoom);
   else if (name === 'matchmaking') { mmOnEnter(); } // v35: real search (v45: the searching LINE carries the visual)
   else if (name === 'join') refreshJoinList();              // v35: live public list
@@ -2391,7 +2456,8 @@ function renderRoom(d) {
   }
 
   // ---------- v44 (item 5): Go Live — only while a battle is running ----------
-  $('#btn-go-live').classList.toggle('hidden', !(d.battle && d.battle.status === 'active' && (isPlayer || isSpectator)));
+  // v50: Go Live is for ARTISTS (players) of a real, in-flight battle.
+  $('#btn-go-live').classList.toggle('hidden', !(d.battle && ['challenge_locked','countdown','active','time_expired'].includes(d.battle.status) && isPlayer));
 
   const canStart = isHost && isInLobby && d.player_count === d.max_players;
   $('#btn-start').classList.toggle('hidden', !canStart);
@@ -2588,9 +2654,7 @@ $('#btn-rematch-accept').addEventListener('click', () => currentRoomCode && room
 $('#btn-rematch-decline').addEventListener('click', () => currentRoomCode && roomAction(currentRoomCode, '/rematch/decline'));
 $('#btn-rematch-cancel').addEventListener('click', () => currentRoomCode && roomAction(currentRoomCode, '/rematch/cancel'));
 // v44 (item 5): honest coming-soon — no streaming exists yet, so say so.
-$('#btn-go-live').addEventListener('click', () => {
-  toast('Go Live is coming soon — livestreaming battles is on the roadmap. Nothing is streamed today.');
-});
+$('#btn-go-live').addEventListener('click', () => openGoLive()); // v50: real YouTube flow (see LIVE section below)
 
 $('#btn-leave').addEventListener('click', () => {
   if (!currentRoomCode) return;
@@ -4133,6 +4197,203 @@ window.__aaGoogleHandoff = null;
   })();
 })();
 
+// ================== v50: LIVE PAGE + GO LIVE VIA YOUTUBE ===================
+// LIVE cards render ONLY from real /api/live data — a battle is "live" only
+// when YouTube genuinely reports the broadcast live. The Go Live modal uses
+// the same honest-availability pattern as Google sign-in: no credentials on
+// this deployment → a setup state, never a fake connection or broadcast.
+let liveTicker = null;
+function startLiveTicker() {
+  stopLiveTicker();
+  liveTicker = setInterval(() => {
+    document.querySelectorAll('[data-live-start]').forEach((el) => {
+      const t = new Date(el.dataset.liveStart).getTime() - Date.now();
+      el.textContent = t <= 0 ? 'Starting…' : liveCountdownText(t);
+    });
+  }, 1000);
+}
+function stopLiveTicker() { if (liveTicker) { clearInterval(liveTicker); liveTicker = null; } }
+function liveCountdownText(ms) {
+  const s = Math.max(0, Math.round(ms / 1000));
+  if (s >= 3600) return 'in ' + Math.floor(s / 3600) + 'h ' + Math.floor((s % 3600) / 60) + 'm';
+  return 'in ' + String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+function liveCard(x, isLive) {
+  const who = x.opponents && x.opponents.length ? x.artist + ' vs ' + x.opponents.join(' vs ') : x.artist;
+  return `<div class="live-card${isLive ? ' is-live' : ''}">
+    <div class="live-top">
+      ${isLive ? '<span class="live-dot"></span><span class="live-badge">LIVE</span>' : '<span class="live-badge soon">UPCOMING</span>'}
+      <span class="live-platform">▶ YOUTUBE</span>
+      ${!isLive && x.scheduledStart ? '<span class="live-count" data-live-start="' + esc(x.scheduledStart) + '"></span>' : ''}
+    </div>
+    <div class="live-title">${esc(x.title)}</div>
+    <div class="live-meta">${esc(who)}${x.roomCode ? ' · ROOM ' + esc(x.roomCode) : ''}</div>
+    ${x.challenge ? '<div class="live-challenge">' + esc(x.challenge) + '</div>' : ''}
+    ${isLive && x.watchUrl ? '<div class="live-actions"><button type="button" data-watch="' + esc(x.watchUrl) + '">Watch Live</button></div>' : ''}
+  </div>`;
+}
+async function refreshLive() {
+  let d = null;
+  try { d = await api('/api/live'); } catch (e) { console.warn('[live]', e.message); return; }
+  $('#live-now-list').innerHTML = (d.live || []).map((x) => liveCard(x, true)).join('');
+  $('#live-upcoming-list').innerHTML = (d.upcoming || []).map((x) => liveCard(x, false)).join('');
+  $('#live-now-empty').classList.toggle('hidden', (d.live || []).length > 0);
+  $('#live-upcoming-empty').classList.toggle('hidden', (d.upcoming || []).length > 0);
+}
+// Watch Live (and any future external stream links) open in a new tab.
+document.addEventListener('click', (e) => {
+  const w = e.target.closest('[data-watch]');
+  if (w) window.open(w.dataset.watch, '_blank', 'noopener');
+});
+
+// ------------------------------ Go Live modal -------------------------------
+function glvOpen() { const b = $('#live-modal'); b.classList.remove('hidden'); requestAnimationFrame(() => b.classList.add('open')); }
+function glvClose() { const b = $('#live-modal'); b.classList.remove('open'); setTimeout(() => b.classList.add('hidden'), 260); }
+$('#glv-close').addEventListener('click', glvClose);
+$('#live-modal').addEventListener('click', (e) => { if (e.target.id === 'live-modal') glvClose(); });
+function glvBody(html) { $('#glv-body').innerHTML = html; }
+function glvErr(text) { return '<p class="msg err" style="display:block; margin:10px 0 0">' + esc(text) + '</p>'; }
+
+const GLV_STATUS = {
+  scheduled: ['SCHEDULED', 'Broadcast created on your channel — starts at its scheduled time (or when video arrives).'],
+  ready: ['READY FOR VIDEO', 'Everything is bound and waiting for a video source. Art Arena does not send video yet — stream with your encoder (the future Art Arena Stream Studio will automate this).'],
+  live: ['LIVE', 'Your broadcast is genuinely live on YouTube.'],
+  ended: ['ENDED', 'This broadcast has ended.'],
+  failed: ['FAILED', 'YouTube revoked this broadcast — create a new one if needed.'],
+};
+
+async function openGoLive() {
+  glvOpen();
+  glvBody('<p class="muted" style="margin:10px 0 0">Checking YouTube…</p>');
+  let status = null, conn = null;
+  try { status = await api('/api/youtube/status'); } catch (_) {}
+  try { conn = await api('/api/youtube/connection'); } catch (_) {}
+  if (!status) return glvBody('<div class="glv-setup">Could not reach the server — please try again.</div>');
+  if (!status.available) {
+    return glvBody(
+      '<p class="muted" style="margin:10px 0 0">YouTube isn\'t configured on this deployment yet, so live broadcasts can\'t be created here.</p>' +
+      '<div class="glv-setup"><b>Setup needed (developer):</b> set <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> and <code>YOUTUBE_REDIRECT_URI</code> in the server environment (Google Cloud OAuth client with the YouTube scope and redirect URI). See the v50 setup checklist.</div>' +
+      '<p class="glv-note">Nothing is streamed or stored in this state — the button stays honest instead of faking a connection.</p>');
+  }
+  if (!conn || !conn.connected) {
+    const revoked = conn && conn.revoked;
+    return glvBody(
+      '<p class="muted" style="margin:10px 0 0">' + (revoked
+        ? 'Your YouTube authorization expired or was revoked — reconnect to continue.'
+        : 'Connect your YouTube account to schedule a live broadcast for this battle from your own channel.') + '</p>' +
+      '<p class="glv-note">Art Arena asks for permission to manage your live broadcasts (scope: youtube). Authorization tokens stay on our server — never in your browser — and you can disconnect anytime.</p>' +
+      '<button type="button" data-glv-connect style="width:100%">Connect YouTube Account</button>');
+  }
+  glvPrepare(conn);
+}
+
+async function glvPrepare(conn) {
+  let existing = null;
+  try {
+    const mine = await api('/api/youtube/broadcasts');
+    existing = (mine.broadcasts || []).find((b) => currentRoomCode && b.room_code && String(b.room_code).toUpperCase() === String(currentRoomCode).toUpperCase());
+  } catch (_) {}
+  if (existing) return glvStatus(existing, conn);
+
+  const challenge = lastRoomData && lastRoomData.battle && lastRoomData.battle.challenge ? lastRoomData.battle.challenge.summary_text : '';
+  const preTitle = ('Art Arena Battle' + (challenge ? ' — ' + challenge : '')).slice(0, 100);
+  const soon = new Date(Date.now() + 5 * 60 * 1000);
+  const pad = (n) => String(n).padStart(2, '0');
+  const when = `${soon.getFullYear()}-${pad(soon.getMonth() + 1)}-${pad(soon.getDate())}T${pad(soon.getHours())}:${pad(soon.getMinutes())}`;
+  glvBody(
+    '<div class="glv-channel">' + (conn.channel && conn.channel.thumbnail ? `<img src="${esc(conn.channel.thumbnail)}" alt="">` : '') +
+      '<div><div class="nm">' + esc(conn.channel ? conn.channel.title : 'Your channel') + '</div>' +
+      '<div class="muted" style="font-size:12px">YouTube connected ✓</div></div></div>' +
+    '<label>Stream title<input id="glv-title" maxlength="100" value="' + esc(preTitle) + '"></label>' +
+    '<label>Privacy<select id="glv-privacy"><option value="private" selected>Private</option><option value="unlisted">Unlisted</option><option value="public">Public</option></select></label>' +
+    '<label>Scheduled start<input type="datetime-local" id="glv-when" value="' + when + '"></label>' +
+    '<p class="glv-note">Battle: ROOM ' + esc(currentRoomCode || '—') + ' · this broadcast will be linked to it and can appear on the LIVE page.</p>' +
+    '<button type="button" data-glv-create style="width:100%">Create Scheduled Broadcast</button>' +
+    '<p class="glv-note">This creates a real broadcast on your YouTube channel. Art Arena does not send video yet — creation is not streaming.</p>');
+}
+
+function glvStatus(b, conn) {
+  const s = GLV_STATUS[b.last_known_status] || GLV_STATUS.scheduled;
+  glvBody(
+    '<div class="glv-channel">' + (conn && conn.channel && conn.channel.thumbnail ? `<img src="${esc(conn.channel.thumbnail)}" alt="">` : '') +
+      '<div><div class="nm">' + esc(conn && conn.channel ? conn.channel.title : 'Your channel') + '</div>' +
+      '<div class="muted" style="font-size:12px">YouTube connected ✓</div></div></div>' +
+    '<div><span class="glv-status"><span class="live-dot" style="width:7px;height:7px"></span>' + s[0] + '</span></div>' +
+    '<div class="live-title" style="margin-top:8px">' + esc(b.title) + '</div>' +
+    '<div class="live-meta">Privacy: ' + esc(b.privacy) + (b.scheduled_start ? ' · starts ' + new Date(b.scheduled_start).toLocaleString() : '') + '</div>' +
+    (b.watch_url ? '<div class="live-actions"><a href="' + esc(b.watch_url) + '" target="_blank" rel="noopener" style="display:block; text-align:center; padding:11px 20px; border-radius:8px; background:linear-gradient(90deg,var(--pink),var(--purple)); color:#fff; font-weight:700; margin-top:6px">Open on YouTube</a></div>' : '') +
+    '<p class="glv-note">' + s[1] + '</p>' +
+    '<button type="button" class="secondary" data-glv-disconnect style="width:100%; margin-top:10px">Disconnect YouTube</button>');
+}
+
+// One delegated listener covers every Go Live modal action.
+$('#glv-body').addEventListener('click', async (e) => {
+  if (e.target.closest('[data-glv-connect]')) {
+    try { sessionStorage.setItem('aa-yt-return', currentRoomCode || ''); } catch (_) {}
+    location.assign('/api/youtube/connect');
+    return;
+  }
+  if (e.target.closest('[data-glv-create]')) {
+    const btn = e.target.closest('[data-glv-create]');
+    btn.disabled = true; btn.textContent = 'Creating on YouTube…';
+    try {
+      const whenVal = $('#glv-when') && $('#glv-when').value;
+      const d = await api('/api/youtube/broadcasts', {
+        roomCode: currentRoomCode,
+        title: $('#glv-title') ? $('#glv-title').value : '',
+        privacy: $('#glv-privacy') ? $('#glv-privacy').value : 'private',
+        scheduledStartTime: whenVal ? new Date(whenVal).toISOString() : undefined,
+      }, 'POST');
+      toast('Broadcast scheduled on your YouTube channel ✓');
+      glvStatus(d.broadcast, { channel: null });
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Create Scheduled Broadcast';
+      $('#glv-body').insertAdjacentHTML('beforeend', glvErr(err.message));
+    }
+    return;
+  }
+  if (e.target.closest('[data-glv-disconnect]')) {
+    try { await api('/api/youtube/disconnect', {}, 'POST'); toast('YouTube disconnected.'); }
+    catch (err) { toast(err.message); }
+    glvClose();
+    return;
+  }
+});
+
+// ---------------------- YouTube OAuth return handoff ------------------------
+// #aa-youtube=ok|error&reason=… — mirrors the Google sign-in handoff. On
+// success with a saved return room, the artist lands straight back in the
+// battle with the Go Live panel open.
+window.__aaYoutubeHandoff = null;
+(function handleYoutubeReturn() {
+  const m = (location.hash || '').match(/^#aa-youtube=(ok|error)(?:&(.+))?$/);
+  if (!m) return;
+  const q = parseHashQuery(m[2] || '');
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
+  window.__aaYoutubeHandoff = (async () => {
+    if (m[1] === 'error' || !sessionToken) {
+      const why = {
+        denied: 'YouTube connection was cancelled.',
+        bad_state: 'That YouTube connection link expired — please try again.',
+        setup: 'YouTube is not configured on this deployment yet.',
+        token: 'Google rejected the connection — please try again.',
+        channel: 'Your YouTube channel could not be read — make sure the account has a channel.',
+        no_channel: 'That Google account has no YouTube channel to broadcast from.',
+        forbidden_scope: 'The YouTube permission was not granted — try again and allow broadcast access.',
+        network: 'Could not reach Google — check your connection and try again.',
+      }[q.reason || 'other'] || 'YouTube connection did not complete — please try again.';
+      try { if (sessionToken) await enterAccount(); else show('login'); } catch (_) { show('login'); }
+      toast(why);
+      return;
+    }
+    await enterAccount();
+    toast('YouTube connected — GO LIVE is ready in your battle.');
+    let back = null;
+    try { back = sessionStorage.getItem('aa-yt-return'); sessionStorage.removeItem('aa-yt-return'); } catch (_) {}
+    if (back) { openRoom(back); setTimeout(() => openGoLive(), 700); }
+  })();
+})();
+
 // ---------------------------------- init -----------------------------------
 (async function init() {
   rtChip();
@@ -4143,6 +4404,12 @@ window.__aaGoogleHandoff = null;
     if (legalView) { show(legalView); return; }
     if (window.__aaGoogleHandoff) {
       await window.__aaGoogleHandoff; // already entered the app (or bounced to login with an explanation)
+      return;
+    }
+    // v50: YouTube OAuth return (Go Live flow) — already entered the app
+    // (or toasted the failure reason).
+    if (window.__aaYoutubeHandoff) {
+      await window.__aaYoutubeHandoff;
       return;
     }
     // v44 fix (fresh-tab bug): a visitor with NO session token must never

@@ -1425,3 +1425,56 @@ INSERT INTO drawing_apps (app_key, display_name, integration_level, is_active) S
 INSERT INTO drawing_apps (app_key, display_name, integration_level, is_active) SELECT 'other', 'Other', 1, true WHERE NOT EXISTS (SELECT 1 FROM drawing_apps WHERE app_key = 'other');
 INSERT INTO drawing_apps (app_key, display_name, integration_level, is_active) SELECT 'photoshop', 'Adobe Photoshop', 2, true WHERE NOT EXISTS (SELECT 1 FROM drawing_apps WHERE app_key = 'photoshop');
 INSERT INTO drawing_apps (app_key, display_name, integration_level, is_active) SELECT 'procreate', 'Procreate', 1, true WHERE NOT EXISTS (SELECT 1 FROM drawing_apps WHERE app_key = 'procreate');
+
+-- ===========================================================================
+-- v50: YOUTUBE LIVE FOUNDATION (see server/youtube.js)
+-- One YouTube connection per artist (tokens stored SERVER-SIDE only — they
+-- are never returned by any API), and real broadcasts bound to battles.
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS public.youtube_connections (
+    user_id uuid PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+    channel_id text NOT NULL,
+    channel_title text NOT NULL,
+    channel_thumbnail text,
+    access_token text NOT NULL,
+    refresh_token text,
+    token_expires_at timestamp with time zone,
+    scopes text,
+    status text NOT NULL DEFAULT 'active',
+    connected_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+-- The dump ships without PKs on battles/battle_rooms (the server's boot
+-- migrations add them); make this file self-contained before the FK below.
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                    WHERE conrelid = 'battle_rooms'::regclass AND contype = 'p') THEN
+        ALTER TABLE battle_rooms ADD CONSTRAINT battle_rooms_pkey PRIMARY KEY (id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                    WHERE conrelid = 'battles'::regclass AND contype = 'p') THEN
+        ALTER TABLE battles ADD CONSTRAINT battles_pkey PRIMARY KEY (id);
+    END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS public.youtube_broadcasts (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    room_id uuid REFERENCES public.battle_rooms(id) ON DELETE SET NULL,
+    battle_id uuid REFERENCES public.battles(id) ON DELETE SET NULL,
+    youtube_broadcast_id text NOT NULL UNIQUE,
+    youtube_stream_id text,
+    stream_name text,
+    ingestion_address text,
+    title text NOT NULL,
+    privacy text NOT NULL DEFAULT 'private',
+    scheduled_start timestamp with time zone,
+    watch_url text,
+    last_known_status text NOT NULL DEFAULT 'scheduled',
+    last_synced_at timestamp with time zone,
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_yt_broadcast_per_battle_artist
+    ON public.youtube_broadcasts (battle_id, user_id);

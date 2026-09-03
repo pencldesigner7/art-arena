@@ -625,6 +625,80 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v50 — LIVE foundation + real YouTube integration (public LIVE page, Go Live via YouTube, server-side OAuth/broadcast architecture, pink light streaks)
+
+Client (`server/public/index.html`, v50):
+- **LIVE page** — a real destination in the existing navigation (bottom-nav
+  tab between Arena and Community + a drawer row; config-driven, exactly the
+  two-change integration the codebase was pre-architected for). Two honest
+  sections: **LIVE NOW** (cards: pulsing LIVE dot, artist vs opponent,
+  challenge, ▶ YOUTUBE platform chip, Watch Live → the genuine YouTube watch
+  URL) and **UPCOMING LIVE BATTLES** (real scheduled broadcasts with a live
+  ticking countdown). Empty states use the exact spec copy; nothing is ever
+  invented — no viewer counts, no mock streams. Polled like the rooms list;
+  the countdown ticker is owned by the view (no leaked intervals). Dark +
+  Light + responsive.
+- **GO LIVE VIA YOUTUBE** — the room's old honest "coming soon" button is now
+  the real flow, visible only to ARTISTS of an in-flight battle (hidden for
+  spectators and before a battle exists). The modal has four real states:
+  setup (deployment has no YouTube credentials → a developer setup note, NO
+  connect button — never a fake), connect (Google OAuth entry), prepare
+  (connected: channel identity, stream title, privacy, scheduled start,
+  battle association, broadcast status) and status (existing broadcast).
+- **Light-mode Rising Lines are PINK** — the violet that read grey on white
+  (`#A63CD8` @ 0.26) is now the Art Arena brand pink family (`#FF3CAC` stems,
+  `#FF49B8` horizon, deep-pink cores) at dark-parity opacity (brighter).
+  Battery-verified at pixel level (pink-family hue check).
+
+Server (`server/youtube.js` NEW, `server/server.js`):
+- **Real OAuth architecture** mirroring the proven google-auth.js pattern:
+  PKCE S256 + single-use state (a denial burns it too), offline access +
+  fresh consent (refresh tokens), server-side token exchange, channel
+  identity via YouTube Data API v3, token refresh, revoked/expired grant
+  detection, denial/bad-state/token/network/no-channel/forbidden-scope
+  failure taxonomy with friendly client messages, and return-to-battle
+  deep-linking. **Secrets and tokens never reach the browser** — the client
+  only ever sees channel identity and statuses.
+- **Real broadcast management**: `liveBroadcasts.insert` +
+  `liveStreams.insert` + `liveBroadcasts.bind` on the artist's own channel,
+  one broadcast per battle per artist (enforced), watch URL stored,
+  ingestion keys (stream name/address) stored SERVER-SIDE for the future
+  Stream Studio and deliberately not returned in v50. Status lifecycle maps
+  YouTube's lifeCycleStatus → scheduled / ready-for-video / live / ended /
+  failed; "live" is only advertised on the LIVE page when YouTube genuinely
+  reports it — a stored/unverifiable 'live' row is hidden (battery-verified).
+- **Missing credentials fail clearly and safely**: `/api/youtube/status`
+  reports availability, every OAuth/broadcast endpoint returns a 503 with
+  the exact setup instructions, and the UI shows the honest setup state.
+- **DB** (boot migrations + schema.sql, no existing tables touched):
+  `youtube_connections` (one per artist; tokens server-side only) and
+  `youtube_broadcasts` (battle↔broadcast relationship, statuses, watch URL,
+  ingestion info for Stream Studio).
+- Legal pages updated for the REAL new data handling only (YouTube channel
+  identity + server-side tokens + broadcast metadata; explicitly not
+  claiming video transmission/storage). `/privacy` + `/terms` otherwise
+  untouched and re-verified.
+
+Verified: `e2e/v50-browser` **25/25** (pink streaks pixel check, nav,
+drawer auto-close, exact empty states, zero fake cards, light + 375px
+responsive, real-battle Go Live visibility + honest setup modal, no-fake-
+live guard, real watch URL, OAuth error handoffs logged-out/in, zero page
+errors); YouTube API battery **8/8** (no-creds states) and OAuth battery
+**10/10** against REAL Google endpoints with fake credentials (authorization
+URL generation, offline/PKCE/state params, denial → reason=denied, single-
+use state incl. denial replay, unknown state, real token-exchange rejection,
+no secret leakage, no fake connection). Full sweep: v49 29/29, v48 21/21,
+v47 14/14, v46 41/41, v45 33/33, v44-browser 27/27 (updated for v50
+reality), v44 node 50/50, regress 20/20 — **260/260**. Screenshots:
+`docs/shots-v50/`.
+
+What is implemented vs. what needs the real credentials: the entire
+architecture above is live; connecting a real channel, creating real
+broadcasts and the LIVE page showing genuine streams require
+`GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` (+ the official channel's
+Google Cloud project). Video ingestion (Stream Studio) is future work by
+design.
+
 ## v49 — public legal pages (Privacy Policy + Terms of Service at /privacy and /terms)
 
 Client (`server/public/index.html`, v49):

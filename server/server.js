@@ -646,6 +646,13 @@ app.get('/api/notifications/unread', requireAuth, ah(async (req, res) => {
 }));
 
 app.use('/api/rooms', rooms.router);
+// v50: YouTube LIVE foundation (OAuth + broadcasts) + the LIVE page feed.
+const youtube = require('./youtube');
+app.use('/api/youtube', youtube.router);
+app.get('/api/live', requireAuth, ah(async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(await youtube.liveData());
+}));
 // v35: matchmaking (the "Battle" button) — a real persisted queue that
 // pairs queued artists into real private 1v1 rooms (./matchmaking).
 app.use('/api/matchmaking', matchmaking.router);
@@ -825,6 +832,43 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     ['v44 one active seat per artist (the one-room rule)',
      `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_active_seat_per_user
         ON room_participants (user_id) WHERE state IN ('waiting','ready')`],
+    // v50: YouTube LIVE foundation — one YouTube connection per artist,
+    // broadcasts bound to battles. Tokens live server-side ONLY.
+    ['v50 youtube_connections table',
+     `CREATE TABLE IF NOT EXISTS youtube_connections (
+          user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          channel_id text NOT NULL,
+          channel_title text NOT NULL,
+          channel_thumbnail text,
+          access_token text NOT NULL,
+          refresh_token text,
+          token_expires_at timestamptz,
+          scopes text,
+          status text NOT NULL DEFAULT 'active',
+          connected_at timestamptz NOT NULL DEFAULT now(),
+          updated_at timestamptz NOT NULL DEFAULT now()
+        )`],
+    ['v50 youtube_broadcasts table',
+     `CREATE TABLE IF NOT EXISTS youtube_broadcasts (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          room_id uuid REFERENCES battle_rooms(id) ON DELETE SET NULL,
+          battle_id uuid REFERENCES battles(id) ON DELETE SET NULL,
+          youtube_broadcast_id text NOT NULL UNIQUE,
+          youtube_stream_id text,
+          stream_name text,
+          ingestion_address text,
+          title text NOT NULL,
+          privacy text NOT NULL DEFAULT 'private',
+          scheduled_start timestamptz,
+          watch_url text,
+          last_known_status text NOT NULL DEFAULT 'scheduled',
+          last_synced_at timestamptz,
+          created_at timestamptz NOT NULL DEFAULT now()
+        )`],
+    ['v50 one broadcast per battle per artist',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_yt_broadcast_per_battle_artist
+        ON youtube_broadcasts (battle_id, user_id)`],
   ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {
