@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="50">
+<meta name="aa-ui-version" content="51">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -265,6 +265,27 @@ try {
   .glv-note { font-size:12.5px; color:var(--muted); margin:8px 0 0; }
   .glv-setup { font-size:13.5px; background:var(--surface); border:1px dashed var(--line); border-radius:8px; padding:10px 12px; margin:10px 0 0; }
   .glv-status { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; letter-spacing:1px; padding:3px 10px; border-radius:999px; border:1px solid var(--btn-line); }
+  /* v51: notifications history, room context menu, profile modal, kick confirm. */
+  .notif-list { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .notif-item { display:flex; gap:10px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 13px; font-size:14px; }
+  .notif-item.unread { border-color:var(--pink); box-shadow:0 0 0 1px rgba(255,60,172,.28); }
+  .notif-ico { flex:0 0 auto; width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(255,60,172,.2), rgba(123,44,255,.25)); color:var(--pink); }
+  .notif-body { flex:1; min-width:0; }
+  .notif-when { font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .notif-actions { display:flex; gap:8px; margin-top:8px; }
+  .notif-actions button { margin:0; padding:7px 14px; font-size:13px; }
+  .room-ctxmenu { position:fixed; z-index:120; background:var(--panel); border:1px solid var(--line); border-radius:10px; box-shadow:0 14px 40px rgba(0,0,0,.5); min-width:190px; overflow:hidden; }
+  .room-ctxmenu button { display:flex; width:100%; margin:0; border-radius:0; padding:11px 14px; font-size:14px; font-weight:600; text-align:left; background:none; color:var(--text); }
+  .room-ctxmenu button:hover { filter:none; background:var(--surface-hover); }
+  .room-ctxmenu button.danger { color:var(--danger-tx); }
+  .prof-modal-ava { width:64px; height:64px; border-radius:50%; object-fit:cover; border:2px solid var(--pink); background:var(--surface-2); }
+  .prof-modal-ava-fallback { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:24px; color:#fff; background:linear-gradient(135deg,var(--pink),var(--purple)); }
+  .prof-stats-row { display:flex; gap:8px; margin-top:12px; }
+  .prof-stat-cell { flex:1; text-align:center; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 4px; }
+  .prof-stat-cell b { display:block; font-size:17px; }
+  .prof-stat-cell span { font-size:10.5px; color:var(--muted); letter-spacing:.5px; }
+  #countdown-num.go { font-size:clamp(64px, 20vw, 150px); }
+  .rm-expiry { font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--muted); margin-top:3px; }
   .field { position:relative; border-radius:12px; border:1px solid transparent; background:linear-gradient(var(--surface),var(--surface)) padding-box, linear-gradient(90deg, rgba(255,60,172,.75), rgba(123,44,255,.75)) border-box; transition:box-shadow .45s ease, transform .25s ease; }
   .field input { margin-top:0; padding:13px 44px 13px 42px; background:transparent; border:0; border-radius:0; }
   .field input:focus { border-color:transparent; }
@@ -375,12 +396,16 @@ try {
   header .top-brand { justify-self:center; }
   header #btn-notif { justify-self:end; }
   /* v39: the bell takes the brand pink — visual only, states unchanged */
-  #btn-notif { color:var(--pink); }
+  #btn-notif { color:var(--pink); position:relative; }
+  /* v51: unread badge + attention shake (stops on its own after ~2.4 s). */
+  #notif-badge { position:absolute; top:2px; right:2px; min-width:16px; height:16px; padding:0 4px; border-radius:999px; background:linear-gradient(90deg,var(--pink),var(--purple)); color:#fff; font-size:10px; font-weight:800; display:none; align-items:center; justify-content:center; line-height:16px; box-shadow:0 0 0 2px var(--panel); }
+  #notif-badge.on { display:inline-flex; }
+  @keyframes bell-shake { 0%,100% { transform:rotate(0); } 15% { transform:rotate(-14deg); } 30% { transform:rotate(12deg); } 45% { transform:rotate(-10deg); } 60% { transform:rotate(8deg); } 75% { transform:rotate(-5deg); } 90% { transform:rotate(3deg); } }
+  #btn-notif.bell-shake { animation:bell-shake 1.1s ease-in-out 2; transform-origin:top center; }
   #btn-notif:hover { color:#ff86d6; background:rgba(255,60,172,.14); }
   .icon-btn { position:relative; margin:0; background:none; border:0; padding:7px; color:var(--muted); border-radius:10px; display:inline-flex; cursor:pointer; }
   .icon-btn:hover { color:var(--text); filter:none; background:rgba(123,44,255,.14); }
   .icon-btn svg { display:block; }
-  .notif-dot { position:absolute; top:5px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--pink); box-shadow:0 0 7px rgba(255,60,172,.9); }
   /* --- slide-in menu (hamburger drawer) --- */
   .drawer-backdrop { position:fixed; inset:0; z-index:90; background:var(--scrim-soft); opacity:0; transition:opacity .26s ease; }
   .drawer-backdrop.open { opacity:1; }
@@ -409,6 +434,12 @@ try {
      directly under the main navigation, separated by a divider + spacing
      (not just another nav row; no dead space between nav and logout). */
   .drawer-logout-zone { width:100%; display:flex; flex-direction:column; gap:12px; margin-top:12px; flex:0 0 auto; }
+  /* v51 layout fix: the drawer is a fixed-height flex column and the nav
+     grew (LIVE row) — without a scrollable, min-height:0 middle the logout
+     zone was pushed below the fold on short viewports with no way to reach
+     it. The nav now takes the remaining space and SCROLLS; Log Out stays
+     pinned at the bottom, always visible and clickable. */
+  #drawer-nav { flex:1 1 auto; min-height:0; overflow-y:auto; scrollbar-width:thin; overscroll-behavior:contain; }
   .drawer-logout-zone .drawer-divider { margin:0 4px; }
   .drawer-logout { justify-content:center; padding:12px; border-radius:12px; background:rgba(255,60,172,.06); font-size:14px; letter-spacing:.5px; }
   .drawer-logout:hover { filter:none; background:rgba(255,60,172,.16); }
@@ -433,7 +464,10 @@ try {
      Light Mode; no mask/outline system (removed in v48). */
   #home-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); display:none; }
   #home-bg.on { display:block; }
-  #view-arena > *:not(#home-bg) { position:relative; z-index:1; }
+  /* v51: the ambient Rising Lines layer is APP-WIDE — #home-bg now lives at
+     body level (outside any view) and the main element lifts every view's
+     content above it. Settings stays clean: show() never turns it on there. */
+  main { position:relative; z-index:1; }
   .home-logo { margin:14px 0 0; display:flex; justify-content:center; }
   .home-logo img { width:min(352px,100%); height:auto; display:block; }
   .home-tagline { margin:20px 0 28px; }
@@ -605,11 +639,11 @@ try {
     </button>
   </div>
   <div class="brand top-brand"><img id="top-logo" src="/logo.png" alt="Art Arena" height="26"></div>
-  <button type="button" id="btn-notif" class="icon-btn" aria-label="Notifications">
+  <button type="button" id="btn-notif" class="icon-btn" aria-label="Notifications"><span id="notif-badge" aria-hidden="true"></span>
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>
-    <span class="notif-dot hidden" id="notif-dot"></span>
   </button>
 </header>
+<div id="home-bg" aria-hidden="true"></div><!-- v51: app-wide ambient layer (body level) -->
 <main>
 
   <!-- ============================== LOGIN ============================== -->
@@ -863,7 +897,8 @@ try {
        three action cards, LIVE BATTLES strip. App shell: hamburger + bell
        top bar, drawer menu, SVG bottom nav. -->
   <section id="view-arena" class="view home-view hidden">
-    <div id="home-bg" aria-hidden="true"></div>
+    <!-- v51: the home-bg layer moved to body level — the ambient animation
+         is app-wide now, not homepage-only. -->
     <div class="home-logo"><img src="/logo.png" alt="Art Arena" width="352" height="145"></div>
     <div class="auth-tagline home-tagline">WELCOME TO THE <span>ARENA.</span></div>
 
@@ -925,10 +960,10 @@ try {
   <!-- v38 (dashboard reference): real drawer destination. The bell in the top
        bar is live (real unread count) — the full feed is an upcoming phase. -->
   <section id="view-notifications" class="view dest hidden">
-    <div class="dest-ico"><svg class="ic ic-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
-    <h1>Notifications</h1>
-    <p class="muted dest-desc">Invitations, results, and everything that happens while you are away.</p>
-    <span class="badge next">COMING SOON</span>
+    <h1>NOTIFICATIONS</h1>
+    <p class="muted" style="margin:0 0 6px; font-size:13.5px">The last 24 hours — older messages expire automatically.</p>
+    <div id="notif-list" class="notif-list"></div>
+    <div id="notif-empty" class="live-empty hidden"><b>No notifications yet</b><span>Friend requests and activity will appear here.</span></div>
   </section>
 
   <!-- ============================= HELP ============================= -->
@@ -1137,7 +1172,7 @@ try {
       <!-- v44 (Go Live): honest coming-soon entry point. It lives in the
            battle UI where a livestream would start — but it is a
            placeholder, NOT streaming: no LIVE tab, no video infra yet. -->
-      <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M7.4 7.4a6.5 6.5 0 0 0 0 9.2M16.6 16.6a6.5 6.5 0 0 0 0-9.2M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></svg> GO LIVE VIA YOUTUBE</button>
+      <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="#FF0000" d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.54 12 3.54 12 3.54s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg> GO LIVE VIA YOUTUBE</button>
     </div>
 
     <!-- v44: post-battle panel — the honest outcome + the two things an
@@ -1148,11 +1183,13 @@ try {
       <div class="muted" id="pb-detail" style="margin-top:6px; font-size:13px"></div>
       <div id="pb-rematch" class="hidden" style="margin-top:12px">
         <div id="pb-rematch-state" style="font-weight:700; font-size:14px"></div>
+        <div id="rm-expiry-line" class="rm-expiry hidden"></div>
         <div class="row2" style="margin-top:8px">
           <button type="button" id="btn-rematch-request" class="hidden" style="width:100%">Request Rematch</button>
           <button type="button" id="btn-rematch-accept" class="hidden" style="width:100%">Accept Rematch</button>
           <button type="button" id="btn-rematch-decline" class="secondary hidden" style="width:100%">Decline</button>
           <button type="button" id="btn-rematch-cancel" class="secondary hidden" style="width:100%">Cancel request</button>
+        <button type="button" id="btn-edit-room" class="secondary hidden" style="width:100%">⚙ Edit Room</button>
         </div>
       </div>
       <button type="button" id="btn-leave-ended" class="danger" style="width:100%; margin-top:12px">LEAVE CURRENT ROOM</button>
@@ -1378,6 +1415,29 @@ try {
       </div>
     </div>
   </div>
+  <!-- ============ v51: user profile modal (room menu → View Profile) ======
+       LIVE data from /api/users/:id/profile — never a snapshot. -->
+  <div id="profile-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="pm-title" style="width:min(400px,100%)">
+      <h3 id="pm-title">ARTIST</h3>
+      <div id="pm-body"></div>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="pm-close">Close</button>
+        <button type="button" id="pm-friend" style="flex:1"></button>
+      </div>
+    </div>
+  </div>
+  <!-- v51: kick confirmation (owner moderation — never accidental) -->
+  <div id="kick-confirm-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="kc-title">
+      <h3 id="kc-title">Kick artist?</h3>
+      <p class="muted" id="kc-text" style="margin:6px 0 0; font-size:14px"></p>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="kc-cancel">Cancel</button>
+        <button type="button" id="kc-confirm" class="danger" style="flex:1">Kick</button>
+      </div>
+    </div>
+  </div>
   <!-- ============ v50: GO LIVE VIA YOUTUBE modal ==========================
        States: setup (no credentials on this deployment) / connect (OAuth
        entry) / prepare (connected: real broadcast form) / status (existing
@@ -1426,7 +1486,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v50</span>
+  <span id="ui-version-badge">v51</span>
 
 <script>
 'use strict';
@@ -1596,6 +1656,10 @@ function startCountdownOverlay(endsAt, battleId) {
   $('#countdown-label').textContent = 'Challenge locked — get ready';
   const numEl = $('#countdown-num');
   numEl.classList.remove('draw');
+  // v51 (clean countdown): any open picker/confirm goes away NOW — the
+  // player's focus belongs to 3-2-1-GO, nothing else.
+  try { canvasModal.close(); } catch (_) {}
+  try { readyConfirm.close(); } catch (_) {}
   countdownTick();
 }
 function stopCountdownOverlay(keepFlash) {
@@ -1605,28 +1669,30 @@ function stopCountdownOverlay(keepFlash) {
 }
 function countdownTick() {
   if (!countdownTarget) return;
-  const remainMs = countdownTarget.endsAt - Date.now();
+  const remainMs = countdownTarget.endsAt - serverNow(); // v51: SERVER time
   const numEl = $('#countdown-num');
   if (remainMs <= 0) {
     if (!countdownTarget.flashing) {
-      // "DRAW!" flash — the overlay clears itself shortly after; the
-      // 'active' state (and the battle clock) renders from the payload the
-      // 'battle_active' event + poll deliver.
+      // v51: "GO!" — the number sequence is 3 → 2 → 1 → GO! The overlay
+      // clears itself the moment the room payload says 'active' (the server
+      // flipped it at exactly countdown_ends_at), with a short fallback.
       countdownTarget.flashing = true;
-      numEl.textContent = 'DRAW!';
-      numEl.classList.add('draw');
+      numEl.textContent = 'GO!';
+      numEl.classList.remove('draw');
+      numEl.classList.add('go');
       numEl.style.animation = 'none';
       void numEl.offsetWidth; // restart the pop animation
       numEl.style.animation = '';
       setTimeout(() => {
         if (countdownTarget && countdownTarget.flashing) stopCountdownOverlay();
-      }, 700);
+      }, 900);
     }
     return;
   }
   const n = Math.min(3, Math.max(1, Math.ceil(remainMs / 1000)));
   if (numEl.textContent !== String(n)) {
     numEl.textContent = String(n);
+    numEl.classList.remove('go');
     numEl.style.animation = 'none';
     void numEl.offsetWidth;
     numEl.style.animation = '';
@@ -1782,12 +1848,16 @@ function show(name) {
   else if (name === 'account') refreshAccount(); // v34: profile card is always fresh
   else if (name === 'settings') refreshAccount(); // v45: settings form always reflects the server
   else if (name === 'about') paintAbout(); // v38: About shows the real version
+  else if (name === 'notifications') loadNotifications(); // v51: real history
   window.scrollTo(0, 0);
   rtSyncSubscriptions();
   // v38: any route into an auth view also closes the drawer (defense in
   // depth — the dashboard chrome can never linger beside the login page).
   if (AUTH_BG_VIEWS.includes(name)) { closeDrawer(); startLoginBg(); stopHomeBg(); }
-  else { stopLoginBg(); if (name === 'arena' && sessionToken) startHomeBg(); else stopHomeBg(); }
+  // v51: the ambient Rising Lines layer runs across the WHOLE app (one
+  // canvas, no rebuilds on view switches) — everywhere except Settings,
+  // which stays clean and distraction-free by request.
+  else { stopLoginBg(); if (sessionToken && name !== 'settings') startHomeBg(); else stopHomeBg(); }
 }
 
 async function api(path, body, method) {
@@ -2266,7 +2336,15 @@ async function refreshRoomsList() {
   }
 }
 
+// v51: SERVER CLOCK — every room payload carries server_now; the client
+// measures its own skew once per fetch and derives ALL server-timestamp
+// rendering (countdown, battle clock) from server time. A wrong local clock
+// can no longer freeze or skip the 3-2-1.
+let serverClockSkewMs = 0;
+const serverNow = () => Date.now() + serverClockSkewMs;
+
 function renderRoom(d) {
+  if (d.server_now) serverClockSkewMs = new Date(d.server_now).getTime() - Date.now(); // v51
   lastRoomData = d; // v33: remembered for the canvas step's pre-selection
   roomRenderKey = currentRoomCode + ':' + JSON.stringify(d);
   $('#room-code').textContent = d.name || ('ROOM #' + d.code); // named rooms show their name
@@ -2277,7 +2355,7 @@ function renderRoom(d) {
   for (let i = 1; i <= d.max_players; i++) {
     const p = d.players.find((x) => x.seat === i);
     seats.push(p
-      ? '<div class="seat"><span>' + i + '. ' + (p.is_host ? IC.crown + ' ' : '') + '@' + esc(p.username) +
+      ? '<div class="seat" data-uid="' + esc(p.user_id) + '" data-username="' + esc(p.username) + '" data-ishost="' + (p.is_host ? '1' : '') + '"><span>' + i + '. ' + (p.is_host ? IC.crown + ' ' : '') + '@' + esc(p.username) +
         (p.is_you ? ' <span class="muted">(you)</span>' : '') + '</span>' +
         '<span style="display:flex; gap:6px; align-items:center;">' +
         // v33: canvas chip — which drawing app this artist picked for the battle
@@ -2379,9 +2457,9 @@ function renderRoom(d) {
     // v36: the full-screen 3-2-1 countdown, synced to the server's
     // countdown_ends_at (startCountdownOverlay below).
     if (d.battle.status === 'countdown' && d.battle.countdown_ends_at) {
-      startCountdownOverlay(new Date(d.battle.countdown_ends_at).getTime(), d.battle.id);
+      startCountdownOverlay(new Date(d.battle.countdown_ends_at).getTime(), 'cd-' + d.battle.countdown_ends_at);
     } else if (d.battle.status === 'active' && countdownTarget && countdownTarget.flashing) {
-      /* let the DRAW! flash finish */
+      /* let the GO! flash finish (short by design) */
     } else {
       stopCountdownOverlay();
     }
@@ -2437,6 +2515,16 @@ function renderRoom(d) {
     const iAmTarget = !!(pending && me && pending.to_username.toLowerCase() === me.username.toLowerCase());
     const rematchable = d.battle.status === 'complete' && opp;
     rm.classList.toggle('hidden', !rematchable);
+    // v51: the 2-minute window, straight from the server (requested_at) —
+    // the expiry itself is enforced server-side; this is display only.
+    const expiryEl = $('#rm-expiry-line');
+    if (rematchable && pending && pending.requested_at) {
+      expiryEl.classList.remove('hidden');
+      expiryEl.dataset.expires = new Date(new Date(pending.requested_at).getTime() + 2 * 60 * 1000).toISOString();
+    } else expiryEl.classList.add('hidden');
+    // v51: the owner gets Edit Room here (settings apply to the rematch).
+    const roomOwner = !!(d.host && me && d.host.user_id === me.id); // seats are released at completion — meInRoom is gone post-battle
+    $('#btn-edit-room').classList.toggle('hidden', !(rematchable && roomOwner));
     if (rematchable) {
       const fromName = pending ? (pending.from_display_name || '@' + pending.from_username) : null;
       $('#pb-rematch-state').innerHTML =
@@ -2448,16 +2536,19 @@ function renderRoom(d) {
       $('#btn-rematch-decline').classList.toggle('hidden', !iAmTarget);
       $('#btn-rematch-cancel').classList.toggle('hidden', !iAmSender);
     }
-    // LEAVE CURRENT ROOM: offered once the battle is over (the server's
-    // /leave is idempotent for released seats — it just navigates us out).
+    // v51 (spec 9): once the battle is over the OWNER sees CLOSE ROOM (the
+    // room ends for everyone, server-side release) — players keep LEAVE.
     $('#btn-leave-ended').classList.toggle('hidden', false);
+    $('#btn-leave-ended').textContent = roomOwner ? 'CLOSE ROOM' : 'LEAVE CURRENT ROOM';
+    $('#btn-leave-ended').dataset.owner = roomOwner ? '1' : '';
   } else {
     pb.classList.add('hidden');
   }
 
-  // ---------- v44 (item 5): Go Live — only while a battle is running ----------
-  // v50: Go Live is for ARTISTS (players) of a real, in-flight battle.
-  $('#btn-go-live').classList.toggle('hidden', !(d.battle && ['challenge_locked','countdown','active','time_expired'].includes(d.battle.status) && isPlayer));
+  // ---------- v51 (spec 1): GO LIVE — ROOM OWNER ONLY, PRE-MATCH ----------
+  // The button lives in the lobby (before the match starts); once the battle
+  // begins it disappears — stream management happened pre-match by design.
+  $('#btn-go-live').classList.toggle('hidden', !(isHost && d.status === 'lobby'));
 
   const canStart = isHost && isInLobby && d.player_count === d.max_players;
   $('#btn-start').classList.toggle('hidden', !canStart);
@@ -2636,10 +2727,12 @@ $('#btn-ready').addEventListener('click', () => {
 $('#btn-leave-ended').addEventListener('click', async () => {
   const code = currentRoomCode;
   if (!code || roomLeaveBusy) return;
+  const asOwner = $('#btn-leave-ended').dataset.owner === '1'; // v51: Close Room
   roomLeaveBusy = true;
   try {
-    await api('/api/rooms/' + code + '/leave', {});
-    toast('You left the room. Your battle history is saved.');
+    if (asOwner) await api('/api/rooms/' + code + '/close', {});
+    else await api('/api/rooms/' + code + '/leave', {});
+    toast(asOwner ? 'Room closed. Battle history is saved.' : 'You left the room. Your battle history is saved.');
     currentRoomCode = null;
     stopPolling();
     show('rooms');
@@ -2753,11 +2846,14 @@ function rtToastText(ev) {
     case 'spectate_left': return '📺 ' + who + ' stopped spectating';
     case 'canvas':           return '🖌 ' + who + ' switched canvas to ' + (canvasAppName(ev.drawing_app_key) || ev.drawing_app_key);
     case 'settings':         return ev.what === 'challenge elements' ? '⚙️ Challenge elements updated' : '⚙️ Room settings updated';
-    case 'challenge_locked': return '🎲 Challenge locked!';
+    case 'challenge_locked': return null; // v51: the countdown overlay is the message
     case 'host_transferred': return '👑 ' + who + ' is now the host';
-    case 'started':          return '🚀 The battle has started!';
-    case 'countdown':        return '⏱ 3… 2… 1… the countdown is on!';
-    case 'battle_active':    return '🎨 The battle is LIVE — good luck!';
+    // v51 (clean countdown): the start sequence is visual ONLY — the
+    // countdown overlay IS the notification. No decorative toasts compete
+    // with 3-2-1-GO (errors and safety messages are unaffected).
+    case 'started':          return null; // the 3-2-1 overlay covers this
+    case 'countdown':        return null; // the countdown IS the message
+    case 'battle_active':    return null; // GO! + the battle clock cover this
     case 'battle_ended':      return '🏁 The battle has ended — see the result!';
     case 'rematch_requested': return '⚔️ ' + who + ' requested a rematch';
     case 'rematch_accepted':  return '⚔️ Rematch on! A new battle is starting';
@@ -2786,18 +2882,63 @@ function rtHandle(msg) {
     if (currentView === 'rooms' || currentView === 'arena') refreshRoomsList();
     return;
   }
+  // v51: a notification arrived for THIS user (friend request, …) — badge +
+  // bell shake + refresh the open Notifications view. Push notifications
+  // never interrupt a countdown: the shake is silent and self-stopping.
+  if (msg.type === 'notification') {
+    onNotificationPush(msg.notification);
+    return;
+  }
+  // v51: kicked from a room (server-side removal) — leave instantly with a
+  // gentle explanation, never a dead room view.
+  if (msg.type === 'room.kicked') {
+    if (currentRoomCode === msg.code || !currentRoomCode) {
+      currentRoomCode = null;
+      stopPolling();
+      show('arena');
+    }
+    toast('You were removed from the room by the host.');
+    return;
+  }
   if (msg.type !== 'room.event' || !msg.event) return;
   if (msg.room !== currentRoomCode) return;
   const ev = msg.event;
-  if (me && ev.username && ev.username.toLowerCase() === me.username.toLowerCase()) return;
-  // Your own action already re-rendered the room via the REST response.
-  if (ev.action === 'closed' || ev.action === 'deleted' || ev.action === 'archived') {
-    toast(rtToastText(ev));
+  if (me && ev.username && ev.username.toLowerCase() === me.username.toLowerCase()
+      && ev.action !== 'kicked') return; // (a kick names you — handle it below)
+  // v51: the room kicks you server-side — same graceful exit for the KICKED
+  // player, while everyone else just sees the room shrink.
+  if (ev.action === 'kicked' && me && ev.user_id === me.id) {
     currentRoomCode = null;
-    show('rooms'); // startPolling fetches immediately
+    stopPolling();
+    show('arena');
+    toast('You were removed from the room by the host.');
     return;
   }
-  toast(rtToastText(ev));
+  // Your own action already re-rendered the room via the REST response.
+  if (ev.action === 'closed' || ev.action === 'deleted' || ev.action === 'archived') {
+    currentRoomCode = null;
+    stopPolling();
+    show('rooms'); // startPolling fetches immediately
+    toast(rtToastText(ev));
+    return;
+  }
+  // v51: start the 3-2-1 from the EVENT's server timestamp — waiting for the
+  // next poll could eat half the countdown. (No toast: quiet mode.)
+  if (ev.action === 'countdown' && ev.countdown_ends_at) {
+    startCountdownOverlay(new Date(ev.countdown_ends_at).getTime(), 'cd-' + ev.countdown_ends_at);
+    return;
+  }
+  if (ev.action === 'rematch_expired') { refreshRoom(); toast('The rematch request expired.'); return; }
+  // v51 quiet mode: while the countdown overlay is up (or the battle is in
+  // countdown), decorative room toasts are suppressed — errors still pass.
+  const inCountdown = !!countdownTarget ||
+    (lastRoomData && lastRoomData.battle && ['challenge_locked', 'countdown'].includes(lastRoomData.battle.status));
+  if (inCountdown && ['started', 'challenge_locked', 'canvas', 'ready', 'unready', 'joined', 'rejoined', 'left'].includes(ev.action)) {
+    refreshRoom();
+    return;
+  }
+  const text = rtToastText(ev);
+  if (text) toast(text);
   refreshRoom();
 }
 
@@ -2868,7 +3009,9 @@ function rtConnect() {
   ws.onmessage = (m) => {
     let parsed;
     try { parsed = JSON.parse(m.data); } catch (_) { return; }
-    if (parsed && (parsed.type === 'error' || parsed.type === 'room.event' || parsed.type === 'rooms.list' || parsed.type === 'matchmaking')) rtHandle(parsed);
+    // v51: direct user messages (notifications, room.kicked) are routed too —
+    // the dispatcher used to whitelist only the room/list feeds.
+    if (parsed && (parsed.type === 'error' || parsed.type === 'room.event' || parsed.type === 'rooms.list' || parsed.type === 'matchmaking' || parsed.type === 'notification' || parsed.type === 'room.kicked')) rtHandle(parsed);
   };
   ws.onclose = () => {
     if (rt.ws === ws) rt.ws = null;
@@ -3912,33 +4055,12 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawe
 // v45: Settings is a real view — the generic [data-view] routing (below)
 // handles the drawer's Settings button; no special case needed.
 
-// v38: the red dot reflects REAL unread data only (the notifications
-// table) — zero unread = no dot, never a fake/demo indicator.
-let unreadNotifs = 0;
-let notifDotTimer = null;
-async function updateNotifDot() {
-  try {
-    const d = await api('/api/notifications/unread');
-    unreadNotifs = d.unread || 0;
-  } catch (_) { /* offline / logged out — dot stays as last known state */ return; }
-  $('#notif-dot').classList.toggle('hidden', unreadNotifs === 0);
-}
-function startNotifDotPolling() {
-  if (notifDotTimer) clearInterval(notifDotTimer);
-  updateNotifDot();
-  notifDotTimer = setInterval(updateNotifDot, 30000);
-}
-function stopNotifDotPolling() {
-  if (notifDotTimer) { clearInterval(notifDotTimer); notifDotTimer = null; }
-  unreadNotifs = 0;
-  const dot = $('#notif-dot');
-  if (dot) dot.classList.add('hidden');
-}
-$('#btn-notif').addEventListener('click', () => {
-  toast(unreadNotifs > 0
-    ? '🔔 ' + unreadNotifs + ' unread — the notification feed arrives in an upcoming update.'
-    : '🔔 All caught up — no new notifications yet.');
-});
+// v38→v51: the red dot grew up — the SAME real-unread data now feeds the
+// badge COUNT on the bell (plus shake-on-new). These shims keep the old
+// call sites; the implementation is the v51 engine above.
+function startNotifDotPolling() { pingUnread(); }
+function stopNotifDotPolling() { paintNotifBadge(0); lastUnread = 0; }
+$('#btn-notif').addEventListener('click', () => show('notifications')); // v51: the real feed
 
 // --------------------------------- login -----------------------------------
 $('#form-login').addEventListener('submit', async (e) => {
@@ -4196,6 +4318,207 @@ window.__aaGoogleHandoff = null;
     }
   })();
 })();
+
+// ============ v51: NOTIFICATIONS · FRIENDS · ROOM OWNER MENU ================
+// Real history (24 h, server-expired), a live unread badge, a self-stopping
+// bell shake, the friend backend's UI surface, and the room owner's context
+// menu (View Profile / Kick) — desktop double-click, mobile long-press.
+
+// ---------------------------- the bell --------------------------------------
+let lastUnread = 0;
+function paintNotifBadge(n) {
+  const b = $('#notif-badge');
+  if (!b) return;
+  b.textContent = n > 9 ? '9+' : String(n);
+  b.classList.toggle('on', n > 0);
+}
+async function pingUnread() {
+  try {
+    const d = await api('/api/notifications/unread');
+    if (d.unread > lastUnread) bellShake();
+    lastUnread = d.unread;
+    paintNotifBadge(d.unread);
+  } catch (_) {}
+}
+function bellShake() {
+  const b = $('#btn-notif');
+  if (!b) return;
+  b.classList.remove('bell-shake');
+  void b.offsetWidth;
+  b.classList.add('bell-shake'); // 2 × 1.1 s — attention, then STILL (by spec)
+  setTimeout(() => b.classList.remove('bell-shake'), 2400);
+}
+function onNotificationPush() {
+  pingUnread();
+  if (currentView === 'notifications') loadNotifications();
+}
+setInterval(pingUnread, 30000); // catches missed pushes (reconnects, sleep)
+
+// ------------------------ notifications view ---------------------------------
+const NOTIF_TEXT = {
+  friend_request: (p) => (p.display_name || '@' + p.username) + ' wants to be your friend.',
+  friend_accepted: (p) => (p.display_name || '@' + p.username) + ' accepted your friend request — you are now friends!',
+  battle_invitation: (p) => 'Battle invitation.', room_invitation: (p) => 'Room invitation.',
+  message: (p) => 'New message.', livestream_start: (p) => 'A livestream is starting.',
+};
+function notifWhen(iso) {
+  const s = Math.max(0, Math.floor((serverNow() - new Date(iso).getTime()) / 1000));
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago';
+}
+async function loadNotifications() {
+  let d = null;
+  try { d = await api('/api/notifications'); } catch (e) { return; }
+  lastUnread = d.unread; paintNotifBadge(d.unread);
+  const list = $('#notif-list'), empty = $('#notif-empty');
+  list.innerHTML = (d.notifications || []).map((n) => {
+    const txt = (NOTIF_TEXT[n.type] || (() => n.type.replace(/_/g, ' ')))(n.payload || {});
+    const isReq = n.type === 'friend_request' && n.payload && n.payload.request_id;
+    return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '">' +
+      '<span class="notif-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      (n.type.startsWith('friend') ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
+      '</svg></span>' +
+      '<div class="notif-body"><div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
+      (isReq ? '<div class="notif-actions"><button type="button" data-fr-accept="' + esc(n.payload.request_id) + '">Accept</button><button type="button" class="secondary" data-fr-decline="' + esc(n.payload.request_id) + '">Decline</button></div>' : '') +
+      '</div></div>';
+  }).join('');
+  empty.classList.toggle('hidden', (d.notifications || []).length > 0);
+  // Opening the panel marks items READ but never deletes them — they stay
+  // listed (unread highlight off) until the server expires them at 24 h.
+  if (d.unread > 0) { try { await api('/api/notifications/read', {}, 'POST'); lastUnread = 0; paintNotifBadge(0); } catch (_) {} }
+}
+$('#notif-list').addEventListener('click', async (e) => {
+  const acc = e.target.closest('[data-fr-accept]');
+  const dec = e.target.closest('[data-fr-decline]');
+  if (!acc && !dec) return;
+  const id = (acc || dec).dataset[acc ? 'frAccept' : 'frDecline'];
+  try {
+    if (acc) { await api('/api/friends/requests/' + id + '/accept', {}, 'POST'); toast('You are now friends! 🤝'); }
+    else { await api('/api/friends/requests/' + id + '/decline', {}, 'POST'); toast('Friend request declined.'); }
+  } catch (err) { toast(err.message); }
+  loadNotifications();
+});
+
+// ------------------------ profile modal + friends ----------------------------
+let pmUserId = null;
+function modalOpen(id) { const b = $(id); b.classList.remove('hidden'); requestAnimationFrame(() => b.classList.add('open')); }
+function modalClose(id) { const b = $(id); b.classList.remove('open'); setTimeout(() => b.classList.add('hidden'), 260); }
+$('#pm-close').addEventListener('click', () => modalClose('#profile-modal'));
+$('#profile-modal').addEventListener('click', (e) => { if (e.target.id === 'profile-modal') modalClose('#profile-modal'); });
+
+async function openProfile(userId) {
+  pmUserId = userId;
+  $('#pm-body').innerHTML = '<p class="muted" style="margin:10px 0 0">Loading profile…</p>';
+  $('#pm-friend').textContent = '';
+  $('#pm-friend').dataset.mode = '';
+  modalOpen('#profile-modal');
+  let d = null, fr = null;
+  try {
+    [d, fr] = await Promise.all([api('/api/users/' + userId + '/profile'), api('/api/friends')]);
+  } catch (err) { $('#pm-body').innerHTML = '<p class="muted" style="margin:10px 0 0">' + esc(err.message) + '</p>'; return; }
+  if (pmUserId !== userId) return; // switched target mid-load
+  const u = d.user, st = d.statistics;
+  const isMe = me && me.id === userId;
+  const isFriend = (fr.friends || []).some((f) => f.id === userId);
+  const iSent = (fr.outgoing || []).some((r) => r.user_id === userId);
+  const theySent = (fr.incoming || []).some((r) => r.user_id === userId);
+  $('#pm-body').innerHTML =
+    '<div style="display:flex; align-items:center; gap:12px; margin:8px 0 2px">' +
+    (u.avatar_url ? '<img class="prof-modal-ava" src="' + esc(u.avatar_url) + '" alt="">' : '<span class="prof-modal-ava-fallback">' + esc((u.display_name || u.username || '?').charAt(0).toUpperCase()) + '</span>') +
+    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + '</div>' +
+    '<div class="muted" style="font-size:13px">@' + esc(u.username) + '</div></div></div>' +
+    (u.bio ? '<p class="muted" style="margin:10px 0 0; font-size:13.5px">' + esc(u.bio) + '</p>' : '') +
+    '<div class="prof-stats-row">' +
+    '<div class="prof-stat-cell"><b>' + st.battles_played + '</b><span>BATTLES</span></div>' +
+    '<div class="prof-stat-cell"><b>' + st.wins + '</b><span>WINS</span></div>' +
+    '<div class="prof-stat-cell"><b>' + st.losses + '</b><span>LOSSES</span></div>' +
+    '<div class="prof-stat-cell"><b>' + st.draws + '</b><span>DRAWS</span></div></div>' +
+    (u.joined_at ? '<p class="muted" style="font-size:11.5px; margin:10px 0 0">Joined ' + new Date(u.joined_at).toLocaleDateString() + '</p>' : '');
+  const btn = $('#pm-friend');
+  if (isMe) { btn.textContent = 'This is you'; btn.dataset.mode = 'none'; btn.disabled = true; }
+  else if (isFriend) { btn.textContent = '✓ Friends'; btn.dataset.mode = 'friends'; btn.disabled = false; }
+  else if (iSent) { btn.textContent = 'Request sent'; btn.dataset.mode = 'sent'; btn.disabled = false; }
+  else if (theySent) { btn.textContent = 'Accept request'; btn.dataset.mode = 'accept'; btn.disabled = false; }
+  else { btn.textContent = '+ Add Friend'; btn.dataset.mode = 'add'; btn.disabled = false; }
+}
+$('#pm-friend').addEventListener('click', async () => {
+  const mode = $('#pm-friend').dataset.mode, id = pmUserId;
+  if (!mode || mode === 'none' || !id) return;
+  try {
+    if (mode === 'add' || mode === 'sent') { await api('/api/friends/request', { user_id: id }, 'POST'); toast(mode === 'add' ? 'Friend request sent.' : 'Request already pending.'); }
+    else if (mode === 'accept') { const fr = await api('/api/friends'); const r = (fr.incoming || []).find((x) => x.user_id === id); if (r) { await api('/api/friends/requests/' + r.id + '/accept', {}, 'POST'); toast('You are now friends! 🤝'); } }
+    else if (mode === 'friends') { await api('/api/friends/' + id, undefined, 'DELETE'); toast('Friend removed.'); }
+  } catch (err) { toast(err.message); }
+  openProfile(id); // re-render with the LIVE relation state
+});
+
+// ------------------------ room owner context menu ----------------------------
+// Owner only; never on yourself; never on the owner. Desktop = double-click,
+// touch = long-press (~500 ms). A plain click/tap never triggers it.
+let ctxTimer = null, ctxLongFired = false;
+function closeRoomMenu() { const m = document.querySelector('.room-ctxmenu'); if (m) m.remove(); }
+function roomMenuFor(seat) {
+  closeRoomMenu();
+  const uid = seat.dataset.uid, uname = seat.dataset.username;
+  if (!uid || !me || !lastRoomData) return;
+  if (!lastRoomData.host || lastRoomData.host.user_id !== me.id) return;   // owner only
+  if (uid === me.id || seat.dataset.ishost === '1') return;                // not self / not the owner
+  const m = document.createElement('div');
+  m.className = 'room-ctxmenu';
+  m.style.left = Math.min(window.innerWidth - 210, 18) + 'px';
+  m.style.top = Math.max(12, seat.getBoundingClientRect().top - 8) + 'px';
+  m.innerHTML =
+    '<button type="button" data-act="profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.5-3.6 3.7-5.6 7.5-5.6s7 2 7.5 5.6"/></svg> View Profile</button>' +
+    '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Kick User</button>';
+  m.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    closeRoomMenu();
+    if (b.dataset.act === 'profile') openProfile(uid);
+    else {
+      $('#kc-text').textContent = 'Kick @' + uname + ' from this room?';
+      $('#kc-confirm').dataset.uid = uid;
+      modalOpen('#kick-confirm-modal');
+    }
+  });
+  document.body.appendChild(m);
+  setTimeout(() => { // tap-anywhere-else dismisses
+    const closer = (ev2) => { if (!m.contains(ev2.target)) { closeRoomMenu(); document.removeEventListener('click', closer, true); } };
+    document.addEventListener('click', closer, true);
+  }, 0);
+}
+$('#room-players').addEventListener('dblclick', (e) => { const s = e.target.closest('.seat[data-uid]'); if (s) roomMenuFor(s); });
+$('#room-players').addEventListener('touchstart', (e) => { const s = e.target.closest('.seat[data-uid]'); if (!s) return; ctxLongFired = false; ctxTimer = setTimeout(() => { ctxLongFired = true; roomMenuFor(s); if (navigator.vibrate) navigator.vibrate(12); }, 500); }, { passive: true });
+$('#room-players').addEventListener('touchend', () => { clearTimeout(ctxTimer); }, { passive: true });
+$('#room-players').addEventListener('touchmove', () => { clearTimeout(ctxTimer); }, { passive: true });
+$('#room-players').addEventListener('click', (e) => { if (ctxLongFired) { e.preventDefault(); e.stopPropagation(); ctxLongFired = false; } }, true);
+
+$('#kc-cancel').addEventListener('click', () => modalClose('#kick-confirm-modal'));
+$('#kick-confirm-modal').addEventListener('click', (e) => { if (e.target.id === 'kick-confirm-modal') modalClose('#kick-confirm-modal'); });
+$('#kc-confirm').addEventListener('click', async () => {
+  const uid = $('#kc-confirm').dataset.uid, code = currentRoomCode;
+  modalClose('#kick-confirm-modal');
+  if (!uid || !code) return;
+  try { await api('/api/rooms/' + code + '/kick', { user_id: uid }, 'POST'); toast('Kicked from the room.'); }
+  catch (err) { toast(err.message); }
+});
+
+// Edit Room (owner, post-battle): reopen the host settings editor — changes
+// apply immediately via the existing PATCH flow and shape the REMATCH.
+$('#btn-edit-room').addEventListener('click', () => {
+  $('#settings-edit').classList.remove('hidden');
+  $('#settings-edit').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+// Rematch expiry countdown (display only — the server enforces the window).
+setInterval(() => {
+  const el = $('#rm-expiry-line');
+  if (!el || el.classList.contains('hidden') || !el.dataset.expires) return;
+  const left = Math.floor((new Date(el.dataset.expires).getTime() - serverNow()) / 1000);
+  el.textContent = left > 0 ? 'Expires in ' + String(Math.floor(left / 60)).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0') : 'Expiring…';
+}, 1000);
 
 // ================== v50: LIVE PAGE + GO LIVE VIA YOUTUBE ===================
 // LIVE cards render ONLY from real /api/live data — a battle is "live" only

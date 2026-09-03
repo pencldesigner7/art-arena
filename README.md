@@ -625,6 +625,75 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v51 — pre-match Go Live, server-time countdown, friends + notifications backend, owner tools, app-wide ambient layer
+
+Client (`server/public/index.html`, v51):
+
+- **Go Live (spec 1)**: the button now carries the official YouTube mark
+  (#FF0000 play-path) and is ROOM-OWNER ONLY + PRE-MATCH (`isHost && status
+  === 'lobby'`). Joined players never see it; it disappears once the match
+  starts. Stream setup happens before the battle, by design.
+- **Countdown (spec 7)**: every room payload carries `server_now`; the client
+  measures its clock skew once per fetch (`serverClockSkewMs`) and drives the
+  3-2-1-GO! overlay from SERVER time. A WS `countdown` event starts the
+  overlay instantly (no poll wait); the 'active' payload lets the GO! flash
+  finish. A wrong local clock can no longer freeze or skip numbers.
+- **Popup hygiene (spec 6)**: `started` / `countdown` / `battle_active` /
+  `challenge_locked` toasts are gone (the overlay IS the message); quiet mode
+  suppresses decorative room toasts during the start sequence. Errors and
+  safety messages stay.
+- **Ambient layer (spec 3)**: the Rising-Lines canvas moved to body level and
+  runs app-wide (one canvas, never two animations) on every view EXCEPT
+  Settings (spec: clean) and auth.
+- **Drawer (spec 4)**: the drawer nav is now a scrolling flex column — Log
+  Out can never be pushed off-screen on short viewports (fixed at the layout
+  level, not by moving the button).
+- **Notifications (specs 5/14)**: real persisted history (`GET
+  /api/notifications`, 24 h server-side expiry + sweeper), unread badge count
+  on the bell, a 2×1.1 s self-stopping bell shake, WS push
+  (`type:'notification'`) → badge + shake + live re-render, accept/decline
+  friend requests straight from the feed. Opening the panel marks read but
+  NEVER deletes.
+- **Friends (spec 14)**: full backend (`friend_requests`, `friendships`,
+  one-pending-per-pair index). Profile modal (live `GET
+  /api/users/:id/profile`) drives Add Friend → "Request sent" → accept →
+  Friends, plus remove. No faked relationships.
+- **Owner tools (specs 9/13)**: post-battle card shows the OWNER "Edit Room"
+  (PATCH now allows ended rooms — settings apply to the rematch) and "CLOSE
+  ROOM" (players keep "LEAVE CURRENT ROOM"). Context menu on player rows —
+  desktop double-click, mobile long-press — with View Profile (live data) and
+  Kick ("Kick @user from this room?" confirm). Owner-only, never on self or
+  the owner; plain clicks unaffected.
+- **Rematch expiry (spec 10)**: `#rm-expiry-line` MM:SS countdown driven by
+  server time; the SERVER enforces the 2-minute window (sweeper + read-path
+  sweep releases the requester and emits `rematch_expired`).
+
+Server:
+
+- `server.js`: notifications backend (list/unread/read + 24 h sweeper),
+  `notifyUser()` with WS push, friends backend (request/accept/decline/list/
+  remove with friendship pair invariant via LEAST/GREATEST uuid keys), live
+  profile stats endpoint, v51 migrations (tables, notification types,
+  randomizer clean-concept purge).
+- `rooms.js`: `POST /:code/kick` (host-only, no self/host, emits `kicked` +
+  sends `room.kicked` to the target), rematch 2-min TTL sweeper, decline
+  releases the decliner, `PATCH /:code` and `POST /:code/join` now allow
+  `ended` rooms (Edit Room after battle; declined/kicked players may rejoin
+  public rooms — no ban), room payloads carry `server_now` and rematch
+  `requested_at`.
+- `randomizer_seed.json`: audited to 6,817 clean single concepts (≤ 2 words,
+  blocklist of scene/emotion/function words, no -ing/-ed forms) — same rule
+  shipped as a SQL migration for existing pools.
+
+Verified: `e2e/v51-browser` **53/53** (two full browser contexts, real
+battles: countdown sequence 3→2→1→GO! sampled live, zero decorative toasts,
+kick/decline/timeout/close with no ghost seats, friend round trip incl.
+badge+shake, 24 h expiry, ambient layer incl. Settings exception, drawer
+logout at 375×500). Regression sweep: v50 25/25 (Go Live section updated to
+v51 semantics), v49 29/29, v48 21/21, v47 14/14, v46 41/41 (ambient rule
+updated to app-wide), v45 33/33, v44-browser 27/27, v44 50/50, regress
+20/20. Composed challenges verified clean DB-wide (0 violations).
+
 ## v50 — LIVE foundation + real YouTube integration (public LIVE page, Go Live via YouTube, server-side OAuth/broadcast architecture, pink light streaks)
 
 Client (`server/public/index.html`, v50):

@@ -1478,3 +1478,29 @@ CREATE TABLE IF NOT EXISTS public.youtube_broadcasts (
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_yt_broadcast_per_battle_artist
     ON public.youtube_broadcasts (battle_id, user_id);
+
+-- ===========================================================================
+-- v51: FRIENDS + REMATCH EXPIRY (see server/server.js, server/rooms.js)
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS public.friend_requests (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    from_user uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    to_user uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    status text NOT NULL DEFAULT 'pending',
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    responded_at timestamp with time zone,
+    CONSTRAINT no_self_friend CHECK (from_user <> to_user)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_friend_request_pending
+    ON public.friend_requests (from_user, to_user) WHERE status = 'pending';
+
+CREATE TABLE IF NOT EXISTS public.friendships (
+    user_a uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    user_b uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_a, user_b),
+    CONSTRAINT ordered_pair CHECK (user_a < user_b)
+);
+
+ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'friend_request';
+ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'friend_accepted';

@@ -431,10 +431,9 @@ router.get('/broadcasts', requireAuth, ah(async (req, res) => {
 }));
 
 // Create + bind a real broadcast on the user's connected channel.
-// Eligibility: an ACTIVE PARTICIPANT of a room whose battle is real and not
-// ended (challenge_locked / countdown / active today).
-const TERMINAL_BATTLE = ['complete', 'cancelled', 'forfeited', 'disqualified']; // mirrors rooms.js
-const ELIGIBLE_BATTLE_STATUSES = ['challenge_locked', 'countdown', 'active', 'time_expired'];
+// Eligibility (v51 spec): the ROOM OWNER, in the PRE-MATCH state — the lobby,
+// before the battle starts. The broadcast is room-scoped now and is linked
+// to the battle automatically the moment the battle is minted (rooms.js).
 router.post('/broadcasts', requireAuth, ah(async (req, res) => {
   requireConfigured(); // clear setup error before anything else
 
@@ -444,32 +443,25 @@ router.post('/broadcasts', requireAuth, ah(async (req, res) => {
   if (!roomCode) throw new HttpError(400, 'A battle room is required.');
   if (!cleanTitle) throw new HttpError(400, 'A stream title is required.');
 
-  // Room + battle + participation (the artist must belong to the battle).
+  // Room + ownership + pre-match state (server-authoritative).
   const { rows: roomRows } = await pool.query(
-    `SELECT r.id, r.code, r.name, r.status, b.id AS battle_id, b.status AS battle_status
+    `SELECT r.id, r.code, r.name, r.status, r.host_id
        FROM battle_rooms r
-       LEFT JOIN battles b ON b.room_id = r.id
-             AND b.status NOT IN ('complete','cancelled','forfeited','disqualified')
-      WHERE UPPER(r.code) = UPPER($1)
-      ORDER BY b.created_at DESC NULLS LAST
+      WHERE UPPER(r.code) = UPPER($1) AND r.deleted_at IS NULL
       LIMIT 1`,
     [String(roomCode)]
   );
   const room = roomRows[0];
   if (!room) throw new HttpError(404, 'That battle room does not exist.');
-  if (!room.battle_id) throw new HttpError(400, 'This room has no battle to stream yet.');
-  if (!ELIGIBLE_BATTLE_STATUSES.includes(room.battle_status))
-    throw new HttpError(400, `This battle is not in a livestreamable state (${room.battle_status}).`);
-  const { rows: seat } = await pool.query(
-    `SELECT 1 FROM room_participants WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')`,
-    [room.id, req.user.id]
-  );
-  if (!seat[0]) throw new HttpError(403, 'Only artists participating in this battle can go live.');
+  if (room.host_id !== req.user.id)
+    throw new HttpError(403, 'Only the room owner can go live from this room.');
+  if (room.status !== 'lobby')
+    throw new HttpError(409, 'Go Live is only available before the match starts.');
 
-  // One broadcast per (battle, artist) — reuse instead of duplicates.
+  // One broadcast per (room, owner) — reuse instead of duplicates.
   const { rows: existing } = await pool.query(
-    `SELECT * FROM youtube_broadcasts WHERE battle_id = $1 AND user_id = $2 LIMIT 1`,
-    [room.battle_id, req.user.id]
+    `SELECT * FROM youtube_broadcasts WHERE room_id = $1 AND user_id = $2 LIMIT 1`,
+    [room.id, req.user.id]
   );
   if (existing[0]) return res.status(200).json({ broadcast: existing[0], reused: true });
 
@@ -546,7 +538,7 @@ router.post('/broadcasts', requireAuth, ah(async (req, res) => {
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'scheduled')
      RETURNING *`,
     [
-      req.user.id, room.id, room.battle_id, broadcast.id, stream.id,
+      req.user.id, room.id, null, broadcast.id, stream.id,
       ingestion.streamName || null, (ingestion.ingestionAddress || null),
       cleanTitle, cleanPrivacy, when.toISOString(),
       `https://www.youtube.com/watch?v=${broadcast.id}`,

@@ -637,12 +637,223 @@ app.get('/api/account/artworks', requireAuth, ah(async (req, res) => {
 // ------------------------- 12. BATTLE ROOMS (Phase 4) ------------------------
 // The place where artists meet: create rooms, join as players, spectate,
 // set battle type + time limit, start the battle. Implementation in ./rooms.
+// ---------------------------------------------------------------------------
+// v51: NOTIFICATIONS — real history + 24 h expiry + realtime push.
+//   notifyUser()       insert + WS push to every open socket of that user
+//   GET  /api/notifications        the last 24 h of items (oldest first
+//                                  readable order, newest first) — opening the
+//                                  panel NEVER deletes anything
+//   POST /api/notifications/read   mark some/all as read (they STAY listed
+//                                  until they expire)
+//   GET  /api/notifications/unread the live badge count
+// Expiry is SERVER-AUTHORITATIVE: a sweep on every list call plus a 5 min
+// timer deletes rows older than 24 h — they vanish from every device.
+// ---------------------------------------------------------------------------
+const rtHub = require('./realtime');
+async function sweepExpiredNotifications() {
+  await pool.query(`DELETE FROM notifications WHERE created_at < now() - interval '24 hours'`);
+}
+setInterval(() => { sweepExpiredNotifications().catch(() => {}); }, 5 * 60 * 1000).unref();
+
+async function notifyUser(userId, type, payload) {
+  const { rows } = await pool.query(
+    `INSERT INTO notifications (user_id, type, payload) VALUES ($1, $2, $3) RETURNING id, created_at`,
+    [userId, type, JSON.stringify(payload || {})]
+  );
+  rtHub.sendToUser(userId, {
+    type: 'notification',
+    notification: { id: rows[0].id, type, payload: payload || {}, created_at: rows[0].created_at },
+  });
+  return rows[0];
+}
+
+app.get('/api/notifications', requireAuth, ah(async (req, res) => {
+  await sweepExpiredNotifications();
+  const { rows } = await pool.query(
+    `SELECT id, type, payload, read_at, created_at
+       FROM notifications
+      WHERE user_id = $1 AND created_at >= now() - interval '24 hours'
+      ORDER BY created_at DESC
+      LIMIT 100`,
+    [req.user.id]
+  );
+  const { rows: unread } = await pool.query(
+    `SELECT count(*)::int AS n FROM notifications WHERE user_id = $1 AND read_at IS NULL`,
+    [req.user.id]
+  );
+  res.json({ notifications: rows, unread: unread[0].n });
+}));
+
+app.post('/api/notifications/read', requireAuth, ah(async (req, res) => {
+  const id = (req.body || {}).id || null;
+  if (id) {
+    await pool.query(
+      `UPDATE notifications SET read_at = now() WHERE user_id = $1 AND id = $2 AND read_at IS NULL`,
+      [req.user.id, id]
+    );
+  } else {
+    await pool.query(
+      `UPDATE notifications SET read_at = now() WHERE user_id = $1 AND read_at IS NULL`,
+      [req.user.id]
+    );
+  }
+  const { rows } = await pool.query(
+    `SELECT count(*)::int AS n FROM notifications WHERE user_id = $1 AND read_at IS NULL`,
+    [req.user.id]
+  );
+  res.json({ ok: true, unread: rows[0].n });
+}));
+
 app.get('/api/notifications/unread', requireAuth, ah(async (req, res) => {
   const { rows } = await pool.query(
     `SELECT count(*)::int AS n FROM notifications WHERE user_id = $1 AND read_at IS NULL`,
     [req.user.id]
   );
   res.json({ unread: rows[0].n });
+}));
+
+// ---------------------------------------------------------------------------
+// v51: PUBLIC PROFILE READING (room context menu → View Profile). LIVE data
+// straight from the tables — never a cached snapshot.
+// ---------------------------------------------------------------------------
+app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
+  const id = String(req.params.id || '');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Invalid user id.');
+  const { rows } = await pool.query(
+    `SELECT u.id, u.username, u.display_name, u.created_at AS joined_at,
+            p.bio, p.avatar_storage_key,
+            s.battles, s.wins, s.losses, s.draws
+       FROM users u
+       LEFT JOIN user_profiles p ON p.user_id = u.id
+       LEFT JOIN user_statistics s ON s.user_id = u.id
+      WHERE u.id = $1 AND u.account_status = 'active'`,
+    [id]
+  );
+  if (!rows[0]) throw new HttpError(404, 'That artist does not exist.');
+  const r = rows[0];
+  res.json({
+    user: {
+      id: r.id, username: r.username, display_name: r.display_name, joined_at: r.joined_at,
+      bio: r.bio || null,
+      avatar_url: r.avatar_storage_key ? '/avatars/' + r.avatar_storage_key : null,
+    },
+    statistics: {
+      battles_played: r.battles || 0, wins: r.wins || 0,
+      losses: r.losses || 0, draws: r.draws || 0,
+    },
+  });
+}));
+
+// ---------------------------------------------------------------------------
+// v51: FRIENDS — the real relationship backend (requests → friendship).
+//   POST   /api/friends/request          { user_id }  send a request
+//   GET    /api/friends                  friends + incoming/outgoing requests
+//   POST   /api/friends/requests/:id/accept   accept (both become friends)
+//   POST   /api/friends/requests/:id/decline  decline
+//   DELETE /api/friends/:userId          remove a friend (or cancel MY outgoing request)
+// Friend requests notify the recipient through the v51 notification engine.
+// ---------------------------------------------------------------------------
+const FRIEND_TYPES = ['friend_request', 'friend_accepted'];
+async function areFriends(a, b) {
+  const { rows } = await pool.query(
+    `SELECT 1 FROM friendships
+      WHERE (user_a = LEAST($1::uuid,$2::uuid) AND user_b = GREATEST($1::uuid,$2::uuid))`,
+    [a, b]
+  );
+  return !!rows[0];
+}
+app.post('/api/friends/request', requireAuth, ah(async (req, res) => {
+  const target = String((req.body || {}).user_id || '');
+  if (!target || target === req.user.id) throw new HttpError(400, 'You cannot friend yourself.');
+  const { rows: tgt } = await pool.query(
+    `SELECT id, username, display_name FROM users WHERE id = $1 AND account_status = 'active'`, [target]
+  );
+  if (!tgt[0]) throw new HttpError(404, 'That artist does not exist.');
+  if (await areFriends(req.user.id, target))
+    throw new HttpError(409, 'You are already friends with ' + (tgt[0].display_name || tgt[0].username) + '.');
+  const { rows: out } = await pool.query(
+    `SELECT 1 FROM friend_requests
+      WHERE from_user = $1 AND to_user = $2 AND status = 'pending'`, [req.user.id, target]
+  );
+  if (out[0]) throw new HttpError(409, 'You already have a pending friend request to this artist.');
+  const { rows: inc } = await pool.query(
+    `SELECT id FROM friend_requests
+      WHERE from_user = $1 AND to_user = $2 AND status = 'pending'`, [target, req.user.id]
+  );
+  if (inc[0]) { // they asked US first — accept their request instead of a second one
+    await pool.query(`UPDATE friend_requests SET status='accepted', responded_at=now() WHERE id=$1`, [inc[0].id]);
+    await pool.query(
+      `INSERT INTO friendships (user_a, user_b) VALUES (LEAST($1::uuid,$2::uuid), GREATEST($1::uuid,$2::uuid))`,
+      [req.user.id, target]
+    );
+    await notifyUser(target, 'friend_accepted', { username: req.user.username, display_name: req.user.display_name });
+    return res.json({ status: 'friends' });
+  }
+  const { rows: reqs } = await pool.query(
+    `INSERT INTO friend_requests (from_user, to_user) VALUES ($1, $2) RETURNING id`,
+    [req.user.id, target]
+  );
+  await notifyUser(target, 'friend_request', {
+    request_id: reqs[0].id, username: req.user.username, display_name: req.user.display_name,
+  });
+  res.status(201).json({ status: 'requested' });
+}));
+app.get('/api/friends', requireAuth, ah(async (req, res) => {
+  const [friends, incoming, outgoing] = await Promise.all([
+    pool.query(
+      `SELECT u.id, u.username, u.display_name, f.created_at AS since
+         FROM friendships f JOIN users u ON u.id = CASE WHEN f.user_a = $1 THEN f.user_b ELSE f.user_a END
+        WHERE $1 IN (f.user_a, f.user_b) ORDER BY u.display_name`, [req.user.id]),
+    pool.query(
+      `SELECT r.id, u.id AS user_id, u.username, u.display_name, r.created_at
+         FROM friend_requests r JOIN users u ON u.id = r.from_user
+        WHERE r.to_user = $1 AND r.status = 'pending' ORDER BY r.created_at DESC`, [req.user.id]),
+    pool.query(
+      `SELECT r.id, u.id AS user_id, u.username, u.display_name, r.created_at
+         FROM friend_requests r JOIN users u ON u.id = r.to_user
+        WHERE r.from_user = $1 AND r.status = 'pending' ORDER BY r.created_at DESC`, [req.user.id]),
+  ]);
+  res.json({ friends: friends.rows, incoming: incoming.rows, outgoing: outgoing.rows });
+}));
+app.post('/api/friends/requests/:id/accept', requireAuth, ah(async (req, res) => {
+  const { rows } = await pool.query(
+    `UPDATE friend_requests SET status = 'accepted', responded_at = now()
+      WHERE id = $1 AND to_user = $2 AND status = 'pending' RETURNING from_user`,
+    [String(req.params.id), req.user.id]
+  );
+  if (!rows[0]) throw new HttpError(409, 'That friend request is no longer pending.');
+  await pool.query(
+    `INSERT INTO friendships (user_a, user_b) VALUES (LEAST($1::uuid,$2::uuid), GREATEST($1::uuid,$2::uuid))`,
+    [req.user.id, rows[0].from_user]
+  );
+  const sender = (await pool.query('SELECT username, display_name FROM users WHERE id = $1', [rows[0].from_user])).rows[0];
+  await notifyUser(rows[0].from_user, 'friend_accepted', { username: req.user.username, display_name: req.user.display_name });
+  res.json({ ok: true, friend: sender });
+}));
+app.post('/api/friends/requests/:id/decline', requireAuth, ah(async (req, res) => {
+  const { rows } = await pool.query(
+    `UPDATE friend_requests SET status = 'declined', responded_at = now()
+      WHERE id = $1 AND to_user = $2 AND status = 'pending' RETURNING id`,
+    [String(req.params.id), req.user.id]
+  );
+  if (!rows[0]) throw new HttpError(409, 'That friend request is no longer pending.');
+  res.json({ ok: true });
+}));
+app.delete('/api/friends/:userId', requireAuth, ah(async (req, res) => {
+  const other = String(req.params.userId);
+  // remove the friendship if any…
+  await pool.query(
+    `DELETE FROM friendships WHERE (user_a = LEAST($1::uuid,$2::uuid) AND user_b = GREATEST($1::uuid,$2::uuid))`,
+    [req.user.id, other]
+  );
+  // …and/or cancel MY outgoing pending request (both are "remove" from the
+  // user's point of view; the other side is untouched).
+  await pool.query(
+    `UPDATE friend_requests SET status='cancelled', responded_at=now()
+      WHERE from_user = $1 AND to_user = $2 AND status = 'pending'`,
+    [req.user.id, other]
+  );
+  res.json({ ok: true });
 }));
 
 app.use('/api/rooms', rooms.router);
@@ -869,6 +1080,41 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     ['v50 one broadcast per battle per artist',
      `CREATE UNIQUE INDEX IF NOT EXISTS uq_yt_broadcast_per_battle_artist
         ON youtube_broadcasts (battle_id, user_id)`],
+    // v51: friends + rematch expiry + notification types.
+    ['v51 friend_requests table',
+     `CREATE TABLE IF NOT EXISTS friend_requests (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          from_user uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          to_user uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          status text NOT NULL DEFAULT 'pending',
+          created_at timestamptz NOT NULL DEFAULT now(),
+          responded_at timestamptz,
+          CONSTRAINT no_self_friend CHECK (from_user <> to_user)
+        )`],
+    ['v51 one pending friend request per pair',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_friend_request_pending
+        ON friend_requests (from_user, to_user) WHERE status = 'pending'`],
+    ['v51 friendships table',
+     `CREATE TABLE IF NOT EXISTS friendships (
+          user_a uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          user_b uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          created_at timestamptz NOT NULL DEFAULT now(),
+          PRIMARY KEY (user_a, user_b),
+          CONSTRAINT ordered_pair CHECK (user_a < user_b)
+        )`],
+    ['v51 notification types: friend_request',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'friend_request'`],
+    ['v51 notification types: friend_accepted',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'friend_accepted'`],
+    // v51 (randomizer spec): challenges are CLEAN CONCEPTS — at most two
+    // words, no descriptive scene phrases (no function words, no verb /
+    // participle modifiers, no -ing/-ed words). Mirrors the re-curated
+    // randomizer_seed.json so existing databases match fresh installs.
+    ['v51 randomizer: remove descriptive phrases (clean concepts only)',
+     `DELETE FROM randomizer_elements
+       WHERE array_length(string_to_array(lower(trim(name)), ' '), 1) > 2
+          OR string_to_array(lower(trim(name)), ' ') && ARRAY['in','on','with','under','over','the','a','an','of','at','by','from','into','onto','and','or','his','her','their','its','while','during','as','holding','standing','sitting','wearing','carrying','riding','walking','running','flying','sad','angry','happy','lonely','terrified','shocked','surprised','bored','tired','sleepy','crying','smiling','laughing','screaming','sleeping','dancing']::text[]
+          OR name ~* '\m\w+(ing|ed)\M'`],
   ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {
@@ -916,6 +1162,7 @@ initRealtime(httpServer, {
   onUserDisconnect: matchmaking.handleDisconnect, // v35: drop queue rows on socket loss
 });
 rooms.startCountdownSweeper(); // v36: flip 'countdown' battles to 'active' on the server clock
+rooms.startRematchSweeper();  // v51: expire 2-minute-old rematch requests server-side
 battleEnd.startBattleEndSweeper(); // v44: complete 'active' battles when their clock runs out
 
 process.on('SIGTERM', async () => {

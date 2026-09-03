@@ -269,10 +269,15 @@ async function roomPayload(code, me) {
   }
   const challenge = battle ? await battleChallengePayload(battle.id) : null;
   // v44: a pending rematch request (post-battle UI state) — null when none.
+  // v51: reads also RUN THE EXPIRY SWEEP — a rematch request older than
+  // 2 minutes is expired server-side and the requester's seat (if they
+  // re-seated waiting for the answer) is released. No ghost seats.
   let rematch = null;
   if (battle && battle.status === 'complete') {
+    await expireStaleRematches();
     const { rows: rr } = await pool.query(
-      `SELECT r.status, fu.username AS from_username, fu.display_name AS from_display_name,
+      `SELECT r.status, r.created_at AS requested_at,
+              fu.username AS from_username, fu.display_name AS from_display_name,
               tu.username AS to_username, tu.display_name AS to_display_name
          FROM rematch_requests r
          JOIN users fu ON fu.id = r.from_user_id
@@ -283,6 +288,10 @@ async function roomPayload(code, me) {
   }
   return {
     code: room.code,
+    // v51: the server's clock in the same payload as its timestamps — the
+    // client measures its OWN skew and derives the 3-2-1 countdown (and the
+    // battle clock) from SERVER time, never from a naive local Date.now().
+    server_now: new Date().toISOString(),
     name: room.name,
     room_type: room.room_type,
     visibility: room.visibility,
@@ -375,6 +384,14 @@ async function startBattleInTx(client, room, players, actorId) {
      room.result_method, room.time_limit_seconds]
   );
   const battleId = bRows[0].id;
+  // v51: any YouTube broadcast the owner prepared PRE-MATCH (room-scoped,
+  // battle_id NULL) is now linked to this battle — the LIVE page chain
+  // (user → broadcast → battle) completes the moment the battle exists.
+  await client.query(
+    `UPDATE youtube_broadcasts SET battle_id = $2
+      WHERE room_id = $1 AND battle_id IS NULL`,
+    [room.id, battleId]
+  );
   for (const p of seated) {
     await client.query(
       'INSERT INTO battle_participants (battle_id, user_id, seat) VALUES ($1, $2, $3)',
@@ -496,6 +513,39 @@ async function emitCountdownIfArmed(code) {
 }
 
 let countdownSweeperTimer = null;
+// ---------------------------------------------------------------------------
+// v51: REMATCH EXPIRY — server-authoritative 2-minute window. Any pending
+// request older than 2 minutes is expired, and the requester is REMOVED from
+// the room (their seat released) so nobody lingers as a ghost waiting for an
+// answer that is never coming. Runs on room reads AND on a 15 s timer, so it
+// is enforced even when nobody is looking at the room.
+// ---------------------------------------------------------------------------
+const REMATCH_TTL_SQL = "now() - interval '2 minutes'";
+async function expireStaleRematches() {
+  const { rows } = await pool.query(
+    `UPDATE rematch_requests SET status = 'expired', responded_at = now()
+      WHERE status = 'pending' AND created_at < ${REMATCH_TTL_SQL}
+      RETURNING id, room_id, from_user_id,
+                (SELECT code FROM battle_rooms WHERE id = rematch_requests.room_id) AS code`
+  );
+  for (const row of rows) {
+    await pool.query(
+      `UPDATE room_participants SET state = 'left', left_at = now()
+        WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')`,
+      [row.room_id, row.from_user_id]
+    );
+    if (row.code) rt.emitRoom(row.code, { action: 'rematch_expired' });
+  }
+  return rows.length;
+}
+let rematchSweeperTimer = null;
+function startRematchSweeper() {
+  if (rematchSweeperTimer) return rematchSweeperTimer;
+  rematchSweeperTimer = setInterval(() => { expireStaleRematches().catch(() => {}); }, 15000);
+  if (rematchSweeperTimer.unref) rematchSweeperTimer.unref();
+  return rematchSweeperTimer;
+}
+
 function startCountdownSweeper() {
   if (countdownSweeperTimer) return countdownSweeperTimer;
   countdownSweeperTimer = setInterval(async () => {
@@ -712,7 +762,13 @@ router.post('/:code/join', ah(async (req, res) => {
     // v36: joining is code-entry, so a wrong code must say exactly that —
     // not the generic "Room not found." every other route uses.
     if (!room) throw new HttpError(404, "We couldn't find a room with that code.");
-    if (room.status !== 'lobby') throw new HttpError(409, 'This room is not accepting players.');
+    // v51 (spec 11): a room whose battle ENDED stays joinable — the rematch
+    // window lives there. A declined/kicked/timed-out artist may rejoin the
+    // public room (no ban); joining seats them as 'waiting' for whatever the
+    // room mints next. Only an in-flight battle (countdown/in_battle/etc.)
+    // truly closes the door.
+    if (room.status !== 'lobby' && room.status !== 'ended')
+      throw new HttpError(409, 'This room is not accepting players.');
     // v44 (one active room per artist): blocked from holding a live seat in
     // ANY other room (rejoining THIS room stays allowed — a left seat is
     // not an active one). The partial unique index enforces the same rule
@@ -1044,7 +1100,11 @@ router.patch('/:code', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
   requireHost(room, req.user.id);
-  if (room.status !== 'lobby') throw new HttpError(409, 'Settings are locked once the battle starts.');
+  // v51: Edit Room also works after the battle (the owner shaping the
+  // REMATCH) — settings apply to the next battle the room mints. Only an
+  // in-flight battle locks settings.
+  if (room.status !== 'lobby' && room.status !== 'ended')
+    throw new HttpError(409, 'Settings are locked while the battle is in progress.');
 
   const b = req.body || {};
   const sets = [];
@@ -1075,7 +1135,10 @@ router.post('/:code/close', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
   requireHost(room, req.user.id);
-  if (room.status !== 'lobby') throw new HttpError(409, 'The battle has already started.');
+  // v51: Close Room works in the lobby AND after the battle (the owner's
+  // post-battle exit). Only an in-flight battle blocks closing.
+  if (room.status !== 'lobby' && room.status !== 'ended')
+    throw new HttpError(409, 'The battle is still in progress — it completes automatically when its clock runs out.');
   await pool.query(
     `UPDATE battle_rooms SET status = 'ended', ended_at = now() WHERE id = $1`, [room.id]
   );
@@ -1089,6 +1152,33 @@ router.post('/:code/close', ah(async (req, res) => {
   );
   rt.emitRoom(room.code, { action: 'closed', by: req.user.username });
   if (room.visibility === 'public') rt.broadcastRoomsList('closed');
+  res.json(await roomPayload(req.params.code, req.user.id));
+}));
+
+// ---------------------------------------------------------------------------
+// v51: KICK — host-only moderation. The host may remove any SEATED PLAYER
+// (never themselves; the host seat is not kickable). Server-authoritative:
+// the seat is released in the DB and everyone is told to refetch — a kicked
+// player can never linger as a ghost participant.
+// ---------------------------------------------------------------------------
+router.post('/:code/kick', ah(async (req, res) => {
+  const room = await roomByCode(req.params.code);
+  if (!room) throw new HttpError(404, 'Room not found.');
+  requireHost(room, req.user.id);
+  const target = String((req.body || {}).user_id || '');
+  if (!target) throw new HttpError(400, 'A user_id is required.');
+  if (target === req.user.id) throw new HttpError(400, 'You cannot kick yourself.');
+  if (target === room.host_id) throw new HttpError(403, 'The room owner cannot be kicked.');
+  const { rows } = await pool.query(
+    `UPDATE room_participants SET state = 'left', left_at = now()
+      WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')
+      RETURNING user_id`,
+    [room.id, target]
+  );
+  if (!rows[0]) throw new HttpError(409, 'That artist is not in this room.');
+  const kicked = (await pool.query('SELECT username, display_name FROM users WHERE id = $1', [target])).rows[0];
+  rt.emitRoom(room.code, { action: 'kicked', user_id: target, username: kicked.username, display_name: kicked.display_name, by: req.user.username });
+  rt.sendToUser(target, { type: 'room.kicked', code: room.code, by: req.user.username });
   res.json(await roomPayload(req.params.code, req.user.id));
 }));
 
@@ -1364,7 +1454,17 @@ router.post('/:code/rematch/decline', ah(async (req, res) => {
     [room.id, req.user.id]
   );
   if (!rows[0]) throw new HttpError(409, 'There is no rematch request for you in this room.');
+  // v51 (spec): declining also REMOVES the decliner from the room — the
+  // rematch state is cleaned up, no lingering membership. The room itself is
+  // untouched: if it is public and still hosted, they can rejoin normally.
+  const { rows: goneRows } = await pool.query(
+    `UPDATE room_participants SET state = 'left', left_at = now()
+      WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')
+      RETURNING user_id`,
+    [room.id, req.user.id]
+  );
   rt.emitRoom(room.code, { action: 'rematch_declined', username: req.user.username, display_name: req.user.display_name });
+  if (goneRows[0]) rt.emitRoom(room.code, { action: 'left', username: req.user.username, display_name: req.user.display_name, why: 'rematch_declined' });
   res.json(await roomPayload(req.params.code, req.user.id));
 }));
 
@@ -1435,4 +1535,4 @@ async function canViewRoom(code, user) {
     : { ok: false, reason: 'You do not have access to that room.' };
 }
 
-module.exports = { router, canViewRoom, roomByCode, roomPayload, battleChallengePayload, createMatchRoom, startCountdownSweeper, activeRoomOf };
+module.exports = { router, canViewRoom, roomByCode, roomPayload, battleChallengePayload, createMatchRoom, startCountdownSweeper, startRematchSweeper, activeRoomOf };
