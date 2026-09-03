@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="48">
+<meta name="aa-ui-version" content="49">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -12,6 +12,11 @@
    (survives refreshes and sign-ins on this device). */
 try {
   if (localStorage.getItem('aa-theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+} catch (_) {}
+/* v49: on /privacy and /terms, stop the (default-visible) login card from
+   flashing before init() switches to the legal view. */
+try {
+  if (/^\/(privacy|terms)\/?$/.test(location.pathname)) document.documentElement.classList.add('legal-boot');
 } catch (_) {}
 </script>
 <style>
@@ -219,6 +224,23 @@ try {
   .auth-logo img { width:min(320px, 78%); height:auto; }
   .auth-tagline { text-align:center; font-weight:800; letter-spacing:2.5px; font-size:15px; margin:12px 0 28px; }
   .auth-tagline span { background:linear-gradient(90deg,var(--pink),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  /* v49: public legal pages (Privacy Policy / Terms of Service) — same card
+     family as the auth screens, tuned for long-form reading. Token-based, so
+     Dark/Light theming works with no extra rules. */
+  html.legal-boot #view-login { display:none; } /* no login flash pre-init on /privacy + /terms */
+  .legal-head { text-align:center; margin-bottom:4px; }
+  .legal-logo { width:min(210px,62%); height:auto; }
+  .legal-title { font-size:23px; margin:12px 0 2px; }
+  .legal-updated { font-size:12.5px; margin:0 0 6px; }
+  .legal-body { font-size:14.5px; }
+  .legal-body p { margin:8px 0; }
+  .legal-body ul { margin:8px 0 8px 18px; padding:0; }
+  .legal-body li { margin:4px 0; }
+  .legal-body h3 { margin:14px 0 2px; font-size:15px; color:var(--text); }
+  .legal-foot { margin-top:22px; text-align:center; }
+  .legal-foot .links { margin-top:14px; }
+  .legal-back { display:block; padding:11px 20px; border:1px solid var(--pink); border-radius:8px; color:var(--text); font-weight:700; margin-top:12px; }
+  .legal-back:hover { background:rgba(255,60,172,.12); }
   .field { position:relative; border-radius:12px; border:1px solid transparent; background:linear-gradient(var(--surface),var(--surface)) padding-box, linear-gradient(90deg, rgba(255,60,172,.75), rgba(123,44,255,.75)) border-box; transition:box-shadow .45s ease, transform .25s ease; }
   .field input { margin-top:0; padding:13px 44px 13px 42px; background:transparent; border:0; border-radius:0; }
   .field input:focus { border-color:transparent; }
@@ -239,7 +261,7 @@ try {
      referenced it anymore. */
   #login-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--auth-page-bg); display:none; }
   #login-bg.on { display:block; }
-  #view-login, #view-register, #view-forgot { position:relative; z-index:1; background:var(--auth-card); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
+  #view-login, #view-register, #view-forgot, #view-privacy, #view-terms { position:relative; z-index:1; background:var(--auth-card); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
   /* v36: full-screen 3-2-1 battle countdown — rendered above everything
      (z-index 200) but pointer-events:none, so it never blocks a click.
      Shown while battle.status === 'countdown'; the number is re-derived
@@ -585,6 +607,7 @@ try {
       <button type="button" class="social-btn" data-social="discord" title="Continue with Discord"><svg viewBox="0 0 24 24" width="24" height="24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></button>
     </div>
     <p class="auth-signup">Don't have an account? <a href="#" data-view="register">Sign up</a></p>
+    <p class="links auth-legal"><a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a></p>
   </section>
 
   <!-- ============================= REGISTER ============================ -->
@@ -597,6 +620,7 @@ try {
       <label class="field" title="Minimum 8 characters"><span class="field-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><input type="password" name="password" required minlength="8" autocomplete="new-password" placeholder="Password"><button type="button" class="pw-toggle" data-pw-toggle title="Show password"><span class="eye-off"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M10.7 10.7a2.5 2.5 0 0 0 3.6 3.5"/><path d="M9.9 5.2c.6-.13 1.3-.2 2.1-.2 5 0 8.6 3.3 10 7a13.4 13.4 0 0 1-2.7 3.9M6.3 6.3A13.3 13.3 0 0 0 2 12c1.4 3.7 5 7 10 7 1.5 0 2.9-.3 4.2-.9"/></svg></span><span class="eye-on hidden"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12c1.4-3.7 5-7 10-7s8.6 3.3 10 7c-1.4 3.7-5 7-10 7S3.4 15.7 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span></button></label>
       <button type="submit" class="login-btn">Sign up</button>
     </form>
+    <p class="links auth-legal">By creating an account you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.</p>
     <button type="button" class="secondary" data-view="login" style="width:100%">Log in</button>
 
     <div id="register-verify" class="hidden">
@@ -644,6 +668,146 @@ try {
       </div>
     </div>
     <p class="links"><a href="#" data-view="login">← Back to log in</a></p>
+  </section>
+
+  <!-- ==================== v49: PUBLIC LEGAL PAGES ====================== -->
+  <!-- Standalone public pages (server serves the SPA at /privacy and /terms;
+       init() boots straight into the view — no session required). Same card
+       family as the auth screens; the glitter starfield runs behind them. -->
+  <section id="view-privacy" class="view legal hidden">
+    <div class="legal-head">
+      <img src="/logo.png" alt="Art Arena" class="legal-logo">
+      <h1 class="legal-title">Privacy Policy</h1>
+      <p class="muted legal-updated">Last updated: September 2026</p>
+    </div>
+    <div class="legal-body">
+      <h2>Overview</h2>
+      <p>This policy explains what information Art Arena collects, why we collect it, and the choices you have. It covers the Art Arena web app (the "Service") — including the public pages, your account, art battles and matchmaking.</p>
+
+      <h2>Information we collect</h2>
+      <h3>Account information</h3>
+      <ul>
+        <li><strong>Username</strong> and <strong>email address</strong> — used to create and sign you in to your account.</li>
+        <li><strong>Password</strong> — stored only as a bcrypt hash. We cannot read your password, and it never appears in any API response.</li>
+        <li><strong>Display name</strong> — the name other artists see.</li>
+      </ul>
+      <h3>Optional profile information</h3>
+      <ul>
+        <li>A short <strong>bio</strong> (up to 300 characters) and an <strong>avatar picture</strong>, if you choose to add them. The avatar is stored on our server so we can display it in rooms and battles.</li>
+      </ul>
+      <h3>Google sign-in (optional)</h3>
+      <ul>
+        <li>If you use "Continue with Google", we receive your Google account ID, Google email address and display name to create or sign you in to your account. We do not receive or store your Google password, and we do not post anything to your Google account.</li>
+      </ul>
+      <h3>Battle activity</h3>
+      <ul>
+        <li>Art Arena records the battle activity needed to run the Service: rooms you create or join (room name and settings), matchmaking entries, the battles you take part in, their results, your battle history and your statistics (such as battles played).</li>
+      </ul>
+      <h3>One-time email codes</h3>
+      <ul>
+        <li>When you register or reset your password, we email you a one-time code. Codes are stored only as SHA-256 hashes, expire quickly, and are never returned by our API.</li>
+      </ul>
+      <h3>Technical data stored on your device</h3>
+      <ul>
+        <li>A <strong>session token</strong> (in sessionStorage and a single HttpOnly cookie) that keeps you signed in for up to 30 days.</li>
+        <li>Your <strong>theme choice</strong> (Dark or Light), in localStorage.</li>
+      </ul>
+
+      <h2>How we use your information</h2>
+      <p>We use your information only to operate the Service: creating and securing your account, verifying your email, sending password reset codes, matching you with opponents, running and timing battles, recording results, showing your profile in rooms and battles, and displaying in-app notifications about your battles.</p>
+
+      <h2>What other users can see</h2>
+      <p>Your username, display name, avatar and battle participation/results are visible to other users inside battle rooms, matchmaking and the public LIVE BATTLES list. Public room names are shown to everyone. Your email address and password are never shown to other users.</p>
+
+      <h2>What we don't do</h2>
+      <ul>
+        <li>We do not sell or rent your personal information.</li>
+        <li>We do not run advertising, analytics or third-party trackers — the app loads no tracking scripts and sets no advertising cookies.</li>
+        <li>We do not send marketing or newsletter emails. The only emails the Service sends are verification and password-reset codes.</li>
+      </ul>
+
+      <h2>Where your data is stored</h2>
+      <p>The Service and its database run on our cloud hosting provider (Render). Uploaded avatars are stored on the server. Basic, standard hosting-platform server logs (for example request times) exist for security and troubleshooting only.</p>
+
+      <h2>Security</h2>
+      <p>Passwords are bcrypt-hashed, one-time codes are stored only as hashes, and sessions are kept server-side with expiry. No system is perfectly secure, so please also protect your password and sign out on shared devices.</p>
+
+      <h2>Retention and your choices</h2>
+      <p>We keep your information while your account exists. You can edit or remove your profile information (display name, bio, avatar) at any time from the Edit Profile panel. There is currently no in-app account deletion — to request correction or deletion of your account data, email <a href="mailto:pencldesigner@gmail.com">pencldesigner@gmail.com</a> and we will action it.</p>
+
+      <h2>Children</h2>
+      <p>Art Arena is not directed to children under 13, and we do not knowingly collect information from children under 13.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>If we change this policy we will update the "Last updated" date above and the version shown in the app's About page.</p>
+
+      <h2>Contact</h2>
+      <p>Questions or requests? Email <a href="mailto:pencldesigner@gmail.com">pencldesigner@gmail.com</a>.</p>
+    </div>
+    <div class="legal-foot">
+      <a class="legal-back" href="/">← Back to Art Arena</a>
+      <p class="links">See also our <a href="/terms">Terms of Service</a></p>
+    </div>
+  </section>
+
+  <section id="view-terms" class="view legal hidden">
+    <div class="legal-head">
+      <img src="/logo.png" alt="Art Arena" class="legal-logo">
+      <h1 class="legal-title">Terms of Service</h1>
+      <p class="muted legal-updated">Last updated: September 2026</p>
+    </div>
+    <div class="legal-body">
+      <h2>The agreement</h2>
+      <p>These Terms govern your use of the Art Arena web app (the "Service"). By creating an account or using the Service, you agree to them. If you don't agree, please don't use the Service.</p>
+
+      <h2>What Art Arena is</h2>
+      <p>Art Arena coordinates timed art battles: you can create or join battle rooms, get matched with a random artist, receive random challenge elements, pick the drawing application you want to battle in, and see results, battle history and statistics.</p>
+      <p>Some honesty about what the Service is today: your artwork itself is created in the drawing application you choose — Art Arena coordinates the battle (timing, matchmaking, challenge elements, results) and does not currently collect or store your artwork files. Features marked "coming soon" in the interface are not part of the Service yet, and the Service involves no payments, prizes or money.</p>
+
+      <h2>Your account</h2>
+      <ul>
+        <li>Give accurate registration information and keep your password private. You're responsible for activity under your account.</li>
+        <li>You must be at least 13 years old to create an account.</li>
+        <li>One person, one account — don't create accounts for others or share yours.</li>
+      </ul>
+
+      <h2>Conduct</h2>
+      <p>Keep the arena creative and safe. Specifically, don't:</p>
+      <ul>
+        <li>use usernames, display names, bios, avatars or room names that are unlawful, hateful, harassing, sexually explicit, or that impersonate someone else;</li>
+        <li>disrupt battles, matchmaking or other users (spam, griefing, manipulating results or statistics);</li>
+        <li>attempt to access another person's account, or probe, scan or test the Service's security without permission;</li>
+        <li>use the Service for anything illegal.</li>
+      </ul>
+
+      <h2>Battles and results</h2>
+      <p>Battle rooms are governed by the settings their host chooses (visibility, mode, time limit and similar). Results are recorded as configured for each battle; if a battle's clock runs out without a recorded result, the battle is recorded as a draw. We may correct plainly erroneous data (for example statistics clearly produced by a glitch).</p>
+
+      <h2>Your content</h2>
+      <p>Content you provide to the Service — such as your display name, bio, avatar and the names of rooms you create — remains yours. You give us a limited, worldwide, non-exclusive licence to host and display that content as needed to operate the Service (for example showing your avatar and room names to other users). You confirm you have the rights to anything you upload.</p>
+
+      <h2>Availability and changes</h2>
+      <p>The Service is provided as available. We may add, change, suspend or remove features at any time (including turning "coming soon" features on or reworking them). We don't promise uninterrupted or error-free operation.</p>
+
+      <h2>Suspension and termination</h2>
+      <p>You can stop using the Service at any time. We may lock or suspend accounts that violate these Terms, and we may remove content that violates them.</p>
+
+      <h2>No warranty</h2>
+      <p>The Service is provided "as is" and "as available", without warranties of any kind, express or implied, including fitness for a particular purpose or non-infringement.</p>
+
+      <h2>Limitation of liability</h2>
+      <p>To the maximum extent permitted by applicable law, Art Arena and its operators are not liable for indirect, incidental, special or consequential damages, or for lost profits or data, arising from your use of the Service.</p>
+
+      <h2>Changes to these Terms</h2>
+      <p>If we change these Terms we will update the "Last updated" date above. Continuing to use the Service after a change means you accept the updated Terms.</p>
+
+      <h2>Contact</h2>
+      <p>Questions? Email <a href="mailto:pencldesigner@gmail.com">pencldesigner@gmail.com</a>.</p>
+    </div>
+    <div class="legal-foot">
+      <a class="legal-back" href="/">← Back to Art Arena</a>
+      <p class="links">See also our <a href="/privacy">Privacy Policy</a></p>
+    </div>
   </section>
 
   <!-- ======================= ARENA HOME (main) — v26 ===================== -->
@@ -733,6 +897,7 @@ try {
       <img src="/logo.png" alt="Art Arena" class="about-logo">
       <p class="muted about-line">Where artists battle for creative supremacy.</p>
       <span class="badge next">VERSION <b id="about-version"></b></span>
+      <div class="links about-legal" style="margin-top:16px"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a></div>
     </div>
   </section>
 
@@ -1200,7 +1365,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v48</span>
+  <span id="ui-version-badge">v49</span>
 
 <script>
 'use strict';
@@ -1423,7 +1588,7 @@ setInterval(battleClockTick, 500);
 // logged in. If a 2D canvas is unavailable the try/catch leaves a plain dark
 // background and the login keeps working.
 let loginBgScene = null;
-const AUTH_BG_VIEWS = ['login', 'register', 'forgot'];
+const AUTH_BG_VIEWS = ['login', 'register', 'forgot', 'privacy', 'terms']; // v49: legal pages are public pages
 function startLoginBg() {
   const host = $('#login-bg');
   if (!host) return;
@@ -3972,6 +4137,10 @@ window.__aaGoogleHandoff = null;
 (async function init() {
   rtChip();
   try {
+    // v49: public legal pages — /privacy and /terms (served by server.js as
+    // the SPA) boot straight into their view. No session needed or requested.
+    const legalView = { '/privacy': 'privacy', '/terms': 'terms' }[(location.pathname || '/').replace(/\/+$/, '') || '/'];
+    if (legalView) { show(legalView); return; }
     if (window.__aaGoogleHandoff) {
       await window.__aaGoogleHandoff; // already entered the app (or bounced to login with an explanation)
       return;

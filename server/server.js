@@ -113,6 +113,15 @@ app.use(express.static(path.join(__dirname, 'public'), {
   },
 }));
 
+// v49: public legal pages. /privacy and /terms serve the same SPA; the
+// client boots straight into the matching view (no session required), so
+// the pages work logged-out, get the full theme system, and share one HTML
+// file with the rest of the app.
+app.get(['/privacy', '/terms'], (req, res) => {
+  res.set('Cache-Control', 'no-store'); // same policy as the SPA itself
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Request log (dev) — makes session/auth problems diagnosable in one glance.
 // Also records WHICH channel carried the session token (header / cookie /
 // query / none), which is how embedded-preview header-stripping is caught.

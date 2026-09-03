@@ -625,6 +625,48 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v49 — public legal pages (Privacy Policy + Terms of Service at /privacy and /terms)
+
+Client (`server/public/index.html`, v49):
+- **Two new public pages** — Privacy Policy (`/privacy`) and Terms of Service
+  (`/terms`), accessible WITHOUT logging in. They live in the SPA as
+  `#view-privacy` / `#view-terms`: same translucent-card family as the auth
+  screens (blur + the Glitter Wrap starfield behind them), long-form reading
+  typography scoped under `.legal-*`, built entirely on theme tokens so
+  Dark/Light work with zero extra rules (light persists across reloads, live
+  `applyTheme` swap on the page).
+- **Routing** — the server serves the SPA for `GET /privacy` and `/terms`
+  (trailing-slash safe, `no-store`); `init()` boots straight into the legal
+  view before any session logic (no session is required or requested), and a
+  pre-paint `legal-boot` class on `<html>` prevents a login-card flash.
+  Unknown paths still 404. "← Back to Art Arena" returns logged-out visitors
+  to login and signed-in users to the app home (session untouched).
+- **Links where appropriate** — login page footer (Terms · Privacy), the
+  Sign-up agreement line ("By creating an account you agree to our Terms of
+  Service and Privacy Policy"), the About page, and cross-links between the
+  two pages themselves.
+- **Content written from the actual code, not templates** — verified against
+  the real data handling: bcrypt password hashes, SHA-256-hashed one-time
+  email codes (verification + reset only, no marketing), server-side
+  sessions (30-day window, single HttpOnly cookie + sessionStorage), theme
+  in localStorage, avatar + bio on the profile, Google sign-in scope
+  (account ID / email / display name), battle rooms/matchmaking/results/
+  statistics, Render hosting. Explicitly honest about what the app does NOT
+  do: no artwork collection or hosting (drawing happens in the user's chosen
+  application; battles end as draws today), no analytics/ads/trackers, no
+  selling data, no payments or prizes, "coming soon" features called out as
+  not part of the Service, and no in-app account deletion (email contact
+  given instead). Guarded by battery checks (A5/B2/F1) so future edits can't
+  silently claim features that don't exist.
+- Version bump: UI meta + on-screen badge v49 (`/api/ui-version` → 49).
+
+Verified: `e2e/v49-browser` 29/29 (routes logged-out, no login flash, no app
+chrome, starfield live, 8 content-accuracy checks, theme dark/live-light/
+persisted, all link placements, back-navigation logged-out + logged-in, no
+anonymous-boot regression, zero page errors), plus the full existing sweep —
+v48 21/21, v47 14/14, v46 41/41, v45 33/33, v44-browser 27/27, v44 node
+50/50, regress 20/20 — **235/235**. Screenshots: `docs/shots-v49/`.
+
 ## v48 — home animation swap + matchmaking deep pass (Rising Lines, root-cause timer, solid line, v44 Profile restore)
 
 Client (`server/public/index.html`, v48 + `rising-lines.js`, `line-ripple.js` deleted):
