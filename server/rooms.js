@@ -238,7 +238,7 @@ async function roomPayload(code, me) {
       }
     }
   } catch (_) { /* fall through to the current state */ }
-  const [players, spectators, battle, hostRow] = await Promise.all([
+  const [players, spectators, battleRow, hostRow] = await Promise.all([
     activeParticipants(room.id),
     spectatorsOf(room.id),
     latestBattle(room.id),
@@ -246,6 +246,11 @@ async function roomPayload(code, me) {
       ? pool.query('SELECT id, username, display_name FROM users WHERE id = $1', [room.host_id])
       : Promise.resolve({ rows: [{}] }),
   ]);
+  // v47 server fix: this was destructured as `const battle` above, so the
+  // countdown self-heal below (`battle = await latestBattle(...)`) threw
+  // "Assignment to constant variable" — the room GET 500'd in exactly the
+  // countdown→active window it was supposed to heal. `let` fixes the heal.
+  let battle = battleRow;
   const host = hostRow.rows[0];
   // v36: self-heal on read — if a countdown is already due but the sweeper
   // has not (yet) flipped it, flip it NOW (same atomic path) so a late

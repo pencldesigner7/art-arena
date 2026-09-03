@@ -625,6 +625,49 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v47 — home & navigation pass (ripple polish, instant search clock, theme-only Settings, pink light outlines, auto-closing drawer)
+
+Client (`server/public/index.html`, v47 + `line-ripple.js`):
+- **Homepage Line Ripple, refined** — the layer is now `position:fixed`, so the
+  animation spans the ENTIRE homepage background edge-to-edge instead of a
+  boxed area, and renders at reduced opacity (0.35) so it reads as a subtle
+  full-page effect behind the content.
+- **Protection mask** — the ripple never draws over the logo (a 1.5× zone in
+  the logo's OWN shape, painted with the logo image itself), over any text
+  (protection padding scales with the text size), or over any button /
+  the LIVE BATTLES strip. The mask tracks layout: scroll, resize, DOM
+  changes (MutationObserver) and a light 1 s refresh keep the zones exact
+  through late avatar/image loads. Works identically in both themes.
+- **Matchmaking timer starts INSTANTLY** — `00:00` renders on the first
+  frame and ticks locally from the moment the search begins (no API wait);
+  once the server anchor lands, the same tick derives elapsed from the
+  server deadline (refresh-proof), freezing on match/cancel/timeout.
+- **Settings simplified to theme-only** — the Appearance control lives on
+  the dedicated Settings page and NOTHING else; Edit Profile and Log out
+  returned to the Profile page; the Settings row was removed from Profile.
+  Profile = profile information + profile actions; Settings = theme.
+- **Light Mode outlined buttons go PINK** — new `--btn-line` token: outlined
+  buttons (`mini`, theme options, time chips, social buttons, canvas
+  change) use the Art Arena pink `#FF3CAC` in Light Mode; Dark Mode keeps
+  its established line color (token value unchanged there).
+- **Drawer auto-closes on navigation** — nav clicks are now delegated at the
+  document level, so any `[data-view]` navigation (drawer, rows, tabs —
+  whenever rendered) navigates AND dismisses the drawer automatically.
+- **enterAccount hardened** — only a real auth rejection clears the session
+  and bounces to login; a render error is logged loudly and the valid
+  session is kept (a render bug can no longer silently log users out).
+
+Server (`server/`):
+- **rooms.js fix (pre-existing bug, found by the v44 battery)** — the v36
+  read-path countdown self-heal reassigned a `const`-destructured `battle`,
+  so `GET /api/rooms/:code` 500'd ("Assignment to constant variable") in
+  exactly the countdown→active window the heal was meant to cover. Now
+  `let` — the self-heal works as designed (verified: zero recurrences).
+
+Verified: `e2e/v47-browser` 20/20 (the 10-point list), `v46-browser` 43/43,
+`v45-browser` 33/33, `v44-browser` 27/27 (×2), `v44` node 50/50,
+`regress` 20/20 — 193/193.
+
 ## v46 — theme & matchmaking pass (login theme, Apple icon, logout theme, count-up timer, Line Ripple home)
 
 Client (`server/public/index.html`, v46 + NEW `line-ripple.js`):

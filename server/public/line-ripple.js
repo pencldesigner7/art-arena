@@ -1,16 +1,21 @@
 // Line Ripple Background — vanilla port of the Originkit "custom-style"
-// React component the user supplied (v46). Two theme versions were given,
-// identical except for colors:
+// React component the user supplied. Two theme versions were given, identical
+// except for colors:
 //   DARK  → strokeColor #EA69F1 on backgroundColor #09070D
 //   LIGHT → strokeColor #F200FF on backgroundColor #FFFFFF
-// This port keeps the original physics verbatim (simplex-noise curl field,
-// seeded permutation, BASE_ANGLE 0 / CURL 3 / SEED 0.5, count 82 → the same
-// grid gap curve, movement 14, resolution 1 → the same line half-length) so
-// the animation is frame-for-frame the one they approved in the preview.
-// The React mouse-bend interaction (hover/force) was NOT ported: the supplied
-// presets run with hover=false + force=0, i.e. it is inert in their code too.
-// Instead of two mounted components, ONE instance lives on the page and its
-// stroke follows the app theme — so exactly one animation is ever active.
+// The physics/grid are the original's verbatim (seeded simplex-noise curl
+// field, BASE_ANGLE 0 / CURL 3 / SEED 0.5, count 82 → the same gap curve,
+// movement 14, resolution 1 → the same line half-length). The React
+// mouse-bend interaction (hover/force) was not ported: the supplied presets
+// run with hover=false + force=0, i.e. inert in the original too.
+//
+// v47 additions:
+//   • opts.opacity — the whole effect renders more subtle (default .35).
+//   • setProtected(areas) — an SVG mask that keeps the lines out of the
+//     page's important content: {type:'image', …} paints the LOGO ITSELF
+//     (its own alpha = the logo's shape) scaled 1.5× as a protected zone,
+//     and {type:'rect', …} pads every text/button block (padding scales
+//     with the text size). The animation flows AROUND protected areas.
 (function () {
   'use strict';
 
@@ -62,6 +67,7 @@
   var BASE_ANGLE = 0;
   var CURL = 3;
   var SEED = 0.5;
+  var MASK_ID = 'line-ripple-mask-' + String(Math.random()).slice(2, 8);
 
   function LineRipple(host, opts) {
     opts = opts || {};
@@ -70,6 +76,7 @@
     this._count = Math.max(1, Math.min(100, opts.count != null ? opts.count : 82));
     this._movement = opts.movement != null ? opts.movement : 14;
     this._resolution = opts.resolution != null ? opts.resolution : 1;
+    this._opacity = opts.opacity != null ? opts.opacity : 0.35;
     this._noise = createNoise2D(SEED);
     this._points = [];
     this._raf = null;
@@ -78,12 +85,22 @@
     this._io = null;
     this._svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this._svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    this._svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
+    this._svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;opacity:' + this._opacity + ';';
+    // defs + mask (white base = drawable; black shapes = protected)
+    this._defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    this._mask = document.createElementNS('http://www.w3.org/2000/svg', 'mask');
+    this._mask.setAttribute('id', MASK_ID);
+    this._maskBase = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    this._maskBase.setAttribute('fill', '#fff');
+    this._mask.appendChild(this._maskBase);
+    this._defs.appendChild(this._mask);
+    this._svg.appendChild(this._defs);
     this._path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     this._path.setAttribute('fill', 'none');
     this._path.setAttribute('stroke', this._stroke);
     this._path.setAttribute('stroke-width', '1.5');
     this._path.setAttribute('stroke-linecap', 'round');
+    this._path.setAttribute('mask', 'url(#' + MASK_ID + ')');
     this._svg.appendChild(this._path);
     host.appendChild(this._svg);
     this._setSize();
@@ -105,9 +122,13 @@
     this._w = w; this._h = h;
     this._svg.setAttribute('width', String(w));
     this._svg.setAttribute('height', String(h));
+    this._maskBase.setAttribute('x', '0');
+    this._maskBase.setAttribute('y', '0');
+    this._maskBase.setAttribute('width', String(w));
+    this._maskBase.setAttribute('height', String(h));
   };
 
-  // Same grid math as the component: count → gap via the original curve.
+  // Same grid math as the original component: count → gap via its curve.
   LineRipple.prototype._setLines = function () {
     var w = this._w, h = this._h;
     var c = this._count;
@@ -158,6 +179,36 @@
   LineRipple.prototype.setStroke = function (color) {
     this._stroke = color;
     this._path.setAttribute('stroke', color);
+  };
+
+  // v47: rebuild the protection mask. areas = [
+  //   { type:'image', x, y, w, h, href }  → the logo itself (its alpha shape)
+  //   { type:'rect',  x, y, w, h, rx }    → padded text/button blocks
+  // ] Coordinates are the layer's own pixel space (the host is fixed to the
+  // viewport, so client rects map 1:1).
+  LineRipple.prototype.setProtected = function (areas) {
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var keep = [this._maskBase];
+    while (this._mask.childNodes.length > 1) this._mask.removeChild(this._mask.lastChild);
+    (areas || []).forEach(function (a) {
+      if (!a || !(a.w > 1) || !(a.h > 1)) return;
+      var el;
+      if (a.type === 'image' && a.href) {
+        el = document.createElementNS(svgNS, 'image');
+        el.setAttribute('href', a.href);
+        el.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      } else {
+        el = document.createElementNS(svgNS, 'rect');
+        el.setAttribute('rx', String(a.rx || 8));
+      }
+      el.setAttribute('x', a.x.toFixed(1));
+      el.setAttribute('y', a.y.toFixed(1));
+      el.setAttribute('width', a.w.toFixed(1));
+      el.setAttribute('height', a.h.toFixed(1));
+      el.setAttribute('fill', '#000'); // black in the mask = not drawable
+      this._mask.appendChild(el);
+      keep.push(el);
+    }, this);
   };
 
   LineRipple.prototype.dispose = function () {

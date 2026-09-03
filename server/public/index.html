@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="46">
+<meta name="aa-ui-version" content="47">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -35,6 +35,7 @@ try {
     --danger-bg:#2a1218; --danger-tx:#ff9db1; --danger-bd:#6e2536;
     --info-bg:#101b2e; --info-tx:#8fc7ff; --info-bd:#274a75;
     --canvas-bg:#150f26; --canvas-tx:#cbb7ff; --canvas-bd:#4a3670;
+    --btn-line:#2c2142; /* v47: outlined-button border — dark unchanged; light = brand pink */
     --icon-strong:#ffffff; --on-accent:#0b0612;
   }
   * { box-sizing:border-box; }
@@ -54,7 +55,7 @@ try {
   button:hover { filter:brightness(1.15); }
   button.secondary { background:transparent; border:1px solid var(--pink); color:var(--text); }
   button.secondary:hover { filter:none; background:rgba(123,44,255,.15); }
-  button.mini { background:transparent; border:1px solid var(--line); color:var(--muted); font-size:12px; padding:3px 10px; margin:0 0 0 8px; font-weight:400; }
+  button.mini { background:transparent; border:1px solid var(--btn-line); color:var(--muted); font-size:12px; padding:3px 10px; margin:0 0 0 8px; font-weight:400; }
   button.mini:hover { color:var(--text); border-color:var(--purple); filter:none; }
   button.danger { background:transparent; border:1px solid var(--pink); color:var(--pink); width:100%; }
   button:disabled { opacity:.4; cursor:not-allowed; filter:none; }
@@ -164,7 +165,7 @@ try {
   .challenge-val { font-weight:700; text-align:right; }
   /* ---------------- time limit: presets + custom (v13) --------------------- */
   .time-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
-  .time-chip { padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--text); font-size:13px; cursor:pointer; }
+  .time-chip { padding:6px 12px; border-radius:999px; border:1px solid var(--btn-line); background:var(--surface); color:var(--text); font-size:13px; cursor:pointer; }
   .time-chip:hover { border-color:var(--pink); }
   .time-chip.on { background:var(--pink); border-color:var(--pink); color:var(--on-accent); font-weight:700; }
   .time-block { display:block; margin:12px 0; font-size:14px; color:var(--muted); }
@@ -207,7 +208,7 @@ try {
   .canvas-preferred { position:absolute; top:-8px; right:12px; font-size:9px; font-weight:800; letter-spacing:1px; padding:2px 8px; border-radius:999px; background:linear-gradient(90deg,var(--pink),var(--purple)); color:#fff; box-shadow:0 2px 10px rgba(255,60,172,.4); white-space:nowrap; }
   .canvas-check { flex:0 0 auto; display:none; color:var(--pink); }
   .canvas-card.selected .canvas-check { display:inline-flex; }
-  .canvas-change { margin:12px 0 0; background:transparent; border:1px solid var(--line); color:var(--muted); font-size:12px; padding:6px 12px; border-radius:999px; }
+  .canvas-change { margin:12px 0 0; background:transparent; border:1px solid var(--btn-line); color:var(--muted); font-size:12px; padding:6px 12px; border-radius:999px; }
   .canvas-change:hover { color:var(--text); border-color:var(--pink); filter:none; background:rgba(255,60,172,.08); }
   .canvas-hint { font-size:12px; color:var(--muted); margin:10px 0 0; }
   .state-chip.canvas { color:var(--canvas-tx); border-color:var(--canvas-bd); background:var(--canvas-bg); }
@@ -266,7 +267,7 @@ try {
   .social-divider { display:flex; align-items:center; gap:12px; margin:24px 0 14px; color:var(--muted); font-size:13px; white-space:nowrap; }
   .social-divider::before, .social-divider::after { content:''; flex:1; height:1px; background:var(--line); }
   .social-row { display:flex; justify-content:center; gap:18px; }
-  .social-btn { width:56px; height:56px; border-radius:50%; border:1px solid var(--line); background:var(--surface); padding:0; margin-top:0; display:flex; align-items:center; justify-content:center; color:var(--icon-strong); }
+  .social-btn { width:56px; height:56px; border-radius:50%; border:1px solid var(--btn-line); background:var(--surface); padding:0; margin-top:0; display:flex; align-items:center; justify-content:center; color:var(--icon-strong); }
   .social-btn:hover { border-color:var(--purple); filter:none; background:rgba(123,44,255,.12); }
   /* v28: the Google button is "armed" only when the server reports real
      credentials (GET /api/auth/google/status) — no deployment can show a
@@ -377,8 +378,12 @@ try {
      inside the already-transparent home view; all other children are lifted
      above it. min-height keeps the animation spanning the viewport even
      when the content itself is short. */
-  #view-arena { position:relative; min-height:calc(100vh - 150px); min-height:calc(100dvh - 150px); }
-  #home-bg { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); display:none; }
+  #view-arena { position:relative; }
+  /* v47: the ripple layer is FIXED to the viewport, so the animation spans
+     the ENTIRE homepage background (edge to edge) instead of a boxed area.
+     It renders at reduced opacity (line-ripple.js) and is masked away from
+     the logo (1.5x its own shape), all text and every button. */
+  #home-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); display:none; }
   #home-bg.on { display:block; }
   #view-arena > *:not(#home-bg) { position:relative; z-index:1; }
   .home-logo { margin:14px 0 0; display:flex; justify-content:center; }
@@ -520,13 +525,14 @@ try {
     --danger-bg:#fdeef1; --danger-tx:#b02a53; --danger-bd:#f3b8c6;
     --info-bg:#eaf3ff; --info-tx:#2b6cb0; --info-bd:#a9cdf0;
     --canvas-bg:#f3edfd; --canvas-tx:#5b3fa8; --canvas-bd:#cbb9ec;
+    --btn-line:#FF3CAC; /* v47: outlined buttons go pink in Light Mode */
     --icon-strong:#241a3d;
   }
   html[data-theme="light"] input, html[data-theme="light"] textarea, html[data-theme="light"] select { background:#ffffff; }
   html[data-theme="light"] .time-modal { box-shadow:0 24px 70px rgba(36,26,61,.3); }
   html[data-theme="light"] .toast { box-shadow:0 8px 24px rgba(36,26,61,.22); }
   .theme-row { display:flex; gap:8px; margin-top:6px; }
-  .theme-opt { flex:1; margin:0; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--text); font:inherit; font-weight:700; font-size:13px; letter-spacing:.4px; cursor:pointer; }
+  .theme-opt { flex:1; margin:0; padding:9px 12px; border-radius:10px; border:1px solid var(--btn-line); background:var(--surface); color:var(--text); font:inherit; font-weight:700; font-size:13px; letter-spacing:.4px; cursor:pointer; }
   .theme-opt.active { border-color:var(--pink); box-shadow:0 0 0 1px var(--pink), 0 0 14px rgba(255,60,172,.25); }
 </style>
 </head>
@@ -1020,16 +1026,6 @@ try {
     <div class="list-card">
       <button type="button" class="list-row" data-view="battlehistory"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg><span>Battle History</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
       <div class="list-sep"></div>
-      <button type="button" class="list-row" data-view="savedartworks"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 4.5-4 3.5 3 3-2.5 4 3.5"/></svg><span>Saved Artworks</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
-      <button type="button" class="list-row" data-view="settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg><span>Settings</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
-    </div>
-
-  </section>
-
-  <!-- ================== SETTINGS (v45: its own dedicated page) ============= -->
-  <section id="view-settings" class="view hidden">
-    <h1>SETTINGS</h1>
-    <div class="msg" id="msg-settings"></div>
     <div id="profile-edit-panel">
       <form id="form-profile">
         <h2>Edit Profile</h2>
@@ -1040,19 +1036,31 @@ try {
           <label>Drawing app<select name="drawing_app_key" id="app-select"></select></label>
         </div>
         <label class="check"><input type="checkbox" name="is_discoverable"> Discoverable in “Find Artists”</label>
-        <!-- v44: appearance setting — Dark is the default Art Arena theme;
-             Light is opt-in. Saved on this device (localStorage). -->
-        <label>Appearance
-          <div class="theme-row" role="group" aria-label="Appearance">
-            <button type="button" class="theme-opt active" id="theme-dark">DARK</button>
-            <button type="button" class="theme-opt" id="theme-light">LIGHT</button>
-          </div>
-        </label>
         <button type="submit" id="btn-save-profile">Save profile</button>
       </form>
     </div>
 
-    <button id="btn-logout" class="danger">Log out</button>
+        <button id="btn-logout" class="danger">Log out</button>
+    <button type="button" class="list-row" data-view="savedartworks"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 4.5-4 3.5 3 3-2.5 4 3.5"/></svg><span>Saved Artworks</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
+    </div>
+
+  </section>
+
+  <!-- ================== SETTINGS (v45: its own dedicated page) ============= -->
+  <section id="view-settings" class="view hidden">
+    <h1>SETTINGS</h1>
+    <!-- v47: Settings is deliberately SIMPLE — just the Appearance control
+         for now. Edit Profile and Log out live on the Profile page, where
+         profile-related actions belong. -->
+    <div class="settings-appearance">
+      <label>Appearance
+        <div class="theme-row" role="group" aria-label="Appearance">
+          <button type="button" class="theme-opt active" id="theme-dark">DARK</button>
+          <button type="button" class="theme-opt" id="theme-light">LIGHT</button>
+        </div>
+      </label>
+      <p class="muted" style="font-size:13px; text-align:center; margin:14px 0 0">Dark is the classic Art Arena look; Light is easier on the eyes in bright rooms. Saved on this device.</p>
+    </div>
   </section>
 
   <!-- ================== BATTLE HISTORY (v29, real data) ================== -->
@@ -1191,11 +1199,11 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v46</span>
+  <span id="ui-version-badge">v47</span>
 
 <script>
 'use strict';
-console.log('Art Arena UI v46 (theme & matchmaking pass: dark chrome tokens repaired, theme-aware login backdrop + light/dark auth page, adaptive social icons, theme preserved across logout, Settings keeps the theme controls, matchmaking timer counts UP from 00:00, homepage Line Ripple background in both themes, planet stays gone)');
+console.log('Art Arena UI v47 (home pass: Line Ripple made subtle and viewport-wide with a logo/text/button protection mask, matchmaking timer starts at 00:00 instantly, Settings simplified to theme-only with Edit Profile back on Profile, light-mode outlined buttons use the brand pink, drawer auto-closes on navigation)');
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -1493,6 +1501,7 @@ function startHomeBg() {
   }
   try {
     homeBgScene = new window.LineRipple(host, { strokeColor: homeBgStroke() });
+    armHomeBgProtection();
   } catch (e) {
     console.warn('[home-bg] animation unavailable:', e.message);
     homeBgScene = null;
@@ -1502,6 +1511,65 @@ function stopHomeBg() {
   if (homeBgScene) { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
   const host = $('#home-bg');
   if (host) host.classList.remove('on');
+  disarmHomeBgProtection();
+}
+// v47: the PROTECTION MASK — the ripple never draws over the logo (a 1.5x
+// zone in the logo's OWN shape, painted with the logo image itself), any
+// text (padding scales with the text size), or any button / the LIVE
+// BATTLES strip. The mask follows layout: scroll, resize and DOM changes
+// all recompute it (rAF-throttled) so the protected zones track the page.
+function homeBgProtectedAreas() {
+  const areas = [];
+  const logo = document.querySelector('#view-arena .home-logo img');
+  if (logo) {
+    const r = logo.getBoundingClientRect();
+    const w = r.width * 1.5, h = r.height * 1.5;
+    areas.push({ type: 'image', x: r.left - (w - r.width) / 2, y: r.top - (h - r.height) / 2, w: w, h: h, href: logo.currentSrc || logo.src });
+  }
+  const els = document.querySelectorAll(
+    '#view-arena h1, #view-arena h2, #view-arena h3, #view-arena p, #view-arena button, #view-arena a, ' +
+    '#view-arena .home-tagline, #view-arena .hc-label, #view-arena .live-block, #view-arena .live-title, ' +
+    '#view-arena .badge, #view-arena .muted'
+  );
+  els.forEach((el) => {
+    if (el.closest('.hidden')) return;
+    const r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return;
+    const fs = parseFloat(getComputedStyle(el).fontSize) || 14;
+    const pad = Math.max(6, Math.round(fs * 0.35)); // bigger text → bigger cushion
+    areas.push({ type: 'rect', x: r.left - pad, y: r.top - pad, w: r.width + pad * 2, h: r.height + pad * 2, rx: Math.min(14, pad) });
+  });
+  return areas;
+}
+function updateHomeBgMask() {
+  if (homeBgScene && homeBgScene.setProtected) homeBgScene.setProtected(homeBgProtectedAreas());
+}
+let homeBgMaskRaf = 0, homeBgMo = null, homeBgProtectionArmed = false, homeBgMaskPoll = null;
+function scheduleHomeBgMask() {
+  if (homeBgMaskRaf) return;
+  homeBgMaskRaf = requestAnimationFrame(() => { homeBgMaskRaf = 0; updateHomeBgMask(); });
+}
+function armHomeBgProtection() {
+  updateHomeBgMask();
+  if (homeBgProtectionArmed) return;
+  homeBgProtectionArmed = true;
+  window.addEventListener('scroll', scheduleHomeBgMask, { passive: true });
+  window.addEventListener('resize', scheduleHomeBgMask);
+  try {
+    homeBgMo = new MutationObserver(scheduleHomeBgMask);
+    homeBgMo.observe($('#view-arena'), { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+  } catch (_) {}
+  // Late layout shifts (avatar images loading, strip re-renders) change no
+  // observed attribute — a light 1 s refresh keeps the zones exact.
+  if (!homeBgMaskPoll) homeBgMaskPoll = setInterval(() => { if (homeBgScene) updateHomeBgMask(); }, 1000);
+}
+function disarmHomeBgProtection() {
+  if (homeBgMaskRaf) { cancelAnimationFrame(homeBgMaskRaf); homeBgMaskRaf = 0; }
+  if (homeBgMaskPoll) { clearInterval(homeBgMaskPoll); homeBgMaskPoll = null; }
+  if (homeBgMo) { homeBgMo.disconnect(); homeBgMo = null; }
+  window.removeEventListener('scroll', scheduleHomeBgMask);
+  window.removeEventListener('resize', scheduleHomeBgMask);
+  homeBgProtectionArmed = false;
 }
 
 // v38: About shows the REAL app version (the same source the silent guard
@@ -1652,9 +1720,16 @@ $('#open-inbox-verify').addEventListener('click', () => openInbox('verify'));
 $('#open-inbox-reset').addEventListener('click', () => openInbox('reset'));
 $('#open-inbox-verify2').addEventListener('click', () => openInbox('verify2'));
 
-document.querySelectorAll('[data-view]').forEach((a) =>
-  a.addEventListener('click', (e) => { e.preventDefault(); show(a.dataset.view); })
-);
+// v47: navigation clicks are DELEGATED, so they keep working no matter when
+// the nav is (re)rendered — and any navigation from the drawer/menu panel
+// now closes it automatically. Nobody has to dismiss the panel by hand.
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('[data-view]');
+  if (!a) return;
+  e.preventDefault();
+  show(a.dataset.view);
+  closeDrawer();
+});
 
 // ------------------- v26: LIVE BATTLES strip on the homepage --------------
 // Fed by the SAME coalesced, change-detected room-list fetch as the Rooms
@@ -2825,10 +2900,18 @@ async function enterAccount() {
     await renderAccount(d);
     startNotifDotPolling(); // v38: real unread indicator for this session
   } catch (err) {
-    setSessionToken(null);
-    rtClose();
-    rt.status = 'off'; rtChip();
-    show('login');
+    // v47: ONLY a real auth rejection ends the session. A render error must
+    // NOT silently log the user out — it is logged loudly and the (valid)
+    // session is kept so a reload recovers instead of losing the login.
+    if (err && err.message === 'Not authenticated.') {
+      setSessionToken(null);
+      rtClose();
+      rt.status = 'off'; rtChip();
+      show('login');
+    } else {
+      console.error('[enterAccount] profile render failed (session kept):', err);
+      rtChip();
+    }
     throw err; // the caller (login/init) shows the right message
   }
 }
@@ -3111,6 +3194,7 @@ const mm = (() => {
   const TIMEOUT_MS = 180000; // spec: 3 minutes — exact, deadline-based
   let state = 'idle'; // idle | searching | found | failed | cancelling
   let tickT = null, pollT = null, proceedT = null, deadlineAt = null;
+  let enterStartT = 0; // v47: local t0 — the timer runs from the FIRST frame, before the API answers
   let opponent = null;
 
   const fmtClock = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
@@ -3128,7 +3212,15 @@ const mm = (() => {
   // now derives the ELAPSED time from it instead of showing a countdown,
   // and the timeout itself is unchanged.
   function tickClock() {
-    if (state !== 'searching' || !deadlineAt) return;
+    if (state !== 'searching') return;
+    // v47: with no server anchor yet, the clock runs on the local t0 set the
+    // instant the search began (00:00 → 00:01 → … immediately). Once the
+    // enter response lands, the SAME tick derives elapsed from the server's
+    // deadline so a refresh can never disagree — the handover is seamless.
+    if (!deadlineAt) {
+      $('#mm-timer').textContent = fmtSearchClock(Math.floor((Date.now() - enterStartT) / 1000));
+      return;
+    }
     const remainMs = deadlineAt - Date.now();
     if (remainMs <= 0) {
       fail('No available artists in the last 3 minutes \u2014 give it another try.');
@@ -3276,6 +3368,7 @@ const mm = (() => {
     state = 'searching';
     opponent = null;
     deadlineAt = null;
+    enterStartT = Date.now(); // v47: tick from THIS instant — no API wait
     resetOppSlot();
     paintMySlot();
     paintSearching();
@@ -3789,7 +3882,7 @@ $('#form-profile').addEventListener('submit', async (e) => {
     }, 'PUT');
     await renderAccount(d); // updated profile information, immediately
     closeProfileEdit();     // v45: lock the form; success message on THIS page
-    msg('msg-settings', 'Profile saved.', true);
+    msg('msg-account', 'Profile saved.', true); // v47: the form lives on Profile again
   } catch (err) {
     // v38: failure → the panel STAYS open with the error visible (retryable).
     if (!handleAuthError(err)) msg('msg-account', err.message, false);
