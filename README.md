@@ -924,8 +924,8 @@ sudo apt-get update -qq
 sudo apt-get install -y -qq postgresql postgresql-contrib
 sudo pg_ctlcluster 17 main start
 sudo -u postgres createdb art_arena
-cp ../schema/art_arena_foundation.sql /tmp/ && chmod 644 /tmp/art_arena_foundation.sql
-sudo -u postgres psql -v ON_ERROR_STOP=1 -d art_arena -f /tmp/art_arena_foundation.sql
+cp server/schema.sql /tmp/ && chmod 644 /tmp/schema.sql
+sudo -u postgres psql -v ON_ERROR_STOP=1 -d art_arena -f /tmp/schema.sql
 # 2. App role (or reuse credentials from .env)
 #    NOTE: run GRANTs with `-d art_arena` (running against the default
 #    `postgres` db is a silent no-op — this bit us once).

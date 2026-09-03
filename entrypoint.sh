@@ -1,8 +1,11 @@
 #!/bin/bash
 # ============================================================================
 # Art Arena on Render — container entrypoint
-# First boot: if the Neon database is empty, load the embedded full dump,
-# then start the app. On every later boot the existing data is kept.
+# First boot: if the database is empty, create the schema from the embedded
+# server/schema.sql (pure DDL + static platform rows — no user data). The
+# app then seeds the randomizer word pool itself on startup. Every later
+# boot keeps the existing data. (A full dump at /app/backups/latest.sql is
+# still honored if one is mounted/built in, but none is required.)
 # ============================================================================
 set -e
 
@@ -25,13 +28,28 @@ if [ -z "$N" ]; then
 fi
 
 if [ "$N" = "0" ]; then
-  echo "[entrypoint] first boot: loading embedded dump into Neon..."
+  # Prefer a full dump if one was built in (backward compatible); otherwise
+  # fall back to the schema-only bootstrap that ships with the app code.
+  if [ -f /app/backups/latest.sql ]; then
+    SEED=/app/backups/latest.sql
+    echo "[entrypoint] first boot: loading embedded dump into the database..."
+  elif [ -f /app/schema.sql ]; then
+    SEED=/app/schema.sql
+    echo "[entrypoint] first boot: creating schema from server/schema.sql (no dump needed)..."
+  else
+    echo "[entrypoint] ERROR: database is empty and no bootstrap file was found"
+    echo "[entrypoint] (expected /app/schema.sql inside the image)."
+    exit 1
+  fi
   # strip pg_dump-17-only guard lines so psql accepts the file
-  grep -vE '^\\(restrict|unrestrict)' /app/backups/latest.sql \
+  grep -vE '^\\(restrict|unrestrict)' "$SEED" \
     | psql "$DATABASE_URL" -q -v ON_ERROR_STOP=0 2>&1 | grep -E 'ERROR|FATAL' | head -10 || true
   N=$(psql "$DATABASE_URL" -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" | tr -d '[:space:]')
   echo "[entrypoint] public tables: $N"
-  echo "[entrypoint] users: $(psql "$DATABASE_URL" -tAc 'SELECT count(*) FROM users' 2>/dev/null || echo '?')"
+  if [ "$N" = "0" ]; then
+    echo "[entrypoint] ERROR: bootstrap loaded no tables — check the database credentials/permissions."
+    exit 1
+  fi
 else
   echo "[entrypoint] database has $N public tables — keeping existing data"
 fi

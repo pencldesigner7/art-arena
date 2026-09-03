@@ -783,6 +783,14 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
         WHERE NOT EXISTS (SELECT 1 FROM battle_rooms r WHERE r.id = rs.room_id)`);
     console.log('MIGRATE v44: one-active-seat guard, rematch_requests, room archive (deleted_at), single-challenge guard, one-result-per-battle');
   } catch (e) { console.error('[migrate] v44 migration failed:', e.message); }
+      // v44.1 (deploy fix): seed.js upserts the word pool with ON CONFLICT
+    // (category, name) — existing databases need the matching unique index
+    // or a fresh wipe + re-seed would silently fail.
+    try {
+      await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_randomizer_element_name
+                          ON randomizer_elements (category, name)`);
+      console.log('MIGRATE v44.1: randomizer pool unique index ready (seed.js ON CONFLICT target)');
+    } catch (e) { console.error('[migrate] v44.1 pool index failed (duplicates?):', e.message); }
   // Phase 6: self-seed the randomizer word pool (no-op when already loaded).
   try { await ensureRandomizerSeed(); }
   catch (e) { console.error('[seed] randomizer pool seeding failed:', e.message); }

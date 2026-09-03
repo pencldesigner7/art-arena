@@ -9,6 +9,6 @@ dev-outbox.json
 server/avatars/
 *.log
 
-# local DB dumps (the sanitized first-boot seed lives in backups/latest.sql)
+# local DB dumps (first-boot schema bootstrap is server/schema.sql, committed)
 latest.sql
 *.sql.dump

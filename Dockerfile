@@ -1,11 +1,14 @@
 # Art Arena — app container for Render (free tier)
 #
 # Postgres lives on NEON (external, persistent). The app container is
-# intentionally stateless; the embedded dump below makes first boot
-# self-healing: if the Neon database is empty, the entrypoint loads it.
+# intentionally stateless. First boot is self-healing WITHOUT any database
+# dump: if the Neon database is empty, the entrypoint creates the schema
+# from the embedded server/schema.sql (pure DDL + static platform rows —
+# no user data), and the app itself seeds the 10k+ randomizer word pool
+# from server/randomizer_seed.json on startup.
 FROM node:20-slim
 
-# psql is only used by the entrypoint to load the embedded dump on first boot.
+# psql is only used by the entrypoint to create the schema on first boot.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends postgresql-client \
  && rm -rf /var/lib/apt/lists/*
@@ -16,9 +19,8 @@ WORKDIR /app
 COPY server/package*.json ./
 RUN npm install --omit=dev
 
-# app code + embedded DB dump (safety net) + entrypoint
+# app code + first-boot schema bootstrap (server/schema.sql) + entrypoint
 COPY server/ ./
-COPY backups/latest.sql /app/backups/latest.sql
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
