@@ -625,6 +625,82 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v46 — theme & matchmaking pass (login theme, Apple icon, logout theme, count-up timer, Line Ripple home)
+
+Client (`server/public/index.html`, v46 + NEW `line-ripple.js`):
+- **Login page follows the theme** — the full-viewport auth backdrop (`#login-bg`)
+  was hardcoded dark `#070115`; it now uses `--auth-page-bg` (dark `#070115`,
+  light `#f5f2fa`). Card, text, inputs, buttons and icons were already
+  token-driven from v45; the backdrop completes the page.
+- **Dark chrome tokens REPAIRED (v45 regression)** — v45 accidentally wrote
+  the dark `:root` tokens (`--header-bg/--nav-bg/--scrim*/--ok|warn|danger|info
+  |canvas-*`) as self-references, which are CSS cycles → invalid at computed
+  value time, silently turning dark-mode header glass, nav, scrims and status
+  tints transparent. Restored with the exact v44 dark literals.
+- **Apple icon visibility** — Apple is `currentColor` on `--icon-strong`
+  (white on dark, `#241a3d` on light); Discord keeps brand blurple `#5865F2`
+  and Google stays multicolor — all readable in both themes.
+- **Theme preserved across logout** — logout never touches `aa-theme`; the
+  pre-paint `<head>` script applies the theme before first render, so the
+  login page comes up in the user's theme with no wrong-theme flash.
+- **Settings is the dedicated page** — routed `#view-settings` (drawer +
+  Profile row); the Appearance (Dark/Light) controls live THERE, Profile has
+  none. Verified by battery.
+- **Matchmaking timer counts UP** — `00:00 → 00:01 → …` elapsed search time
+  (still anchored to the server's `queued_at`, so a refresh cannot lie); it
+  freezes when an opponent is found / the search is cancelled, and shows
+  `03:00` only when the 3-minute window genuinely expires. No countdown.
+- **Homepage Line Ripple background** — vanilla port of the user-supplied
+  Originkit component (`line-ripple.js`): same seeded-noise curl physics and
+  grid math, one instance, stroke themed in place (dark `#EA69F1`, light
+  `#F200FF`), mounted only while the home view + session are active and
+  disposed on leave — exactly one background animation ever runs. The light
+  version's page background rides the app's `--bg` (identical `#09070d` in
+  dark; the light paper in light) so it can never seam.
+- **Dead code removed** — `arch-corridor.js` + `vendor/three.min.js` were
+  unreferenced since v45's globe removal; both deleted (~600 KB less per
+  cold load).
+
+Verified: `e2e/v46-browser` 43/43 (the 10-point list + dark-token regression
+guard), `v45-browser` 33/33, `v44-browser` 27/27, `v44` node 50/50,
+`regress` 20/20.
+
+## v45 — 5 reported issues (schema heal, matchmaking visual, Settings page, Light Mode, login linger)
+
+Server (`server/`):
+- **Schema self-heal at boot (the `deleted_at` failure)** — `MIGRATION_STEPS`: an
+  idempotent, ordered ladder where the v45 sweeps (orphaned seats/spectators,
+  duplicate active seats, duplicate results) run BEFORE the v44 DDL, so a
+  pre-v44 database heals instead of crashing on `deleted_at`. Every step is
+  individually guarded; failures are never hidden — `/api/health` gains a
+  `schema` field (`"ok"` | `"incomplete: …"`) and the boot log points at the
+  remediation. Additive only: production data is never wiped.
+  **`migrations-v45.sql` (NEW)** mirrors the ladder for manual psql runs.
+
+Client (`server/public/index.html`, v45):
+- **Matchmaking planet → searching LINE** — globe, scanner, `d3.min.js` and
+  `land.json` fully removed (files deleted from the repo). A pure-CSS line
+  runs between the two player slots: `#mm-link` with `data-mode`
+  `off`/`search`/`connected`; on match it locks solid green. No network
+  requests to dead scripts.
+- **Settings is its own page** — routed `#view-settings` with back nav,
+  reachable from the drawer and a Profile row. The edit form and logout moved
+  there; Profile stays profile-focused; save verified end-to-end via API.
+- **Light Mode completed via tokens** — one palette swap (`:root` +
+  `html[data-theme="light"]`): header/nav/scrims, canvas families, icon
+  colors. White brand icons (Apple) adapt via `currentColor` /
+  `--icon-strong`; auth cards via the new `--auth-card`. Dark remains the
+  default.
+- **Login no longer lingers** — `enterAccount()` renders the homepage the
+  instant authentication exists and fetches the profile behind it (measured
+  ~0.4 s login→homepage, no flicker); a rejected session still bounces back
+  to login with a clear message.
+
+Verified: `e2e/v45-browser` 33/33 (the 10-point list), `v44-browser` 27/27,
+`v44` node 50/50, `regress` 20/20; publish rehearsal — patch applies onto
+`f4e885e` with a bit-identical tree, boots `MIGRATE v44/v45: schema verified
+OK`, `/api/health` → `"schema":"ok"`, two-user matchmaking matches.
+
 ## v44 — 10-item feature + integrity pass (battle lifecycle completion)
 
 Server (`server/`):

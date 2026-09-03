@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="45">
+<meta name="aa-ui-version" content="46">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -21,13 +21,20 @@ try {
     /* v45 theme tokens — chrome + status families (Light Mode overrides these,
        nothing else). --icon-strong is for icons/text ON surfaces (the Apple
        logo etc.); white-on-brand-gradient text stays white in both themes. */
-    --header-bg:var(--header-bg); --nav-bg:var(--nav-bg);
-    --scrim:var(--scrim); --scrim-soft:var(--scrim-soft);
-    --ok-bg:var(--ok-bg); --ok-tx:var(--ok-tx); --ok-bd:var(--ok-bd);
-    --warn-bg:var(--warn-bg); --warn-tx:var(--warn-tx); --warn-bd:var(--warn-bd);
-    --danger-bg:var(--danger-bg); --danger-tx:var(--danger-tx); --danger-bd:var(--danger-bd);
-    --info-bg:var(--info-bg); --info-tx:var(--info-tx); --info-bd:var(--info-bd);
-    --canvas-bg:var(--canvas-bg); --canvas-tx:var(--canvas-tx); --canvas-bd:var(--canvas-bd);
+    /* v46 FIX: these were accidentally self-referential in v45 (a CSS custom
+       property referring to itself is a cycle, invalid at computed-value
+       time, so dark mode silently lost its header/nav glass, scrims and
+       status tints). The values below are the exact v44 dark literals;
+       --header-bg is the dark twin of the v45 light glass header;
+       --auth-card/--auth-page-bg theme the auth card + backdrop. */
+    --header-bg:rgba(9,7,13,.88); --nav-bg:rgba(13,9,23,.97);
+    --auth-card:rgba(13,9,23,.82); --auth-page-bg:#070115;
+    --scrim:rgba(5,3,10,.74); --scrim-soft:rgba(5,3,10,.62);
+    --ok-bg:#10241a; --ok-tx:#7fe0a8; --ok-bd:#1f5c3a;
+    --warn-bg:#2a1e10; --warn-tx:#ffd27f; --warn-bd:#6e5325;
+    --danger-bg:#2a1218; --danger-tx:#ff9db1; --danger-bd:#6e2536;
+    --info-bg:#101b2e; --info-tx:#8fc7ff; --info-bd:#274a75;
+    --canvas-bg:#150f26; --canvas-tx:#cbb7ff; --canvas-bd:#4a3670;
     --icon-strong:#ffffff; --on-accent:#0b0612;
   }
   * { box-sizing:border-box; }
@@ -218,14 +225,18 @@ try {
   .field:focus-within { box-shadow:0 0 0 1px rgba(123,44,255,.5), 0 0 14px rgba(255,60,172,.3), 0 0 30px rgba(123,44,255,.28); transform:translateY(-2px); }
   .login-btn:hover { box-shadow:0 0 12px rgba(255,60,172,.5), 0 0 28px rgba(123,44,255,.4); transform:translateY(-2px); }
   /* NOTE: .social-btn (Google/Apple/Discord) deliberately has NO glow hover. */
-  /* ---------------- v36: login background structure -------------------------
-     The Arch Corridor animation (user-supplied, arch-corridor.js + vendored
-     three.js) renders its canvas into #login-bg: a full-viewport FIXED layer
-     sitting BEHIND the entire auth page — z-index 0 and pointer-events:none,
-     so it can never intercept a click or a keystroke. The auth views are
-     positioned above it (z-index 1). The layer is display:none unless an
-     auth view is on screen, so it costs nothing while logged in. */
-  #login-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:#070115; display:none; }
+  /* ---------------- login background structure -----------------------------
+     The Glitter Wrap starfield (glitter-wrap.js, the vanilla port of the
+     user-supplied component) renders its canvas into #login-bg: a full-
+     viewport FIXED layer sitting BEHIND the entire auth page (z-index 0,
+     pointer-events:none, so it can never intercept a click or a keystroke).
+     The auth views are positioned above it (z-index 1). The layer is
+     display:none unless an auth view is on screen, so it costs nothing while
+     logged in. v46: the backdrop follows the THEME via --auth-page-bg (the
+     starfield's brand hues read on both dark and light). The old Arch
+     Corridor effect (arch-corridor.js + three.min.js) is gone; nothing
+     referenced it anymore. */
+  #login-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--auth-page-bg); display:none; }
   #login-bg.on { display:block; }
   #view-login, #view-register, #view-forgot { position:relative; z-index:1; background:var(--auth-card); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
   /* v36: full-screen 3-2-1 battle countdown — rendered above everything
@@ -362,6 +373,14 @@ try {
   #bottom-nav button.tab.active::after { background:var(--pink); }
   /* --- homepage (arena home = the main screen) --- */
   .home-view { background:transparent; border:0; border-radius:0; padding:6px 0 0; text-align:center; }
+  /* v46: the homepage Line Ripple background (line-ripple.js) - a layer
+     inside the already-transparent home view; all other children are lifted
+     above it. min-height keeps the animation spanning the viewport even
+     when the content itself is short. */
+  #view-arena { position:relative; min-height:calc(100vh - 150px); min-height:calc(100dvh - 150px); }
+  #home-bg { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); display:none; }
+  #home-bg.on { display:block; }
+  #view-arena > *:not(#home-bg) { position:relative; z-index:1; }
   .home-logo { margin:14px 0 0; display:flex; justify-content:center; }
   .home-logo img { width:min(352px,100%); height:auto; display:block; }
   .home-tagline { margin:20px 0 28px; }
@@ -494,7 +513,7 @@ try {
   html[data-theme="light"] {
     --bg:#f5f2fa; --panel:#ffffff; --line:#e3daf0; --text:#241a3d; --muted:#6e6390;
     --surface:#f7f4fc; --surface-hover:#efe8f9; --surface-2:#ece5f7;
-    --header-bg:rgba(255,255,255,.92); --nav-bg:rgba(255,255,255,.97); --auth-card:rgba(255,255,255,.88);
+    --header-bg:rgba(255,255,255,.92); --nav-bg:rgba(255,255,255,.97); --auth-card:rgba(255,255,255,.88); --auth-page-bg:#f5f2fa;
     --scrim:rgba(36,26,61,.45); --scrim-soft:rgba(36,26,61,.4);
     --ok-bg:#e9f9f0; --ok-tx:#137a4a; --ok-bd:#9fe0c2;
     --warn-bg:#fdf4e0; --warn-tx:#8a6116; --warn-bd:#ecd39a;
@@ -626,6 +645,7 @@ try {
        three action cards, LIVE BATTLES strip. App shell: hamburger + bell
        top bar, drawer menu, SVG bottom nav. -->
   <section id="view-arena" class="view home-view hidden">
+    <div id="home-bg" aria-hidden="true"></div>
     <div class="home-logo"><img src="/logo.png" alt="Art Arena" width="352" height="145"></div>
     <div class="auth-tagline home-tagline">WELCOME TO THE <span>ARENA.</span></div>
 
@@ -741,7 +761,7 @@ try {
     <div class="mm-status" id="mm-status">
       <div class="mm-status-main" id="mm-status-main">Connecting<span class="mm-dots"><span>.</span><span>.</span><span>.</span></span></div>
       <div class="mm-status-sub" id="mm-status-sub">Art Arena is searching for an artist</div>
-      <div class="mm-timer" id="mm-timer">3:00</div>
+      <div class="mm-timer" id="mm-timer">00:00</div>
     </div>
 
     <div class="mm-actions hidden" id="mm-actions"><button type="button" class="secondary" id="mm-cancel">Cancel Search</button></div>
@@ -1171,11 +1191,11 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v45</span>
+  <span id="ui-version-badge">v46</span>
 
 <script>
 'use strict';
-console.log('Art Arena UI v45 (deploy-fix pack: self-healing v44/v45 migrations + schema health, matchmaking searching LINE replaces the planet, dedicated Settings page, complete token-driven Light Mode, instant login→homepage transition)');
+console.log('Art Arena UI v46 (theme & matchmaking pass: dark chrome tokens repaired, theme-aware login backdrop + light/dark auth page, adaptive social icons, theme preserved across logout, Settings keeps the theme controls, matchmaking timer counts UP from 00:00, homepage Line Ripple background in both themes, planet stays gone)');
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -1269,6 +1289,8 @@ function applyTheme(t) {
   try { localStorage.setItem('aa-theme', light ? 'light' : 'dark'); } catch (_) {}
   const d = $('#theme-dark'), l = $('#theme-light');
   if (d && l) { d.classList.toggle('active', !light); l.classList.toggle('active', light); }
+  // v46: the homepage Line Ripple follows the theme switch in place.
+  try { if (homeBgScene) homeBgScene.setStroke(light ? '#F200FF' : '#EA69F1'); } catch (_) {}
 }
 $('#theme-dark').addEventListener('click', () => applyTheme('dark'));
 $('#theme-light').addEventListener('click', () => applyTheme('light'));
@@ -1436,6 +1458,52 @@ function stopLoginBg() {
 // very first frame; init()/show() will dispose it if the user is logged in.
 if (!$('#view-login').classList.contains('hidden')) startLoginBg();
 
+// v46: the homepage Line Ripple background (line-ripple.js, the vanilla
+// port of the Originkit component the user supplied, in a dark and a light
+// palette). Same lifecycle discipline as the auth starfield: mounted ONLY
+// while the arena (home) view is on screen AND the user is logged in,
+// disposed on leave - exactly one background animation is ever active. The
+// stroke follows the theme (dark #EA69F1 / light #F200FF) and the layer
+// paints var(--bg) so it can never seam against the page.
+var homeBgScene = null;
+function homeBgStroke() {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? '#F200FF' : '#EA69F1';
+}
+function startHomeBg() {
+  const host = $('#home-bg');
+  if (!host) return;
+  host.classList.add('on');
+  if (homeBgScene) { homeBgScene.setStroke(homeBgStroke()); return; }
+  if (!window.LineRipple) {
+    // same fresh-tab race guard as the auth starfield: the app script runs
+    // before the effect scripts at the bottom of <body>; retry until they
+    // arrive, then mount if the home view is still the one on screen.
+    if (!startHomeBg._armed) {
+      startHomeBg._armed = true;
+      const wantIt = () => currentView === 'arena' && !!sessionToken;
+      window.addEventListener('load', () => { if (wantIt()) startHomeBg(); });
+      let tries = 0;
+      const t = setInterval(() => {
+        tries++;
+        if (homeBgScene || !wantIt() || tries > 40) { clearInterval(t); return; }
+        if (window.LineRipple) { clearInterval(t); startHomeBg(); }
+      }, 250);
+    }
+    return; // script missing/blocked; plain bg (retry armed above)
+  }
+  try {
+    homeBgScene = new window.LineRipple(host, { strokeColor: homeBgStroke() });
+  } catch (e) {
+    console.warn('[home-bg] animation unavailable:', e.message);
+    homeBgScene = null;
+  }
+}
+function stopHomeBg() {
+  if (homeBgScene) { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
+  const host = $('#home-bg');
+  if (host) host.classList.remove('on');
+}
+
 // v38: About shows the REAL app version (the same source the silent guard
 // compares against — never a hardcoded string).
 function paintAbout() {
@@ -1477,7 +1545,8 @@ function show(name) {
   rtSyncSubscriptions();
   // v38: any route into an auth view also closes the drawer (defense in
   // depth — the dashboard chrome can never linger beside the login page).
-  if (AUTH_BG_VIEWS.includes(name)) { closeDrawer(); startLoginBg(); } else stopLoginBg();
+  if (AUTH_BG_VIEWS.includes(name)) { closeDrawer(); startLoginBg(); stopHomeBg(); }
+  else { stopLoginBg(); if (name === 'arena' && sessionToken) startHomeBg(); else stopHomeBg(); }
 }
 
 async function api(path, body, method) {
@@ -3045,16 +3114,19 @@ const mm = (() => {
   let opponent = null;
 
   const fmtClock = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  // v46: the matchmaking search clock counts UP from zero.
+  const fmtSearchClock = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 
   function clearTimers() {
     for (const t of [tickT, pollT]) { if (t) clearInterval(t); }
     tickT = pollT = null;
   }
-  // v42: deadline-based clock — the displayed countdown is ALWAYS derived
-  // from (deadlineAt - now), never decremented. deadlineAt comes from the
-  // SERVER (queued_at + exactly 180 s), so the display and the server's own
-  // 180 s expiry share one anchor: the timeout can only trigger once the
-  // full 3 minutes have genuinely elapsed.
+  // v46: the timer COUNTS UP - it shows how long the artist has been
+  // searching (00:00, 00:01, ...) until an opponent is found, the search is
+  // cancelled, or the session ends. The server's 180 s queue expiry stays
+  // the single anchor (deadlineAt, = queued_at + exactly 180 s); the display
+  // now derives the ELAPSED time from it instead of showing a countdown,
+  // and the timeout itself is unchanged.
   function tickClock() {
     if (state !== 'searching' || !deadlineAt) return;
     const remainMs = deadlineAt - Date.now();
@@ -3062,7 +3134,8 @@ const mm = (() => {
       fail('No available artists in the last 3 minutes \u2014 give it another try.');
       return;
     }
-    $('#mm-timer').textContent = fmtClock(Math.max(0, Math.floor(remainMs / 1000)));
+    const elapsed = Math.max(0, Math.floor(180 - remainMs / 1000));
+    $('#mm-timer').textContent = fmtSearchClock(elapsed);
   }
   function paintMySlot() {
     const ava = $('#mm-me-ava');
@@ -3104,7 +3177,7 @@ const mm = (() => {
     $('#mm-status-sub').textContent = 'Art Arena is searching for an artist';
     $('#mm-status-sub').classList.remove('ok');
     $('#mm-timer').classList.remove('hidden');
-    $('#mm-timer').textContent = fmtClock(180); // full 3:00 — counts DOWN to 0:00
+    $('#mm-timer').textContent = '00:00'; // v46: counts UP from zero
     $('#mm-actions').classList.remove('hidden');
     $('#mm-fail-actions').classList.add('hidden');
   }
@@ -3168,10 +3241,8 @@ const mm = (() => {
     state = 'found';
     opponent = opp;
     clearTimers();
-    // Freeze the countdown at the real remaining time (deadline-derived).
-    $('#mm-timer').textContent = deadlineAt
-      ? fmtClock(Math.max(0, Math.floor((deadlineAt - Date.now()) / 1000)))
-      : '0:00';
+    // v46: leave the timer showing the ELAPSED search time (it counts UP
+    // now); ticking is already stopped, so the value simply freezes here.
     mmLinkSet('connected'); // v45: the line locks solid green
     paintFound();
     // A brief, intentional "Connected" beat \u2192 straight into the room,
@@ -3195,7 +3266,7 @@ const mm = (() => {
     state = 'failed';
     clearTimers();
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
-    $('#mm-timer').textContent = '0:00'; // the full window has run out
+    $('#mm-timer').textContent = '03:00'; // v46: the full window has run out (elapsed, not a countdown)
     mmLinkSet('off'); // v45: the line goes quiet
     api('/api/matchmaking/cancel', {}).catch(() => {}); // never leave a ghost queue row
     paintFailed(why, title);
@@ -3889,9 +3960,10 @@ window.__aaGoogleHandoff = null;
 })();
 </script>
 <script src="/glitter-wrap.js"></script>
+<script src="/line-ripple.js"></script>
 <!-- v45: the matchmaking globe (globe-wrap.js + d3) and the beacon scanner
-     (mm-scan-wrap.js) are REMOVED — the searching line is pure CSS.
-     three.min.js stays: the login Arch Corridor background uses it. -->
-<script src="/vendor/three.min.js"></script>
+     (mm-scan-wrap.js) are REMOVED; the searching line is pure CSS.
+     v46: arch-corridor.js + vendor/three.min.js are removed too (nothing
+     referenced THREE anymore). line-ripple.js is the homepage background. -->
 </body>
 </html>
