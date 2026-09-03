@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="47">
+<meta name="aa-ui-version" content="48">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -308,6 +308,10 @@ try {
   .list-row:hover { background:rgba(123,44,255,.08); }
   .list-row svg { color:var(--pink); flex:0 0 auto; }
   .list-row .chev { margin-left:auto; color:var(--pink); display:inline-flex; }
+  /* v48: restored verbatim from the original Profile page — the Edit
+     Profile pill in the profile header (toggles the edit panel). */
+  .edit-profile { margin-top:10px; background:transparent; border:1px solid var(--pink); color:var(--text); border-radius:999px; padding:9px 18px; font-size:14px; font-weight:600; letter-spacing:.3px; display:inline-flex; align-items:center; gap:7px; }
+  .edit-profile:hover { background:rgba(123,44,255,.15); filter:none; }
   .list-sep { height:1px; background:var(--line); }
   .hist-row { display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:10px; }
   .hist-room { font-weight:700; }
@@ -374,15 +378,13 @@ try {
   #bottom-nav button.tab.active::after { background:var(--pink); }
   /* --- homepage (arena home = the main screen) --- */
   .home-view { background:transparent; border:0; border-radius:0; padding:6px 0 0; text-align:center; }
-  /* v46: the homepage Line Ripple background (line-ripple.js) - a layer
-     inside the already-transparent home view; all other children are lifted
-     above it. min-height keeps the animation spanning the viewport even
-     when the content itself is short. */
+  /* v48: the homepage Rising Lines background - a layer inside the already-
+     transparent home view; all other children are lifted above it. */
   #view-arena { position:relative; }
-  /* v47: the ripple layer is FIXED to the viewport, so the animation spans
-     the ENTIRE homepage background (edge to edge) instead of a boxed area.
-     It renders at reduced opacity (line-ripple.js) and is masked away from
-     the logo (1.5x its own shape), all text and every button. */
+  /* v48: the Rising Lines layer is FIXED to the viewport, so the animation
+     spans the ENTIRE homepage background (edge to edge). The canvas paints
+     the page color itself in Dark Mode and runs on a transparent frame in
+     Light Mode; no mask/outline system (removed in v48). */
   #home-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; background:var(--bg); display:none; }
   #home-bg.on { display:block; }
   #view-arena > *:not(#home-bg) { position:relative; z-index:1; }
@@ -454,25 +456,23 @@ try {
      needs every pixel of the app's 560px shell column to keep the profile
      circles clear of the globe. Text stays centered; nothing else changes. */
   #view-matchmaking { text-align:center; padding:30px 8px 40px; position:relative; overflow:hidden; }
-  /* v45: the SEARCHING LINE — the planet/globe effect is GONE. Between the
-     two player slots a connection line carries the "actively searching"
-     story: the dashes flow and a runner dot travels from the artist toward
-     the empty seat; the moment an opponent is found the line locks solid
-     green (connected). Pure CSS — no canvas, no three.js, no d3. */
+  /* v45/v48: the SEARCHING LINE — the planet/globe effect is GONE. Between
+     the two player slots a SOLID connection line carries the "actively
+     searching" story: a continuous gradient track with a soft sheen
+     traveling along it (no dashes, no dots, constant visual weight); the
+     moment an opponent is found the line locks solid green. Pure CSS. */
   .mm-stage { position:relative; display:flex; align-items:center; justify-content:space-between; gap:12px; margin:34px auto 6px; max-width:660px; }
   .mm-slot { display:flex; flex-direction:column; align-items:center; gap:10px; flex:0 0 auto; width:150px; }
   .mm-link { flex:1 1 auto; align-self:flex-start; margin-top:47px; height:4px; position:relative; min-width:40px; }
   .mm-link-track { position:absolute; left:0; right:0; top:0; height:3px; border-radius:99px; background:linear-gradient(90deg, var(--purple), var(--pink)); opacity:.18; }
-  .mm-link-runner { position:absolute; top:-3px; left:0; width:10px; height:10px; border-radius:50%; background:var(--pink); box-shadow:0 0 12px rgba(255,60,172,.8); opacity:0; }
-  .mm-link[data-mode="search"] .mm-link-track { opacity:.5; background:repeating-linear-gradient(90deg, var(--pink) 0 12px, transparent 12px 24px); animation:mm-line-flow .7s linear infinite; }
-  .mm-link[data-mode="search"] .mm-link-runner { animation:mm-run 1.5s cubic-bezier(.45,0,.55,1) infinite; }
+  /* v48: SOLID while searching — one continuous track; a soft highlight
+     travels along it via background-position (200%-wide gradient), so the
+     line keeps a constant weight with zero dashes or dots. */
+  .mm-link[data-mode="search"] .mm-link-track { opacity:.55; background:linear-gradient(90deg, var(--purple), var(--pink) 38%, #ff9de8 50%, var(--pink) 62%, var(--purple)); background-size:220% 100%; animation:mm-line-sheen 1.6s linear infinite; box-shadow:0 0 10px rgba(255,60,172,.35); }
   .mm-link[data-mode="connected"] .mm-link-track { opacity:1; background:linear-gradient(90deg, #22c55e, #4ade80); box-shadow:0 0 12px rgba(74,222,128,.5); }
-  .mm-link[data-mode="connected"] .mm-link-runner { left:calc(50% - 5px); opacity:1; background:#4ade80; box-shadow:0 0 14px rgba(74,222,128,.95); }
   .mm-link[data-mode="off"] .mm-link-track { opacity:.12; }
   #mm-stage.cancelled .mm-link { opacity:.4; }
-  #mm-stage.cancelled .mm-link-runner { animation:none; opacity:0; }
-  @keyframes mm-line-flow { to { background-position:24px 0; } }
-  @keyframes mm-run { 0% { left:0; opacity:0; } 10% { opacity:1; } 90% { opacity:1; } 100% { left:calc(100% - 10px); opacity:0; } }
+  @keyframes mm-line-sheen { to { background-position:-220% 0; } }
   @media (max-width: 560px) {
     .mm-slot { width:130px; }      /* the profiles keep their 96px circles —
                                       only the column padding narrows */
@@ -757,7 +757,7 @@ try {
         <div class="mm-ava" id="mm-me-ava">•</div>
         <div class="mm-name" id="mm-me-name">—</div>
       </div>
-      <div class="mm-link" id="mm-link" data-mode="off" aria-hidden="true"><i class="mm-link-track"></i><i class="mm-link-runner"></i></div>
+      <div class="mm-link" id="mm-link" data-mode="off" aria-hidden="true"><i class="mm-link-track"></i></div>
       <div class="mm-slot">
         <div class="mm-ava mm-ava-empty" id="mm-op-ava"><span class="mm-pulse"></span><span class="mm-pulse mm-pulse2"></span><span class="mm-op-q">?</span></div>
         <div class="mm-name mm-name-empty" id="mm-op-name">Searching…</div>
@@ -1012,6 +1012,7 @@ try {
         <div class="prof-sub" id="card-sub">@…</div>
         <!-- v34: bio now actually shows (saved via Edit Profile → bio field) -->
         <p id="card-bio" class="card-bio hidden"></p>
+        <button type="button" id="btn-edit-profile" class="edit-profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5h4L19.6 8.4a2.3 2.3 0 0 0-3.2-3.2L5.3 16.3z"/><path d="m13.5 6.5 3.2 3.2"/></svg><span>Edit Profile</span></button>
               </div>
     </div>
     <input type="file" id="avatar-input" accept="image/png,image/jpeg,image/webp" class="hidden">
@@ -1026,7 +1027,9 @@ try {
     <div class="list-card">
       <button type="button" class="list-row" data-view="battlehistory"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg><span>Battle History</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
       <div class="list-sep"></div>
-    <div id="profile-edit-panel">
+    <button type="button" class="list-row" data-view="savedartworks"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 4.5-4 3.5 3 3-2.5 4 3.5"/></svg><span>Saved Artworks</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
+    </div>
+    <div id="profile-edit-panel" class="hidden">
       <form id="form-profile">
         <h2>Edit Profile</h2>
         <label>Display name<input name="display_name" maxlength="50"></label>
@@ -1041,8 +1044,6 @@ try {
     </div>
 
         <button id="btn-logout" class="danger">Log out</button>
-    <button type="button" class="list-row" data-view="savedartworks"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 17.5 4.5-4 3.5 3 3-2.5 4 3.5"/></svg><span>Saved Artworks</span><span class="chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
-    </div>
 
   </section>
 
@@ -1199,11 +1200,11 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v47</span>
+  <span id="ui-version-badge">v48</span>
 
 <script>
 'use strict';
-console.log('Art Arena UI v47 (home pass: Line Ripple made subtle and viewport-wide with a logo/text/button protection mask, matchmaking timer starts at 00:00 instantly, Settings simplified to theme-only with Edit Profile back on Profile, light-mode outlined buttons use the brand pink, drawer auto-closes on navigation)');
+console.log('Art Arena UI v48 (homepage Rising Lines animation with a live light/dark adaptation, matchmaking timer fully decoupled from the server clock (local monotonic, no jumps), solid matchmaking connection line, Profile page restored to its original structure minus Settings)');
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -1298,7 +1299,7 @@ function applyTheme(t) {
   const d = $('#theme-dark'), l = $('#theme-light');
   if (d && l) { d.classList.toggle('active', !light); l.classList.toggle('active', light); }
   // v46: the homepage Line Ripple follows the theme switch in place.
-  try { if (homeBgScene) homeBgScene.setStroke(light ? '#F200FF' : '#EA69F1'); } catch (_) {}
+  try { if (homeBgScene) homeBgScene.setTheme(light ? 'light' : 'dark'); } catch (_) {} // v48: LIVE palette swap, no rebuild
 }
 $('#theme-dark').addEventListener('click', () => applyTheme('dark'));
 $('#theme-light').addEventListener('click', () => applyTheme('light'));
@@ -1466,23 +1467,25 @@ function stopLoginBg() {
 // very first frame; init()/show() will dispose it if the user is logged in.
 if (!$('#view-login').classList.contains('hidden')) startLoginBg();
 
-// v46: the homepage Line Ripple background (line-ripple.js, the vanilla
-// port of the Originkit component the user supplied, in a dark and a light
-// palette). Same lifecycle discipline as the auth starfield: mounted ONLY
-// while the arena (home) view is on screen AND the user is logged in,
-// disposed on leave - exactly one background animation is ever active. The
-// stroke follows the theme (dark #EA69F1 / light #F200FF) and the layer
-// paints var(--bg) so it can never seam against the page.
+// v48: the homepage Rising Lines background (rising-lines.js, the vanilla
+// port of the user-supplied Originkit component). Same lifecycle discipline
+// as the auth starfield: mounted ONLY while the arena (home) view is on
+// screen AND the user is logged in, disposed on leave - exactly one
+// background animation is ever active. The scene carries BOTH palettes and
+// swaps them LIVE on theme change (no rebuild, no refresh); dark paints the
+// page color behind the sparks, light runs on a transparent frame over the
+// light page with adapted violet tones (v48 also removed the v47 protection
+// outlines - the animation is subtle at the supplied opacity).
 var homeBgScene = null;
-function homeBgStroke() {
-  return document.documentElement.getAttribute('data-theme') === 'light' ? '#F200FF' : '#EA69F1';
+function homeBgThemeKey() {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
 }
 function startHomeBg() {
   const host = $('#home-bg');
   if (!host) return;
   host.classList.add('on');
-  if (homeBgScene) { homeBgScene.setStroke(homeBgStroke()); return; }
-  if (!window.LineRipple) {
+  if (homeBgScene) { homeBgScene.setTheme(homeBgThemeKey()); return; }
+  if (!window.RisingLines) {
     // same fresh-tab race guard as the auth starfield: the app script runs
     // before the effect scripts at the bottom of <body>; retry until they
     // arrive, then mount if the home view is still the one on screen.
@@ -1494,14 +1497,13 @@ function startHomeBg() {
       const t = setInterval(() => {
         tries++;
         if (homeBgScene || !wantIt() || tries > 40) { clearInterval(t); return; }
-        if (window.LineRipple) { clearInterval(t); startHomeBg(); }
+        if (window.RisingLines) { clearInterval(t); startHomeBg(); }
       }, 250);
     }
     return; // script missing/blocked; plain bg (retry armed above)
   }
   try {
-    homeBgScene = new window.LineRipple(host, { strokeColor: homeBgStroke() });
-    armHomeBgProtection();
+    homeBgScene = new window.RisingLines(host, { theme: homeBgThemeKey() });
   } catch (e) {
     console.warn('[home-bg] animation unavailable:', e.message);
     homeBgScene = null;
@@ -1511,65 +1513,6 @@ function stopHomeBg() {
   if (homeBgScene) { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
   const host = $('#home-bg');
   if (host) host.classList.remove('on');
-  disarmHomeBgProtection();
-}
-// v47: the PROTECTION MASK — the ripple never draws over the logo (a 1.5x
-// zone in the logo's OWN shape, painted with the logo image itself), any
-// text (padding scales with the text size), or any button / the LIVE
-// BATTLES strip. The mask follows layout: scroll, resize and DOM changes
-// all recompute it (rAF-throttled) so the protected zones track the page.
-function homeBgProtectedAreas() {
-  const areas = [];
-  const logo = document.querySelector('#view-arena .home-logo img');
-  if (logo) {
-    const r = logo.getBoundingClientRect();
-    const w = r.width * 1.5, h = r.height * 1.5;
-    areas.push({ type: 'image', x: r.left - (w - r.width) / 2, y: r.top - (h - r.height) / 2, w: w, h: h, href: logo.currentSrc || logo.src });
-  }
-  const els = document.querySelectorAll(
-    '#view-arena h1, #view-arena h2, #view-arena h3, #view-arena p, #view-arena button, #view-arena a, ' +
-    '#view-arena .home-tagline, #view-arena .hc-label, #view-arena .live-block, #view-arena .live-title, ' +
-    '#view-arena .badge, #view-arena .muted'
-  );
-  els.forEach((el) => {
-    if (el.closest('.hidden')) return;
-    const r = el.getBoundingClientRect();
-    if (r.width < 2 || r.height < 2) return;
-    const fs = parseFloat(getComputedStyle(el).fontSize) || 14;
-    const pad = Math.max(6, Math.round(fs * 0.35)); // bigger text → bigger cushion
-    areas.push({ type: 'rect', x: r.left - pad, y: r.top - pad, w: r.width + pad * 2, h: r.height + pad * 2, rx: Math.min(14, pad) });
-  });
-  return areas;
-}
-function updateHomeBgMask() {
-  if (homeBgScene && homeBgScene.setProtected) homeBgScene.setProtected(homeBgProtectedAreas());
-}
-let homeBgMaskRaf = 0, homeBgMo = null, homeBgProtectionArmed = false, homeBgMaskPoll = null;
-function scheduleHomeBgMask() {
-  if (homeBgMaskRaf) return;
-  homeBgMaskRaf = requestAnimationFrame(() => { homeBgMaskRaf = 0; updateHomeBgMask(); });
-}
-function armHomeBgProtection() {
-  updateHomeBgMask();
-  if (homeBgProtectionArmed) return;
-  homeBgProtectionArmed = true;
-  window.addEventListener('scroll', scheduleHomeBgMask, { passive: true });
-  window.addEventListener('resize', scheduleHomeBgMask);
-  try {
-    homeBgMo = new MutationObserver(scheduleHomeBgMask);
-    homeBgMo.observe($('#view-arena'), { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-  } catch (_) {}
-  // Late layout shifts (avatar images loading, strip re-renders) change no
-  // observed attribute — a light 1 s refresh keeps the zones exact.
-  if (!homeBgMaskPoll) homeBgMaskPoll = setInterval(() => { if (homeBgScene) updateHomeBgMask(); }, 1000);
-}
-function disarmHomeBgProtection() {
-  if (homeBgMaskRaf) { cancelAnimationFrame(homeBgMaskRaf); homeBgMaskRaf = 0; }
-  if (homeBgMaskPoll) { clearInterval(homeBgMaskPoll); homeBgMaskPoll = null; }
-  if (homeBgMo) { homeBgMo.disconnect(); homeBgMo = null; }
-  window.removeEventListener('scroll', scheduleHomeBgMask);
-  window.removeEventListener('resize', scheduleHomeBgMask);
-  homeBgProtectionArmed = false;
 }
 
 // v38: About shows the REAL app version (the same source the silent guard
@@ -3193,7 +3136,7 @@ $('#btn-delete').addEventListener('click', () => { if (currentRoomCode) deleteMo
 const mm = (() => {
   const TIMEOUT_MS = 180000; // spec: 3 minutes — exact, deadline-based
   let state = 'idle'; // idle | searching | found | failed | cancelling
-  let tickT = null, pollT = null, proceedT = null, deadlineAt = null;
+  let tickT = null, pollT = null, proceedT = null;
   let enterStartT = 0; // v47: local t0 — the timer runs from the FIRST frame, before the API answers
   let opponent = null;
 
@@ -3205,29 +3148,21 @@ const mm = (() => {
     for (const t of [tickT, pollT]) { if (t) clearInterval(t); }
     tickT = pollT = null;
   }
-  // v46: the timer COUNTS UP - it shows how long the artist has been
-  // searching (00:00, 00:01, ...) until an opponent is found, the search is
-  // cancelled, or the session ends. The server's 180 s queue expiry stays
-  // the single anchor (deadlineAt, = queued_at + exactly 180 s); the display
-  // now derives the ELAPSED time from it instead of showing a countdown,
-  // and the timeout itself is unchanged.
+  // v48 ROOT-CAUSE FIX: the display clock is purely LOCAL and monotonic —
+  // one anchor (enterStartT, set the instant the search begins), never
+  // rewritten by API responses or re-renders. The old designs derived the
+  // display from the server's queued_at deadline once /enter answered, so
+  // server <-> client clock skew (or a reused queue row from a previous,
+  // incompletely cancelled session) made the visible timer JUMP — and any
+  // re-anchor reset the perceived start. The server stays authoritative
+  // for the SESSION'S END (match via WS/poll, expiry via the server
+  // 'timeout' event); the local cap below is only the WS-down fallback.
   function tickClock() {
     if (state !== 'searching') return;
-    // v47: with no server anchor yet, the clock runs on the local t0 set the
-    // instant the search began (00:00 → 00:01 → … immediately). Once the
-    // enter response lands, the SAME tick derives elapsed from the server's
-    // deadline so a refresh can never disagree — the handover is seamless.
-    if (!deadlineAt) {
-      $('#mm-timer').textContent = fmtSearchClock(Math.floor((Date.now() - enterStartT) / 1000));
-      return;
-    }
-    const remainMs = deadlineAt - Date.now();
-    if (remainMs <= 0) {
-      fail('No available artists in the last 3 minutes \u2014 give it another try.');
-      return;
-    }
-    const elapsed = Math.max(0, Math.floor(180 - remainMs / 1000));
+    const elapsed = Math.floor((Date.now() - enterStartT) / 1000);
     $('#mm-timer').textContent = fmtSearchClock(elapsed);
+    if (elapsed >= TIMEOUT_MS / 1000 + 3) // +3 s grace — only fires if the server timeout event never arrived
+      fail('No available artists in the last 3 minutes \u2014 give it another try.');
   }
   function paintMySlot() {
     const ava = $('#mm-me-ava');
@@ -3358,17 +3293,16 @@ const mm = (() => {
     state = 'failed';
     clearTimers();
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
-    $('#mm-timer').textContent = '03:00'; // v46: the full window has run out (elapsed, not a countdown)
     mmLinkSet('off'); // v45: the line goes quiet
     api('/api/matchmaking/cancel', {}).catch(() => {}); // never leave a ghost queue row
     paintFailed(why, title);
   }
   async function enter() {
     if (state === 'searching' || state === 'found' || state === 'cancelling') return;
+    clearTimers(); // v48: a previous session can never leave a tick behind
     state = 'searching';
     opponent = null;
-    deadlineAt = null;
-    enterStartT = Date.now(); // v47: tick from THIS instant — no API wait
+    enterStartT = Date.now(); // the ONE display anchor — set the instant the search begins
     resetOppSlot();
     paintMySlot();
     paintSearching();
@@ -3379,15 +3313,13 @@ const mm = (() => {
     pollT = setInterval(pollStatus, 3000);
     try {
       const d = await api('/api/matchmaking/enter', {});
-      if (state === 'searching') {
-        // Anchor the countdown to the SERVER's queue entry:
-        // deadline = queued_at + exactly 180 s — the same anchor the server
-        // uses to expire the queue row, so display and timeout stay in sync.
-        if (d.deadline_at) deadlineAt = new Date(d.deadline_at).getTime();
-        else if (d.queued_at) deadlineAt = new Date(d.queued_at).getTime() + TIMEOUT_MS;
-        else deadlineAt = Date.now() + TIMEOUT_MS;
-        tickClock();
-      }
+      // v48: the server response NEVER touches the display clock. It can
+      // only (a) match immediately, or (b) leave us searching — the local
+      // tick keeps counting from enterStartT regardless. The old code
+      // re-anchored the display to the server's queued_at deadline here,
+      // which made the timer JUMP whenever the server clock skewed or the
+      // server reused a queue row from an incompletely cancelled session.
+
       if (d.matched) found(d.room, d.opponent);
     } catch (err) {
       if (handleAuthError(err)) return;
@@ -3434,7 +3366,6 @@ const mm = (() => {
     if (state === 'searching' || state === 'failed' || state === 'cancelling') api('/api/matchmaking/cancel', {}).catch(() => {});
     state = 'idle';
     clearTimers();
-    deadlineAt = null;
     mmLinkSet('off');
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
   }
@@ -3862,10 +3793,19 @@ $('#form-reset').addEventListener('submit', async (e) => {
 });
 
 // ---------------------------- profile settings -----------------------------
+// v48: the Edit Profile pill is back in the profile header (its original
+// home) — it toggles the edit panel, which is collapsed by default again.
+$('#btn-edit-profile').addEventListener('click', () => {
+  const p = $('#profile-edit-panel');
+  const open = p.classList.toggle('hidden') === false;
+  // v30: only the label swaps — the pencil SVG stays in the button.
+  $('#btn-edit-profile span').textContent = open ? '\u2715 Close' : 'Edit Profile';
+});
 function closeProfileEdit() {
-  // v45: the form lives on the Settings page — after a successful save it
-  // locks (the button reads "Edit profile"); the success message shows on
-  // the Settings page itself.
+  // v38/v48: the edit panel closes by itself after a successful save —
+  // the updated profile is what the user sees next (original behavior).
+  $('#profile-edit-panel').classList.add('hidden');
+  $('#btn-edit-profile span').textContent = 'Edit Profile';
   setProfileEditing(false); // lock form, button becomes "Edit profile"
 }
 $('#form-profile').addEventListener('submit', async (e) => {
@@ -4053,10 +3993,11 @@ window.__aaGoogleHandoff = null;
 })();
 </script>
 <script src="/glitter-wrap.js"></script>
-<script src="/line-ripple.js"></script>
+<script src="/rising-lines.js"></script>
 <!-- v45: the matchmaking globe (globe-wrap.js + d3) and the beacon scanner
      (mm-scan-wrap.js) are REMOVED; the searching line is pure CSS.
      v46: arch-corridor.js + vendor/three.min.js are removed too (nothing
-     referenced THREE anymore). line-ripple.js is the homepage background. -->
+     referenced THREE anymore). v48: line-ripple.js is replaced by
+     rising-lines.js (the user-supplied Rising Lines animation). -->
 </body>
 </html>

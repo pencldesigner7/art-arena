@@ -155,7 +155,18 @@ router.post('/enter', ah(async (req, res) => {
   if (inRoom) throw new HttpError(409, 'You are already in a room — leave it before matchmaking.');
 
   // Already matched (missed the WS event / refreshed the page)? Re-claim.
-  const prev = claimable(u.id);
+  // v48 fix: the reclaim is only valid while the room still exists — /status
+  // already validated this, but /enter did not. A user whose matched room
+  // was deleted/closed got instantly "reclaimed" into a DEAD room on every
+  // new matchmaking entry (client: instant "Found Player" → room gone).
+  // That was a previous session poisoning every new one. Same rule as
+  // /status: gone/ended → drop the stale record and queue normally.
+  let prev = claimable(u.id);
+  if (prev) {
+    const { rows } = await pool.query(
+      `SELECT status FROM battle_rooms WHERE code = $1`, [prev.room_code]);
+    if (!rows[0] || rows[0].status === 'ended') { recent.delete(u.id); prev = null; }
+  }
   if (prev) return res.json({ matched: true, room: prev.room_code, opponent: prev.opponent, reclaimed: true });
 
   if (await queuedRow(u.id))

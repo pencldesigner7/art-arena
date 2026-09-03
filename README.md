@@ -625,6 +625,59 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v48 — home animation swap + matchmaking deep pass (Rising Lines, root-cause timer, solid line, v44 Profile restore)
+
+Client (`server/public/index.html`, v48 + `rising-lines.js`, `line-ripple.js` deleted):
+- **Homepage animation = Originkit "Rising Lines"** (vanilla port of the
+  supplied React component; preset: 130 particles, `#EB00FF`, riseSpeed 10,
+  opacity 30 %, scale 6, horizon glow `#C918F8` @ 85 %, direction up) on the
+  same fixed full-viewport `#home-bg` layer. **Dark Mode** is the supplied
+  look as-is. **Light Mode** is a purpose-made adaptation — identical
+  behavior/movement/timing (same code path, same particle field), with the
+  palette re-tuned for a white background (softer magenta stems, horizon
+  glow dialed down) so the effect stays visible but subtle and never
+  overpowers the content. Theme switching swaps the palette in place on the
+  same canvas — NO page reload, no second animation (one at a time, always).
+- **v47 protection outlines/mask REMOVED** — no mask, no zones, no outline
+  pass; the lines run free behind the content (that was the ask).
+- **Matchmaking timer — root-cause fix, not a patch.** The clock is now a
+  single owned ticker: it renders `00:00` on the very first frame
+  (< 300 ms), counts up locally from the moment the search starts, and is
+  the ONLY writer of the display for the whole session. The old flow had
+  several writers (a server-deadline re-render that overwrote the local
+  clock with a stale `queued_at`, duplicate intervals on re-enter, and a
+  re-render reset on view switches) — all removed. Verified by a timer
+  torture battery: immediate start, strict +1/s monotonic (no double
+  ticks), stale server anchor (−37 s) ignored, cancel freezes the display,
+  ×3 cancel→restart always restarts pristine at `00:00`, +10 s extended
+  wait accurate to the wall clock, session survives view switches, and a
+  REAL mid-search match holds the elapsed time (no reset).
+- **Connection line is SOLID** — the searching line between the two avatars
+  is now a continuous stroke of constant weight with a sheen sweep; no
+  dashes, no dots, no runner (the v46 runner class/rule is gone).
+- **Profile restored to its exact pre-v45/v47 (v44) structure** — byte-diff
+  against the v44 tag confirms the ONLY change is the removed Settings
+  row/button: head → 3-col stats → Battle History → Saved Artworks →
+  Edit Profile panel (outside the card, collapsed by default, pill toggles
+  with "✕ Close") → Log out. Nothing redesigned, nothing rearranged;
+  Settings remains its own dedicated theme-only page.
+
+Server (`server/matchmaking.js`):
+- **/enter stale-reclaim fix (root cause of phantom instant matches)** —
+  the reclaim path trusted a `recent` match record even when its battle
+  room no longer existed (deleted after a bout), so a NEW search could
+  instantly "find" a dead room. /enter now validates the room
+  (`SELECT status FROM battle_rooms WHERE code=$1`) and drops the stale
+  record when the room is gone or `ended`, queueing normally — same
+  liveness check /status already had. API-verified: match → delete room →
+  re-enter queues cleanly instead of phantom-matching.
+
+Verified: `e2e/v48-browser` 21/21 (animation both themes + live swap,
+timer torture ×3 restarts + extended wait + real match, solid line,
+Profile v44 restore), `v47-browser` 14/14, `v46-browser` 41/41,
+`v45-browser` 33/33, `v44-browser` 27/27, `v44` node 50/50, `regress`
+20/20 — **206/206**. Screenshots: `docs/shots-v48/`.
+
 ## v47 — home & navigation pass (ripple polish, instant search clock, theme-only Settings, pink light outlines, auto-closing drawer)
 
 Client (`server/public/index.html`, v47 + `line-ripple.js`):
