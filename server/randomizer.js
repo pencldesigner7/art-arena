@@ -118,15 +118,8 @@ router.post('/battles/:id/lock-challenge', ah(async (req, res) => {
       randomizerConfig: row.randomizer_config,
       actorId: req.user.id,
     }));
-    // v36: the manual lock gets the SAME 3-2-1 gate as the auto path — the
-    // moment the challenge is officially locked, the countdown starts and
-    // the sweeper flips the battle to 'active' at the exact moment.
-    await client.query(
-      `UPDATE battles SET status = 'countdown',
-                         countdown_ends_at = now() + interval '3 seconds'
-        WHERE id = $1 AND status = 'challenge_locked'`,
-      [row.id]
-    );
+    // v53: the manual lock now REVEALS the challenge (same as /start) — the
+    // host launches when ready, which arms the 3-2-1 countdown.
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});

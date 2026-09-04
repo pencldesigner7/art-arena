@@ -625,6 +625,82 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v53 — seven dynamic design themes (full-UI adaptation), reveal phase + host launch, premium unlimited pre-match re-roll, GO! race fix, broadened pool
+
+Spec 1–3 — **the theme system** (Premium, all 2D):
+
+- **Seven themes** — Flame, Cloud, Glitch, Graffiti, Stitch/Embroidery,
+  Glowing, Magazine Cutout — each adapting the WHOLE interface as one
+  system: logo, accents, buttons, borders, cards, background scene,
+  hovers, decorations. Theme art is NEVER a page background image; it
+  integrates into the existing UI chrome.
+- **ThemeScene** (`server/public/themes.js`): one shared canvas engine,
+  ~30 fps, devicePixelRatio ≤ 2, pauses when the tab is hidden, static
+  fallback under `prefers-reduced-motion`, `setPalette()` for live color
+  changes and `dispose()` on theme switch. Seven scenes: flame embers
+  (bottom-heavy), drifting clouds (slow/calm), occasional glitch slices
+  (subtle, never constant), paint drips/splashes, stitch dashes, soft
+  glow pulses, magazine cutout shapes.
+- **Exact user logos** (`server/public/themes/*.png`): the six supplied
+  files are used byte-for-byte — flame, cloud, glitch, glowing, graffiti,
+  stitch (no generated art, per explicit correction). **Magazine keeps
+  the classic logo until its file is supplied**; dropping
+  `themes/magazine.png` + uncommenting `THEME_LOGOS.magazine` completes
+  it (one-line change).
+- **Manual color customization** (Flame/Glitch/Glowing): one or two
+  colors — solids or gradient — plus gradient direction; the UI updates
+  immediately and persists server-side (`users.ui_theme_custom` jsonb,
+  sanitized per-theme on read).
+
+Spec 7 — **re-roll & the reveal phase**:
+
+- Battles now start into `challenge_locked` (reveal): the locked
+  challenge is shown, the countdown is NOT armed. The host's
+  `POST /api/rooms/:code/launch` (host-only, 409 after start) arms the
+  3→2→1→GO! — matchmaking/auto-start rooms still auto-countdown.
+- **Premium: unlimited re-roll during the reveal phase only** (never
+  repeats outgoing elements, WS `challenge_rerolled` syncs the opponent
+  live). Free: no re-roll. Once the match is active the button is hidden
+  COMPLETELY for both tiers.
+
+Spec 8 — **countdown guarantee**: a real race was found — the server's
+'active' payload could beat the 100 ms tick to zero, so GO! never
+flashed. `flashGo()` is now the single authority, called from BOTH the
+tick-zero branch and the server-active render branch, guarded so GO!
+flashes exactly once per battle per page regardless of WS vs poll
+timing.
+
+Spec 6 — **randomizer broadened** to 1,200 elements (character 170,
+environment 189, object 306, style 162, mood 75, lighting 135, color
+116, wildcard 47): open single concepts that inspire without dictating
+("robot", not "crying robot"; "futuristic", not "Forgotten
+Technology"). Boot migration purges + re-seeds the pool.
+
+Spec 9 — **Premium navigation**: no permanent dashboard slot.
+Customization lives in **Settings → UI Customization** (live apply for
+Premium; locked teaser + upgrade link for Free). Free users get a small
+Premium button beside the Notifications bell; the premium page remains
+the upgrade destination.
+
+Spec 5 — **YouTube Live "not showing" = deployment config, not code**
+(the honest states are intact): the Go Live button renders (owner,
+pre-match), and the modal truthfully reports
+`/api/youtube/status → available:false` because `GOOGLE_CLIENT_ID` /
+`GOOGLE_CLIENT_SECRET` (+ optional `YOUTUBE_REDIRECT_URI`) are not set
+in this environment. To enable: Google Cloud OAuth client (Web app,
+youtube scope), authorized redirect `https://<host>/api/youtube/callback`
+(derived from the Host header when `YOUTUBE_REDIRECT_URI` is unset), set
+the env vars, restart — the Connect YouTube / broadcast flow then
+appears. Per the v52 honesty rule the UI never fakes availability.
+
+Verified: `e2e/v53-browser` **33/33** (7 themes apply + distinct
+accents, custom colors persist, reveal/launch/re-roll matrix, one GO!
+per page on both contexts across two battles, nav matrix, revoke
+fallback, pool checks, zero page errors). `e2e/v52-browser` ported to
+v53 semantics **41/41**. Regression sweep all green — v51 53/53, v50
+25/25, v49 29/29, v48 21/21, v47 14/14, v46 41/41, v45 33/33, v44 27/27,
+regress 21/21 — **338/338 total**.
+
 ## v52 — countdown hardened (no double GO), Premium system in Test Mode, rematch notifications, strict single-concept randomizer
 
 Part A — critical fixes:

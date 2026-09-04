@@ -43,6 +43,7 @@ const {
   premiumOf,
   themeCatalog,
   sanitizeTheme,
+  sanitizeThemeCustom,
 } = require('./lib');
 const rooms = require('./rooms');
 const matchmaking = require('./matchmaking');
@@ -747,11 +748,13 @@ app.post('/api/premium/test-revoke', requireAuth, ah(async (req, res) => {
   res.json({ ...(await premiumOf(req.user.id)), test_mode: PREMIUM_TEST_MODE });
 }));
 app.get('/api/premium/themes', requireAuth, ah(async (req, res) => {
-  const { rows } = await pool.query('SELECT ui_theme FROM users WHERE id = $1', [req.user.id]);
+  const { rows } = await pool.query('SELECT ui_theme, ui_theme_custom FROM users WHERE id = $1', [req.user.id]);
+  const ui_theme = await sanitizeTheme(req.user.id, rows[0] ? rows[0].ui_theme : null);
   res.json({
     themes: themeCatalog(),
     premium: (await premiumOf(req.user.id)).active,
-    ui_theme: await sanitizeTheme(req.user.id, rows[0] ? rows[0].ui_theme : null),
+    ui_theme,
+    ui_custom: ui_theme ? sanitizeThemeCustom(ui_theme, rows[0] ? rows[0].ui_theme_custom : null) : null,
   });
 }));
 app.put('/api/premium/theme', requireAuth, ah(async (req, res) => {
@@ -762,8 +765,11 @@ app.put('/api/premium/theme', requireAuth, ah(async (req, res) => {
     const p = await premiumOf(req.user.id);
     if (!p.active) throw new HttpError(403, 'Art Arena Premium is required for that theme.');
   }
-  await pool.query('UPDATE users SET ui_theme = $1 WHERE id = $2', [key === 'default' ? null : key, req.user.id]);
-  res.json({ ok: true, ui_theme: key === 'default' ? null : key, premium: (await premiumOf(req.user.id)).active });
+  // v53: manual colors travel with the theme (validated + entitlement-bound)
+  const custom = (key !== 'default' && (req.body || {}).custom) ? sanitizeThemeCustom(key, req.body.custom) : null;
+  await pool.query('UPDATE users SET ui_theme = $1, ui_theme_custom = $2 WHERE id = $3',
+    [key === 'default' ? null : key, JSON.stringify(custom), req.user.id]);
+  res.json({ ok: true, ui_theme: key === 'default' ? null : key, ui_custom: custom, premium: (await premiumOf(req.user.id)).active });
 }));
 
 app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
@@ -1195,7 +1201,15 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // adjective cross-product variants are gone at the DATA source).
     ['v52 randomizer: single-concept pool (re-seed from curated base list)',
      `DELETE FROM randomizer_elements`],
-  ];
+      // ---------------- v53 ----------------
+    ['v53 users.ui_theme_custom (manual theme colors)',
+     `ALTER TABLE users ADD COLUMN IF NOT EXISTS ui_theme_custom jsonb`],
+    // v53 (randomizer spec: broader, more open): the pool is re-seeded from
+    // the v53 JSON — long-tail over-specific compounds out, broad inspiring
+    // direction concepts in. One concise concept per category, as ever.
+    ['v53 randomizer: broader open-concept pool (re-seed)',
+     `DELETE FROM randomizer_elements`],
+];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {
     try {

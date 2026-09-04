@@ -305,66 +305,6 @@
    "tags": []
   },
   {
-   "name": "Stone Giant",
-   "tags": []
-  },
-  {
-   "name": "Crystal Golem",
-   "tags": []
-  },
-  {
-   "name": "Water Spirit",
-   "tags": []
-  },
-  {
-   "name": "Fire Spirit",
-   "tags": []
-  },
-  {
-   "name": "Ice Spirit",
-   "tags": []
-  },
-  {
-   "name": "Wind Spirit",
-   "tags": []
-  },
-  {
-   "name": "Storm Spirit",
-   "tags": []
-  },
-  {
-   "name": "Sea Spirit",
-   "tags": []
-  },
-  {
-   "name": "Sky Spirit",
-   "tags": []
-  },
-  {
-   "name": "Moon Spirit",
-   "tags": []
-  },
-  {
-   "name": "Sun Spirit",
-   "tags": []
-  },
-  {
-   "name": "Star Spirit",
-   "tags": []
-  },
-  {
-   "name": "Comet Rider",
-   "tags": []
-  },
-  {
-   "name": "Planet Keeper",
-   "tags": []
-  },
-  {
-   "name": "Galaxy Wanderer",
-   "tags": []
-  },
-  {
    "name": "Cyborg",
    "tags": []
   },
@@ -614,10 +554,6 @@
   },
   {
    "name": "Mammoth",
-   "tags": []
-  },
-  {
-   "name": "Cave Dweller",
    "tags": []
   },
   {
@@ -3341,6 +3277,42 @@
   {
    "name": "Cast",
    "tags": []
+  },
+  {
+   "name": "Minimalist",
+   "tags": []
+  },
+  {
+   "name": "Maximalist",
+   "tags": []
+  },
+  {
+   "name": "Abstract",
+   "tags": []
+  },
+  {
+   "name": "Surreal",
+   "tags": []
+  },
+  {
+   "name": "Realistic",
+   "tags": []
+  },
+  {
+   "name": "Impressionist",
+   "tags": []
+  },
+  {
+   "name": "Expressionist",
+   "tags": []
+  },
+  {
+   "name": "Cubist",
+   "tags": []
+  },
+  {
+   "name": "Gothic",
+   "tags": []
   }
  ],
  "mood": [
@@ -3594,6 +3566,54 @@
   },
   {
    "name": "Torn",
+   "tags": []
+  },
+  {
+   "name": "Futuristic",
+   "tags": []
+  },
+  {
+   "name": "Ancient",
+   "tags": []
+  },
+  {
+   "name": "Mystical",
+   "tags": []
+  },
+  {
+   "name": "Serenity",
+   "tags": []
+  },
+  {
+   "name": "Chaos",
+   "tags": []
+  },
+  {
+   "name": "Heroic",
+   "tags": []
+  },
+  {
+   "name": "Whimsical",
+   "tags": []
+  },
+  {
+   "name": "Eerie",
+   "tags": []
+  },
+  {
+   "name": "Nostalgia",
+   "tags": []
+  },
+  {
+   "name": "Sacred",
+   "tags": []
+  },
+  {
+   "name": "Cosmic",
+   "tags": []
+  },
+  {
+   "name": "Underwater",
    "tags": []
   }
  ],
@@ -4768,6 +4788,30 @@
   },
   {
    "name": "Shadow It",
+   "tags": []
+  },
+  {
+   "name": "Mirror It",
+   "tags": []
+  },
+  {
+   "name": "Shrink It",
+   "tags": []
+  },
+  {
+   "name": "Simplify It",
+   "tags": []
+  },
+  {
+   "name": "Exaggerate It",
+   "tags": []
+  },
+  {
+   "name": "Invert It",
+   "tags": []
+  },
+  {
+   "name": "Double It",
    "tags": []
   }
  ]

@@ -144,20 +144,38 @@ function authUserPayload(u) {
 // truth. Today only the test-mode endpoints write rows (source='test'); a
 // future Paystack webhook writes the SAME rows with source='paystack' after
 // a verified payment — feature access, gating, badge and themes never change.
+// ---------------- v53: DESIGN THEME REGISTRY ----------------
+// The seven user-supplied design styles. Every theme is a COMPLETE visual
+// system: logo (public/themes/<key>.png), accent variables, button/border
+// treatments and its own animated background (themes.js). flame/glitch/
+// glowing additionally expose manual color customization (solid or gradient
+// + direction) persisted in users.ui_theme_custom. All strictly 2D.
 const PREMIUM_THEMES = [
-  // ALL 2D interface treatments (colour / border / background only — no 3D,
-  // no perspective, no depth effects; Art Arena stays a clean 2D UI).
-  { key: 'neon_grid',    name: 'Neon Grid',     hint: 'Dark base · cyan & magenta accents · subtle grid', premium: true },
-  { key: 'sakura',       name: 'Sakura Bloom',  hint: 'Soft light base · warm pink accents', premium: true },
-  { key: 'retro_arcade', name: 'Retro Arcade',  hint: 'Dark base · arcade yellow/red · pixel-edge borders', premium: true },
-  { key: 'midnight',     name: 'Midnight Ink',  hint: 'Deep indigo base · violet accents', premium: true },
-  { key: 'sunset',       name: 'Sunset Fade',   hint: 'Warm gradient accents · dusk tones', premium: true },
-  { key: 'mono',         name: 'Mono Minimal',  hint: 'Greyscale minimal · pure 2D flat', premium: true },
+  { key: 'flame',    name: 'Flame',           hint: 'Fire gradients · ember background · animated buttons', premium: true,  customizable: true, c1: '#FF5A00', c2: '#FFC300' },
+  { key: 'cloud',    name: 'Cloud',           hint: 'Blue sky · drifting clouds · calm and smooth', premium: true,  customizable: false },
+  { key: 'glitch',   name: 'Glitch',          hint: 'Neon RGB · occasional glitch pulses', premium: true,  customizable: true, c1: '#00F0FF', c2: '#FF2BD1' },
+  { key: 'graffiti', name: 'Graffiti',        hint: 'Street art · paint drips · spray splashes', premium: true,  customizable: false },
+  { key: 'stitch',   name: 'Stitch',          hint: 'Embroidery · stitched borders · handcrafted motion', premium: true,  customizable: false },
+  { key: 'glowing',  name: 'Glowing',         hint: 'Soft glows · gradient buttons · luminous accents', premium: true,  customizable: true, c1: '#8A7CFF', c2: '#39C4FF' },
+  { key: 'magazine', name: 'Magazine Cutout', hint: 'Paper collage · cutout layers · editorial', premium: true,  customizable: false },
 ];
 const FREE_THEMES = [
   { key: 'default', name: 'Art Arena', hint: 'Light / Dark mode (built in)', premium: false },
 ];
 function themeCatalog() { return [...FREE_THEMES, ...PREMIUM_THEMES]; }
+// v53: manual color customization — {c1, c2, dir} kept only for themes that
+// declare it, values strictly validated (hex colors + angle). Anything else
+// is dropped server-side; the client never decides entitlement.
+function sanitizeThemeCustom(themeKey, custom) {
+  const t = PREMIUM_THEMES.find((x) => x.key === themeKey);
+  if (!t || !t.customizable || !custom || typeof custom !== 'object') return null;
+  const hex = (v) => /^#[0-9a-fA-F]{6}$/.test(String(v)) ? String(v).toUpperCase() : null;
+  const c1 = hex(custom.c1) || t.c1;
+  const c2 = hex(custom.c2) || t.c2;
+  const dir = Number.isFinite(Number(custom.dir)) ? Math.max(0, Math.min(360, Math.round(Number(custom.dir)))) : 135;
+  return { c1, c2, dir };
+}
+
 async function premiumOf(userId) {
   const { rows } = await pool.query(
     `SELECT plan, source, started_at FROM premium_subscriptions
@@ -184,7 +202,7 @@ async function fullUser(u) {
             p.avatar_storage_key, p.updated_at,
             da.display_name AS drawing_app_name,
             s.battles, s.wins, s.losses, s.draws, s.win_streak, s.best_streak, s.rating,
-            u.ui_theme,
+            u.ui_theme, u.ui_theme_custom,
             ps.plan AS premium_plan, ps.source AS premium_source, ps.started_at AS premium_started_at
        FROM user_profiles p
        JOIN user_statistics s ON s.user_id = p.user_id
@@ -201,10 +219,12 @@ async function fullUser(u) {
   // badge, theme application and re-roll gating all read THIS (server truth).
   const premium = { active: !!p.premium_plan, plan: p.premium_plan || null, source: p.premium_source || null, started_at: p.premium_started_at || null };
   const ui_theme = (p.ui_theme && p.ui_theme !== 'default' && PREMIUM_THEMES.some((t) => t.key === p.ui_theme) && premium.active) ? p.ui_theme : null;
+  const ui_custom = ui_theme ? sanitizeThemeCustom(ui_theme, p.ui_theme_custom) : null;
   return {
     user: authUserPayload(u),
     premium,
     ui_theme,
+    ui_custom,
     profile: {
       bio: p.bio || '',
       country_code: p.country_code || null,
@@ -265,6 +285,7 @@ module.exports = {
   fullUser,
   PREMIUM_THEMES,
   themeCatalog,
+  sanitizeThemeCustom,
   premiumOf,
   sanitizeTheme,
   cookieOpts,

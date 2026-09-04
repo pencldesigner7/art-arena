@@ -292,21 +292,14 @@ async function roomPayload(code, me) {
         ORDER BY r.created_at DESC LIMIT 1`, [room.id]);
     rematch = rr[0] || null;
   }
-  // v52: Premium re-roll window — server truth for the REQUESTING user
-  // (free users get allowed:false; the button routes to the upgrade prompt).
+  // v53: re-roll is PRE-MATCH (reveal) only — unlimited while allowed.
+  // Once the countdown/active starts the phase flips to 'live' and the
+  // client hides the button entirely for EVERYONE (spec).
   let reroll = null;
-  if (battle && battle.status === 'active' && battle.start_time) {
-    const deadline = new Date(new Date(battle.start_time).getTime() + 60000);
-    const { rows: rc } = await pool.query(
-      `SELECT count(*)::int AS n FROM battle_event_log
-        WHERE battle_id = $1 AND event_type = 'challenge_rerolled'`, [battle.id]);
+  if (battle && (battle.status === 'challenge_locked' || battle.status === 'countdown' || battle.status === 'active')) {
     const prem = me ? await premiumOf(me) : { active: false };
-    reroll = {
-      used: rc[0].n,
-      max: 3,
-      deadline: deadline.toISOString(),
-      allowed: !!(prem.active && rc[0].n < 3 && Date.now() < deadline.getTime()),
-    };
+    const reveal = battle.status === 'challenge_locked';
+    reroll = { phase: reveal ? 'reveal' : 'live', allowed: !!(reveal && prem.active) };
   }
   return {
     code: room.code,
@@ -383,7 +376,7 @@ function requireHost(room, me) {
 // Returns the challenge summary (null if generation failed — the start
 // itself must not break; the host can still lock manually).
 // ---------------------------------------------------------------------------
-async function startBattleInTx(client, room, players, actorId) {
+async function startBattleInTx(client, room, players, actorId, opts) {
   const mode = room.battle_mode || '1v1';
   if (mode === '1v1') {
     if (players.length !== 2)
@@ -449,7 +442,12 @@ async function startBattleInTx(client, room, players, actorId) {
   // derives the same "DRAW!" instant and the same battle clock), and no
   // client can ever see 'active' before the server says so — the timer
   // cannot begin early, and all players transition simultaneously.
-  if (challengeLocked) {
+  // v53 (premium re-roll spec): HOST-started battles get a REVEAL phase —
+  // the challenge is generated and shown ('challenge_locked') WITHOUT the
+  // countdown. Premium members may re-roll it here (infinitely); the host
+  // then LAUNCHES, which arms the 3-2-1 countdown. Auto-start rooms
+  // (matchmaking) keep the immediate countdown — no host UI to launch.
+  if (challengeLocked && !(opts && opts.reveal)) {
     await client.query(
       `UPDATE battles SET status = 'countdown',
                          countdown_ends_at = now() + interval '3 seconds'
@@ -1191,25 +1189,29 @@ router.post('/:code/close', ah(async (req, res) => {
 // enforced HERE, so a free client can never bypass the gate.
 // ---------------------------------------------------------------------------
 router.post('/:code/challenge/reroll', ah(async (req, res) => {
+  // v53 spec: Premium re-roll — PRE-MATCH ONLY (the reveal phase, while the
+  // battle sits at 'challenge_locked') and UNLIMITED. Once the match starts
+  // (countdown/active) the button is hidden client-side AND this route
+  // refuses — free and premium alike draw with the locked challenge.
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
   const prem = await premiumOf(req.user.id);
   if (!prem.active)
     throw new HttpError(403, 'Re-roll is an Art Arena Premium feature — upgrade to re-roll the challenge.');
   const battle = await latestBattleRow(room.id);
-  if (!battle || battle.status !== 'active')
-    throw new HttpError(409, 'There is no live battle to re-roll.');
-  if (!battle.start_time || Date.now() > new Date(battle.start_time).getTime() + 60000)
-    throw new HttpError(409, 'The re-roll window (the first 60 seconds) has closed.');
-  const { rows: cnt } = await pool.query(
-    `SELECT count(*)::int AS n FROM battle_event_log
-      WHERE battle_id = $1 AND event_type = 'challenge_rerolled'`, [battle.id]);
-  if (cnt[0].n >= 3) throw new HttpError(409, 'This battle has used all its re-rolls.');
+  if (!battle) throw new HttpError(409, 'There is no challenge to re-roll.');
+  if (battle.status !== 'challenge_locked')
+    throw new HttpError(409, 'The match has started — the challenge is locked for this battle.');
+  const { rows: part } = await pool.query(
+    `SELECT 1 FROM battle_participants WHERE battle_id = $1 AND user_id = $2`,
+    [battle.id, req.user.id]);
+  if (!part[0]) throw new HttpError(403, 'Only the artists of this battle can re-roll it.');
 
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    // the outgoing challenge: keep its categories, exclude its elements
+    // keep the categories, never repeat the outgoing elements (same strict
+    // single-concept pool — a re-roll is as clean as the first draw)
     const { rows: prev } = await client.query(
       `SELECT bce.category, bce.element_id
          FROM battle_challenge_elements bce
@@ -1251,6 +1253,29 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
   } finally {
     client.release();
   }
+  res.json(await roomPayload(req.params.code, req.user.id));
+}));
+
+
+// ---------------------------------------------------------------------------
+// v53: LAUNCH — the host ends the REVEAL phase. The locked challenge (as
+// re-rolled or accepted) stays exactly as it is; the 3-2-1 countdown arms
+// NOW and the sweeper flips the battle active at its end (the match timer
+// can only begin after GO!, as ever — server-authoritative).
+// ---------------------------------------------------------------------------
+router.post('/:code/launch', ah(async (req, res) => {
+  const room = await roomByCode(req.params.code);
+  if (!room) throw new HttpError(404, 'Room not found.');
+  requireHost(room, req.user.id);
+  const battle = await latestBattleRow(room.id);
+  if (!battle || battle.status !== 'challenge_locked')
+    throw new HttpError(409, 'There is no revealed challenge to launch.');
+  const { rows } = await pool.query(
+    `UPDATE battles SET status = 'countdown', countdown_ends_at = now() + interval '3 seconds'
+      WHERE id = $1 AND status = 'challenge_locked' RETURNING countdown_ends_at`,
+    [battle.id]);
+  if (!rows[0]) throw new HttpError(409, 'The battle is already launching.');
+  rt.emitRoom(room.code, { action: 'countdown', countdown_ends_at: rows[0].countdown_ends_at });
   res.json(await roomPayload(req.params.code, req.user.id));
 }));
 
@@ -1372,7 +1397,7 @@ router.post('/:code/start', ah(async (req, res) => {
     requireHost(room, req.user.id);
     if (room.status !== 'lobby') throw new HttpError(409, 'This room is not ready to start.');
     const players = await activeParticipants(room.id, client);
-    challengeSummary = await startBattleInTx(client, room, players, req.user.id);
+    challengeSummary = await startBattleInTx(client, room, players, req.user.id, { reveal: true }); // v53: reveal → launch
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
@@ -1524,7 +1549,7 @@ router.post('/:code/rematch/accept', ah(async (req, res) => {
       [room.id]
     );
     const players = await activeParticipants(room.id, client);
-    summary = await startBattleInTx(client, { ...room, status: 'lobby' }, players, null);
+    summary = await startBattleInTx(client, { ...room, status: 'lobby' }, players, null, { reveal: true }); // v53: reveal → launch
     await client.query(
       `UPDATE rematch_requests SET status = 'accepted', responded_at = now() WHERE id = $1`,
       [request.id]

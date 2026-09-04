@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="52">
+<meta name="aa-ui-version" content="53">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -218,16 +218,40 @@ try {
   .canvas-hint { font-size:12px; color:var(--muted); margin:10px 0 0; }
   .state-chip.canvas { color:var(--canvas-tx); border-color:var(--canvas-bd); background:var(--canvas-bg); }
   .battle-canvas-line { font-size:14px; font-weight:700; }
-  /* ============ v52: PREMIUM (2D themes only — no 3D, ever) ============ */
-  .prem-chip { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:800; letter-spacing:.6px; padding:2px 8px; border-radius:999px; background:linear-gradient(90deg, var(--pink), var(--purple)); color:#fff; vertical-align:2px; }
+  /* ============ v53: DESIGN THEMES (all 2D; logos in /themes/) ============
+     Each theme is a complete visual system — logo, accents, buttons, borders,
+     background animation (themes.js) and decorations change TOGETHER.
+     flame/glitch/glowing expose manual colors: --pth-c1/c2/dir are set on
+     <body> from the user's saved customization (server-sanitized). */
+  .prem-chip { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:800; letter-spacing:.6px; padding:2px 8px; border-radius:999px; background:linear-gradient(90deg, var(--pth-c1, var(--pink)), var(--pth-c2, var(--purple))); color:#fff; vertical-align:2px; }
   .prem-chip.big { font-size:12px; padding:5px 14px; }
-  body[data-ptheme="neon_grid"] { --pink:#00E5FF; --purple:#FF2BD1; --surface:#07121a; --surface-hover:#0a1822; --surface-2:#0d2130; --bg:#040a10; --panel:#08151f; --line:#12384a; --muted:#6fa7bd; --btn-line:#12384a; }
-  body[data-ptheme="sakura"] { --pink:#E86A92; --purple:#B45BD4; --surface:#fdf3f6; --surface-hover:#fdeaf0; --surface-2:#f9dfe8; --bg:#fff7f9; --panel:#fdeef3; --line:#f0cbd7; --text:#43242f; --muted:#9d6f80; --header-bg:rgba(255,247,249,.9); --nav-bg:rgba(253,243,246,.97); --btn-line:#f0cbd7; }
-  body[data-ptheme="retro_arcade"] { --pink:#FFD23F; --purple:#FF4365; --surface:#12060e; --surface-hover:#1a0913; --surface-2:#241019; --bg:#0b0308; --panel:#170a11; --line:#4a1f33; --muted:#c98da4; --btn-line:#4a1f33; }
-  body[data-ptheme="retro_arcade"] .card, body[data-ptheme="retro_arcade"] .time-modal { border-style:dashed; border-radius:4px; }
-  body[data-ptheme="midnight"] { --pink:#8A7CFF; --purple:#4C39B8; --surface:#0d0d24; --surface-hover:#11112e; --surface-2:#191940; --bg:#07071a; --panel:#101030; --line:#2b2b5e; --muted:#8f8fc9; --btn-line:#2b2b5e; }
-  body[data-ptheme="sunset"] { --pink:#FF7A59; --purple:#D24FD6; --surface:#1d1220; --surface-hover:#241628; --surface-2:#301c36; --bg:#140b17; --panel:#1e1222; --line:#4a2a4e; --muted:#c39acb; --btn-line:#4a2a4e; }
-  body[data-ptheme="mono"] { --pink:#c9c9c9; --purple:#8f8f8f; --surface:#141414; --surface-hover:#1a1a1a; --surface-2:#222222; --bg:#0c0c0c; --panel:#161616; --line:#3a3a3a; --muted:#9a9a9a; --btn-line:#3a3a3a; }
+  body[data-ptheme="flame"] { --pink:var(--pth-c1,#FF5A00); --purple:var(--pth-c2,#FFC300); --muted:#c9a587; --line:#4a2a12; --btn-line:#4a2a12; --surface:#180d05; --surface-hover:#1f1108; --surface-2:#2a170a; --bg:#0e0703; --panel:#170d05; }
+  body[data-ptheme="flame"] .card, body[data-ptheme="flame"] .time-modal { border-color:rgba(255,120,20,.35); box-shadow:0 0 22px -12px rgba(255,110,0,.5); }
+  body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#FF5A00), var(--pth-c2,#FFC300)); background-size:180% 180%; animation:pth-flame-shift 5s ease-in-out infinite; color:#1d0e02; border:none; font-weight:800; }
+  @keyframes pth-flame-shift { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+  body[data-ptheme="cloud"] { --pink:#3E8EE0; --purple:#6FB6F2; --surface:#eaf4fd; --surface-hover:#e2eefa; --surface-2:#d7e9f9; --bg:#f2f8ff; --panel:#e6f1fb; --line:#c3dcf2; --text:#20344a; --muted:#5f7794; --header-bg:rgba(242,248,255,.9); --nav-bg:rgba(234,244,253,.97); --btn-line:#c3dcf2; }
+  body[data-ptheme="cloud"] .card, body[data-ptheme="cloud"] .time-modal { border-radius:18px; border-color:#c3dcf2; box-shadow:0 10px 30px -18px rgba(62,142,224,.4); }
+  body[data-ptheme="glitch"] { --pink:var(--pth-c1,#00F0FF); --purple:var(--pth-c2,#FF2BD1); --surface:#0a0d14; --surface-hover:#0e1219; --surface-2:#131826; --bg:#060810; --panel:#0c101a; --line:#1d2c44; --muted:#6f86a8; --btn-line:#1d2c44; }
+  body[data-ptheme="glitch"] .card { border-style:solid; position:relative; }
+  body[data-ptheme="glitch"] .card::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(var(--pth-dir,135deg), rgba(0,240,255,.05), rgba(255,43,209,.05)); }
+  .pth-glitch-pulse main { animation:pth-glitch-jolt .2s steps(2) 1; }
+  .pth-glitch-pulse #top-header { animation:pth-glitch-jolt .18s steps(2) 1; }
+  @keyframes pth-glitch-jolt { 0% { transform:translateX(0); filter:none; } 25% { transform:translateX(-2.5px); filter:hue-rotate(18deg); } 60% { transform:translateX(2px); } 100% { transform:translateX(0); } }
+  body[data-ptheme="graffiti"] { --pink:#FF4FA3; --purple:#25C4A9; --surface:#171327; --surface-hover:#1c1730; --surface-2:#241d3d; --bg:#100d1c; --panel:#161225; --line:#3a2f5c; --muted:#a394c9; --btn-line:#3a2f5c; }
+  body[data-ptheme="graffiti"] .card { border-width:2px; border-color:#3a2f5c; border-radius:10px; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { position:relative; border-radius:8px; box-shadow:3px 3px 0 rgba(0,0,0,.45); }
+  body[data-ptheme="graffiti"] .badge.next, body[data-ptheme="graffiti"] .state-chip { transform:rotate(-1.4deg); }
+  body[data-ptheme="stitch"] { --pink:#FF6A5A; --purple:#D8A25C; --surface:#1f1a24; --surface-hover:#251f2b; --surface-2:#2e2735; --bg:#171320; --panel:#1e1926; --line:#4a3f56; --muted:#b3a3c0; --btn-line:#4a3f56; }
+  body[data-ptheme="stitch"] .card, body[data-ptheme="stitch"] .time-modal, body[data-ptheme="stitch"] .settings-appearance { border:1.5px dashed #6b5a7a; border-radius:14px; background-image:repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 2px, transparent 2px 5px); }
+  body[data-ptheme="stitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { border:1.5px dashed #b392cb; border-radius:12px; }
+  body[data-ptheme="glowing"] { --pink:var(--pth-c1,#8A7CFF); --purple:var(--pth-c2,#39C4FF); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#8A7CFF), var(--pth-c2,#39C4FF)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 18px -4px var(--pth-c1,#8A7CFF); }
+  body[data-ptheme="glowing"] .card { box-shadow:0 0 26px -14px var(--pth-c1,#8A7CFF); }
+  body[data-ptheme="magazine"] { --pink:#E6483E; --purple:#2B2B36; --surface:#f4f1ea; --surface-hover:#eeebe2; --surface-2:#e6e2d7; --bg:#e9e5dc; --panel:#f0ede5; --line:#c9c3b4; --text:#23211d; --muted:#6f6a5e; --header-bg:rgba(240,237,229,.92); --nav-bg:rgba(244,241,234,.97); --btn-line:#c9c3b4; }
+  body[data-ptheme="magazine"] .card { border:none; border-left:5px solid #23211d; border-radius:2px; box-shadow:3px 4px 0 rgba(35,33,29,.22); transform:rotate(-.25deg); }
+  body[data-ptheme="magazine"] .home-card:hover, body[data-ptheme="magazine"] .card:hover { transform:rotate(.3deg) translateY(-2px); }
+  body[data-ptheme="magazine"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:#23211d; color:#f4f1ea; border-radius:2px; box-shadow:2px 3px 0 #E6483E; }
+  /* Premium page + settings swatches */
   .prem-hero { text-align:center; padding:22px 16px 10px; }
   .prem-hero h1 { font-size:clamp(26px, 6vw, 40px); background:linear-gradient(90deg, var(--pink), var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:1px; }
   .prem-table { width:100%; border-collapse:collapse; margin-top:14px; font-size:13.5px; }
@@ -242,13 +266,21 @@ try {
   .swatch-name { font-weight:800; font-size:13px; }
   .swatch-hint { font-size:11px; color:var(--muted); }
   .swatch-lock { position:absolute; top:8px; right:10px; font-size:13px; }
-  .sw-neon_grid { background:linear-gradient(135deg,#040a10 60%, #00E5FF33 60.1%, #FF2BD133); }
-  .sw-sakura { background:linear-gradient(135deg,#fff7f9 55%, #f9dfe8 55.1%, #E86A92); }
-  .sw-retro_arcade { background:repeating-linear-gradient(45deg,#12060e 0 8px,#241019 8px 16px); border-bottom:4px solid #FFD23F; }
-  .sw-midnight { background:linear-gradient(135deg,#07071a 60%, #4C39B8 60.1%, #8A7CFF); }
-  .sw-sunset { background:linear-gradient(135deg,#140b17 45%, #FF7A59 45.1%, #D24FD6); }
-  .sw-mono { background:linear-gradient(135deg,#0c0c0c 50%, #3a3a3a 50.1%, #c9c9c9); }
+  .sw-flame { background:linear-gradient(135deg,#0e0703 55%, #FF5A00 55.1%, #FFC300); }
+  .sw-cloud { background:linear-gradient(180deg,#8ec9f5 0%, #c9e6fb 60%, #eef7ff); }
+  .sw-glitch { background:linear-gradient(135deg,#060810 50%, #00F0FF 50.1%, #FF2BD1); }
+  .sw-graffiti { background:linear-gradient(135deg,#100d1c 55%, #FF4FA3 55.1%, #25C4A9); }
+  .sw-stitch { background:repeating-linear-gradient(45deg,#171320 0 7px,#2e2735 7px 14px); border:1.5px dashed #b392cb; }
+  .sw-glowing { background:radial-gradient(circle at 30% 45%, #8A7CFF 0%, #101024 62%), radial-gradient(circle at 75% 70%, #39C4FF 0%, transparent 45%); background-color:#0a0a18; }
+  .sw-magazine { background:#f4f1ea; position:relative; }
   .sw-default { background:linear-gradient(135deg,#09070d 50%, #FF3CAC 50.1%, #7B2CFF); }
+  /* settings customization */
+  .pth-color-row { display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  .pth-color { display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); }
+  .pth-color input[type="color"] { width:34px; height:26px; border:1px solid var(--line); border-radius:6px; background:var(--surface); padding:1px; cursor:pointer; }
+  #btn-premium-mini { position:relative; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--btn-line); background:linear-gradient(135deg, rgba(255,60,172,.16), rgba(123,44,255,.16)); cursor:pointer; }
+  #btn-premium-mini:hover { border-color:var(--pink); }
+  #btn-launch { width:100%; margin-top:10px; }
   #btn-reroll { width:100%; margin-top:10px; }
   #btn-reroll.locked { opacity:.75; }
   #ui-version-badge { position:fixed; right:8px; bottom:6px; z-index:70; font-size:10px; color:var(--muted); opacity:.55; pointer-events:none; }
@@ -671,7 +703,8 @@ try {
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
     </button>
   </div>
-  <div class="brand top-brand"><img id="top-logo" src="/logo.png" alt="Art Arena" height="26"></div>
+  <div class="brand top-brand"><img id="top-logo" src="/logo.png" data-aa-logo alt="Art Arena" height="26"></div>
+  <button type="button" id="btn-premium-mini" class="hidden" aria-label="Art Arena Premium" title="Art Arena Premium"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="url(#aa-grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.8 5.9 6.2.8-4.6 4.4 1.2 6.3L12 17.1l-5.6 3.1 1.2-6.3L3 9.5l6.2-.8z"/></svg></button>
   <button type="button" id="btn-notif" class="icon-btn" aria-label="Notifications"><span id="notif-badge" aria-hidden="true"></span>
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>
   </button>
@@ -681,7 +714,7 @@ try {
 
   <!-- ============================== LOGIN ============================== -->
   <section id="view-login" class="view">
-    <div class="auth-logo"><img src="/logo.png" alt="Art Arena" width="320" height="131"></div>
+    <div class="auth-logo"><img src="/logo.png" data-aa-logo alt="Art Arena" width="320" height="131"></div>
     <div class="auth-tagline">WELCOME TO THE <span>ARENA.</span></div>
     <h1>Welcome back</h1>
     <div class="msg" id="msg-login"></div>
@@ -767,7 +800,7 @@ try {
        family as the auth screens; the glitter starfield runs behind them. -->
   <section id="view-privacy" class="view legal hidden">
     <div class="legal-head">
-      <img src="/logo.png" alt="Art Arena" class="legal-logo">
+      <img src="/logo.png" data-aa-logo alt="Art Arena" class="legal-logo">
       <h1 class="legal-title">Privacy Policy</h1>
       <p class="muted legal-updated">Last updated: September 2026</p>
     </div>
@@ -849,7 +882,7 @@ try {
 
   <section id="view-terms" class="view legal hidden">
     <div class="legal-head">
-      <img src="/logo.png" alt="Art Arena" class="legal-logo">
+      <img src="/logo.png" data-aa-logo alt="Art Arena" class="legal-logo">
       <h1 class="legal-title">Terms of Service</h1>
       <p class="muted legal-updated">Last updated: September 2026</p>
     </div>
@@ -932,7 +965,7 @@ try {
   <section id="view-arena" class="view home-view hidden">
     <!-- v51: the home-bg layer moved to body level — the ambient animation
          is app-wide now, not homepage-only. -->
-    <div class="home-logo"><img src="/logo.png" alt="Art Arena" width="352" height="145"></div>
+    <div class="home-logo"><img src="/logo.png" data-aa-logo alt="Art Arena" width="352" height="145"></div>
     <div class="auth-tagline home-tagline">WELCOME TO THE <span>ARENA.</span></div>
 
     <div class="home-cards">
@@ -1010,7 +1043,7 @@ try {
   <!-- ============================= ABOUT ============================= -->
   <section id="view-about" class="view hidden">
     <div class="about-wrap">
-      <img src="/logo.png" alt="Art Arena" class="about-logo">
+      <img src="/logo.png" data-aa-logo alt="Art Arena" class="about-logo">
       <p class="muted about-line">Where artists battle for creative supremacy.</p>
       <span class="badge next">VERSION <b id="about-version"></b></span>
       <div class="links about-legal" style="margin-top:16px"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a></div>
@@ -1203,6 +1236,10 @@ try {
         <!-- v52: PREMIUM re-roll — server-gated (battle.reroll); free users see
              the locked state that routes to the upgrade prompt. -->
         <button type="button" id="btn-reroll" class="secondary hidden"></button>
+        <!-- v53: the host ends the REVEAL phase — the 3-2-1 countdown arms
+             here and the match timer starts only after GO!. -->
+        <button type="button" id="btn-launch" class="hidden">⚔ LAUNCH BATTLE</button>
+        <p class="muted hidden" id="launch-wait-note" style="font-size:12.5px; margin:8px 0 0">Challenge revealed — waiting for the host to launch…</p>
       </div>
       <p class="muted" id="battle-note" style="margin-top:8px">The host locks the challenge — the 3-2-1 countdown starts the battle.</p>
       <!-- v44 (Go Live): honest coming-soon entry point. It lives in the
@@ -1349,6 +1386,19 @@ try {
       </label>
       <p class="muted" style="font-size:13px; text-align:center; margin:14px 0 0">Dark is the classic Art Arena look; Light is easier on the eyes in bright rooms. Saved on this device.</p>
     </div>
+    <!-- v53: UI Customization lives HERE for Premium members (no standalone
+         nav slot). Free members see an honest locked teaser. -->
+    <div class="settings-appearance" id="settings-themes" style="margin-top:18px">
+      <label>UI Customization <span class="prem-chip">PREMIUM</span>
+        <div id="settings-theme-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-top:10px"></div>
+      </label>
+      <div id="settings-theme-custom" class="pth-color-row hidden">
+        <span class="pth-color">Colors <input type="color" id="pth-c1"><input type="color" id="pth-c2"></span>
+        <span class="pth-color">Direction <input type="range" id="pth-dir" min="0" max="360" step="15" style="width:90px"></span>
+        <button type="button" class="mini" id="pth-save">Apply</button>
+      </div>
+      <p class="muted" id="settings-theme-note" style="font-size:12.5px; margin:12px 0 0"></p>
+    </div>
   </section>
   <!-- ============ v52: PREMIUM (test mode — no real payments yet) =========
        Honest comparison, the TWO real Premium benefits (2D UI themes +
@@ -1431,7 +1481,7 @@ try {
     <!-- v42: logo and the close button share ONE row — same alignment
          level, balanced spacing (dashboard reference). -->
     <div class="drawer-head">
-      <img src="/logo.png" alt="Art Arena">
+      <img src="/logo.png" data-aa-logo alt="Art Arena">
       <button type="button" id="btn-drawer-close" class="icon-btn" aria-label="Close menu">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
@@ -1581,7 +1631,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v52</span>
+  <span id="ui-version-badge">v53</span>
 
 <script>
 'use strict';
@@ -1612,7 +1662,6 @@ const DRAWER_NAV = [
   { id: 'arena',         label: 'Arena',         view: 'arena' },
   { id: 'community',     label: 'Community',     view: 'community' },
   { id: 'live',          label: 'LIVE',           view: 'live' },
-  { id: 'premium',       label: 'Premium ★',       view: 'premium' },
   { id: '__divider' },
   { id: 'profile',       label: 'Profile',       view: 'account' },
   { id: 'settings',      label: 'Settings',      view: 'settings' },
@@ -1697,10 +1746,49 @@ try {
 // is PERSISTED server-side (users.ui_theme, sanitized on read — a revoked
 // account falls back to the free Light/Dark system automatically).
 let mePremium = false;
-function applyPremiumTheme(key) {
-  if (key && key !== 'default') document.body.setAttribute('data-ptheme', key);
-  else document.body.removeAttribute('data-ptheme');
+let activeThemeKey = null, activeThemeCustom = null;
+const THEME_LOGOS = {
+  flame: '/themes/flame.png', cloud: '/themes/cloud.png', glitch: '/themes/glitch.png',
+  graffiti: '/themes/graffiti.png', stitch: '/themes/stitch.png', glowing: '/themes/glowing.png',
+  // magazine: drop the supplied logo at /themes/magazine.png and add it here —
+  // until then the theme uses the classic Art Arena logo (no generated art).
+};
+function applyThemeLogo(key) {
+  document.querySelectorAll('img[data-aa-logo]').forEach((img) => {
+    const target = key && THEME_LOGOS[key] ? THEME_LOGOS[key] : '/logo.png';
+    if (img.getAttribute('src') !== target) {
+      img.dataset.fallback = img.getAttribute('src');
+      img.onerror = function () { img.onerror = null; img.src = '/logo.png'; };
+      img.src = target;
+    }
+  });
 }
+function applyPremiumTheme(key, custom) {
+  activeThemeKey = key && key !== 'default' ? key : null;
+  activeThemeCustom = custom || null;
+  const b = document.body;
+  if (activeThemeKey) {
+    b.setAttribute('data-ptheme', activeThemeKey);
+    // manual colors (flame/glitch/glowing) — validated server-side, live here
+    b.style.setProperty('--pth-c1', (custom && custom.c1) || null);
+    b.style.setProperty('--pth-c2', (custom && custom.c2) || null);
+    if (custom && typeof custom.dir === 'number') b.style.setProperty('--pth-dir', custom.dir + 'deg');
+    else b.style.removeProperty('--pth-dir');
+  } else {
+    b.removeAttribute('data-ptheme');
+    b.style.removeProperty('--pth-c1'); b.style.removeProperty('--pth-c2'); b.style.removeProperty('--pth-dir');
+  }
+  applyThemeLogo(activeThemeKey);
+  // the background scene follows the theme (exactly one animation, ever)
+  try { startHomeBg(); } catch (_) {}
+}
+// v53: glitch pulses never fire while a countdown/battle overlay is up
+window.__pthGlitchAllowed = function () {
+  const o = document.querySelector('#countdown-overlay');
+  const battle = lastRoomData && lastRoomData.battle;
+  const battleLive = battle && ['countdown', 'active'].includes(battle.status);
+  return !(battleLive || (o && !o.classList.contains('hidden')));
+};
 async function refreshMe() {
   try {
     const d = await api('/api/auth/me');
@@ -1784,27 +1872,31 @@ function stopCountdownOverlay(keepFlash) {
   if (countdownTarget) { clearInterval(countdownTarget.timer); countdownTarget = null; }
   $('#countdown-overlay').classList.add('hidden');
 }
+// v53: the GO! flash, extracted — BOTH paths converge here (the 100 ms tick
+// crossing zero, AND the server's 'active' payload arriving first). Whichever
+// comes first flashes GO! exactly once; the flashing flag + lastFlashedKey
+// make doubles structurally impossible and a missed GO! impossible too.
+function flashGo() {
+  if (!countdownTarget || countdownTarget.flashing) return;
+  countdownTarget.flashing = true;
+  lastFlashedKey = countdownTarget.battleId; // one GO! per countdown, ever
+  const numEl = $('#countdown-num');
+  numEl.textContent = 'GO!';
+  numEl.classList.remove('draw');
+  numEl.classList.add('go');
+  numEl.style.animation = 'none';
+  void numEl.offsetWidth; // restart the pop animation
+  numEl.style.animation = '';
+  setTimeout(() => {
+    if (countdownTarget && countdownTarget.flashing) stopCountdownOverlay();
+  }, 900);
+}
 function countdownTick() {
   if (!countdownTarget) return;
   const remainMs = countdownTarget.endsAt - serverNow(); // v51: SERVER time
   const numEl = $('#countdown-num');
   if (remainMs <= 0) {
-    if (!countdownTarget.flashing) {
-      // v51: "GO!" — the number sequence is 3 → 2 → 1 → GO! The overlay
-      // clears itself the moment the room payload says 'active' (the server
-      // flipped it at exactly countdown_ends_at), with a short fallback.
-      countdownTarget.flashing = true;
-      lastFlashedKey = countdownTarget.battleId; // v52: one GO! per countdown, ever
-      numEl.textContent = 'GO!';
-      numEl.classList.remove('draw');
-      numEl.classList.add('go');
-      numEl.style.animation = 'none';
-      void numEl.offsetWidth; // restart the pop animation
-      numEl.style.animation = '';
-      setTimeout(() => {
-        if (countdownTarget && countdownTarget.flashing) stopCountdownOverlay();
-      }, 900);
-    }
+    flashGo();
     return;
   }
   const n = Math.min(3, Math.max(1, Math.ceil(remainMs / 1000)));
@@ -1896,6 +1988,21 @@ function homeBgThemeKey() {
 function startHomeBg() {
   const host = $('#home-bg');
   if (!host) return;
+  // v53: an active design theme carries its OWN animated background.
+  if (activeThemeKey) {
+    if (homeBgScene) { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
+    if (window.ThemeScene) {
+      host.classList.add('on');
+      if (!homeBgScene || homeBgScene.__kind !== 'theme') {
+        try { homeBgScene = new window.ThemeScene(host, { theme: activeThemeKey, custom: activeThemeCustom }); homeBgScene.__kind = 'theme'; }
+        catch (e) { console.warn('[theme-bg]', e.message); homeBgScene = null; }
+      } else if (homeBgScene.setPalette) {
+        homeBgScene.setPalette(activeThemeKey, activeThemeCustom);
+      }
+      return;
+    }
+  }
+  if (homeBgScene && homeBgScene.__kind === 'theme') { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
   host.classList.add('on');
   if (homeBgScene) { homeBgScene.setTheme(homeBgThemeKey()); return; }
   if (!window.RisingLines) {
@@ -1960,6 +2067,7 @@ function show(name) {
   else if (name === 'live') { startPolling(refreshLive); startLiveTicker(); } // v50: LIVE feed + countdowns
   else if (name === 'room') startPolling(refreshRoom);
   else if (name === 'premium') renderPremiumPage(); // v52: entitlement + catalog, server truth
+  else if (name === 'settings') renderSettingsThemes(); // v53: UI Customization lives in Settings
   else if (name === 'matchmaking') { mmOnEnter(); } // v35: real search (v45: the searching LINE carries the visual)
   else if (name === 'join') refreshJoinList();              // v35: live public list
   else if (name === 'battlehistory') loadBattleHistory();
@@ -2566,23 +2674,30 @@ function renderRoom(d) {
         '<span class="challenge-val">' + esc(el.value) + '</span></div>'
       ).join('');
       $('#challenge-summary').textContent = d.battle.challenge.summary_text;
-      // v52: PREMIUM RE-ROLL — the window is SERVER-computed for THIS user
-      // (battle.reroll.allowed). Free users see a locked button that routes
-      // to the upgrade prompt — gating is never hide-only.
+      // v53: the REVEAL phase — the challenge is shown BEFORE the match.
+      // Premium re-rolls it here (unlimited); the host LAUNCHES (which arms
+      // the 3-2-1). Once countdown/active starts, the re-roll button is
+      // hidden COMPLETELY for everyone (spec) and the locked challenge rules.
       const rr = d.battle.reroll;
-      const rrOpen = !!(rr && rr.used < rr.max && serverNow() < new Date(rr.deadline).getTime());
-      const rrMine = d.players.some((x) => x.is_you);
+      const inReveal = d.battle.status === 'challenge_locked';
+      const iAmArtist = d.players.some((x) => x.is_you);
       const rrBtn = $('#btn-reroll');
-      rrBtn.classList.toggle('hidden', !(rrOpen && rrMine));
-      if (rrOpen && rrMine) {
-        rrBtn.classList.toggle('locked', !rr.allowed);
-        rrBtn.innerHTML = rr.allowed
-          ? IC.dice + ' RE-ROLL · ' + (rr.max - rr.used) + ' left'
+      rrBtn.classList.toggle('hidden', !(inReveal && iAmArtist));
+      if (inReveal && iAmArtist) {
+        rrBtn.classList.toggle('locked', !rr || !rr.allowed);
+        rrBtn.innerHTML = (rr && rr.allowed)
+          ? IC.dice + ' RE-ROLL'
           : IC.lock + ' RE-ROLL <span class="muted">· Premium</span>';
       }
+      // launch: HOST only, during the reveal
+      const roomOwnerLaunch = !!(d.host && me && d.host.user_id === me.id && d.players.some((x) => x.is_you));
+      $('#btn-launch').classList.toggle('hidden', !(inReveal && roomOwnerLaunch));
+      $('#launch-wait-note').classList.toggle('hidden', !(inReveal && iAmArtist && !roomOwnerLaunch));
     } else {
       $('#challenge-box').classList.add('hidden');
       $('#btn-reroll').classList.add('hidden');
+      $('#btn-launch').classList.add('hidden');
+      $('#launch-wait-note').classList.add('hidden');
     }
     // v36: the battle clock is only ever shown while the battle is
     // 'active' (the server flips it there only AFTER the 3-2-1 countdown
@@ -2590,10 +2705,15 @@ function renderRoom(d) {
     $('#battle-clock').classList.toggle('hidden', !(d.battle.status === 'active' && d.battle.official_end_time));
     // v36: the full-screen 3-2-1 countdown, synced to the server's
     // countdown_ends_at (startCountdownOverlay below).
+    if (d.battle.status !== 'challenge_locked') { $('#btn-reroll').classList.add('hidden'); $('#btn-launch').classList.add('hidden'); $('#launch-wait-note').classList.add('hidden'); }
     if (d.battle.status === 'countdown' && d.battle.countdown_ends_at) {
       startCountdownOverlay(new Date(d.battle.countdown_ends_at).getTime(), 'cd-' + d.battle.countdown_ends_at);
-    } else if (d.battle.status === 'active' && countdownTarget && countdownTarget.flashing) {
-      /* let the GO! flash finish (short by design) */
+    } else if (d.battle.status === 'active' && countdownTarget) {
+      // v53 (GO! race fix): the server flipped the battle active — if the
+      // tick hasn't crossed zero yet, flash GO! NOW (the server's active
+      // instant IS the GO instant). Never stop an un-flashed countdown.
+      if (!countdownTarget.flashing) flashGo();
+      /* already flashing → let the 900 ms finish (short by design) */
     } else {
       stopCountdownOverlay();
     }
@@ -3214,9 +3334,12 @@ async function renderAccount(d) {
   // v52: Premium entitlement + the persisted UI theme arrive with the session
   // (fullUser). Badge chips and gating read THIS — never a local override.
   mePremium = !!(d.premium && d.premium.active);
-  applyPremiumTheme(d.ui_theme || null);
+  applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
   $('#drawer-prem').classList.toggle('hidden', !mePremium);
   $('#card-prem').classList.toggle('hidden', !mePremium);
+  // v53 (spec 9): Free users get the small ⭐ upgrade button by the bell;
+  // Premium users customize in Settings instead.
+  $('#btn-premium-mini').classList.toggle('hidden', mePremium);
   // v26: the signed-in user is shown in the hamburger drawer.
   const who = d.user.display_name || d.user.username;
   $('#drawer-name').textContent = who;
@@ -4697,13 +4820,16 @@ async function renderPremiumPage() {
   mePremium = !!d.premium;
   applyPremiumTheme(d.ui_theme || null);
   $('#prem-status').innerHTML = d.premium
-    ? '<span class="prem-chip big">★ PREMIUM ACTIVE</span> <span class="muted" style="font-size:12px; margin-left:8px">test mode — no payment was taken</span>'
+    ? '<span class="prem-chip big">★ PREMIUM ACTIVE</span> <span class="muted" style="font-size:12px; margin-left:8px">test mode · customize your themes in <a href="#" id="prem-to-settings" style="color:var(--pink); font-weight:700">Settings</a></span>'
     : '<span class="muted" style="font-size:13px">You are on the <b>Free</b> plan.</span>';
   $('#prem-activate-wrap').classList.toggle('hidden', d.premium);
   $('#prem-revoke-wrap').classList.toggle('hidden', !d.premium);
   $('#prem-confirm').classList.add('hidden');
   const activeKey = d.ui_theme || 'default';
-  $('#prem-themes').innerHTML = d.themes.map((t) => {
+  // v53 (spec 9): Premium members customize in SETTINGS — this page is the
+  // upgrade page; premium visitors get a pointer instead of a second gallery.
+  $('#prem-themes').classList.toggle('hidden', d.premium);
+  $('#prem-themes').innerHTML = d.premium ? '' : d.themes.map((t) => {
     const locked = t.premium && !d.premium;
     const active = t.key === activeKey;
     return '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" data-theme-key="' + esc(t.key) + '" data-locked="' + (locked ? '1' : '') + '">' +
@@ -4752,11 +4878,11 @@ $('#prem-revoke').addEventListener('click', async () => {
   } catch (err) { toast(err.message); }
 });
 
-// The re-roll button — one handler, gated by the SERVER truth (mePremium
-// mirrors the entitlement; the API is the final word either way).
+// The re-roll button — PRE-MATCH (reveal) only, unlimited for Premium; the
+// SERVER is the final word on both the entitlement and the phase.
 $('#btn-reroll').addEventListener('click', async () => {
   if (!mePremium) {
-    openUpsell('Re-roll is a Premium feature', 'Premium members re-roll the challenge for a fresh set of clean, concise concepts — up to 3 times in the first 60 seconds of a battle.');
+    openUpsell('Re-roll is a Premium feature', 'Premium members re-roll the revealed challenge as many times as they like — before the battle launches.');
     return;
   }
   try {
@@ -4765,6 +4891,75 @@ $('#btn-reroll').addEventListener('click', async () => {
     toast('🎲 Challenge re-rolled!');
   } catch (e) { toast(e.message); }
 });
+// v53: LAUNCH — the host ends the reveal; the 3-2-1 countdown (and only
+// then the match timer) begins.
+$('#btn-launch').addEventListener('click', async () => {
+  try {
+    const d = await api('/api/rooms/' + currentRoomCode + '/launch', {}, 'POST');
+    renderRoom(d);
+  } catch (e) { toast(e.message); }
+});
+
+// v53: Settings → UI Customization (Premium). The gallery and color pickers
+// render from the SERVER catalog + entitlement — never a client-side unlock.
+async function renderSettingsThemes() {
+  let d = null;
+  try { d = await api('/api/premium/themes'); } catch (e) { return; }
+  const grid = $('#settings-theme-grid'), note = $('#settings-theme-note'), customRow = $('#settings-theme-custom');
+  if (!d.premium) {
+    grid.innerHTML = d.themes.filter((t) => t.premium).slice(0, 7).map((t) =>
+      '<div class="theme-swatch locked" data-upsell="1"><span class="swatch-preview sw-' + esc(t.key) + '"></span>' +
+      '<span class="swatch-name">' + esc(t.name) + '</span><span class="swatch-hint">' + esc(t.hint || '') + '</span><span class="swatch-lock">🔒</span></div>'
+    ).join('');
+    customRow.classList.add('hidden');
+    note.innerHTML = 'Design themes are part of <b>Art Arena Premium</b> — each one restyles the whole app: logo, colors, buttons, borders and its own animated background. <a href="#" id="pth-upgrade-link" style="color:var(--pink); font-weight:700">Upgrade</a>';
+    return;
+  }
+  const activeKey = d.ui_theme || 'default';
+  grid.innerHTML = d.themes.map((t) => {
+    const active = t.key === activeKey;
+    return '<div class="theme-swatch' + (active ? ' active' : '') + '" data-settings-theme="' + esc(t.key) + '">' +
+      '<span class="swatch-preview sw-' + esc(t.key) + '"></span>' +
+      '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip">P</span>' : '') + '</span>' +
+      '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
+      (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') + '</div>';
+  }).join('');
+  const activeTheme = d.themes.find((t) => t.key === activeKey);
+  if (activeTheme && activeTheme.customizable) {
+    customRow.classList.remove('hidden');
+    const cu = d.ui_custom || { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
+    $('#pth-c1').value = cu.c1; $('#pth-c2').value = cu.c2; $('#pth-dir').value = cu.dir;
+    note.textContent = 'Custom colors for the ' + activeTheme.name + ' theme — solids or gradients, applied instantly and saved to your account.';
+  } else {
+    customRow.classList.add('hidden');
+    note.textContent = activeTheme ? 'The ' + activeTheme.name + ' theme comes with its own curated palette.' : 'Pick a theme — it applies across the whole app instantly.';
+  }
+}
+$('#settings-theme-grid').addEventListener('click', async (e) => {
+  const up = e.target.closest('[data-upsell]');
+  if (up) { openUpsell('Design themes are Premium', 'Seven complete visual systems — Flame, Cloud, Glitch, Graffiti, Stitch, Glowing and Magazine Cutout — each restyling the entire app.'); return; }
+  const sw = e.target.closest('[data-settings-theme]');
+  if (!sw) return;
+  try {
+    const r = await api('/api/premium/theme', { theme: sw.dataset.settingsTheme }, 'PUT');
+    applyPremiumTheme(r.ui_theme, r.ui_custom);
+    renderSettingsThemes();
+    toast(sw.dataset.settingsTheme === 'default' ? 'Back to the standard Art Arena look.' : 'Theme applied — the whole app follows.');
+  } catch (err) { toast(err.message); }
+});
+$('#settings-theme-note').addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'pth-upgrade-link') { e.preventDefault(); show('premium'); }
+});
+$('#pth-save').addEventListener('click', async () => {
+  if (!activeThemeKey) return;
+  const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };
+  try {
+    const r = await api('/api/premium/theme', { theme: activeThemeKey, custom }, 'PUT');
+    applyPremiumTheme(r.ui_theme, r.ui_custom);
+    toast('Colors applied.');
+    renderSettingsThemes();
+  } catch (err) { toast(err.message); }
+});
 
 // The upgrade prompt every locked feature routes to (tasteful, never silent).
 function openUpsell(title, body) {
@@ -4772,7 +4967,11 @@ function openUpsell(title, body) {
   $('#ups-text').textContent = body || 'Upgrade to unlock exclusive 2D UI themes and challenge re-rolls.';
   modalOpen('#premium-upsell');
 }
+$('#btn-premium-mini').addEventListener('click', () => show('premium')); // v53: ⭐ → upgrade page
 $('#ups-close').addEventListener('click', () => modalClose('#premium-upsell'));
+document.addEventListener('click', (e) => { // v53: premium page → Settings pointer
+  if (e.target && e.target.id === 'prem-to-settings') { e.preventDefault(); show('settings'); }
+});
 $('#ups-cta').addEventListener('click', () => { modalClose('#premium-upsell'); show('premium'); });
 $('#premium-upsell').addEventListener('click', (e) => { if (e.target.id === 'premium-upsell') modalClose('#premium-upsell'); });
 
@@ -5009,6 +5208,7 @@ window.__aaYoutubeHandoff = null;
 </script>
 <script src="/glitter-wrap.js"></script>
 <script src="/rising-lines.js"></script>
+<script src="/themes.js"></script><!-- v53: per-theme animated backgrounds -->
 <!-- v45: the matchmaking globe (globe-wrap.js + d3) and the beacon scanner
      (mm-scan-wrap.js) are REMOVED; the searching line is pure CSS.
      v46: arch-corridor.js + vendor/three.min.js are removed too (nothing
