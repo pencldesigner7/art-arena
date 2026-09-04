@@ -625,6 +625,84 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v54 — Premium UI customization deep pass: cloud/graffiti/magazine/stitch/glowing redesigns, accent token system, glitch events (bursts + rare fullscreen), premium activation notification, Deactivate UI, Light/Dark hierarchy, themed login, logo cards + colour wheel
+
+Theme system (specs 1–3, 6–9, 13):
+
+- **Cloud redesigned**: each cloud is ONE cohesive silhouette — a single
+  multi-arc path filled once (a union: no circle seams, no bubble clusters)
+  with a natural flat cumulus bottom and soft internal shading, baked to
+  sprites (3 depth layers, slow drift + bob).
+- **Graffiti redesigned**: a real wall — baked brick/concrete texture,
+  spray-tag ribbons (multi-pass stroke + speckle halo), paint splats with
+  satellites, live drips that run and dry, periodic fresh spray bursts.
+  Surfaces warm to wall tones; accents are spray pink + marker yellow; cards
+  get imperfect radii + spray-dot corners; the white wordmark is TAGGED on
+  with a stencil/spray reveal and quick unpredictable marker jiggles (the
+  supplied logo art is untouched — there was no box in the file; the fix is
+  presentation, not regeneration).
+- **Magazine Cutout redesigned**: an intentional collage — torn-edge paper
+  clippings (jittered polygons) carrying print fragments (giant glyphs,
+  halftone patches, headline bars), taped corners, soft shadows; sheets
+  breathe and new clippings get PLACED every few seconds. Readability kept
+  (low-alpha paper tones).
+- **Stitch separated from Magazine by construction**: fabric weave texture,
+  a wooden embroidery hoop, and a needle that steadily sews running-stitch
+  motifs (lazy daisies, scallop borders) in thread colors — textile only,
+  zero paper elements (and Magazine has zero fabric).
+- **Glowing with hierarchy**: drifting light fields + twinkling sparks + an
+  edge vignette on the canvas; in the UI only primary CTAs, the logo and
+  active nav glow — home cards (buttons!) were explicitly excluded from the
+  CTA gradient so they stay calm surfaces with a faint halo.
+- **Accent token system (spec 2)**: 78 hardcoded accent rgba/hex values
+  replaced by `--pink-rgb` / `--purple-rgb` tokens (every theme, plus
+  `--pth-c1-rgb/--pth-c2-rgb` for custom colors) — unread rings, field
+  gradients, hovers, chips, glows all follow the active theme now.
+
+Glitch (specs 4–5):
+
+- Background pulses a little more frequent (3.5–7.5 s, randomized — still
+  long calm stretches). Gradient/CTA buttons glitch along in SHORT bursts
+  (~0.4 s, readable + clickable). Each pulse rolls a true-random ~1-in-10
+  escalation to the **full-screen signal disruption**: ~3 s takeover with
+  the RGB-split glitching logo, slices + scanlines, pointer-transparent,
+  auto-dismissed, and hard-suppressed during countdowns and live battles
+  (`__pthGlitchAllowed`).
+
+Behavior (specs 3, 10–12 + settings):
+
+- **Premium activation notification**: exactly once per real activation
+  transition (server-guarded; logins/re-activations never duplicate) —
+  "Welcome to Art Arena Premium!" with a **Customize UI** button that lands
+  straight in Settings → UI Customization. Follows the normal notification
+  persistence rules (24 h TTL, unread badge, WS push).
+- **Light/Dark can never override a premium theme**: `data-visual=premium`
+  on the root scopes the standard light/dark rules out entirely — no mixed
+  states (the old white-input leak under dark themes is fixed). The
+  Appearance row visibly stands down but still records the preference.
+- **Deactivate UI**: one button in Settings turns the theme off, restores
+  the saved Light/Dark preference instantly (no flash), persists across
+  refresh/logout, and keeps the entitlement + full access to themes.
+- **Themed login page**: this browser's saved premium identity (localStorage
+  hint, no account data) paints the login page — backdrop scene, card,
+  accents, logo — before the first paint, and survives logout + refresh; a
+  different (free) account logging in clears it, the premium account's
+  server truth restores theirs.
+- **Settings cards carry the real theme logos** (not two-color blocks), with
+  palette chips; a proper **colour wheel** (hue ring + saturation/value
+  square + hex) replaces the raw color inputs; picks recolor the app LIVE
+  and tint the card logo to the chosen gradient (Flame/Glitch/Glowing only —
+  Cloud/Magazine/Stitch/Graffiti keep their exact supplied art).
+
+Verified: `e2e/v54-browser` **49/49** (per-theme sweep ×7, cloud cohesion
+metrics, wall/paper/weave pixel checks, glitch frequency/burst/fullscreen/
+guards/randomness, notification once + CTA + no duplicates, Light/Dark
+hierarchy + mixed-state, Deactivate, login-page flow ×4, logo cards, wheel
+live preview + tint + persistence, responsive 375px, zero page errors).
+Regression sweep all green: v53 33/33, v52 41/41, v51 53/53, v50 25/25,
+v49 29/29, v48 21/21, v47 14/14, v46 41/41, v45 33/33, v44 27/27, regress
+21/21 — **436/436 total** incl. v54. Screenshots: `docs/shots-v54/`.
+
 ## v53 — seven dynamic design themes (full-UI adaptation), reveal phase + host launch, premium unlimited pre-match re-roll, GO! race fix, broadened pool
 
 Spec 1–3 — **the theme system** (Premium, all 2D):

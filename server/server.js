@@ -725,6 +725,10 @@ app.get('/api/premium/status', requireAuth, ah(async (req, res) => {
 }));
 app.post('/api/premium/test-activate', requireAuth, ah(async (req, res) => {
   if (!PREMIUM_TEST_MODE) throw new HttpError(403, 'Test activation is disabled on this deployment.');
+  // v54 (spec 3): the welcome notification is tied to the REAL transition —
+  // only an account that was NOT premium becomes premium. Re-activations of
+  // an already-active entitlement notify nobody (and logins never do).
+  const wasActive = (await premiumOf(req.user.id)).active;
   const c = await pool.connect();
   try {
     await c.query('BEGIN');
@@ -736,6 +740,9 @@ app.post('/api/premium/test-activate', requireAuth, ah(async (req, res) => {
        VALUES ($1, 'premium', 'active', 'test')`, [req.user.id]);
     await c.query('COMMIT');
   } catch (e) { await c.query('ROLLBACK').catch(() => {}); throw e; } finally { c.release(); }
+  if (!wasActive) {
+    await notifyUser(req.user.id, 'premium_activated', { plan: 'premium', source: 'test' });
+  }
   res.json({ ...(await premiumOf(req.user.id)), test_mode: PREMIUM_TEST_MODE });
 }));
 app.post('/api/premium/test-revoke', requireAuth, ah(async (req, res) => {
@@ -1195,6 +1202,10 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
      `ALTER TABLE users ADD COLUMN IF NOT EXISTS ui_theme text`],
     ['v52 notification types: rematch_request',
      `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'rematch_request'`],
+    // v54 (spec 3): the Premium welcome notification fires ONCE per real
+    // activation event (never per login/refresh — guarded at insert time).
+    ['v54 notification types: premium_activated',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'premium_activated'`],
     // v52 (randomizer spec, stricter): ONE concise concept per category. The
     // pool is emptied and re-seeded at boot from the re-curated base list in
     // randomizer_seed.json (single nouns / established compounds only — the
