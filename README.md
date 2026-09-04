@@ -625,6 +625,101 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v56 — UI refinements: Arena tab no-op, CloudSky WebGL clouds (user-supplied), new PIXELATED theme (user's logo + reference), stitch background removed + invisible-hand fashion atelier, graffiti integration + randomized drips, glowing logo restored, fully-themed legal pages, gold medallion badge, minimal Settings, chaotic glitch takeover, theme-aware homepage icons, Add Friend in rooms
+
+Navigation (item 2):
+
+- Tapping the **Arena tab while already on Arena is a true no-op** — no
+  reload, no redirect, no scroll reset, no polling restart, no refetch
+  burst (asserted: 0 navigations, scroll kept at 400px, 0 API calls).
+  Tabs still navigate from anywhere else, including child destinations.
+
+Clouds (item 1) — the user-supplied **Originkit CloudSky shader** is now
+the cloud theme's background (`cloud-sky.js`, ported verbatim from the
+supplied React component to plain JS): fbm-eroded cumulus fields in two
+parallax layers, cirrus veil, aerial perspective, inter-cloud shadows,
+pointer parallax + wind gust. `ThemeScene` supervises the lifecycle: the
+2D canvas stands down, `setMotion(false)` freezes the last WebGL frame
+(Animations OFF never hides the theme), dispose tears it down, and the
+classic 2D scene remains as the fallback for browsers without WebGL.
+Perf: rendering skips while the host is hidden.
+
+**PIXELATED — new premium theme** (item 13), from the user's reference
+image + logo:
+
+- Background: an animated pixel world rendered at 1/6 resolution and
+  upscaled NEAREST — dithered sky bands (2×2 Bayer seams), blocky sun
+  with dithered halo, drifting chunky clouds (3 depths), stepped hill
+  silhouettes in the reference's sage/navy palette, twinkling sparkles
+  (white + cyan, flash-safe). Asserted blocky: hard color steps on a
+  hill row; animates; freezes painted under Animations OFF.
+- The UI itself goes pixel: sharp corners everywhere, 3px chunky
+  borders, hard offset shadows (4px 4px 0 #000) with press/hover
+  offsets, arcade magenta→cyan gradient buttons, pixel-ring icon
+  treatments, heading block shadows. Accents from the supplied logo
+  (`#E337C4` + `#77D5DF`) on the reference's dark navy surfaces.
+- Logo: the supplied pixel-art wordmark installed AS-IS (transparent,
+  NEAREST-scaled to 900px). Server catalog: 9 cards (8 premium themes),
+  not customizable.
+
+Stitch (item 3): the fabric background is fully removed from the logo
+(alpha from fabric-distance; threads keep full opacity — corners 0,
+opaque 30.7%). New background: a **fashion atelier where an invisible
+hand sketches** — one garment at a time inside the embroidery hoop
+(gown → jacket → sneakers), running-stitch strokes with a floating
+needle tip at the point of work, draw → hold → unpick cycling, drifting
+thread curls, dark linen + weave. Freezes mid-garment under Animations
+OFF.
+
+Graffiti (item 4): the exact wall now breathes (±1.4% scale) under
+feathered edge scrims + a center vignette so it melts into the page;
+logo/headings carry hard shadows, panel cards denser (rgba 13,13,13,.92);
+text contrast asserted ≥ 4.5:1. **Every button drips differently** —
+five drip variants (length/width/position/count/shape, mirrored and
+shifted) cycled by sibling position.
+
+Glowing (item 5): root cause of the "eaten" letters — the supplied file
+was ALREADY background-free; v55's haze-strip pass had damaged it.
+Rebuilt as pure trim + resize, art untouched (darkFrac 0.28, glow 0.43).
+
+Legal pages (item 6): cold `/privacy` and `/terms` visits now fully wear
+the premium identity — `activeThemeKey` is hydrated from the local hint
+(theme SCENE + themed logos, not just colors), and a signed-in user
+reconciles with server truth (revoke → classic look on next visit).
+
+Premium badge (items 7+10): a **gold medallion** — gradient facets,
+metal ring, beveled star, sparkle points, slow shine animation (frozen
+by Animations OFF). Still pinned top-right, pointer-events:none, zero
+text. The dashboard profile card carries ONLY the badge.
+
+Settings (item 8): every explanatory paragraph and card hint removed —
+labels, buttons, and state indicators only.
+
+Glitch takeover (item 11): chaotic system-takeover — 8 slice bands +
+2 vertical interference columns + 12 randomly-placed signal blocks + TV
+static + CRT roll bar + full-screen channel washes + RGB ghost-split
+logo + randomized system messages. Still ~1-in-10 rare, ~3s,
+pointer-transparent, countdown/battle-guarded, flash-safe (no cycle
+under 0.5s), fully suppressed by Animations OFF.
+
+Homepage icons (item 12): Battle / Join / Create icons follow the active
+theme (accent stroke overrides the hardcoded gradient + per-theme ring/
+glow/chip treatments, contrast ≥ 3:1 asserted).
+
+Add Friend (item 9): every seat in a room carries the action —
+`＋ Add Friend` → `Request sent` → `✓ Accept request` → `✓ Friends`,
+deduped server-side (friends/pending 409s refresh the state chip), uses
+the existing friend + notification system, long-press menu guarded.
+
+Testing: `e2e/v56-browser.js` **50/50 PASS** (navigation ×3, stitch ×5,
+graffiti ×4, glowing ×1, legal ×3, badge ×5, settings ×2, homepage icons
+×4, glitch ×3, add-friend ×4, cloud CloudSky ×5, pixelated ×10, zero
+page errors). Full sweep green: v44–v55 batteries + regress 21/21
+(updated for the intentional v56 changes: WebGL cloud assertions, 9-card
+catalog, badge v56, ui-version 56). Headless note: WebGL verified under
+SwiftShader with `preserveDrawingBuffer` for freeze-inspection. Shots:
+`docs/shots-v56/` (9 PNGs).
+
 ## v55 — Premium UI refinements: supplied theme logos (graffiti/glowing/magazine/stitch), exact graffiti wall + B&W world with dripping buttons, glowing green/blue, richer magazine, refined clouds, themed legal pages, theme-aware icons, top-right group, profile star badge, Settings → Animations (freeze motion, persisted)
 
 Theme logos — the user's exact uploads, nothing regenerated (workflow:

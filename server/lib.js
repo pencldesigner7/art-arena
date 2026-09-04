@@ -158,6 +158,7 @@ const PREMIUM_THEMES = [
   { key: 'stitch',   name: 'Stitch',          hint: 'Embroidery · stitched borders · handcrafted motion', premium: true,  customizable: false },
   { key: 'glowing',  name: 'Glowing',         hint: 'Green & blue glow · gradient buttons · luminous accents', premium: true,  customizable: true, c1: '#6ED4BF', c2: '#51A8D9' },
   { key: 'magazine', name: 'Magazine Cutout', hint: 'Paper collage · cutout layers · editorial', premium: true,  customizable: false },
+  { key: 'pixel',    name: 'Pixelated',        hint: 'Retro pixel art · dithered sky · chunky arcade UI', premium: true, customizable: false, c1: '#E337C4', c2: '#77D5DF' },
 ];
 const FREE_THEMES = [
   { key: 'default', name: 'Art Arena', hint: 'Light / Dark mode (built in)', premium: false },
