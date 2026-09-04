@@ -109,6 +109,8 @@
 
       const loop = (t) => {
         if (this._disposed) return;
+        // v55: Settings → Animations OFF — freeze (last frame stays visible).
+        if (this._motion === false) { this.raf = 0; return; }
         if (this._lastT == null) this._lastT = t;
         const deltaSec = (t - this._lastT) / 1000;
         this._lastT = t;
@@ -116,6 +118,7 @@
         this.raf = requestAnimationFrame(loop);
       };
       this.raf = requestAnimationFrame(loop);
+      this._loop = loop; // v55: kept for setMotion resume
     }
 
     // ------------------------------------------------------------------ cfg --
@@ -313,6 +316,14 @@
     }
 
     // ---------------------------------------------------------------- dispose -
+    // v55: motion toggle — freeze/resume the starfield
+    setMotion(on) {
+      this._motion = !!on;
+      if (this._motion && !this.raf && !this._disposed && this._loop) {
+        this._lastT = null;
+        this.raf = requestAnimationFrame(this._loop);
+      }
+    }
     dispose() {
       if (this._disposed) return;
       this._disposed = true;

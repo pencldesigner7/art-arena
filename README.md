@@ -625,6 +625,90 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v55 — Premium UI refinements: supplied theme logos (graffiti/glowing/magazine/stitch), exact graffiti wall + B&W world with dripping buttons, glowing green/blue, richer magazine, refined clouds, themed legal pages, theme-aware icons, top-right group, profile star badge, Settings → Animations (freeze motion, persisted)
+
+Theme logos — the user's exact uploads, nothing regenerated (workflow:
+logos were requested and reviewed BEFORE any implementation):
+
+- **Graffiti** — white wordmark; background removed, letter interiors kept
+  (opaque 52%, semi 2.5% — the earlier "eaten letters" failure class is
+  numerically excluded). The app under graffiti is strictly **black &
+  white**: accents `#F4F4F4`/`#BFBFBF`, page `#101010`, cards `rgba(16,16,16,.9)`.
+- **Glowing** — ONLY the background haze was stripped this time; the dark
+  letterforms survived (dark-fraction asserted). Rising dots/sparks now use
+  the two colors sampled from the logo: green `#6ED4BF` + blue `#51A8D9`
+  (tokens, sparks, server catalog defaults all switched).
+- **Magazine Cutout** — flood-fill background removal, interiors preserved;
+  logo live at `/themes/magazine.png` (980×490).
+- **Stitch Embroidery** — used AS SUPPLIED (resized 3000×2000 → 900×600,
+  art untouched, 100% opaque): the fabric is part of the patch.
+
+Graffiti world (user's exact wall + realistic drips):
+
+- The background IS the user's exact `image-1.png` (740×411, monochrome
+  copy at `/themes/graffiti-bg.png`), cover-fit baked per resize with a
+  `#101010` fallback; on top: 7 monochrome drips (4 tapered segments +
+  bulbous head + highlight — `drawDrip(ctx,x,y,len,w0,color,alpha)` in
+  themes.js) and occasional spray puffs. Canvas verified ≥97% monochrome.
+- **Every button drips**: a shared `::after` SVG strip (3 tapered runs of
+  varied lengths + bulb circles, hover scaleY 1.22) — white paint on black,
+  never "a line and a dot".
+
+Cloud refined (edgier, atmospheric): bold asymmetric 3-arc masses with an
+irregular underside (never a ruler-flat cartoon base), defined under-shadow,
+3 depth layers (far/mid/near), 4 stratus streaks, moodier sky gradient.
+Asserted: every cloud is ONE cohesive mass (single opaque run at the widest
+row), min aspect 1.9, deeper blue at the top.
+
+Magazine richer: 13 torn sheets + 12 print fragments (glyphs/headline
+bars) + 7 tape strips + 5 halftone dots, layered placement over time.
+
+Premium themes on `/privacy` + `/terms`: full theme scenes + themed legal
+cards, hierarchy/links/responsive preserved, **no legal text changed**.
+Readability asserted numerically: text/card contrast ≥ 4.5:1 on dark
+(graffiti) AND light (cloud) themes.
+
+Theme-aware icons: Battle/Create/Join/History/Saved icons adapt per theme —
+graffiti rough organic ring, stitch dashed thread ring, glowing accent
+glow, cloud radial chip, magazine paper chip — each asserted contrast ≥ 3:1
+against its background on both light and dark worlds.
+
+Top-right fixed: bell + premium mini button now live in one `#nav-right`
+flex group (36×36, 8px gap, margin/padding normalized — a stray
+`padding:11px 20px` + flex `min-width:auto` had made the mini button 42px
+and misaligned). Aligned at 1280px and 375px, badge inside viewport.
+
+Profile Premium badge: a real **star badge SVG pinned top-right of the
+profile card** (absolute 14/14px, `pointer-events:none`, zero text — not a
+button, not clickable-looking). Free users: none. Revoked: gone after
+reload (backend entitlement is the only truth).
+
+Settings → **Animations ON/OFF** (spec: freeze, never hide):
+
+- `html[data-anim]` is the single motion authority (`'off'` only; absent =
+  ON). CSS kills all `animation`/`transition` app-wide; ThemeScene /
+  RisingLines / GlitterWrap all expose `setMotion(on)` — OFF cancels rAF
+  and holds the last frame (canvas stays fully painted, verified frozen by
+  pixel-hash), ON re-arms. Glitch bursts/fullscreen and the graffiti idle
+  tag early-return when OFF.
+- Persisted in `localStorage('aa-anim')`, survives refresh AND
+  logout/login, independent of Light/Dark and of the active premium theme
+  (theme identity — attr, logo, `data-visual` — verified intact while
+  frozen; deactivation hierarchy unchanged from v54).
+
+Fix during hardening: v55's cloud-bake replacement had accidentally
+deleted `ThemeScene.prototype.bakeWall` (sliced CLOUD→MAGAZINE swallowed
+it) — graffiti scenes failed construction silently into a caught warning;
+re-inserted and now all 7 themes construct cleanly (battery asserts).
+
+Testing: `e2e/v55-browser.js` — **43/43 PASS** (logos numeric art checks,
+graffiti world, glowing colors, magazine richness, cloud cohesion, icon
+contrast ×5, legal ×4, top-right ×3, badge ×4, animations ×9, zero page
+errors). Regression sweep all green: v44–v54 batteries (v54 updated to the
+intentional v55 changes: accents/logo map, graffiti wall+drips, cloud
+organic underside, accent-follows-token) + regress.js 21/21. Shots:
+`docs/shots-v55/` (10 PNGs).
+
 ## v54 — Premium UI customization deep pass: cloud/graffiti/magazine/stitch/glowing redesigns, accent token system, glitch events (bursts + rare fullscreen), premium activation notification, Deactivate UI, Light/Dark hierarchy, themed login, logo cards + colour wheel
 
 Theme system (specs 1–3, 6–9, 13):

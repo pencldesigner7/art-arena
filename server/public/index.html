@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="53">
+<meta name="aa-ui-version" content="55">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -99,7 +99,8 @@ try {
   .check { display:flex; align-items:center; gap:8px; }
   .check input { width:auto; margin:0; }
   .banner { background:var(--warn-bg); border:1px solid var(--warn-bd); color:var(--warn-tx); padding:10px 12px; border-radius:8px; margin-bottom:12px; font-size:14px; }
-  #nav-right { display:flex; align-items:center; gap:12px; }
+#nav-right { display:flex; align-items:center; justify-self:end; gap:8px; }
+  #nav-right .icon-btn, #nav-right #btn-premium-mini { width:36px; height:36px; flex:0 0 auto; margin:0; padding:0; min-width:0; }
 
   /* ------------------------- arena home (main screen) ------------------- */
   .welcome { font-size:24px; letter-spacing:1px; margin-bottom:4px; }
@@ -240,19 +241,23 @@ try {
   .pth-glitch-pulse main { animation:pth-glitch-jolt .2s steps(2) 1; }
   .pth-glitch-pulse #top-header { animation:pth-glitch-jolt .18s steps(2) 1; }
   @keyframes pth-glitch-jolt { 0% { transform:translateX(0); filter:none; } 25% { transform:translateX(-2.5px); filter:hue-rotate(18deg); } 60% { transform:translateX(2px); } 100% { transform:translateX(0); } }
-  body[data-ptheme="graffiti"] { --pink:#FF4FA3; --purple:#FFD23F; --pink-rgb:255,79,163; --purple-rgb:255,210,63; --surface:#1d1610; --surface-hover:#241c14; --surface-2:#2c221a; --bg:#151009; --panel:#1a130c; --line:#4d3d28; --muted:#c9b18a; --btn-line:#4d3d28; --auth-card:rgba(24,17,10,.88); --auth-page-bg:#151009; }
-  body[data-ptheme="graffiti"] .card, body[data-ptheme="graffiti"] .time-modal { border-width:2px; border-color:#4d3d28; border-radius:14px 5px 13px 6px; }
+  body[data-ptheme="graffiti"] { --pink:#F4F4F4; --purple:#C7C7C7; --pink-rgb:244,244,244; --purple-rgb:199,199,199; --surface:#181818; --surface-hover:#202020; --surface-2:#282828; --bg:#101010; --panel:#151515; --line:#3d3d3d; --muted:#b0b0b0; --btn-line:#3d3d3d; --auth-card:rgba(14,14,14,.9); --auth-page-bg:#0d0d0d; }
+  body[data-ptheme="graffiti"] .card, body[data-ptheme="graffiti"] .time-modal { border-width:2px; border-color:#3d3d3d; border-radius:14px 5px 13px 6px; background-color:rgba(16,16,16,.9); }
   body[data-ptheme="graffiti"] .home-card:hover, body[data-ptheme="graffiti"] .card:hover { transform:rotate(-.35deg) translateY(-2px); }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { position:relative; border-radius:9px 6px 10px 6px; background:linear-gradient(115deg, var(--pink), var(--purple)); color:#1c1206; font-weight:800; border:none; box-shadow:3px 3px 0 rgba(0,0,0,.5); }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { position:relative; border-radius:9px 6px 10px 6px; background:#F4F4F4; color:#0d0d0d; font-weight:800; border:none; box-shadow:3px 3px 0 rgba(0,0,0,.55); overflow:visible; }
   body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):hover { transform:rotate(-1deg) translateY(-1px); }
+  /* v55: buttons DRIP — white paint runs with tapered bodies and bulbous
+     heads (like real gravity-thickened paint), not a line and a dot. */
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini)::after { content:""; position:absolute; top:99%; left:7%; right:7%; height:16px; pointer-events:none; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='16'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M8 0 L13 0 L11.6 8 L9.4 8 Z'/%3E%3Ccircle cx='10.5' cy='10.6' r='3.1'/%3E%3Cpath d='M44 0 L48.4 0 L47.4 5.6 L45 5.6 Z'/%3E%3Ccircle cx='46.2' cy='7.4' r='2.5'/%3E%3Cpath d='M74 0 L77.6 0 L76.8 10 L74.8 10 Z'/%3E%3Ccircle cx='75.8' cy='12.9' r='3.4'/%3E%3C/g%3E%3C/svg%3E") repeat-x bottom left; background-size:96px 16px; transform-origin:top center; transition:transform .35s ease; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):hover::after { transform:scaleY(1.22); }
   body[data-ptheme="graffiti"] .badge.next, body[data-ptheme="graffiti"] .state-chip { transform:rotate(-1.4deg); }
   body[data-ptheme="graffiti"] .card::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.5; background:radial-gradient(circle at 88% 8%, rgba(var(--purple-rgb),.16) 0 2px, transparent 3px), radial-gradient(circle at 92% 14%, rgba(var(--pink-rgb),.2) 0 2.5px, transparent 4px), radial-gradient(circle at 85% 16%, rgba(var(--purple-rgb),.14) 0 1.6px, transparent 3px); }
   body[data-ptheme="stitch"] { --pink:#FF6A5A; --purple:#D8A25C; --pink-rgb:255,106,90; --purple-rgb:216,162,92; --surface:#1f1a24; --surface-hover:#251f2b; --surface-2:#2e2735; --bg:#171320; --panel:#1e1926; --line:#4a3f56; --muted:#b3a3c0; --btn-line:#4a3f56; --auth-card:rgba(26,21,30,.88); --auth-page-bg:#171320; }
   body[data-ptheme="stitch"] .card, body[data-ptheme="stitch"] .time-modal, body[data-ptheme="stitch"] .settings-appearance { border:1.5px dashed #6b5a7a; border-radius:14px; background-image:repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 2px, transparent 2px 5px); }
   body[data-ptheme="stitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { border:1.5px dashed #b392cb; border-radius:12px; }
-  body[data-ptheme="glowing"] { --pink:var(--pth-c1,#8A7CFF); --purple:var(--pth-c2,#39C4FF); --pink-rgb:var(--pth-c1-rgb,138,124,255); --purple-rgb:var(--pth-c2-rgb,57,196,255); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
-  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#8A7CFF), var(--pth-c2,#39C4FF)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 18px -4px var(--pth-c1,#8A7CFF); }
-  body[data-ptheme="glowing"] .card { box-shadow:0 0 26px -14px var(--pth-c1,#8A7CFF); }
+  body[data-ptheme="glowing"] { --pink:var(--pth-c1,#6ED4BF); --purple:var(--pth-c2,#51A8D9); --pink-rgb:var(--pth-c1-rgb,110,212,191); --purple-rgb:var(--pth-c2-rgb,81,168,217); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 18px -4px var(--pth-c1,#6ED4BF); }
+  body[data-ptheme="glowing"] .card { box-shadow:0 0 26px -14px var(--pth-c1,#6ED4BF); }
   body[data-ptheme="magazine"] { --pink:#E6483E; --purple:#2B2B36; --pink-rgb:230,72,62; --purple-rgb:43,43,54; --surface:#f4f1ea; --surface-hover:#eeebe2; --surface-2:#e6e2d7; --bg:#e9e5dc; --panel:#f0ede5; --line:#c9c3b4; --text:#23211d; --muted:#6f6a5e; --header-bg:rgba(240,237,229,.92); --nav-bg:rgba(244,241,234,.97); --btn-line:#c9c3b4; --auth-card:rgba(244,241,234,.9); --auth-page-bg:#e9e5dc; }
   body[data-ptheme="magazine"] .card { border:none; border-left:5px solid #23211d; border-radius:2px; box-shadow:3px 4px 0 rgba(35,33,29,.22); transform:rotate(-.25deg); }
   body[data-ptheme="magazine"] .home-card:hover, body[data-ptheme="magazine"] .card:hover { transform:rotate(.3deg) translateY(-2px); }
@@ -361,6 +366,29 @@ try {
   /* ---- Premium activation notification CTA ---- */
   .notif-cta { background:linear-gradient(90deg, var(--pink), var(--purple)); color:var(--on-accent); border:none; font-weight:800; }
 
+  /* ---- v55: premium star badge (dashboard profile card) ---- */
+  #view-account { position:relative; }
+  .prem-star { position:absolute; top:14px; right:14px; z-index:5; width:34px; height:34px; pointer-events:none; filter:drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+  .prem-star svg { width:34px; height:34px; display:block; }
+
+  /* ---- v55: theme-aware destination icons (Battle / Create / Join /
+       History / Saved). Decorative treatments AROUND an icon whose color
+       already follows the theme accent — contrast is never sacrificed. ---- */
+  .dest-ico { position:relative; }
+  body[data-ptheme="flame"] .dest-ico { filter:drop-shadow(0 0 10px rgba(var(--pink-rgb),.5)); }
+  body[data-ptheme="cloud"] .dest-ico svg { background:radial-gradient(circle, rgba(255,255,255,.92) 0 60%, transparent 61%); border-radius:50%; }
+  body[data-ptheme="glitch"] .dest-ico { filter:drop-shadow(1.6px 0 0 rgba(var(--pink-rgb),.85)) drop-shadow(-1.6px 0 0 rgba(var(--purple-rgb),.85)); }
+  body[data-ptheme="graffiti"] .dest-ico svg { border:2px solid var(--pink); border-radius:48% 52% 46% 54%; padding:4px; }
+  body[data-ptheme="stitch"] .dest-ico svg { border:2px dashed var(--pink); border-radius:50%; padding:4px; }
+  body[data-ptheme="glowing"] .dest-ico { filter:drop-shadow(0 0 12px rgba(var(--pink-rgb),.65)); }
+  body[data-ptheme="magazine"] .dest-ico svg { background:var(--surface); border:1.5px solid var(--text); box-shadow:2px 2px 0 rgba(35,33,29,.28); padding:5px; transform:rotate(-2deg); }
+
+  /* ---- v55: Animations OFF — motion stops, visuals stay ---- */
+  html[data-anim="off"] *, html[data-anim="off"] *::before, html[data-anim="off"] *::after {
+    animation: none !important; transition: none !important;
+  }
+  html[data-anim="off"] { scroll-behavior: auto !important; }
+
   /* ---- reduced motion: the event effects collapse to stillness ---- */
   @media (prefers-reduced-motion: reduce) {
     #pth-fullscreen-glitch.on, .pth-gbtn-burst, .pth-logo-graffiti, .pth-fsglitch main { animation:none !important; }
@@ -385,7 +413,7 @@ try {
   .sw-glitch { background:linear-gradient(135deg,#060810 50%, #00F0FF 50.1%, #FF2BD1); }
   .sw-graffiti { background:linear-gradient(135deg,#100d1c 55%, #FF4FA3 55.1%, #25C4A9); }
   .sw-stitch { background:repeating-linear-gradient(45deg,#171320 0 7px,#2e2735 7px 14px); border:1.5px dashed #b392cb; }
-  .sw-glowing { background:radial-gradient(circle at 30% 45%, #8A7CFF 0%, #101024 62%), radial-gradient(circle at 75% 70%, #39C4FF 0%, transparent 45%); background-color:#0a0a18; }
+  .sw-glowing { background:radial-gradient(circle at 30% 45%, #6ED4BF 0%, #101024 62%), radial-gradient(circle at 75% 70%, #51A8D9 0%, transparent 45%); background-color:#0a0a18; }
   .sw-magazine { background:#f4f1ea; position:relative; }
   .sw-default { background:linear-gradient(135deg,#09070d 50%, #FF3CAC 50.1%, #7B2CFF); }
   /* settings customization */
@@ -839,10 +867,12 @@ try {
     </button>
   </div>
   <div class="brand top-brand"><img id="top-logo" src="/logo.png" data-aa-logo alt="Art Arena" height="26"></div>
+  <div id="nav-right">
   <button type="button" id="btn-premium-mini" class="hidden" aria-label="Art Arena Premium" title="Art Arena Premium"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="url(#aa-grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.8 5.9 6.2.8-4.6 4.4 1.2 6.3L12 17.1l-5.6 3.1 1.2-6.3L3 9.5l6.2-.8z"/></svg></button>
   <button type="button" id="btn-notif" class="icon-btn" aria-label="Notifications"><span id="notif-badge" aria-hidden="true"></span>
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>
   </button>
+  </div>
 </header>
 <div id="home-bg" aria-hidden="true"></div><!-- v51: app-wide ambient layer (body level) -->
 <main>
@@ -1433,6 +1463,9 @@ try {
        real-data lists (honest empty states until battles exist). The old
        always-visible save-profile form now lives behind "Edit Profile". -->
   <section id="view-account" class="view hidden">
+    <!-- v55: Premium star badge — a real badge in the card's top-right corner
+         (not a button-looking chip). Shows only for actual Premium users. -->
+    <span id="card-prem" class="prem-star hidden" title="Art Arena Premium"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="#14141c" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><path d="M17 7.6l2.6 5.2 5.7.9-4.1 4 1 5.7-5.2-2.7-5.2 2.7 1-5.7-4.1-4 5.7-.9z" fill="#FFD75E" stroke="#96731c" stroke-width="1" stroke-linejoin="round"/></svg></span>
     <div id="unverified-banner" class="banner hidden">
       ⚠ Email not verified — a code was sent to your email.
       <div style="margin-top:8px">
@@ -1468,7 +1501,6 @@ try {
           <span id="card-verified" class="verified-tick hidden" title="Email verified"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
         </div>
         <div class="prof-sub" id="card-sub">@…</div>
-        <div style="margin-top:6px"><span id="card-prem" class="prem-chip hidden">★ PREMIUM</span></div>
         <!-- v34: bio now actually shows (saved via Edit Profile → bio field) -->
         <p id="card-bio" class="card-bio hidden"></p>
         <button type="button" id="btn-edit-profile" class="edit-profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5h4L19.6 8.4a2.3 2.3 0 0 0-3.2-3.2L5.3 16.3z"/><path d="m13.5 6.5 3.2 3.2"/></svg><span>Edit Profile</span></button>
@@ -1521,6 +1553,13 @@ try {
       </label>
       <p class="muted" style="font-size:13px; text-align:center; margin:14px 0 0">Dark is the classic Art Arena look; Light is easier on the eyes in bright rooms. Saved on this device.</p>
       <p class="muted hidden" id="pth-mode-note" style="font-size:11.5px; text-align:center; margin:8px 0 0"></p>
+      <label style="margin-top:20px">Animations
+        <div class="theme-row" role="group" aria-label="Animations">
+          <button type="button" class="theme-opt active" id="anim-on">ON</button>
+          <button type="button" class="theme-opt" id="anim-off">OFF</button>
+        </div>
+      </label>
+      <p class="muted" style="font-size:13px; text-align:center; margin:14px 0 0">Off freezes background motion and visual effects — every theme stays fully visible, only the movement stops. Saved on this device and independent of your theme.</p>
     </div>
     <!-- v53: UI Customization lives HERE for Premium members (no standalone
          nav slot). Free members see an honest locked teaser. -->
@@ -1891,6 +1930,30 @@ function applyTheme(t) {
 }
 $('#theme-dark').addEventListener('click', () => applyTheme('dark'));
 $('#theme-light').addEventListener('click', () => applyTheme('light'));
+
+// v55: ANIMATIONS (Settings) — controls MOTION ONLY. Visuals (backgrounds,
+// theme art, decorations) stay fully visible; the clock simply stops.
+function animIsOn() { return document.documentElement.getAttribute('data-anim') !== 'off'; }
+function updateSceneMotion() {
+  const on = animIsOn();
+  try { if (homeBgScene && homeBgScene.setMotion) homeBgScene.setMotion(on); } catch (_) {}
+  try { if (loginBgScene && loginBgScene.setMotion) loginBgScene.setMotion(on); } catch (_) {}
+}
+function setAnimations(on) {
+  document.documentElement.setAttribute('data-anim', on ? 'on' : 'off');
+  try { localStorage.setItem('aa-anim', on ? 'on' : 'off'); } catch (_) {}
+  const o = $('#anim-on'), f = $('#anim-off');
+  if (o && f) { o.classList.toggle('active', !!on); f.classList.toggle('active', !on); }
+  updateSceneMotion();
+}
+$('#anim-on').addEventListener('click', () => setAnimations(true));
+$('#anim-off').addEventListener('click', () => setAnimations(false));
+try { if (localStorage.getItem('aa-anim') === 'off') document.documentElement.setAttribute('data-anim', 'off'); } catch (_) {}
+(function () { // reflect the persisted state on the toggle buttons
+  const off = !animIsOn();
+  const o = $('#anim-on'), f = $('#anim-off');
+  if (o && f) { o.classList.toggle('active', !off); f.classList.toggle('active', off); }
+})();
 try {
   if (localStorage.getItem('aa-theme') === 'light') applyTheme('light');
 } catch (_) {}
@@ -1904,8 +1967,7 @@ let activeThemeKey = null, activeThemeCustom = null;
 const THEME_LOGOS = {
   flame: '/themes/flame.png', cloud: '/themes/cloud.png', glitch: '/themes/glitch.png',
   graffiti: '/themes/graffiti.png', stitch: '/themes/stitch.png', glowing: '/themes/glowing.png',
-  // magazine: drop the supplied logo at /themes/magazine.png and add it here —
-  // until then the theme uses the classic Art Arena logo (no generated art).
+  magazine: '/themes/magazine.png', // v55: the supplied cutout logo (bg removed, art exact)
 };
 function applyThemeLogo(key) {
   document.querySelectorAll('img[data-aa-logo]').forEach((img) => {
@@ -1925,7 +1987,7 @@ function applyThemeLogo(key) {
 let pthTagTimer = null;
 function pthIdleTagSchedule() {
   if (pthTagTimer) { clearTimeout(pthTagTimer); pthTagTimer = null; }
-  if (activeThemeKey !== 'graffiti') return;
+  if (activeThemeKey !== 'graffiti' || !animIsOn()) return;
   pthTagTimer = setTimeout(() => {
     if (activeThemeKey === 'graffiti') {
       document.querySelectorAll('img[data-aa-logo]').forEach((img) => {
@@ -1996,7 +2058,7 @@ window.__pthGlitchAllowed = function () {
 // v54: gradient buttons glitch along with the theme — SHORT bursts on a few
 // visible primary buttons; always readable, always clickable.
 window.addEventListener('aa-glitch-burst', () => {
-  if (activeThemeKey !== 'glitch') return;
+  if (activeThemeKey !== 'glitch' || !animIsOn()) return;
   const btns = Array.from(document.querySelectorAll('body[data-ptheme="glitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini)'))
     .filter((x) => x.offsetParent !== null);
   const n = Math.min(3, btns.length);
@@ -2012,7 +2074,7 @@ window.addEventListener('aa-glitch-burst', () => {
 // ~3s, and never while a countdown or live battle is up (__pthGlitchAllowed).
 let pthFsActive = false;
 window.addEventListener('aa-glitch-fullscreen', (e) => {
-  if (activeThemeKey !== 'glitch' || pthFsActive) return;
+  if (activeThemeKey !== 'glitch' || pthFsActive || !animIsOn()) return;
   try { if (typeof window.__pthGlitchAllowed === 'function' && !window.__pthGlitchAllowed()) return; } catch (_) {}
   let fs = document.getElementById('pth-fullscreen-glitch');
   if (!fs) {
@@ -2180,7 +2242,7 @@ function startLoginBg() {
   if (activeThemeKey && window.ThemeScene) {
     if (loginBgScene && loginBgScene.__kind !== 'theme') { try { loginBgScene.dispose(); } catch (_) {} loginBgScene = null; }
     if (!loginBgScene) {
-      try { loginBgScene = new window.ThemeScene(host, { theme: activeThemeKey, custom: activeThemeCustom }); loginBgScene.__kind = 'theme'; }
+      try { loginBgScene = new window.ThemeScene(host, { theme: activeThemeKey, custom: activeThemeCustom }); loginBgScene.__kind = 'theme'; try { loginBgScene.setMotion(animIsOn()); } catch (_) {} }
       catch (e) { console.warn('[theme-login-bg]', e.message); loginBgScene = null; }
     } else if (loginBgScene.setPalette) { loginBgScene.setPalette(activeThemeKey, activeThemeCustom); }
     return;
@@ -2210,6 +2272,7 @@ function startLoginBg() {
     // The scene starts itself and owns its ResizeObserver (DPR-capped,
     // no-op unless the size really changed) — one object, one dispose().
     loginBgScene = new window.GlitterWrap(host, window.GlitterWrapPreset || {});
+    try { loginBgScene.setMotion(animIsOn()); } catch (_) {}
   } catch (e) {
     console.warn('[login-bg] animation unavailable:', e.message);
     loginBgScene = null;
@@ -2247,7 +2310,7 @@ function startHomeBg() {
     if (window.ThemeScene) {
       host.classList.add('on');
       if (!homeBgScene || homeBgScene.__kind !== 'theme') {
-        try { homeBgScene = new window.ThemeScene(host, { theme: activeThemeKey, custom: activeThemeCustom }); homeBgScene.__kind = 'theme'; }
+        try { homeBgScene = new window.ThemeScene(host, { theme: activeThemeKey, custom: activeThemeCustom }); homeBgScene.__kind = 'theme'; try { homeBgScene.setMotion(animIsOn()); } catch (_) {} }
         catch (e) { console.warn('[theme-bg]', e.message); homeBgScene = null; }
       } else if (homeBgScene.setPalette) {
         homeBgScene.setPalette(activeThemeKey, activeThemeCustom);
@@ -2277,6 +2340,7 @@ function startHomeBg() {
   }
   try {
     homeBgScene = new window.RisingLines(host, { theme: homeBgThemeKey() });
+    try { homeBgScene.setMotion(animIsOn()); } catch (_) {}
   } catch (e) {
     console.warn('[home-bg] animation unavailable:', e.message);
     homeBgScene = null;

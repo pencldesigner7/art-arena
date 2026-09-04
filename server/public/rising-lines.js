@@ -106,6 +106,15 @@
     this._raf = requestAnimationFrame(this._loop);
   }
 
+  // v55: Settings → Animations OFF freezes the loop; the last painted frame
+  // stays on screen (the visual stays, only motion stops).
+  RisingLines.prototype.setMotion = function (on) {
+    this._motion = !!on;
+    if (this._motion && !this._raf && !this._disposed) {
+      this._lastT = performance.now();
+      this._raf = requestAnimationFrame(this._loop);
+    }
+  };
   RisingLines.prototype._resize = function () {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = Math.max(1, Math.floor(this._host.clientWidth || this._host.offsetWidth || 800));
@@ -155,6 +164,8 @@
 
   RisingLines.prototype._loop = function (t) {
     var self = this;
+    // v55: Settings → Animations OFF — stop the clock, keep the last frame.
+    if (this._motion === false) { this._raf = 0; return; }
     var dt = Math.max(0.001, Math.min(0.05, (t - this._lastT) / 1000));
     this._lastT = t;
     if (this._visible) this._draw(dt);

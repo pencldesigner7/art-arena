@@ -1,23 +1,20 @@
 (function () {
   'use strict';
-  // Art Arena v54 — THEME SCENES. One canvas, one live scene at a time, chosen
+  // Art Arena v55 — THEME SCENES. One canvas, one live scene at a time, chosen
   // by the active premium theme. All strictly 2D and cheap: baked offscreen
-  // sprites (clouds, tags, paper clippings, weave) drawn per frame, ≤ 40 live
-  // particles, DPR capped at 2, ~30fps, paused when the tab is hidden, and a
-  // single static frame when the user prefers reduced motion.
+  // sprites drawn per frame, ≤ 40 live particles, DPR capped at 2, ~30fps,
+  // paused when the tab is hidden, a static frame under reduced motion — and
+  // since v55, MOTION CAN BE FROZEN app-wide (Settings → Animations OFF):
+  // setMotion(false) stops the clock but keeps the scene fully visible.
   //
   // setPalette(theme, custom) swaps colors live (sprites re-bake only when the
   // palette actually changes); dispose() tears everything down.
   //
-  // v54 glitch event system: the scene owns the pulse clock and tells the app
-  // via window events —
-  //   'aa-glitch-pulse'       small page pulse (body class, ~200ms)
-  //   'aa-glitch-burst'       {buttons:[...n]} short gradient-button bursts
-  //   'aa-glitch-fullscreen'  the rare ~3s takeover (rolled at ~1-in-10 pulses,
-  //                           true random — no counter)
-  // Guards live in the app (window.__pthGlitchAllowed) so gameplay, countdowns
-  // and battles are NEVER interrupted. window.__pthSceneStats / __pthForceEvent
-  // are honest test hooks (read-only stats + deterministic forcing for e2e).
+  // v54 glitch event system (kept): the scene owns the pulse clock and tells
+  // the app via window events — aa-glitch-pulse / aa-glitch-burst /
+  // aa-glitch-fullscreen (~1-in-10 true-random roll). Guards live in the app
+  // (window.__pthGlitchAllowed) so gameplay, countdowns and battles are NEVER
+  // interrupted. __pthSceneStats / __pthForceEvent are honest test hooks.
 
   var REDUCED = false;
   try { REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
@@ -36,6 +33,35 @@
     var c = document.createElement('canvas');
     c.width = Math.max(2, Math.round(w)); c.height = Math.max(2, Math.round(h));
     return c;
+  }
+  // v55: global motion preference (Settings → Animations). Read at construction
+  // and toggled live via setMotion(); the attribute is the single truth.
+  function motionOn() {
+    try { return document.documentElement.getAttribute('data-anim') !== 'off'; } catch (e) { return true; }
+  }
+  // v55: draw a REALISTIC paint drip — a run that tapers under gravity and
+  // ends in a bulbous head wider than the run (not "a line and a dot").
+  function drawDrip(ctx, x, y, len, w0, color, alpha) {
+    var segs = 4, i, yy, ww;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    for (i = 0; i < segs; i++) {
+      yy = y + (len * i) / segs;
+      ww = w0 * (1 - 0.45 * (i / (segs - 1)));        // taper toward the head
+      ctx.fillRect(x - ww / 2, yy, ww, len / segs + 0.6);
+    }
+    // the accumulated head: a droplet BULB wider than the run
+    var hy = y + len, hr = w0 * 0.85;
+    ctx.beginPath();
+    ctx.ellipse(x, hy - hr * 0.15, hr * 0.72, hr, 0, 0, 6.283);
+    ctx.fill();
+    // wet highlight on the head
+    ctx.globalAlpha = alpha * 0.35;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(x - hr * 0.22, hy - hr * 0.45, hr * 0.2, hr * 0.3, -0.5, 0, 6.283);
+    ctx.fill();
+    ctx.globalAlpha = 1;
   }
 
   // ---------------------------------------------------------------------------
@@ -57,6 +83,7 @@
     this.burst = 0;                   // glitch burst timer
     this.pulseAt = 0;                 // next glitch pulse (scene time)
     this.stats = { pulses: 0, fullscreen: 0, bursts: 0, drips: 0, placed: 0 };
+    this.motion = motionOn();         // v55: Animations toggle (freeze ≠ hide)
     var self = this;
     this._onResize = function () { self.resize(); self.bake(); self.staticFrame(); };
     window.addEventListener('resize', this._onResize);
@@ -64,7 +91,7 @@
     document.addEventListener('visibilitychange', this._onVis);
     this.resize();
     this.seed();
-    if (REDUCED) { this.staticFrame(); }
+    if (REDUCED || !this.motion) { this.staticFrame(); }
     else { this.raf = requestAnimationFrame(this.tick.bind(this)); }
     try { window.__pthScene = this; } catch (e) {}
   }
@@ -104,149 +131,115 @@
     else if (this.theme === 'glowing') this.bakeGlow();
   };
 
-  // CLOUD — one cohesive silhouette per cloud: a single path of overlapping
-  // arcs filled ONCE (a union — no circle seams), flat-bottomed like real
-  // cumulus, shaded with one soft gradient inside the same silhouette.
+  // CLOUD (v55: refined, atmospheric — not cartoon). One cohesive silhouette
+  // per cloud (single-path union, no seams), but now: elongated organic masses
+  // with fewer, bolder arcs; flatter irregular undersides; shading in the
+  // cloud LOGO's blue-grays; atmospheric depth (far = hazy, near = crisp with
+  // a defined under-shadow). Thin stratus streaks fill the far field.
   ThemeScene.prototype.bakeClouds = function () {
-    var self = this;
-    function cloudSprite(sw, sh, n) {
-      var c = mk(sw, sh + 24), x = c.getContext('2d');
-      var base = sh * 0.72;                    // the flat-ish bottom line
+    var LOGO = { hi: '#fbfcfe', body: '#e8edf5', shade: '#c3cddd', deep: '#9fb0c6' };
+    function cloudSprite(sw, sh) {
+      var c = mk(sw, sh + 20), x = c.getContext('2d');
+      var base = sh * 0.74;
       var path = new Path2D();
-      var cx = 14, span = sw - 28;
-      // top bumps: chain of arcs with varied radii (organic, never symmetric)
-      var r0 = rnd(base * 0.42, base * 0.55);
+      var cx = 12, span = sw - 26;
+      // bold asymmetric arcs — 3 max (fewer, stronger shapes)
+      var r0 = rnd(base * 0.5, base * 0.62);
       path.moveTo(cx, base);
-      path.arc(cx + r0, base - r0 * 0.15, r0, Math.PI, Math.PI * 1.62);
-      var x2 = cx + r0 + r0 * 0.78;
-      for (var i = 1; i < n; i++) {
-        var rr = rnd(base * 0.3, base * 0.52);
-        var step = span / n;
-        var cxx = Math.min(cx + step * i + rnd(-8, 8), sw - 20 - rr);
-        path.arc(cxx, base - rr * 0.72, rr, Math.PI * (i % 2 ? 1.05 : 0.96), Math.PI * 1.72);
-        x2 = cxx + rr * 0.7;
-      }
-      path.arc(Math.max(x2 + 10, sw - 34), base - 10, rnd(12, 20), Math.PI * 1.3, Math.PI * 1.98);
-      path.lineTo(sw - 14, base);
+      path.arc(cx + r0, base - r0 * 0.1, r0, Math.PI, Math.PI * 1.6);
+      var r1 = rnd(base * 0.58, base * 0.75);
+      path.arc(cx + span * rnd(0.38, 0.5), base - r1 * 0.8, r1, Math.PI * 1.02, Math.PI * 1.7);
+      var r2 = rnd(base * 0.4, base * 0.55);
+      path.arc(sw - 18 - r2, base - r2 * 0.55, r2, Math.PI * 1.05, Math.PI * 1.95);
+      // irregular underside (never a straight cartoon base)
+      var ux = sw - 14;
+      while (ux > cx + 6) { var step = rnd(16, 42); path.lineTo(Math.max(cx + 4, ux - step * 0.5), base + rnd(-2.5, 2.5)); ux -= step; }
+      path.lineTo(cx, base);
       path.closePath();
-      // ONE fill = one form. Soft shading gradient lives inside the shape.
       var g = x.createLinearGradient(0, 0, 0, base);
-      g.addColorStop(0, '#ffffff');
-      g.addColorStop(0.62, '#f7fbff');
-      g.addColorStop(1, '#dbeaf8');
-      x.fillStyle = g;
-      x.fill(path);
-      // faint under-shadow, still inside the same silhouette
+      g.addColorStop(0, LOGO.hi); g.addColorStop(0.55, LOGO.body); g.addColorStop(1, LOGO.shade);
+      x.fillStyle = g; x.fill(path);
+      // defined under-shadow (edgier than a soft puff)
       x.save(); x.clip(path);
-      var sg = x.createLinearGradient(0, base - 26, 0, base);
-      sg.addColorStop(0, 'rgba(148,180,208,0)'); sg.addColorStop(1, 'rgba(148,180,208,.35)');
-      x.fillStyle = sg; x.fillRect(0, base - 26, sw, 26);
+      var sg = x.createLinearGradient(0, base - base * 0.34, 0, base);
+      sg.addColorStop(0, 'rgba(159,176,198,0)'); sg.addColorStop(1, 'rgba(159,176,198,.5)');
+      x.fillStyle = sg; x.fillRect(0, base - base * 0.34, sw, base * 0.34 + 2);
       x.restore();
       return c;
     }
-    this.spr.clouds = [];
-    for (var i = 0; i < 8; i++) {
-      var depth = i < 2 ? 0 : (i < 6 ? 1 : 2);        // 0 far · 1 mid · 2 near
-      var sw = depth === 0 ? rnd(150, 210) : depth === 1 ? rnd(230, 330) : rnd(330, 460);
-      this.spr.clouds.push({
-        img: cloudSprite(sw, sw * rnd(0.34, 0.46), 3 + Math.floor(rnd(0, 3))),
-        depth: depth,
-        x: rnd(-0.25, 1.1) * this.w,
-        y: depth === 0 ? rnd(0.04, 0.22) * this.h : rnd(0.08, 0.55) * this.h,
-        v: (depth === 0 ? rnd(3, 6) : depth === 1 ? rnd(7, 13) : rnd(14, 22)) / (depth === 2 ? 1.6 : 1),
-        bob: rnd(2, 7), ph: rnd(0, 6.28),
-        a: depth === 0 ? rnd(0.35, 0.5) : depth === 1 ? rnd(0.6, 0.8) : rnd(0.82, 0.95)
-      });
-    }
-  };
-
-  // GRAFFITI — a wall, not a website. Baked once: brick-tinted texture, two
-  // spray-paint tag ribbons, paint splats. Live: spray bursts, slow drips.
-  ThemeScene.prototype.bakeWall = function () {
-    var c1 = this.c1(), c2 = this.c2();
-    // wall texture: warm concrete + faint brick courses
-    var w = mk(420, 420), x = w.getContext('2d');
-    x.fillStyle = '#191410'; x.fillRect(0, 0, 420, 420);
-    for (var i = 0; i < 2600; i++) {
-      var g = rnd(20, 46);
-      x.fillStyle = 'rgba(' + Math.round(g + rnd(-6, 14)) + ',' + Math.round(g) + ',' + Math.round(g - 6) + ',' + rnd(0.05, 0.22) + ')';
-      x.fillRect(rnd(0, 420), rnd(0, 420), rnd(1, 3.5), rnd(1, 3.5));
-    }
-    x.strokeStyle = 'rgba(0,0,0,.16)'; x.lineWidth = 2;
-    for (var by = 0; by < 420; by += 46) {
-      x.beginPath(); x.moveTo(0, by); x.lineTo(420, by); x.stroke();
-      for (var bx = (by / 46) % 2 ? 0 : 35; bx < 420; bx += 70) {
-        x.beginPath(); x.moveTo(bx, by); x.lineTo(bx, by + 46); x.stroke();
-      }
-    }
-    this.spr.wall = w;
-
-    // spray tag ribbon: one flowing multi-pass stroke with spray speckle —
-    // hand-made energy, imperfect edges, opaque core + soft halo.
-    function tagSprite(color, len, th) {
-      var c = mk(len + 60, th * 4), t = c.getContext('2d');
-      var mid = th * 2;
-      function curve(u) { return mid + Math.sin(u * 6.3 + rnd(0, 0.6)) * th * 0.8 * Math.sin(u * 2.1); }
-      // halo pass (soft wide)
-      for (var p = 0; p < 3; p++) {
-        t.beginPath();
-        for (var u = 0; u <= 1.001; u += 0.02) {
-          var xx = 30 + u * len, yy = curve(u) + rnd(-2, 2);
-          if (u === 0) t.moveTo(xx, yy); else t.lineTo(xx, yy);
-        }
-        t.strokeStyle = rgba(color, 0.10 + p * 0.06);
-        t.lineWidth = th * (2.4 - p * 0.55); t.lineCap = 'round'; t.lineJoin = 'round';
-        t.stroke();
-      }
-      // core pass
-      t.beginPath();
-      for (var u2 = 0; u2 <= 1.001; u2 += 0.02) {
-        var xx2 = 30 + u2 * len, yy2 = curve(u2);
-        if (u2 === 0) t.moveTo(xx2, yy2); else t.lineTo(xx2, yy2);
-      }
-      t.strokeStyle = rgba(color, 0.92); t.lineWidth = th * 0.6; t.lineCap = 'round'; t.stroke();
-      // spray speckle around the stroke
-      for (var s = 0; s < 260; s++) {
-        var u3 = Math.random();
-        t.fillStyle = rgba(color, rnd(0.06, 0.4));
-        var r = rnd(0.5, 1.8);
-        t.beginPath(); t.arc(30 + u3 * len + rnd(-th, th), curve(u3) + rnd(-th * 1.5, th * 1.5), r, 0, 6.283); t.fill();
-      }
+    function streakSprite(sw) {
+      var c = mk(sw, 22), x = c.getContext('2d');
+      var g = x.createLinearGradient(0, 0, sw, 0);
+      g.addColorStop(0, 'rgba(232,237,245,0)'); g.addColorStop(0.5, 'rgba(232,237,245,.85)'); g.addColorStop(1, 'rgba(232,237,245,0)');
+      x.fillStyle = g;
+      x.beginPath(); x.ellipse(sw / 2, 11, sw / 2, rnd(5, 8), 0, 0, 6.283); x.fill();
       return c;
     }
-    this.spr.tags = [
-      { img: tagSprite(c1, Math.min(520, this.w * 0.42), 30), x: this.w * rnd(0.02, 0.1), y: this.h * rnd(0.12, 0.3), rot: rnd(-0.16, 0.05) },
-      { img: tagSprite(c2, Math.min(440, this.w * 0.36), 24), x: this.w * rnd(0.55, 0.66), y: this.h * rnd(0.55, 0.78), rot: rnd(-0.05, 0.14) },
-      { img: tagSprite('#FFD23F', Math.min(300, this.w * 0.26), 16), x: this.w * rnd(0.7, 0.8), y: this.h * rnd(0.16, 0.3), rot: rnd(-0.2, 0.08) }
-    ];
-    // splats
-    this.spr.splats = [];
-    for (var s2 = 0; s2 < 5; s2++) {
-      var rr = rnd(10, 26), sc = mk(rr * 2.6, rr * 2.6), sx = sc.getContext('2d');
-      var col = s2 % 3 === 0 ? '#FFD23F' : (s2 % 2 ? c2 : c1);
-      sx.translate(rr * 1.3, rr * 1.3);
-      sx.fillStyle = rgba(col, 0.85);
-      sx.beginPath();
-      for (var a = 0; a < 6.283; a += 0.4) {
-        var rv = rr * rnd(0.5, 1);
-        var px2 = Math.cos(a) * rv, py2 = Math.sin(a) * rv;
-        if (a === 0) sx.moveTo(px2, py2); else sx.lineTo(px2, py2);
-      }
-      sx.closePath(); sx.fill();
-      for (var d = 0; d < 7; d++) {
-        var da = rnd(0, 6.283), dd = rr * rnd(1.25, 1.75);
-        sx.beginPath(); sx.arc(Math.cos(da) * dd, Math.sin(da) * dd, rnd(0.8, 2.4), 0, 6.283); sx.fill();
-      }
-      this.spr.splats.push({ img: sc, x: Math.random() < 0.5 ? rnd(20, this.w * 0.14) : rnd(this.w * 0.84, this.w - 40), y: rnd(this.h * 0.12, this.h * 0.9), a: rnd(0.5, 0.8) });
+    this.spr.clouds = [];
+    for (var i = 0; i < 9; i++) {
+      var depth = i < 2 ? 0 : (i < 7 ? 1 : 2);        // 0 far · 1 mid · 2 near
+      var sw = depth === 0 ? rnd(240, 340) : depth === 1 ? rnd(300, 430) : rnd(430, 620);
+      this.spr.clouds.push({
+        img: cloudSprite(sw, sw * rnd(0.26, 0.36)),
+        depth: depth,
+        x: rnd(-0.3, 1.1) * this.w,
+        y: depth === 0 ? rnd(0.03, 0.2) * this.h : rnd(0.07, 0.52) * this.h,
+        v: (depth === 0 ? rnd(2.5, 5) : depth === 1 ? rnd(6, 11) : rnd(12, 19)) / (depth === 2 ? 1.6 : 1),
+        bob: depth === 2 ? rnd(0, 2.5) : 0,
+        ph: rnd(0, 6.28),
+        a: depth === 0 ? rnd(0.22, 0.34) : depth === 1 ? rnd(0.5, 0.7) : rnd(0.78, 0.92),
+        haze: depth === 0
+      });
     }
-    // live drips fall from the tag cores
-    this.drips = [];
-    for (var d2 = 0; d2 < 5; d2++) {
-      var tg = this.spr.tags[d2 % this.spr.tags.length];
-      this.drips.push({ x: tg.x + rnd(40, tg.img.width - 60), y: tg.y + tg.img.height * 0.5, len: 0, max: rnd(40, 130), v: rnd(6, 16), w: rnd(1.4, 2.8), c: d2 % 3 === 0 ? '#FFD23F' : (d2 % 2 ? c2 : c1), started: rnd(0, 8) });
+    this.spr.streaks = [];
+    for (var s2 = 0; s2 < 4; s2++) this.spr.streaks.push({ img: streakSprite(rnd(180, 380)), x: rnd(-0.2, 1) * this.w, y: rnd(0.05, 0.3) * this.h, v: rnd(3, 6), a: rnd(0.3, 0.5) });
+  };
+
+  // GRAFFITI (v55) — the user's EXACT monochrome wall image is the background
+  // (themes/graffiti-bg.png, cover-fit baked at resize). On top: realistic
+  // white/black paint drips (tapered runs + bulbous heads) and occasional
+  // monochrome spray puffs. Pure black & white — the app chrome follows.
+  ThemeScene.prototype.bakeWall = function () {
+    var self = this;
+    this.spr.wall = null; // v55: the generated wall is gone — exact image below
+    if (!this.bgImg) {
+      try {
+        var img = new Image();
+        img.onload = function () {
+          self.bgImg = img;
+          self._bakeKey = null;       // force a cover-fit rebake next frame
+          self.bake();
+          self.staticFrame();
+        };
+        img.src = '/themes/graffiti-bg.png';
+      } catch (e) {}
     }
+    // cover-fit the exact image once per size bake
+    var W = this.w, H = this.h;
+    if (this.bgImg) {
+      var sc = Math.max(W / this.bgImg.width, H / this.bgImg.height);
+      var bw = Math.round(this.bgImg.width * sc), bh = Math.round(this.bgImg.height * sc);
+      var c = mk(bw, bh), x = c.getContext('2d');
+      x.drawImage(this.bgImg, 0, 0, bw, bh);
+      this.spr.wallCanvas = { c: c, x: Math.round((W - bw) / 2), y: Math.round((H - bh) / 2) };
+    } else { this.spr.wallCanvas = null; }
+    // monochrome spray puffs
     this.sprays = [];
-    this.nextSpray = 1.2;
+    this.nextSpray = 1.6;
+    // realistic drips: anchors spread over the upper half; they run, bulge, dry
+    this.drips = [];
+    var n = 7, i;
+    for (i = 0; i < n; i++) {
+      this.drips.push({
+        x: rnd(0.04, 0.96) * (this.w || 800),
+        y: rnd(0.06, 0.42) * (this.h || 600),
+        len: 0, max: rnd(60, 210),
+        v: rnd(9, 26),
+        w: rnd(2.6, 5.2),
+        c: Math.random() < 0.72 ? '#F2F2F2' : '#0c0c0c',
+        started: rnd(0, 9),
+      });
+    }
   };
 
   // MAGAZINE — a real collage: torn-edge paper clippings with print fragments
@@ -310,8 +303,8 @@
     var tones = ['#faf7ef', '#f2ecdf', '#eadfe4', '#e8eef2', '#f6efe2'];
     var inks = ['#23211d', '#2c3350', '#5c2320'];
     this.spr.sheets = [];
-    for (var i = 0; i < 7; i++) {
-      var big = i < 3;
+    for (var i = 0; i < 13; i++) {
+      var big = i < 4;
       this.spr.sheets.push({
         img: tornSheet(big ? rnd(120, 210) : rnd(60, 130), big ? rnd(90, 160) : rnd(50, 110), pick(tones), pick(inks)),
         x: rnd(-20, this.w - 60), y: rnd(-20, this.h - 60),
@@ -319,6 +312,39 @@
         a: big ? rnd(0.5, 0.72) : rnd(0.3, 0.5), settle: 1
       });
     }
+    // v55 (user request): MORE things in the collage — typography fragments
+    // (single serif glyphs), thin paper strips, and halftone patches.
+    function glyphSprite(ch) {
+      var c = mk(64, 64), x = c.getContext('2d');
+      x.font = '900 58px Georgia, serif';
+      x.fillStyle = pick(inks.concat(['#8a2f74', '#1f5c46']));
+      x.fillText(ch, rnd(2, 14), 54 + rnd(-4, 4));
+      return c;
+    }
+    function stripSprite() {
+      var c = mk(20, 130), x = c.getContext('2d');
+      x.fillStyle = pick(tones); x.fillRect(0, 0, 20, 130);
+      x.fillStyle = 'rgba(35,33,29,.5)';
+      for (var ly = 10; ly < 120; ly += 12) x.fillRect(4, ly, rnd(8, 14), 2);
+      return c;
+    }
+    function halftoneSprite() {
+      var c = mk(84, 84), x = c.getContext('2d');
+      x.fillStyle = pick(['#e3d6e8', '#d6e4e8', '#e8e0d6']);
+      x.fillRect(0, 0, 84, 84);
+      x.fillStyle = 'rgba(35,33,29,.55)';
+      for (var hy = 8; hy < 78; hy += 12) for (var hx = 8; hx < 78; hx += 12) {
+        x.beginPath(); x.arc(hx, hy, 2 + 2.4 * Math.abs(Math.sin(hx * 0.09 + hy * 0.07)), 0, 6.283); x.fill();
+      }
+      return c;
+    }
+    var glyphs = 'ARNMW&?!✦'.split('');
+    this.spr.frags = [];
+    for (var f = 0; f < 12; f++) this.spr.frags.push({ img: glyphSprite(pick(glyphs)), x: rnd(0, this.w), y: rnd(0, this.h), rot: rnd(-0.5, 0.5), vr: rnd(-0.08, 0.08), vx: rnd(-4, 4), vy: rnd(-3, 3), a: rnd(0.25, 0.5) });
+    this.spr.strips = [];
+    for (var t2 = 0; t2 < 7; t2++) this.spr.strips.push({ img: stripSprite(), x: rnd(0, this.w), y: rnd(0, this.h), rot: rnd(-0.24, 0.24), vr: rnd(-0.04, 0.04), vx: rnd(-3, 3), vy: rnd(-2, 2), a: rnd(0.3, 0.55) });
+    this.spr.dots = [];
+    for (var d2 = 0; d2 < 5; d2++) this.spr.dots.push({ img: halftoneSprite(), x: rnd(0, this.w), y: rnd(0, this.h), rot: rnd(-0.3, 0.3), vr: rnd(-0.05, 0.05), vx: rnd(-3, 3), vy: rnd(-2, 2), a: rnd(0.22, 0.4) });
     this.nextPlace = 2.5;
   };
 
@@ -427,7 +453,20 @@
     this.theme = theme; this.custom = custom || null;
     if (themeChanged) { this.seed(); }
     else if (palChanged) { this._bakeKey = null; this.bake(); }
-    if (REDUCED) this.staticFrame();
+    if (REDUCED || !this.motion) this.staticFrame();
+  };
+
+  // v55: Animations OFF freezes the clock but NEVER hides the scene — the
+  // theme's full visual identity stays on screen as a static frame.
+  ThemeScene.prototype.setMotion = function (on) {
+    this.motion = !!on;
+    if (!this.motion) {
+      if (this.raf) { cancelAnimationFrame(this.raf); this.raf = 0; }
+      this.staticFrame();
+    } else if (!this.raf && !this.dead && !REDUCED) {
+      this.last = 0;
+      this.raf = requestAnimationFrame(this.tick.bind(this));
+    }
   };
 
   ThemeScene.prototype.tick = function (ts) {
@@ -451,7 +490,12 @@
       var cs = this.spr.clouds || [];
       for (i = 0; i < cs.length; i++) {
         p = cs[i]; p.x += p.v * dt; p.ph += dt * 0.5;
-        if (p.x - p.img.width > w) { p.x = -p.img.width + 10; p.y = (p.depth === 0 ? rnd(0.04, 0.22) : rnd(0.08, 0.55)) * h; }
+        if (p.x - p.img.width > w) { p.x = -p.img.width + 10; p.y = (p.depth === 0 ? rnd(0.03, 0.2) : rnd(0.07, 0.52)) * h; }
+      }
+      var st = this.spr.streaks || [];
+      for (i = 0; i < st.length; i++) {
+        p = st[i]; p.x += p.v * dt;
+        if (p.x - p.img.width > w) { p.x = -p.img.width; p.y = rnd(0.05, 0.3) * h; }
       }
     } else if (this.theme === 'glitch') {
       for (i = 0; i < this.p.length; i++) { p = this.p[i]; p.y += p.v * dt; if (p.y > h) { p.y = -4; p.x = rnd(0, w); } }
@@ -464,17 +508,17 @@
         this.doPulse();
       }
     } else if (this.theme === 'graffiti') {
-      // drips run down from the tags, then stop (paint dries)
+      // drips run down under gravity, bulge at the head, then dry (stop)
       for (i = 0; i < (this.drips || []).length; i++) {
         var d = this.drips[i];
         if (d.started > 0) { d.started -= dt; continue; }
-        if (d.len < d.max) { d.len += d.v * dt; if (d.len >= d.max) this.stats.drips++; }
+        if (d.len < d.max) { d.len += d.v * dt * (1 - 0.4 * (d.len / d.max)); if (d.len >= d.max) this.stats.drips++; }
       }
-      // a fresh spray pass every few seconds: energy, but the wall stays put
+      // a fresh monochrome spray pass every few seconds — energy, wall stays put
       this.nextSpray -= dt;
       if (this.nextSpray <= 0) {
         this.nextSpray = rnd(2.2, 5);
-        var col = pick([this.c1(), this.c2(), '#FFD23F']);
+        var col = Math.random() < 0.6 ? '#F2F2F2' : '#9a9a9a';
         this.sprays.push({ x: rnd(w * 0.05, w * 0.95), y: rnd(h * 0.08, h * 0.92), r: rnd(26, 64), a: 0, rise: true, c: col });
         if (this.sprays.length > 5) this.sprays.shift();
       }
@@ -493,6 +537,9 @@
         if (p.x < -p.img.width) p.x = w; if (p.x > w + 10) p.x = -p.img.width;
         if (p.y < -p.img.height) p.y = h; if (p.y > h + 10) p.y = -p.img.height;
       }
+      // v55: the small collage fragments breathe too
+      var dr2 = function (arr) { for (var k = 0; k < arr.length; k++) { var e = arr[k]; e.x += e.vx * dt; e.y += e.vy * dt; e.rot += e.vr * dt * 0.2; if (e.x < -e.img.width) e.x = w; if (e.x > w + 8) e.x = -e.img.width; if (e.y < -e.img.height) e.y = h; if (e.y > h + 8) e.y = -e.img.height; } };
+      dr2(this.spr.frags || []); dr2(this.spr.strips || []); dr2(this.spr.dots || []);
       // occasionally a NEW clipping gets placed onto the collage
       this.nextPlace -= dt;
       if (this.nextPlace <= 0 && sh.length) {
@@ -559,14 +606,18 @@
         ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(x, p.y, p.r * 3, 0, 6.283); ctx.fill();
       }
     } else if (this.theme === 'cloud') {
+      // v55: deeper, moodier sky (edgier than pale baby blue)
       var sky = ctx.createLinearGradient(0, 0, 0, h);
-      sky.addColorStop(0, '#8ec9f5'); sky.addColorStop(0.65, '#c9e6fb'); sky.addColorStop(1, '#eef7ff');
+      sky.addColorStop(0, '#6fb3e8'); sky.addColorStop(0.6, '#a8d4f2'); sky.addColorStop(1, '#e8f4fc');
       ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+      var st = this.spr.streaks || [];
+      for (i = 0; i < st.length; i++) { p = st[i]; ctx.globalAlpha = p.a; ctx.drawImage(p.img, Math.round(p.x), Math.round(p.y)); }
       var cs = (this.spr.clouds || []).slice().sort(function (a, b) { return a.depth - b.depth; });
       for (i = 0; i < cs.length; i++) {
         p = cs[i];
         ctx.globalAlpha = p.a;
-        ctx.drawImage(p.img, Math.round(p.x), Math.round(p.y + Math.sin(p.ph) * p.bob));
+        if (p.haze) { ctx.globalAlpha = 1; ctx.drawImage(p.img, Math.round(p.x), Math.round(p.y + Math.sin(p.ph) * p.bob)); ctx.globalAlpha = 1; }
+        else ctx.drawImage(p.img, Math.round(p.x), Math.round(p.y + Math.sin(p.ph) * p.bob));
       }
       ctx.globalAlpha = 1;
     } else if (this.theme === 'glitch') {
@@ -579,31 +630,22 @@
         ctx.fillStyle = rgba(c2, 0.13); ctx.fillRect(rnd(-30, 0), by + bh, w, bh * 0.7);
       }
     } else if (this.theme === 'graffiti') {
-      // wall tiles
-      var wall = this.spr.wall;
-      if (wall) for (var wy = 0; wy < h; wy += wall.height) for (var wx = 0; wx < w; wx += wall.width) ctx.drawImage(wall, wx, wy);
-      // fresh spray passes (breathe in, fade)
+      // the user's EXACT wall image, cover-fit
+      var wc = this.spr.wallCanvas;
+      if (wc) ctx.drawImage(wc.c, wc.x, wc.y);
+      else { ctx.fillStyle = '#101010'; ctx.fillRect(0, 0, w, h); }
+      // fresh monochrome spray passes (breathe in, fade)
       for (i = 0; i < (this.sprays || []).length; i++) {
         var sp = this.sprays[i];
         var sg = ctx.createRadialGradient(sp.x, sp.y, 0, sp.x, sp.y, sp.r);
         sg.addColorStop(0, rgba(sp.c, 0.16 * sp.a * 2)); sg.addColorStop(0.7, rgba(sp.c, 0.07 * sp.a * 2)); sg.addColorStop(1, rgba(sp.c, 0));
         ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r, 0, 6.283); ctx.fill();
       }
-      // tags + splats + drips
-      (this.spr.tags || []).forEach(function (t) {
-        ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(t.rot); ctx.drawImage(t.img, 0, 0); ctx.restore();
-      });
-      (this.spr.splats || []).forEach(function (s) {
-        ctx.save(); ctx.globalAlpha = s.a; ctx.drawImage(s.img, s.x, s.y); ctx.restore();
-      });
-      ctx.globalAlpha = 1;
+      // realistic drips: tapered runs ending in bulbous heads
       for (i = 0; i < (this.drips || []).length; i++) {
         var dr = this.drips[i];
         if (dr.started > 0 || dr.len <= 1) continue;
-        ctx.strokeStyle = rgba(dr.c, 0.8); ctx.lineWidth = dr.w; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(dr.x, dr.y); ctx.lineTo(dr.x, dr.y + dr.len); ctx.stroke();
-        ctx.fillStyle = rgba(dr.c, 0.85);
-        ctx.beginPath(); ctx.arc(dr.x, dr.y + dr.len, dr.w * 1.3, 0, 6.283); ctx.fill();
+        drawDrip(ctx, dr.x, dr.y, dr.len, dr.w, dr.c, 0.85);
       }
     } else if (this.theme === 'stitch') {
       // woven fabric field
@@ -657,6 +699,8 @@
       var desk = ctx.createLinearGradient(0, 0, 0, h);
       desk.addColorStop(0, '#e9e5dc'); desk.addColorStop(1, '#efeae0');
       ctx.fillStyle = desk; ctx.fillRect(0, 0, w, h);
+      var layer = function (arr) { for (var k = 0; k < arr.length; k++) { var e = arr[k]; ctx.save(); ctx.globalAlpha = e.a; ctx.translate(e.x + e.img.width / 2, e.y + e.img.height / 2); ctx.rotate(e.rot); ctx.drawImage(e.img, -e.img.width / 2, -e.img.height / 2); ctx.restore(); } };
+      layer(this.spr.dots || []); layer(this.spr.strips || []);
       var sh2 = (this.spr.sheets || []).slice().sort(function (a, b) { return (a.img.width * a.img.height) - (b.img.width * b.img.height); });
       for (i = 0; i < sh2.length; i++) {
         p = sh2[i];
@@ -670,6 +714,7 @@
         ctx.restore();
       }
       ctx.globalAlpha = 1;
+      layer(this.spr.frags || []);   // typography fragments float on top
     }
   };
 
@@ -687,8 +732,8 @@
   ThemeScene.PALETTE = {
     flame: { c1: '#FF5A00', c2: '#FFC300' },
     glitch: { c1: '#00F0FF', c2: '#FF2BD1' },
-    glowing: { c1: '#8A7CFF', c2: '#39C4FF' },
-    graffiti: { c1: '#FF4FA3', c2: '#25C4A9' },
+    glowing: { c1: '#6ED4BF', c2: '#51A8D9' },   // v55: green+blue derived from the supplied logo
+    graffiti: { c1: '#F2F2F2', c2: '#BFBFBF' },  // v55: pure black & white world
     stitch: { c1: '#E8D8C4', c2: '#FF6A5A' },
     cloud: { c1: '#4A9FE8', c2: '#8EC9F5' },
     magazine: { c1: '#FF5A5A', c2: '#222228' }
