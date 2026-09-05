@@ -1279,6 +1279,15 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // v59: Discord joins the linked-platform enum (user_platform_accounts.platform).
     ['v59 platform_name gains discord (Sign in with Discord)',
      `ALTER TYPE public.platform_name ADD VALUE IF NOT EXISTS 'discord'`],
+      // ---------------- v60 ----------------
+    // v60 randomizer: the "color" category is now the curated COLOUR
+    // COMBINATION dataset (491 palettes of 3–6 hex colours) — single colour
+    // names are retired at the data source. Only this category is cleared;
+    // seed.js re-fills any empty category from randomizer_seed.json at boot.
+    ['v60 randomizer: colour combinations replace single colour names (re-seed color)',
+     `DELETE FROM randomizer_elements WHERE category = 'color' AND name NOT LIKE '#%'`],
+    ['v60 randomizer: category label → Colour Combination',
+     `UPDATE randomizer_categories SET display_name = 'Colour Combination' WHERE key = 'color' AND display_name <> 'Colour Combination'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

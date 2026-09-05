@@ -172,6 +172,8 @@ try {
   .challenge-row { display:flex; justify-content:space-between; gap:10px; padding:7px 10px; background:var(--surface); border:1px solid var(--line); border-radius:8px; margin-top:6px; font-size:14px; }
   .challenge-cat { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; padding-top:2px; }
   .challenge-val { font-weight:700; text-align:right; }
+  .challenge-palette { display:inline-flex; gap:3px; vertical-align:middle; }
+  .challenge-palette i { width:18px; height:18px; border-radius:5px; border:1px solid rgba(255,255,255,.18); display:inline-block; }
   /* ---------------- time limit: presets + custom (v13) --------------------- */
   .time-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
   .time-chip { padding:6px 12px; border-radius:999px; border:1px solid var(--btn-line); background:var(--surface); color:var(--text); font-size:13px; cursor:pointer; }
@@ -694,6 +696,51 @@ try {
      clock) only exists after the server flips the status to 'active'. */
   #countdown-overlay { position:fixed; inset:0; z-index:200; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; background:radial-gradient(ellipse at center, rgba(13,9,23,.86) 0%, rgba(9,7,13,.97) 70%); pointer-events:none; }
   #countdown-overlay.hidden { display:none; }
+  /* ============ v60: CHALLENGE REVEAL — the randomizer's results screen ============
+     A dedicated full-screen stage (above the room, below the 3-2-1 overlay).
+     Only the CHOSEN categories are shown; the colour combination renders as
+     real swatches + hex. Token-driven, so every premium theme recolours it. */
+  #reveal-view { position:fixed; inset:0; z-index:150; overflow-y:auto; -webkit-overflow-scrolling:touch; background:radial-gradient(ellipse at 50% -10%, rgba(var(--purple-rgb),.42) 0%, rgba(var(--pink-rgb),.10) 30%, transparent 60%), var(--bg); padding:22px 16px 40px; }
+  #reveal-view::before { content:""; position:fixed; inset:0; pointer-events:none; background:radial-gradient(circle at 15% 85%, rgba(var(--pink-rgb),.14), transparent 40%), radial-gradient(circle at 85% 70%, rgba(var(--purple-rgb),.16), transparent 42%); }
+  #reveal-view .rv-wrap { position:relative; }
+  #reveal-view.hidden { display:none; }
+  .rv-wrap { max-width:640px; margin:0 auto; }
+  .rv-head { text-align:center; margin:6px 0 18px; animation:rv-pop .5s cubic-bezier(.22,1,.36,1) both; }
+  .rv-kicker { display:inline-flex; align-items:center; gap:8px; font-size:11.5px; letter-spacing:3px; text-transform:uppercase; color:var(--pink); font-weight:800; }
+  .rv-kicker .ic { width:14px; height:14px; }
+  .rv-title { margin:8px 0 0; font-size:clamp(26px, 6vw, 40px); line-height:1.05; font-weight:900; letter-spacing:1px; background:linear-gradient(90deg, var(--pink), var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .rv-sub { color:var(--muted); font-size:13.5px; margin-top:8px; }
+  .rv-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
+  .rv-card { position:relative; overflow:hidden; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 16px 18px; min-height:112px; opacity:0; transform:translateY(18px) scale(.97); animation:rv-pop .55s cubic-bezier(.22,1,.36,1) forwards; animation-delay:var(--d, 0s); }
+  .rv-card::before { content:""; position:absolute; inset:0 0 auto 0; height:3px; background:linear-gradient(90deg, var(--pink), var(--purple)); }
+  .rv-card::after { content:""; position:absolute; left:-30%; top:-60%; width:60%; height:220%; background:linear-gradient(105deg, transparent 0%, rgba(255,255,255,.16) 50%, transparent 100%); transform:translateX(-120%) rotate(8deg); animation:rv-shine 1.1s ease-out forwards; animation-delay:calc(var(--d, 0s) + .35s); pointer-events:none; }
+  .rv-card.wide { grid-column:1 / -1; }
+  .rv-cat { display:flex; align-items:center; gap:7px; font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:var(--muted); font-weight:800; }
+  .rv-cat .ic { width:15px; height:15px; color:var(--pink); }
+  .rv-val { margin-top:10px; font-size:clamp(19px, 4.2vw, 24px); font-weight:900; line-height:1.15; letter-spacing:.2px; word-break:break-word; }
+  .rv-num { position:absolute; right:12px; top:10px; font-size:38px; font-weight:900; line-height:1; color:rgba(var(--pink-rgb),.10); pointer-events:none; }
+  /* the palette */
+  .rv-swatches { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .rv-sw { flex:1 1 0; min-width:64px; display:flex; flex-direction:column; align-items:center; gap:7px; }
+  .rv-sw i { display:block; width:100%; aspect-ratio:1 / 1; max-height:96px; border-radius:16px; background:var(--sw); border:2px solid rgba(255,255,255,.14); box-shadow:0 10px 26px -10px var(--sw), inset 0 -10px 18px rgba(0,0,0,.18), inset 0 8px 14px rgba(255,255,255,.14); transform:scale(.6); opacity:0; animation:rv-swatch .5s cubic-bezier(.34,1.56,.64,1) forwards; animation-delay:var(--sd, 0s); }
+  .rv-sw code { font:700 11.5px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing:.6px; color:var(--text); background:rgba(0,0,0,.28); border:1px solid var(--line); border-radius:999px; padding:5px 8px; white-space:nowrap; }
+  .rv-strip { display:flex; height:8px; border-radius:999px; overflow:hidden; margin-top:12px; border:1px solid var(--line); }
+  .rv-strip i { flex:1; background:var(--sw); }
+  .rv-actions { margin-top:18px; display:flex; flex-direction:column; gap:8px; animation:rv-pop .5s .35s cubic-bezier(.22,1,.36,1) both; }
+  .rv-actions button { width:100%; }
+  .rv-note { text-align:center; color:var(--muted); font-size:12.5px; margin:8px 0 0; }
+  .rv-count { text-align:center; color:var(--muted); font-size:12px; letter-spacing:2px; text-transform:uppercase; margin:16px 0 0; }
+  @keyframes rv-pop { from { opacity:0; transform:translateY(18px) scale(.97); } to { opacity:1; transform:none; } }
+  @keyframes rv-shine { to { transform:translateX(260%) rotate(8deg); } }
+  @keyframes rv-swatch { to { transform:none; opacity:1; } }
+  @media (max-width: 480px) { .rv-grid { grid-template-columns:1fr; } .rv-card { min-height:0; } .rv-sw { min-width:56px; } .rv-sw i { border-radius:12px; } .rv-sw code { font-size:10.5px; padding:4px 6px; } }
+  [data-anim="off"] .rv-card, [data-anim="off"] .rv-card::after, [data-anim="off"] .rv-sw i, [data-anim="off"] .rv-head, [data-anim="off"] .rv-actions { animation:none !important; opacity:1; transform:none; }
+  /* theme accents: pixel = hard edges/steps, glowing = soft halo */
+  body[data-ptheme="pixel"] .rv-card, body[data-ptheme="pixel"] .rv-sw i, body[data-ptheme="pixel"] .rv-sw code, body[data-ptheme="pixel"] .rv-strip { border-radius:0; }
+  body[data-ptheme="pixel"] .rv-card { border:3px solid #2E4A63; box-shadow:4px 4px 0 rgba(0,0,0,.5); }
+  body[data-ptheme="pixel"] .rv-sw i { border:3px solid #0d0d1f; box-shadow:3px 3px 0 rgba(0,0,0,.5); animation-timing-function:steps(4); }
+  body[data-ptheme="glowing"] .rv-card { box-shadow:0 0 30px -12px var(--pth-c1, var(--pink)); }
+  body[data-ptheme="glowing"] .rv-sw i { box-shadow:0 0 26px -4px var(--sw), inset 0 0 14px rgba(255,255,255,.18); }
   #countdown-num { font-size:clamp(90px, 30vw, 210px); font-weight:900; line-height:1; letter-spacing:2px; background:linear-gradient(180deg, var(--pink) 20%, var(--purple) 90%); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 26px rgba(var(--pink-rgb),.55)); animation:cd-pop .55s cubic-bezier(.2,1.5,.4,1) both; }
   #countdown-num.draw { font-size:clamp(52px, 17vw, 140px); }
   #countdown-label { letter-spacing:3px; font-weight:800; color:var(--muted); text-transform:uppercase; font-size:13px; }
@@ -1860,6 +1907,26 @@ try {
        Driven by the server's countdown_ends_at (see renderRoom + the
        countdown JS at the bottom); the battle clock only exists after the
        server flips the battle to 'active'. -->
+  <!-- v60: CHALLENGE REVEAL — the randomizer's dedicated results screen.
+       Rendered from the LIVE room payload (battle.challenge); only chosen
+       categories appear. Host launches / Premium re-rolls from here. -->
+  <div id="reveal-view" class="hidden" role="dialog" aria-modal="true" aria-labelledby="rv-title-el">
+    <div class="rv-wrap">
+      <div class="rv-head">
+        <div class="rv-kicker"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Challenge locked</div>
+        <h2 class="rv-title" id="rv-title-el" style="text-transform:none; letter-spacing:1px; color:transparent">YOUR CHALLENGE</h2>
+        <div class="rv-sub" id="rv-sub"></div>
+      </div>
+      <div class="rv-grid" id="rv-grid"></div>
+      <div class="rv-count" id="rv-count"></div>
+      <div class="rv-actions">
+        <button type="button" id="rv-reroll" class="secondary hidden"></button>
+        <button type="button" id="rv-launch" class="hidden">⚔ LAUNCH BATTLE</button>
+        <button type="button" id="rv-back" class="secondary">Back to room</button>
+        <p class="rv-note hidden" id="rv-wait">Waiting for the host to launch…</p>
+      </div>
+    </div>
+  </div>
   <div id="countdown-overlay" class="hidden" aria-hidden="true">
     <div id="countdown-num">3</div>
     <div id="countdown-label">Challenge locked — get ready</div>
@@ -3423,9 +3490,11 @@ function renderRoom(d) {
       $('#challenge-box').classList.remove('hidden');
       $('#challenge-elements').innerHTML = d.battle.challenge.elements.map((el) =>
         '<div class="challenge-row"><span class="challenge-cat">' + (CAT_ICONS[el.category] || IC.dice) + ' ' + esc(el.display_name) + '</span>' +
-        '<span class="challenge-val">' + esc(el.value) + '</span></div>'
-      ).join('');
+        '<span class="challenge-val">' + (paletteOf(el.value) ? paletteMini(paletteOf(el.value)) : esc(el.value)) + '</span></div>'
+      ).join('') +
+      '<button type="button" class="secondary" id="btn-reveal-open" style="width:100%; margin-top:8px">' + IC.dice + ' View challenge reveal</button>';
       $('#challenge-summary').textContent = d.battle.challenge.summary_text;
+      revealSync(d); // v60: the dedicated results screen (opens once per lock/re-roll)
       // v53: the REVEAL phase — the challenge is shown BEFORE the match.
       // Premium re-rolls it here (unlimited); the host LAUNCHES (which arms
       // the 3-2-1). Once countdown/active starts, the re-roll button is
@@ -3446,6 +3515,7 @@ function renderRoom(d) {
       $('#btn-launch').classList.toggle('hidden', !(inReveal && roomOwnerLaunch));
       $('#launch-wait-note').classList.toggle('hidden', !(inReveal && iAmArtist && !roomOwnerLaunch));
     } else {
+      revealClose();
       $('#challenge-box').classList.add('hidden');
       $('#btn-reroll').classList.add('hidden');
       $('#btn-launch').classList.add('hidden');
@@ -3476,6 +3546,7 @@ function renderRoom(d) {
       : esc(BATTLE_NOTE_BY_STATUS[d.battle.status] || 'The challenge locks, the 3-2-1 countdown runs, then the battle goes live.');
     $('#battle-note').style.display = (isSpectator || !['active', 'countdown'].includes(d.battle.status)) ? 'block' : 'none';
   } else {
+    revealClose();
     $('#battle-card').classList.add('hidden');
     $('#vote-box').classList.add('hidden'); // v58
     stopCountdownOverlay(); // v36: no battle → no countdown
@@ -5723,6 +5794,96 @@ $('#btn-launch').addEventListener('click', async () => {
     const d = await api('/api/rooms/' + currentRoomCode + '/launch', {}, 'POST');
     renderRoom(d);
   } catch (e) { toast(e.message); }
+});
+
+// ============ v60: CHALLENGE REVEAL — the randomizer's results screen ============
+// One screen for the whole generated challenge. Data = the server's locked
+// challenge (battle.challenge.elements) — nothing is invented client-side.
+// A "color" value from the colour-combination dataset is a comma list of hex
+// codes; it is rendered as real swatches + hex (never hex text alone).
+function paletteOf(value) {
+  const cols = String(value || '').match(/#[0-9A-Fa-f]{6}\b/g);
+  return cols && cols.length >= 2 ? cols.map((c) => c.toUpperCase()) : null;
+}
+function paletteMini(cols) {
+  return '<span class="challenge-palette" title="' + esc(cols.join(', ')) + '">' +
+    cols.map((c) => '<i style="background:' + esc(c) + '"></i>').join('') + '</span>';
+}
+const REVEAL_ORDER = ['character', 'environment', 'object', 'style', 'color', 'wildcard', 'mood', 'lighting'];
+const REVEAL_LABELS = { style: 'Drawing Style', color: 'Colour Combination' };
+let revealShownFor = null;   // challenge id currently on screen
+let revealDismissed = null;  // challenge id the user closed (don't re-open on every poll)
+function revealRender(d) {
+  const ch = d.battle.challenge;
+  const els = ch.elements.slice().sort((a, b) => {
+    const ia = REVEAL_ORDER.indexOf(a.category), ib = REVEAL_ORDER.indexOf(b.category);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  const names = d.battle.players.map((p) => p.display_name || '@' + p.username);
+  $('#rv-sub').textContent = (names.length ? names.join(' vs ') + ' · ' : '') + fmtTime(d.battle.time_limit_seconds) + ' · ' + (BATTLE_TYPE_LABELS[d.battle.result_method] || d.battle.result_method);
+  let k = 0;
+  $('#rv-grid').innerHTML = els.map((el, i) => {
+    const label = REVEAL_LABELS[el.category] || el.display_name || CAT_NAMES[el.category] || el.category;
+    const pal = el.category === 'color' ? paletteOf(el.value) : null;
+    const d0 = (0.12 * i).toFixed(2) + 's';
+    if (pal) {
+      return '<div class="rv-card wide" style="--d:' + d0 + '"><span class="rv-num">' + (i + 1) + '</span>' +
+        '<div class="rv-cat">' + (CAT_ICONS.color || '') + ' ' + esc(label) + ' <span class="muted" style="letter-spacing:0; text-transform:none; font-weight:600">· ' + pal.length + ' colours</span></div>' +
+        '<div class="rv-swatches">' + pal.map((c) => '<div class="rv-sw" style="--sw:' + esc(c) + '; --sd:' + (0.12 * i + 0.25 + 0.08 * (k++)).toFixed(2) + 's"><i></i><code>' + esc(c) + '</code></div>').join('') + '</div>' +
+        '<div class="rv-strip">' + pal.map((c) => '<i style="--sw:' + esc(c) + '"></i>').join('') + '</div></div>';
+    }
+    return '<div class="rv-card" style="--d:' + d0 + '"><span class="rv-num">' + (i + 1) + '</span>' +
+      '<div class="rv-cat">' + (CAT_ICONS[el.category] || IC.dice) + ' ' + esc(label) + '</div>' +
+      '<div class="rv-val">' + esc(el.value) + '</div></div>';
+  }).join('');
+  $('#rv-count').textContent = els.length + ' element' + (els.length === 1 ? '' : 's') + ' · one complete challenge';
+  // actions mirror the room card's (same server rules): host launches, artists re-roll (Premium)
+  const inReveal = d.battle.status === 'challenge_locked';
+  const iAmArtist = d.players.some((x) => x.is_you);
+  const roomOwnerLaunch = !!(d.host && me && d.host.user_id === me.id && iAmArtist);
+  const rr = d.battle.reroll;
+  const rrBtn = $('#rv-reroll');
+  rrBtn.classList.toggle('hidden', !(inReveal && iAmArtist));
+  if (inReveal && iAmArtist) {
+    rrBtn.classList.toggle('locked', !rr || !rr.allowed);
+    rrBtn.innerHTML = (rr && rr.allowed) ? IC.dice + ' RE-ROLL' : IC.lock + ' RE-ROLL <span class="muted">· Premium</span>';
+  }
+  $('#rv-launch').classList.toggle('hidden', !(inReveal && roomOwnerLaunch));
+  $('#rv-wait').classList.toggle('hidden', !(inReveal && iAmArtist && !roomOwnerLaunch));
+  $('#rv-back').textContent = inReveal ? 'Back to room' : 'Close';
+}
+function revealOpen(d) {
+  revealRender(d);
+  revealShownFor = d.battle.challenge.id;
+  $('#reveal-view').classList.remove('hidden');
+  $('#reveal-view').scrollTop = 0;
+}
+function revealClose() {
+  if ($('#reveal-view').classList.contains('hidden')) return;
+  revealDismissed = revealShownFor;
+  revealShownFor = null;
+  $('#reveal-view').classList.add('hidden');
+}
+// called from renderRoom whenever a challenge exists — opens ONCE per
+// challenge id (lock or re-roll); later polls only refresh the open screen.
+function revealSync(d) {
+  const ch = d.battle.challenge;
+  const st = d.battle.status;
+  if (st !== 'challenge_locked') { // countdown/active/… → the reveal is over
+    if (revealShownFor) { revealShownFor = null; $('#reveal-view').classList.add('hidden'); }
+    return;
+  }
+  if (revealShownFor === ch.id) { revealRender(d); return; }
+  if (revealDismissed === ch.id) return;
+  revealOpen(d);
+}
+$('#rv-back').addEventListener('click', revealClose);
+$('#reveal-view').addEventListener('click', (e) => { if (e.target.id === 'reveal-view') revealClose(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#reveal-view').classList.contains('hidden')) revealClose(); });
+$('#rv-launch').addEventListener('click', () => $('#btn-launch').click());
+$('#rv-reroll').addEventListener('click', () => $('#btn-reroll').click());
+$('#challenge-box').addEventListener('click', (e) => {
+  if (e.target.closest('#btn-reveal-open') && lastRoomData && lastRoomData.battle && lastRoomData.battle.challenge) { revealDismissed = null; revealOpen(lastRoomData); }
 });
 
 // v54: Settings → UI Customization (Premium). Cards carry the real THEME

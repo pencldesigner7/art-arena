@@ -4161,468 +4161,3441 @@
  ],
  "color": [
   {
-   "name": "Crimson",
-   "tags": []
+   "name": "#FF006E, #FB5607, #FFBE0B, #8338EC, #3A86FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Scarlet",
-   "tags": []
+   "name": "#00F5D4, #9B5DE5, #F15BB5, #FEE440, #00BBF9",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Vermilion",
-   "tags": []
+   "name": "#FF70A6, #FF9770, #FFD670, #E9FF70, #70D6FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Orange",
-   "tags": []
+   "name": "#7400B8, #6930C3, #5E60CE, #48BFE3, #80FFDB",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Amber",
-   "tags": []
+   "name": "#FF4D6D, #C77DFF, #80FFDB, #F9F871, #577590",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Gold",
-   "tags": []
+   "name": "#FF0054, #00E5FF, #39FF14, #FFD60A, #7B2CBF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Yellow",
-   "tags": []
+   "name": "#0B132B, #1C2541, #5BC0BE, #FDE74C, #F45B69",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Chartreuse",
-   "tags": []
+   "name": "#2E294E, #EFBCD5, #BE97C6, #8661C1, #4B5267",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Lime",
-   "tags": []
+   "name": "#FFADAD, #FFD6A5, #FDFFB6, #CAFFBF, #9BF6FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Green",
-   "tags": []
+   "name": "#FF99C8, #FCF6BD, #D0F4DE, #A9DEF9, #E4C1F9",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Emerald",
-   "tags": []
+   "name": "#D00000, #FFBA08, #3F88C5, #032B43, #136F63",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Teal",
-   "tags": []
+   "name": "#F72585, #7209B7, #3A0CA3, #4361EE, #4CC9F0",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Cyan",
-   "tags": []
+   "name": "#03045E, #0077B6, #00B4D8, #90E0EF, #CAF0F8",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Azure",
-   "tags": []
+   "name": "#E63946, #F1FAEE, #A8DADC, #457B9D, #1D3557",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Blue",
-   "tags": []
+   "name": "#FF4800, #FF5400, #FFBD00, #FFF500, #00FF9D",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Navy",
-   "tags": []
+   "name": "#1A1423, #372549, #774C60, #B75D69, #EACDC2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Indigo",
-   "tags": []
+   "name": "#264653, #2A9D8F, #E9C46A, #F4A261, #E76F51",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Violet",
-   "tags": []
+   "name": "#D8E2DC, #FFE5D9, #FFCAD4, #F4ACB7, #9D8189",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Purple",
-   "tags": []
+   "name": "#390099, #9E0059, #FF0054, #FF5400, #FFBD00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Magenta",
-   "tags": []
+   "name": "#001219, #005F73, #0A9396, #94D2BD, #E9D8A6",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Pink",
-   "tags": []
+   "name": "#F8F9FA, #FF6B6B, #4ECDC4, #FFE66D, #1A535C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Rose",
-   "tags": []
+   "name": "#1B1B3A, #693668, #A74482, #F84AA7, #FF3562",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Brown",
-   "tags": []
+   "name": "#2D00F7, #6A00F4, #8900F2, #A100F2, #B100E8",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Tan",
-   "tags": []
+   "name": "#FF7B00, #FF8800, #FF9500, #FFAA00, #FFEA00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Beige",
-   "tags": []
+   "name": "#D90368, #00CCBF, #00A6FB, #FEE440, #F15BB5",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Cream",
-   "tags": []
+   "name": "#011627, #FDFFFC, #2EC4B6, #E71D36, #FF9F1C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Ivory",
-   "tags": []
+   "name": "#241023, #6B0504, #A3320B, #D5A021, #E6E0D4",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "White",
-   "tags": []
+   "name": "#120309, #D7263D, #F46036, #2E294E, #1B998B",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Gray",
-   "tags": []
+   "name": "#07020D, #5DB7DE, #F1E9DB, #A39B8B, #716A5C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Silver",
-   "tags": []
+   "name": "#F72585, #B5179E, #7209B7, #560BAD, #480CA8",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Black",
-   "tags": []
+   "name": "#FE4A49, #2AB7CA, #FED766, #E6E6EA, #F4F4F8",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Charcoal",
-   "tags": []
+   "name": "#EE4266, #FFD23F, #3BCEAC, #0EAD69, #540D6E",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Slate",
-   "tags": []
+   "name": "#F94144, #F3722C, #F8961E, #F9844A, #F9C74F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Olive",
-   "tags": []
+   "name": "#577590, #43AA8B, #90BE6D, #F9C74F, #F9844A",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Khaki",
-   "tags": []
+   "name": "#277DA1, #577590, #4D908E, #43AA8B, #90BE6D",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Sienna",
-   "tags": []
+   "name": "#0D1B2A, #1B263B, #415A77, #778DA9, #E0E1DD",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Umber",
-   "tags": []
+   "name": "#10002B, #240046, #3C096C, #5A189A, #7B2CBF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Rust",
-   "tags": []
+   "name": "#FFB5E8, #B28DFF, #AFF8DB, #85E3FF, #FFFFD2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Copper",
-   "tags": []
+   "name": "#FDE2E4, #FAD2E1, #E2ECE9, #BEE1E6, #CDEAC0",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Bronze",
-   "tags": []
+   "name": "#5F0F40, #9A031E, #FB8B24, #E36414, #0F4C5C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Maroon",
-   "tags": []
+   "name": "#F4E409, #00A6A6, #EF476F, #26547C, #F7FFF7",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Burgundy",
-   "tags": []
+   "name": "#4B3F72, #FFC857, #119DA4, #19647E, #1F2041",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Wine",
-   "tags": []
+   "name": "#FFFCF2, #CCC5B9, #403D39, #252422, #EB5E28",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Plum",
-   "tags": []
+   "name": "#E0FBFC, #C2DFE3, #9DB4C0, #5C6B73, #253237",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Lavender",
-   "tags": []
+   "name": "#2B2D42, #8D99AE, #EDF2F4, #EF233C, #D90429",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Periwinkle",
-   "tags": []
+   "name": "#FDF0D5, #003049, #669BBC, #C1121F, #780000",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Turquoise",
-   "tags": []
+   "name": "#A7C957, #6A994E, #386641, #F2E8CF, #BC4749",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Aqua",
-   "tags": []
+   "name": "#2F4858, #33658A, #86BBD8, #F6AE2D, #F26419",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Mint",
-   "tags": []
+   "name": "#B8F2E6, #AED9E0, #5E6472, #FFA69E, #FAF3DD",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Sage",
-   "tags": []
+   "name": "#F2F7F2, #DDEDEA, #B6C9BB, #4E6E58, #2D4739",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Forest",
-   "tags": []
+   "name": "#FFCAD4, #B0D0D3, #C08497, #F7AF9D, #F6BD60",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Steel",
-   "tags": []
+   "name": "#7FFF00, #8A2BE2, #FF00FF, #FF1493, #00FFFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Cobalt",
-   "tags": []
+   "name": "#C6FFDD, #A9DEF9, #FF9A8B, #FF99AC, #D0F4DE",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Cerulean",
-   "tags": []
+   "name": "#FF6F91, #FFC75F, #00C9A7, #D65DB1, #845EC2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Ultramarine",
-   "tags": []
+   "name": "#FFC75F, #FF9671, #845EC2, #D65DB1, #00C9A7",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Sapphire",
-   "tags": []
+   "name": "#ADFF2F, #FF69B4, #FF8C00, #00BFFF, #00FF7F, #8B008B",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Ruby",
-   "tags": []
+   "name": "#00E676, #2979FF, #FFEA00, #D500F9",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Garnet",
-   "tags": []
+   "name": "#FF7F00, #FF007F, #FFFF00, #7F00FF, #007FFF, #00FF7F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Topaz",
-   "tags": []
+   "name": "#FF1493, #7FFF00, #FF00FF, #FFFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Amethyst",
-   "tags": []
+   "name": "#D65DB1, #00C9A7, #FFC75F",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Aquamarine",
-   "tags": []
+   "name": "#2979FF, #D500F9, #FF6D00, #FF1744, #00E676",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Opal",
-   "tags": []
+   "name": "#00FF00, #FF0000, #FFFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Pearl",
-   "tags": []
+   "name": "#2DE2E6, #FFE900, #00FF41, #FF6B35",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Monochrome",
-   "tags": []
+   "name": "#8B008B, #00FF7F, #ADFF2F",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Duotone",
-   "tags": []
+   "name": "#FF00A8, #00C853, #651FFF, #00E5FF, #E6FF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Tritone",
-   "tags": []
+   "name": "#0081CF, #845EC2, #00C2A8, #F9F871",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Complementary",
-   "tags": []
+   "name": "#FF9A8B, #C6FFDD, #FF6A88, #FF99AC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Analogous",
-   "tags": []
+   "name": "#845EC2, #FF9671, #FF6F91, #D65DB1, #FFC75F, #00C9A7",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Triad",
-   "tags": []
+   "name": "#00FFB2, #FF00C8, #FF3D00, #6C00FF, #FFEE00, #00A8FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Split-complementary",
-   "tags": []
+   "name": "#FF00FF, #8A2BE2, #FFFF00, #FF1493, #7FFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Tetrad",
-   "tags": []
+   "name": "#00FF41, #FF6B35, #7A00FF, #FFE900, #F706CF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Pastel",
-   "tags": []
+   "name": "#8B008B, #00BFFF, #ADFF2F, #FF8C00, #FF69B4, #00FF7F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Neon",
-   "tags": []
+   "name": "#1F7A8C, #FFF275, #FF5714",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Earth Tones",
-   "tags": []
+   "name": "#FF4500, #FFD700, #9400D3, #DC143C, #00FA9A, #1E90FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Jewel Tones",
-   "tags": []
+   "name": "#8A2BE2, #FF00FF, #00FFFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Warm",
-   "tags": []
+   "name": "#FF6B35, #F706CF, #2DE2E6, #00FF41, #FFE900, #7A00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Cool",
-   "tags": []
+   "name": "#00A8FF, #00FFB2, #6C00FF, #FF00C8",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Vibrant",
-   "tags": []
+   "name": "#FF1493, #00FFFF, #FFFF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "High Contrast",
-   "tags": []
+   "name": "#FF00A8, #00E5FF, #E6FF00, #00C853, #FF6D00, #651FFF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Low Contrast",
-   "tags": []
+   "name": "#00FF00, #FFFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Grayscale",
-   "tags": []
+   "name": "#D65DB1, #FF9671, #FF6F91",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Sepia",
-   "tags": []
+   "name": "#00E5FF, #FF00A8, #E6FF00, #651FFF, #FF6D00, #00C853",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Thermal",
-   "tags": []
+   "name": "#FFFF00, #7F00FF, #FF007F, #FF7F00, #007FFF, #00FF7F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Rainbow",
-   "tags": []
+   "name": "#00BFFF, #8B008B, #ADFF2F, #00FF7F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Sunset",
-   "tags": []
+   "name": "#D65DB1, #FF6F91, #845EC2, #FFC75F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Ocean",
-   "tags": []
+   "name": "#00FFB2, #00A8FF, #FFEE00, #6C00FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Desert",
-   "tags": []
+   "name": "#FF7F00, #FFFF00, #007FFF, #7F00FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Cyberpunk",
-   "tags": []
+   "name": "#FF6D00, #FFEA00, #D500F9",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Vaporwave",
-   "tags": []
+   "name": "#00E5FF, #00C853, #FF6D00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Synthwave",
-   "tags": []
+   "name": "#F706CF, #00FF41, #2DE2E6, #FF6B35, #7A00FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Candy",
-   "tags": []
+   "name": "#F9F871, #845EC2, #C34A36, #FF8066, #0081CF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Baby",
-   "tags": []
+   "name": "#FF00A8, #E6FF00, #651FFF, #00E5FF, #00C853",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Metallic",
-   "tags": []
+   "name": "#FFC75F, #845EC2, #FF9671, #D65DB1, #00C9A7, #FF6F91",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Holographic",
-   "tags": []
+   "name": "#FF0000, #00FFFF, #0000FF, #FF00FF, #00FF00, #FFFF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Iridescent",
-   "tags": []
+   "name": "#7FFF00, #8A2BE2, #FF00FF, #00FFFF, #FFFF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Opalescent",
-   "tags": []
+   "name": "#00FA9A, #FFD700, #9400D3, #DC143C",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Pearlescent",
-   "tags": []
+   "name": "#1F7A8C, #FF5714, #FFF275",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Matte",
-   "tags": []
+   "name": "#00FFFF, #FF1493, #FFFF00, #7FFF00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Glossy",
-   "tags": []
+   "name": "#FF8C00, #FF69B4, #00BFFF, #00FF7F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Glow",
-   "tags": []
+   "name": "#FF6A88, #FF99AC, #D0F4DE, #C6FFDD",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Dim",
-   "tags": []
+   "name": "#A9DEF9, #FF99AC, #C6FFDD",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Bright",
-   "tags": []
+   "name": "#00A8FF, #FFEE00, #FF3D00, #00FFB2, #6C00FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Bold",
-   "tags": []
+   "name": "#00FFCC, #FFF275, #1F7A8C, #784BA0, #FF5714",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Acid",
-   "tags": []
+   "name": "#FF9A8B, #A9DEF9, #FF99AC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Toxic",
-   "tags": []
+   "name": "#00BFFF, #ADFF2F, #8B008B, #FF8C00, #00FF7F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Radioactive",
-   "tags": []
+   "name": "#1F7A8C, #FF3CAC, #00FFCC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Poison",
-   "tags": []
+   "name": "#FF00FF, #00FF00, #00FFFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Venom",
-   "tags": []
+   "name": "#ADFF2F, #FF69B4, #8B008B, #00FF7F, #00BFFF, #FF8C00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
   },
   {
-   "name": "Noble",
-   "tags": []
+   "name": "#00E676, #FF6D00, #2979FF, #D500F9",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Royal",
-   "tags": []
+   "name": "#DC143C, #1E90FF, #00FA9A, #FFD700, #FF4500",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Peasant",
-   "tags": []
+   "name": "#00FF41, #2DE2E6, #FF6B35, #FFE900, #F706CF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Street",
-   "tags": []
+   "name": "#A9DEF9, #D0F4DE, #FF6A88, #FF99AC, #C6FFDD",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Urban",
-   "tags": []
+   "name": "#00FF7F, #7F00FF, #FFFF00, #FF007F, #FF7F00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   },
   {
-   "name": "Rustic",
-   "tags": []
+   "name": "#FF6D00, #2979FF, #D500F9, #FF1744",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
   },
   {
-   "name": "Organic",
-   "tags": []
+   "name": "#00FFFF, #0000FF, #FFFF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
   },
   {
-   "name": "Chemical",
-   "tags": []
+   "name": "#FFE900, #7A00FF, #2DE2E6, #00FF41, #FF6B35",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFF275, #FF5714, #784BA0",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #E6FF00, #651FFF, #00E5FF, #00C853, #FF00A8",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #D65DB1, #FF9671, #845EC2, #FF6F91",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #845EC2, #FF9671, #00C9A7, #FF6F91, #D65DB1",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFE900, #2DE2E6, #F706CF, #00FF41, #FF6B35, #7A00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #00E5FF, #651FFF, #00C853, #FF00A8, #E6FF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#DC143C, #FF4500, #FFD700, #9400D3",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF007F, #7F00FF, #007FFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #D65DB1, #FF6F91, #FFC75F, #FF9671, #00C9A7",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#784BA0, #FFF275, #00FFCC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#E6FF00, #00C853, #651FFF, #00E5FF, #FF00A8, #FF6D00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#1E90FF, #9400D3, #FFD700, #FF4500, #00FA9A",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#0081CF, #845EC2, #00C2A8, #FF8066, #C34A36, #F9F871",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#C34A36, #FF8066, #0081CF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #D65DB1, #FFC75F, #00C9A7, #FF6F91",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FF6D00, #FFEA00, #2979FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#0000FF, #FFFF00, #FF0000, #00FFFF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #C6FFDD, #FF6A88, #D0F4DE, #FF99AC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #ADFF2F, #FF69B4, #00BFFF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF6A88, #FF99AC, #FF9A8B, #A9DEF9, #D0F4DE, #C6FFDD",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF4500, #DC143C, #1E90FF, #9400D3, #00FA9A",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#2979FF, #00E676, #D500F9, #FF1744, #FFEA00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #FF4500, #FFD700, #9400D3, #1E90FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#6C00FF, #FF3D00, #FF00C8, #FFEE00, #00A8FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00BFFF, #8B008B, #ADFF2F, #FF8C00, #FF69B4",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #FFFF00, #FF7F00, #FF007F, #007FFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00A8FF, #FF00C8, #FF3D00, #00FFB2, #FFEE00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#2979FF, #D500F9, #00E676, #FFEA00, #FF6D00, #FF1744",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF00C8, #00A8FF, #00FFB2, #FFEE00, #6C00FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF8C00, #FF69B4, #8B008B, #ADFF2F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #FF9A8B, #D0F4DE, #C6FFDD",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#8A2BE2, #FFFF00, #FF1493, #FF00FF, #00FFFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#E6FF00, #FF6D00, #FF00A8, #00C853",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FFCC, #784BA0, #FF3CAC, #FFF275, #1F7A8C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#0081CF, #00C2A8, #F9F871",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF0000, #00FF00, #FFFF00, #00FFFF, #0000FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #D0F4DE, #FF99AC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF8066, #845EC2, #C34A36, #F9F871, #00C2A8, #0081CF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#9400D3, #DC143C, #1E90FF, #FFD700, #FF4500",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #FFF275, #1F7A8C, #00FFCC, #FF3CAC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFE900, #2DE2E6, #F706CF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF8C00, #FF69B4, #00FF7F, #ADFF2F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #D500F9, #FF1744, #FF6D00, #2979FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #00FFFF, #FF0000, #FF00FF, #00FF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#784BA0, #FFF275, #00FFCC, #1F7A8C, #FF5714, #FF3CAC",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#9400D3, #DC143C, #1E90FF, #FFD700",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF1744, #FFEA00, #FF6D00, #00E676, #2979FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF6F91, #00C9A7, #845EC2, #FFC75F, #FF9671, #D65DB1",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF3D00, #FFEE00, #00A8FF, #6C00FF, #00FFB2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#D65DB1, #00C9A7, #845EC2, #FF6F91, #FFC75F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#651FFF, #FF00A8, #00C853, #E6FF00, #FF6D00, #00E5FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FF00, #FF0000, #FFFF00, #00FFFF, #0000FF, #FF00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #FFC75F, #00C9A7, #FF6F91, #FF9671",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #FF00FF, #00FFFF, #8A2BE2, #FF1493, #7FFF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#2979FF, #00E676, #FF6D00, #D500F9, #FF1744, #FFEA00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF8C00, #8B008B, #ADFF2F",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00E5FF, #FF6D00, #E6FF00, #00C853",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #FF7F00, #FF007F, #007FFF, #7F00FF, #FFFF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #D65DB1, #00C9A7, #FF6F91, #FFC75F, #845EC2",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#1E90FF, #DC143C, #00FA9A, #9400D3, #FF4500, #FFD700",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#D65DB1, #FF9671, #00C9A7, #FFC75F, #845EC2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF3D00, #FF00C8, #6C00FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00FF00, #00FFFF, #FF00FF, #0000FF, #FF0000, #FFFF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #2979FF, #FF1744, #D500F9, #FFEA00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #0000FF, #FF00FF, #00FFFF, #00FF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FFCC, #FF5714, #1F7A8C, #784BA0",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#007FFF, #7F00FF, #FF7F00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF00FF, #00FFFF, #FF1493, #8A2BE2, #7FFF00, #FFFF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF00A8, #00E5FF, #E6FF00, #FF6D00, #00C853",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#7A00FF, #2DE2E6, #00FF41, #F706CF, #FF6B35",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #845EC2, #FF6F91, #D65DB1",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#007FFF, #7F00FF, #00FF7F, #FF007F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#D65DB1, #00C9A7, #FF9671, #845EC2, #FF6F91",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#8B008B, #00FF7F, #FF8C00, #FF69B4, #00BFFF, #ADFF2F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#DC143C, #1E90FF, #9400D3, #FF4500",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF4500, #1E90FF, #9400D3, #DC143C, #00FA9A, #FFD700",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF6F91, #845EC2, #FFC75F",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FF1744, #FF6D00, #D500F9",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF00, #FF00FF, #FFFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#DC143C, #FFD700, #9400D3, #FF4500, #1E90FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF00FF, #FF0000, #00FFFF, #FFFF00, #00FF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #D0F4DE, #C6FFDD",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #9400D3, #1E90FF, #DC143C",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #D65DB1, #FF9671, #FFC75F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#F706CF, #FFE900, #00FF41",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00E5FF, #E6FF00, #651FFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#C34A36, #0081CF, #F9F871, #00C2A8, #845EC2, #FF8066",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #D65DB1, #00C9A7, #FFC75F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF007F, #00FF7F, #007FFF, #FF7F00, #FFFF00, #7F00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #F9F871, #0081CF, #00C2A8, #FF8066",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #FF00FF, #7FFF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF69B4, #00BFFF, #8B008B, #FF8C00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#F9F871, #0081CF, #00C2A8, #C34A36, #845EC2, #FF8066",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#8A2BE2, #7FFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FFEE00, #FF3D00, #6C00FF, #00A8FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#651FFF, #E6FF00, #FF00A8, #00C853, #00E5FF, #FF6D00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #007FFF, #FF007F, #FF7F00, #7F00FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00A8FF, #FFEE00, #00FFB2",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #784BA0, #1F7A8C, #FFF275",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#D65DB1, #00C9A7, #845EC2, #FF6F91, #FF9671",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #007FFF, #FF7F00, #FF007F, #00FF7F, #7F00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#F706CF, #FFE900, #00FF41, #7A00FF, #FF6B35, #2DE2E6",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF69B4, #00BFFF, #ADFF2F, #8B008B, #00FF7F, #FF8C00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#C34A36, #0081CF, #FF8066, #00C2A8",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00A8FF, #FFEE00, #FF3D00, #FF00C8, #00FFB2, #6C00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #FFE900, #F706CF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00C853, #651FFF, #FF6D00, #FF00A8",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF00FF, #FFFF00, #0000FF, #00FF00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00C853, #00E5FF, #E6FF00, #FF6D00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #2DE2E6, #FFE900, #00FF41, #F706CF, #7A00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #845EC2, #FF6F91, #FFC75F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF1744, #00E676, #FFEA00, #FF6D00, #2979FF, #D500F9",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FFCC, #FFF275, #1F7A8C, #784BA0, #FF3CAC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #FF00FF, #0000FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF69B4, #ADFF2F, #8B008B",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #FF1493, #FF00FF, #00FFFF, #8A2BE2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #DC143C, #FF4500, #1E90FF, #9400D3, #00FA9A",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#9400D3, #1E90FF, #FFD700",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#1E90FF, #FF4500, #DC143C, #9400D3, #00FA9A",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #00C9A7, #845EC2, #FF9671",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#1F7A8C, #784BA0, #FF3CAC, #FFF275, #FF5714",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF9A8B, #A9DEF9, #FF6A88, #C6FFDD, #FF99AC, #D0F4DE",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #D65DB1, #00C9A7",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#C34A36, #0081CF, #F9F871, #845EC2",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #C34A36, #F9F871, #00C2A8, #0081CF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF99AC, #A9DEF9, #FF9A8B, #D0F4DE, #C6FFDD, #FF6A88",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF99AC, #FF9A8B, #D0F4DE",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#C6FFDD, #A9DEF9, #D0F4DE, #FF6A88",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #C34A36, #F9F871, #0081CF, #FF8066",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#D0F4DE, #FF9A8B, #A9DEF9, #C6FFDD, #FF99AC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #FF00FF, #00FF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#E6FF00, #FF6D00, #FF00A8",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#D500F9, #FF1744, #FFEA00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF00C8, #6C00FF, #FFEE00, #00A8FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FFEE00, #00FFB2, #6C00FF, #FF00C8",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF3CAC, #784BA0, #FFF275, #00FFCC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FFEE00, #FF00C8, #00FFB2",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF00C8, #FFEE00, #6C00FF, #00FFB2, #00A8FF, #FF3D00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#E6FF00, #00E5FF, #FF6D00, #00C853",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #FF7F00, #FF007F, #7F00FF, #FFFF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00C9A7, #D65DB1, #845EC2, #FF9671",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00C9A7, #FF6F91, #845EC2, #FF9671, #D65DB1",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #FF4500, #9400D3, #1E90FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF00A8, #00C853, #E6FF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #0081CF, #F9F871, #C34A36, #FF8066, #00C2A8",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF1493, #FF00FF, #7FFF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#7F00FF, #FF007F, #FF7F00, #00FF7F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF99AC, #C6FFDD, #D0F4DE",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #FF6A88, #FF9A8B, #C6FFDD",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #8A2BE2, #7FFF00, #FF1493, #FF00FF, #FFFF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#ADFF2F, #8B008B, #FF69B4, #00BFFF, #FF8C00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #FF4500, #9400D3, #1E90FF, #DC143C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #845EC2, #00C9A7",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00E5FF, #651FFF, #FF00A8, #E6FF00, #FF6D00, #00C853",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#8B008B, #00FF7F, #00BFFF, #ADFF2F, #FF69B4",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#0081CF, #00C2A8, #FF8066, #F9F871, #845EC2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF3D00, #FF00C8, #FFEE00, #00FFB2",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #DC143C, #FFD700, #9400D3, #1E90FF, #FF4500",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #D0F4DE, #FF9A8B, #C6FFDD, #FF6A88",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFEE00, #6C00FF, #00A8FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #00FFFF, #FF00FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#9400D3, #FF4500, #DC143C, #FFD700",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00C2A8, #F9F871, #845EC2, #0081CF, #C34A36, #FF8066",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #FF69B4, #ADFF2F",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #00FFCC, #FF3CAC, #FFF275, #1F7A8C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FFEA00, #D500F9, #FF6D00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #FF7F00, #FFFF00, #FF007F, #007FFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#DC143C, #00FA9A, #FFD700, #9400D3, #1E90FF, #FF4500",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF3D00, #FFEE00, #6C00FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #2DE2E6, #7A00FF, #00FF41, #FFE900, #F706CF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #FFD700, #FF4500, #1E90FF, #DC143C, #9400D3",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FFCC, #784BA0, #1F7A8C, #FF5714, #FFF275",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #FF9671, #FF6F91, #D65DB1, #00C9A7",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #00BFFF, #FF69B4, #FF8C00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#8A2BE2, #FF1493, #7FFF00, #FF00FF, #FFFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#9400D3, #00FA9A, #FF4500, #DC143C, #FFD700, #1E90FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF3CAC, #784BA0, #1F7A8C, #FFF275, #FF5714, #00FFCC",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF7F00, #FF007F, #FFFF00, #007FFF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#7F00FF, #00FF7F, #FF007F, #FFFF00, #007FFF, #FF7F00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#D500F9, #FF1744, #FF6D00, #2979FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00BFFF, #FF8C00, #ADFF2F",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#DC143C, #9400D3, #00FA9A, #1E90FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#7FFF00, #8A2BE2, #FFFF00, #FF00FF, #00FFFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FF6D00, #FFEA00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00E5FF, #E6FF00, #651FFF, #00C853",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF1744, #00E676, #2979FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF8066, #00C2A8, #F9F871, #0081CF, #C34A36, #845EC2",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF8066, #845EC2, #C34A36",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #FF9A8B, #C6FFDD",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF1493, #FF00FF, #FFFF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #00FA9A, #9400D3, #DC143C, #1E90FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#F9F871, #C34A36, #845EC2",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #FF99AC, #FF6A88, #D0F4DE, #C6FFDD",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #FFE900, #7A00FF, #F706CF, #2DE2E6, #00FF41",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #00FFCC, #FF3CAC, #FFF275, #784BA0",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #E6FF00, #FF00A8",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF0000, #0000FF, #00FFFF, #FF00FF, #00FF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#784BA0, #1F7A8C, #FF5714, #FF3CAC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00BFFF, #ADFF2F, #FF8C00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#8A2BE2, #FF1493, #FFFF00, #FF00FF, #7FFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #DC143C, #1E90FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#2979FF, #FFEA00, #D500F9, #FF1744, #FF6D00, #00E676",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#C34A36, #00C2A8, #FF8066, #0081CF, #845EC2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#2979FF, #00E676, #FF1744, #D500F9, #FF6D00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#D0F4DE, #FF9A8B, #FF6A88, #FF99AC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF00A8, #00C853, #FF6D00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00A8FF, #6C00FF, #FFEE00, #FF00C8, #00FFB2, #FF3D00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#7FFF00, #FF00FF, #FFFF00, #8A2BE2",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#7F00FF, #FF007F, #007FFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #F9F871, #00C2A8, #C34A36",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00BFFF, #00FF7F, #8B008B, #FF69B4, #ADFF2F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF7F00, #FF007F, #007FFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6F91, #00C9A7, #D65DB1, #FFC75F, #845EC2, #FF9671",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#F706CF, #7A00FF, #FF6B35, #00FF41, #FFE900, #2DE2E6",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#8B008B, #00BFFF, #00FF7F, #FF8C00, #FF69B4, #ADFF2F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#C6FFDD, #A9DEF9, #D0F4DE, #FF99AC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #8B008B, #ADFF2F, #FF8C00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #FF1493, #00FFFF, #8A2BE2, #FF00FF, #7FFF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#F9F871, #00C2A8, #FF8066",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF3D00, #FFEE00, #00FFB2",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#007FFF, #00FF7F, #7F00FF, #FF7F00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #7FFF00, #FF1493, #8A2BE2, #FFFF00, #FF00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#2979FF, #FF1744, #FF6D00, #D500F9, #FFEA00, #00E676",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#1F7A8C, #FFF275, #FF3CAC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #00FA9A, #1E90FF, #DC143C, #FF4500, #9400D3",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #FF6F91, #845EC2, #00C9A7, #FFC75F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF007F, #FF7F00, #FFFF00, #7F00FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00C2A8, #FF8066, #C34A36, #0081CF, #F9F871",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #FF3CAC, #00FFCC, #784BA0",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #00BFFF, #FF8C00, #ADFF2F",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#7FFF00, #FF1493, #8A2BE2, #FFFF00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF3CAC, #FF5714, #00FFCC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #DC143C, #FF4500, #1E90FF, #00FA9A, #9400D3",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #FF0000, #0000FF, #FFFF00, #00FF00, #FF00FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#F9F871, #C34A36, #00C2A8, #845EC2, #0081CF, #FF8066",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00C853, #FF6D00, #FF00A8, #651FFF, #00E5FF, #E6FF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#9400D3, #DC143C, #FF4500, #00FA9A, #1E90FF, #FFD700",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #7FFF00, #FF1493",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00C853, #FF00A8, #00E5FF, #FF6D00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00C9A7, #FF9671, #FF6F91, #845EC2, #D65DB1, #FFC75F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF9A8B, #FF6A88, #C6FFDD, #D0F4DE, #FF99AC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #784BA0, #FFF275, #00FFCC, #FF3CAC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF69B4, #ADFF2F, #00FF7F, #00BFFF, #8B008B",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF0000, #FF00FF, #FFFF00, #00FF00, #00FFFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF8C00, #00FF7F, #8B008B",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#9400D3, #FFD700, #1E90FF, #00FA9A, #DC143C",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF3D00, #FFEE00, #FF00C8, #00FFB2",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF00A8, #00C853, #E6FF00, #00E5FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #784BA0, #00FFCC, #1F7A8C, #FF3CAC, #FFF275",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF99AC, #A9DEF9, #D0F4DE, #FF9A8B",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #7A00FF, #2DE2E6, #F706CF, #00FF41, #FFE900",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FF6D00, #FFEA00, #FF1744",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF0000, #0000FF, #FF00FF, #FFFF00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FFF275, #784BA0, #FF5714, #00FFCC, #1F7A8C, #FF3CAC",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#0000FF, #FF0000, #00FFFF, #FF00FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF007F, #FFFF00, #FF7F00, #00FF7F, #007FFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#D0F4DE, #A9DEF9, #FF6A88, #FF99AC, #C6FFDD, #FF9A8B",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #1E90FF, #FF4500",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#C6FFDD, #FF9A8B, #A9DEF9, #FF99AC, #FF6A88",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FF41, #7A00FF, #FF6B35, #FFE900, #F706CF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00C853, #651FFF, #E6FF00, #FF00A8",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF8066, #F9F871, #845EC2, #0081CF, #C34A36",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #00FF41, #F706CF, #7A00FF, #2DE2E6, #FFE900",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#1E90FF, #FF4500, #9400D3, #FFD700, #00FA9A, #DC143C",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#0000FF, #00FF00, #00FFFF, #FF00FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #8B008B, #FF69B4, #FF8C00, #00BFFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #FF1744, #2979FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #C6FFDD, #FF6A88",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #7A00FF, #FFE900, #00FF41, #2DE2E6, #F706CF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #DC143C, #1E90FF, #FF4500, #00FA9A",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF4500, #1E90FF, #FFD700",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF3D00, #6C00FF, #FF00C8, #00FFB2",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #FFC75F, #FF6F91",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#8A2BE2, #FF1493, #00FFFF, #FF00FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#1F7A8C, #00FFCC, #FFF275, #784BA0, #FF3CAC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF4500, #FFD700, #1E90FF, #00FA9A, #DC143C, #9400D3",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#ADFF2F, #FF8C00, #00BFFF, #00FF7F, #8B008B",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#784BA0, #FF3CAC, #00FFCC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF7F00, #007FFF, #00FF7F, #7F00FF, #FF007F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00C2A8, #FF8066, #0081CF, #F9F871, #845EC2, #C34A36",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FFB2, #FFEE00, #00A8FF, #FF00C8, #6C00FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00C2A8, #FF8066, #0081CF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #FFEA00, #00E676, #2979FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00C853, #FF6D00, #651FFF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6F91, #FF9671, #FFC75F, #D65DB1",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FFEE00, #FF00C8, #00A8FF, #FF3D00, #00FFB2",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #651FFF, #00C853, #E6FF00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF9A8B, #A9DEF9, #D0F4DE, #FF6A88, #FF99AC, #C6FFDD",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF00FF, #8A2BE2, #FFFF00, #7FFF00, #FF1493",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#651FFF, #FF6D00, #FF00A8, #00E5FF, #00C853, #E6FF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #FF6F91, #FF9671, #845EC2",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #2979FF, #FF1744, #00E676",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #00C9A7, #D65DB1",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #00C9A7, #845EC2, #FF6F91, #D65DB1, #FFC75F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#ADFF2F, #FF69B4, #FF8C00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6A88, #FF99AC, #C6FFDD, #D0F4DE, #A9DEF9",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #FF8066, #0081CF, #F9F871",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF00A8, #E6FF00, #FF6D00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00FF41, #F706CF, #FF6B35",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00E5FF, #651FFF, #FF00A8",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#D0F4DE, #C6FFDD, #FF6A88",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#D65DB1, #FF6F91, #00C9A7, #845EC2, #FFC75F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FFCC, #FF5714, #784BA0, #FF3CAC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF00FF, #00FF00, #FFFF00, #FF0000, #0000FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#2979FF, #FFEA00, #FF1744, #D500F9, #00E676, #FF6D00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FFB2, #00A8FF, #6C00FF, #FF00C8, #FFEE00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#E6FF00, #00C853, #00E5FF, #FF00A8, #FF6D00, #651FFF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #00FF00, #FF0000",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00C853, #FF00A8, #FF6D00, #651FFF, #00E5FF, #E6FF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF6D00, #00C853, #651FFF, #FF00A8, #00E5FF, #E6FF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#A9DEF9, #FF9A8B, #C6FFDD, #D0F4DE, #FF99AC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#ADFF2F, #00FF7F, #FF8C00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#C6FFDD, #FF9A8B, #A9DEF9, #D0F4DE, #FF6A88",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #FF0000, #00FF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00FF00, #FF0000, #00FFFF, #0000FF, #FFFF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#7FFF00, #00FFFF, #FF00FF, #8A2BE2",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF6B35, #FFE900, #7A00FF, #2DE2E6, #F706CF, #00FF41",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#6C00FF, #00FFB2, #00A8FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#7FFF00, #8A2BE2, #FF00FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #1F7A8C, #784BA0, #FF3CAC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF7F00, #00FF7F, #007FFF, #7F00FF, #FF007F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF0000, #0000FF, #FF00FF, #FFFF00, #00FFFF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF4500, #00FA9A, #FFD700",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#C34A36, #F9F871, #FF8066, #0081CF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF1744, #FF6D00, #2979FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF007F, #00FF7F, #FF7F00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #00FF00, #FF00FF, #FF0000",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #FF6F91, #D65DB1, #00C9A7",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #7FFF00, #FF1493, #8A2BE2, #FFFF00",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FFFF, #FFFF00, #FF0000, #FF00FF, #0000FF, #00FF00",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#784BA0, #FF5714, #1F7A8C, #00FFCC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #1E90FF, #FFD700, #FF4500, #9400D3, #DC143C",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF3CAC, #FF5714, #00FFCC, #1F7A8C",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FFEA00, #D500F9, #FF6D00, #2979FF",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF9671, #D65DB1, #00C9A7, #845EC2, #FF6F91, #FFC75F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#DC143C, #9400D3, #FFD700, #FF4500, #1E90FF, #00FA9A",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFEA00, #D500F9, #FF6D00, #00E676, #2979FF, #FF1744",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #1E90FF, #FF4500, #9400D3, #FFD700",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFC75F, #FF6F91, #FF9671",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00FFCC, #FF5714, #784BA0",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#2DE2E6, #00FF41, #FF6B35",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF6A88, #D0F4DE, #A9DEF9, #FF99AC, #C6FFDD",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #1E90FF, #9400D3",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00FA9A, #1E90FF, #FF4500, #FFD700, #DC143C, #9400D3",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFF275, #1F7A8C, #FF5714, #FF3CAC",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF8066, #00C2A8, #F9F871, #845EC2, #C34A36",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #FF1493, #8A2BE2",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF69B4, #00FF7F, #8B008B, #00BFFF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FF1744, #FF6D00, #D500F9, #FFEA00, #2979FF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#2DE2E6, #FFE900, #7A00FF, #00FF41",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#845EC2, #00C9A7, #FF6F91, #FF9671",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#00FF7F, #FF69B4, #8B008B, #FF8C00, #00BFFF, #ADFF2F",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FF00C8, #6C00FF, #FF3D00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#7A00FF, #FFE900, #00FF41, #FF6B35",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#E6FF00, #00E5FF, #00C853, #FF6D00, #FF00A8, #651FFF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FFEA00, #FF1744, #2979FF, #D500F9",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#ADFF2F, #FF69B4, #FF8C00, #8B008B",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #FF3CAC, #00FFCC",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#1E90FF, #9400D3, #00FA9A",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#8B008B, #00BFFF, #ADFF2F, #FF8C00, #00FF7F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFD700, #FF4500, #1E90FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#8B008B, #ADFF2F, #00FF7F, #FF8C00, #FF69B4, #00BFFF",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#7FFF00, #FF1493, #8A2BE2",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00BFFF, #8B008B, #FF8C00, #FF69B4, #00FF7F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#00FFB2, #FF3D00, #6C00FF",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00E676, #FF1744, #FF6D00, #2979FF",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#FF6A88, #A9DEF9, #C6FFDD",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#00FF41, #F706CF, #7A00FF, #FF6B35, #2DE2E6",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#8B008B, #00BFFF, #FF8C00, #FF69B4, #00FF7F",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FF3CAC, #00FFCC, #1F7A8C, #FFF275, #FF5714, #784BA0",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#FFE900, #7A00FF, #FF6B35, #00FF41, #F706CF, #2DE2E6",
+   "tags": [
+    "palette",
+    "6-colour"
+   ]
+  },
+  {
+   "name": "#0000FF, #00FFFF, #FFFF00",
+   "tags": [
+    "palette",
+    "3-colour"
+   ]
+  },
+  {
+   "name": "#FF5714, #FFF275, #784BA0, #1F7A8C, #FF3CAC",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
+  },
+  {
+   "name": "#FFFF00, #7F00FF, #007FFF, #FF7F00",
+   "tags": [
+    "palette",
+    "4-colour"
+   ]
+  },
+  {
+   "name": "#F9F871, #845EC2, #FF8066, #00C2A8, #C34A36",
+   "tags": [
+    "palette",
+    "5-colour"
+   ]
   }
  ],
  "wildcard": [

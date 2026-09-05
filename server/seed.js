@@ -20,20 +20,27 @@ const { pool, DEV } = require('./lib');
 const CHUNK = 1000;
 
 async function ensureRandomizerSeed() {
-  const { rows } = await pool.query('SELECT count(*)::int AS n FROM randomizer_elements');
-  if (rows[0].n > 0) {
-    if (DEV) console.log(`SEED randomizer pool present (${rows[0].n} elements) — skipping`);
-    return rows[0].n;
-  }
+  // v60: per-CATEGORY emptiness. A migration may clear ONE category (the
+  // colour palettes were replaced by the curated combination dataset) and
+  // only that category is re-filled — the others are untouched.
+  const { rows } = await pool.query(
+    `SELECT category, count(*)::int AS n FROM randomizer_elements GROUP BY category`);
+  const present = new Map(rows.map((r) => [r.category, r.n]));
+  const total = rows.reduce((s, r) => s + r.n, 0);
 
   const file = path.join(__dirname, 'randomizer_seed.json');
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 
   const rowsToInsert = [];
   for (const [category, entries] of Object.entries(data)) {
+    if (present.get(category) > 0) continue; // already loaded — never re-touched
     for (const e of entries) {
       rowsToInsert.push({ category, name: e.name, tags: e.tags || [] });
     }
+  }
+  if (!rowsToInsert.length) {
+    if (DEV) console.log(`SEED randomizer pool present (${total} elements) — skipping`);
+    return total;
   }
 
   let inserted = 0;
