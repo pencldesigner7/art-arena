@@ -62,6 +62,8 @@ router.post('/rooms/:code/randomizer-config', ah(async (req, res) => {
   requireRoomHost(room, req.user.id);
   if (room.status !== 'lobby')
     throw new HttpError(409, 'Challenge elements are locked once the battle starts.');
+  if (room.auto_start) // v58: matchmaking battles use the fixed default categories
+    throw new HttpError(409, 'Matchmaking battles use the default challenge elements (Character · Environment · Object · Style).');
 
   const catsIn = (req.body || {}).categories;
   if (!Array.isArray(catsIn))

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="57">
+<meta name="aa-ui-version" content="58">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -229,6 +229,9 @@ try {
      <body> from the user's saved customization (server-sanitized). */
   .prem-chip { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:800; letter-spacing:.6px; padding:2px 8px; border-radius:999px; background:linear-gradient(90deg, var(--pth-c1, var(--pink)), var(--pth-c2, var(--purple))); color:#fff; vertical-align:2px; }
   .prem-chip.big { font-size:12px; padding:5px 14px; }
+  #drawer-prem, #card-prem, label .prem-chip { cursor:pointer; }
+  #card-prem { pointer-events:auto; }
+  #drawer-prem:hover, label .prem-chip:hover { filter:brightness(1.12); }
   body[data-ptheme="flame"] { --pink:var(--pth-c1,#FF5A00); --purple:var(--pth-c2,#FFC300); --pink-rgb:var(--pth-c1-rgb,255,90,0); --purple-rgb:var(--pth-c2-rgb,255,195,0); --muted:#c9a587; --line:#4a2a12; --btn-line:#4a2a12; --surface:#180d05; --surface-hover:#1f1108; --surface-2:#2a170a; --bg:#0e0703; --panel:#170d05; --auth-card:rgba(20,11,4,.86); --auth-page-bg:#0e0703; }
   body[data-ptheme="flame"] .card, body[data-ptheme="flame"] .time-modal { border-color:rgba(255,120,20,.35); box-shadow:0 0 22px -12px rgba(255,110,0,.5); }
   body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#FF5A00), var(--pth-c2,#FFC300)); background-size:180% 180%; animation:pth-flame-shift 5s ease-in-out infinite; color:#1d0e02; border:none; font-weight:800; }
@@ -341,6 +344,46 @@ try {
   #pth-fullscreen-glitch .fs-wash.p { background:rgba(var(--pink-rgb),.12); animation:pth-fs-wash 1.5s steps(2) infinite; }
   #pth-fullscreen-glitch .fs-wash.u { background:rgba(var(--purple-rgb),.11); animation:pth-fs-wash 1.9s steps(2) infinite .4s; }
   @keyframes pth-fs-wash { 0%,100% { opacity:0; } 50% { opacity:1; } }
+  /* v58: the takeover goes CHAOTIC — the logo shatters into horizontal
+     shards that tear apart independently, stray duplicates flash up at
+     random places, blocks of the live UI tear sideways, the whole page
+     jolts/skews, and a few frames "corrupt" (invert + hue-slip). Everything
+     is transform/filter on overlay elements or on <main> — nothing is moved
+     in layout, so recovery is a class removal and the UI is exactly as it was.
+     Per-element durations are randomised in JS; every cycle stays ≥ .45s. */
+  #pth-fullscreen-glitch .fs-logo-wrap.shatter .fs-logo { opacity:0; }
+  #pth-fullscreen-glitch .fs-shard { position:absolute; left:0; top:0; width:100%; height:100%; overflow:hidden; will-change:transform, clip-path; animation:pth-fs-shard .7s steps(4) infinite; }
+  #pth-fullscreen-glitch .fs-shard img { display:block; width:100%; height:auto; }
+  #pth-fullscreen-glitch .fs-shard:nth-child(odd) { filter:drop-shadow(3px 0 0 rgba(var(--pink-rgb),.8)); }
+  #pth-fullscreen-glitch .fs-shard:nth-child(even) { filter:drop-shadow(-3px 0 0 rgba(var(--purple-rgb),.8)); }
+  @keyframes pth-fs-shard {
+    0%   { transform:translate(0,0) skewX(0); }
+    20%  { transform:translate(var(--dx1), var(--dy1)) skewX(var(--sk)); }
+    45%  { transform:translate(calc(var(--dx1) * -1.4), var(--dy2)) skewX(calc(var(--sk) * -1)); }
+    70%  { transform:translate(var(--dx2), 0) skewX(0); }
+    100% { transform:translate(0,0); }
+  }
+  #pth-fullscreen-glitch .fs-dup { position:absolute; width:min(220px,40vw); opacity:0; mix-blend-mode:screen; will-change:transform, opacity; animation:pth-fs-dup var(--d,1.1s) steps(3) infinite var(--delay,0s); filter:saturate(2.2) hue-rotate(var(--hue,0deg)); }
+  #pth-fullscreen-glitch .fs-dup img { display:block; width:100%; height:auto; clip-path:inset(var(--ct,0) 0 var(--cb,0) 0); }
+  @keyframes pth-fs-dup { 0%,55% { opacity:0; transform:translate(0,0) scale(1); } 60% { opacity:.85; transform:translate(-14px,6px) scale(1.05); } 75% { opacity:.6; transform:translate(18px,-8px) scale(.94) skewX(8deg); } 88% { opacity:.9; transform:translate(-6px,2px); } 100% { opacity:0; } }
+  /* UI tearing: fixed strips that copy the page's accent + slide sideways */
+  #pth-fullscreen-glitch .fs-tear { position:absolute; left:-4%; right:-4%; height:var(--h,6%); top:var(--y,40%); background:linear-gradient(90deg, rgba(var(--purple-rgb),.0), rgba(var(--purple-rgb),.28) 20%, rgba(var(--pink-rgb),.28) 80%, rgba(var(--pink-rgb),0)); mix-blend-mode:screen; backdrop-filter:none; animation:pth-fs-tear var(--d,.6s) steps(2) infinite var(--delay,0s); }
+  @keyframes pth-fs-tear { 0%,100% { transform:translateX(0); opacity:.2; } 50% { transform:translateX(var(--tx,-40px)); opacity:1; } }
+  #pth-fullscreen-glitch .fs-corrupt { position:absolute; inset:0; opacity:0; background:rgba(255,255,255,.06); backdrop-filter:invert(1) hue-rotate(160deg) contrast(1.4); -webkit-backdrop-filter:invert(1) hue-rotate(160deg) contrast(1.4); animation:pth-fs-corrupt 3s steps(1) both; }
+  @keyframes pth-fs-corrupt { 0%,18%,25%,52%,58%,80%,86%,100% { opacity:0; } 20%,23% { opacity:1; } 54%,56% { opacity:1; } 82%,84% { opacity:1; } }
+  /* the page itself: harder jolt + skew + a horizontal slip of the whole UI
+     (transform only — layout never changes; removed with the class) */
+  body.pth-fsglitch main { animation:pth-fs-mainchaos .55s steps(3) 5; transform-origin:50% 40%; }
+  @keyframes pth-fs-mainchaos {
+    0% { transform:none; filter:none; }
+    25% { transform:translate(-9px,2px) skewX(-2.5deg); filter:drop-shadow(4px 0 0 rgba(var(--pink-rgb),.55)) drop-shadow(-4px 0 0 rgba(var(--purple-rgb),.55)); }
+    50% { transform:translate(7px,-3px) skewX(1.8deg) scale(1.01); filter:drop-shadow(-5px 0 0 rgba(var(--purple-rgb),.5)); clip-path:inset(0 0 0 0); }
+    75% { transform:translate(-3px,1px); filter:none; }
+    100% { transform:none; filter:none; }
+  }
+  body.pth-fsglitch #top-header, body.pth-fsglitch #bottom-nav { animation:pth-fs-barslip .5s steps(2) 3 .2s; }
+  @keyframes pth-fs-barslip { 0%,100% { transform:none; } 50% { transform:translateX(-12px) skewX(-6deg); } }
+  [data-anim="off"] body.pth-fsglitch main, [data-anim="off"] body.pth-fsglitch #top-header, [data-anim="off"] body.pth-fsglitch #bottom-nav { animation:none !important; }
   #pth-fullscreen-glitch .fs-logo-wrap { position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); }
   #pth-fullscreen-glitch .fs-logo-wrap img { display:block; max-width:min(430px,64vw); height:auto; }
   #pth-fullscreen-glitch .fs-logo-wrap .fs-logo { position:static; transform:none; animation:pth-fs-logo .8s steps(8) infinite; }
@@ -426,25 +469,32 @@ try {
 
   /* ---- v55: premium star badge (dashboard profile card) ---- */
   #view-account { position:relative; }
-  /* v57: the Premium DIAMOND — the supplied gem art (background removed),
-     one shared badge in every Premium location. Never interactive. The
-     motion is a gentle float + a soft glow pulse + a passing shimmer sweep:
-     premium and calm, never busy. Animations OFF freezes it (global rule),
-     reduced-motion collapses it to stillness. */
-  .prem-star { position:absolute; top:10px; right:12px; z-index:5; width:44px; height:44px; pointer-events:none; }
-  .prem-diamond { position:relative; display:inline-block; width:44px; height:44px; vertical-align:middle; pointer-events:none; user-select:none; animation:prem-diamond-float 4.2s ease-in-out infinite; }
-  .prem-diamond > img { display:block; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 6px rgba(226,120,255,.45)) drop-shadow(0 3px 5px rgba(0,0,0,.45)); animation:prem-diamond-glow 3.6s ease-in-out infinite; }
-  .prem-diamond::after { content:""; position:absolute; inset:0; -webkit-mask:url(/premium-diamond.png) center/contain no-repeat; mask:url(/premium-diamond.png) center/contain no-repeat; background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.7) 50%, transparent 60%); background-size:260% 100%; background-position:120% 0; mix-blend-mode:screen; animation:prem-diamond-shimmer 5.5s ease-in-out infinite; }
-  .prem-diamond.sm { width:18px; height:18px; }
-  .prem-diamond.md { width:28px; height:28px; }
-  .prem-diamond.lg { width:64px; height:64px; }
-  .prem-chip .prem-diamond { width:14px; height:14px; margin-right:1px; }
-  .prem-chip.big .prem-diamond { width:18px; height:18px; }
-  @keyframes prem-diamond-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2.5px); } }
-  @keyframes prem-diamond-glow { 0%,100% { filter:drop-shadow(0 0 5px rgba(226,120,255,.35)) drop-shadow(0 3px 5px rgba(0,0,0,.45)) brightness(1); } 50% { filter:drop-shadow(0 0 11px rgba(226,120,255,.75)) drop-shadow(0 3px 5px rgba(0,0,0,.45)) brightness(1.08); } }
-  @keyframes prem-diamond-shimmer { 0%,55% { background-position:120% 0; } 80%,100% { background-position:-120% 0; } }
-  @media (prefers-reduced-motion: reduce) { .prem-diamond, .prem-diamond > img, .prem-diamond::after { animation:none !important; } }
-  @media (max-width:420px) { .prem-star { width:36px; height:36px; top:8px; right:10px; } .prem-star .prem-diamond { width:36px; height:36px; } }
+  /* v58: the PREMIUM EMBLEM — Art Arena's status mark. A faceted gem cut in
+     the theme gradient, set in a thin hex plate: it inherits --pink/--purple
+     so it belongs to every theme, sits inline at text size in chips, and
+     scales to a 48px seal on the profile card. Motion is a single slow
+     facet-shimmer sweep (masked to the gem) + a soft halo pulse on the
+     seal only; frozen under Animations OFF / reduced-motion. */
+  .prem-chip { gap:5px; padding:2px 9px 2px 5px; background:linear-gradient(90deg, rgba(var(--pink-rgb),.16), rgba(var(--purple-rgb),.16)); border:1px solid rgba(var(--pink-rgb),.5); color:var(--text); font-size:10px; letter-spacing:1.1px; }
+  .prem-chip.big { font-size:11.5px; padding:5px 14px 5px 8px; gap:7px; }
+  .prem-emblem { position:relative; display:inline-block; width:16px; height:16px; vertical-align:-3px; flex:0 0 auto; pointer-events:none; }
+  .prem-emblem svg { display:block; width:100%; height:100%; overflow:visible; }
+  .prem-emblem { --pe-plate:var(--surface-2); --pe-ring:rgba(var(--pink-rgb),.6); }
+  .prem-emblem::after { content:""; position:absolute; inset:18%; clip-path:polygon(22% 8%, 78% 8%, 100% 40%, 50% 100%, 0 40%); background:linear-gradient(115deg, transparent 35%, rgba(255,255,255,.9) 50%, transparent 65%); background-size:300% 100%; background-position:130% 0; animation:pe-shimmer 6s ease-in-out infinite; }
+  .prem-chip.big .prem-emblem { width:20px; height:20px; }
+  .swatch-name .prem-chip { padding:1px 4px; gap:0; }
+  .swatch-name .prem-emblem { width:14px; height:14px; vertical-align:-3px; }
+  .prem-star { position:absolute; top:10px; right:12px; z-index:5; width:46px; height:46px; pointer-events:auto; cursor:pointer; }
+  .prem-star .prem-emblem { width:46px; height:46px; filter:drop-shadow(0 0 8px rgba(var(--pink-rgb),.5)) drop-shadow(0 4px 6px rgba(0,0,0,.45)); animation:pe-halo 4s ease-in-out infinite; }
+  .prem-star .prem-emblem { --pe-plate:var(--surface); }
+  .prem-star:hover .prem-emblem { transform:translateY(-1px); }
+  @keyframes pe-shimmer { 0%,60% { background-position:130% 0; } 85%,100% { background-position:-130% 0; } }
+  @keyframes pe-halo { 0%,100% { filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.35)) drop-shadow(0 4px 6px rgba(0,0,0,.45)); } 50% { filter:drop-shadow(0 0 14px rgba(var(--pink-rgb),.75)) drop-shadow(0 4px 6px rgba(0,0,0,.45)); } }
+  @media (prefers-reduced-motion: reduce) { .prem-emblem, .prem-emblem::after { animation:none !important; } }
+  @media (max-width:420px) { .prem-star { width:40px; height:40px; top:8px; right:10px; } .prem-star .prem-emblem { width:40px; height:40px; } }
+  /* light surfaces (Cloud / Magazine / Light mode): the plate reads on paper */
+  html[data-theme="light"] .prem-emblem, body[data-ptheme="cloud"] .prem-emblem, body[data-ptheme="magazine"] .prem-emblem { --pe-plate:#ffffff; }
+  body[data-ptheme="pixel"] .prem-chip { border-radius:0; }
 
   /* ---- v55: theme-aware destination icons (Battle / Create / Join /
        History / Saved). Decorative treatments AROUND an icon whose color
@@ -594,6 +644,12 @@ try {
   .field:focus-within { box-shadow:0 0 0 1px rgba(var(--purple-rgb),.5), 0 0 14px rgba(var(--pink-rgb),.3), 0 0 30px rgba(var(--purple-rgb),.28); transform:translateY(-2px); }
   .login-btn:hover { box-shadow:0 0 12px rgba(var(--pink-rgb),.5), 0 0 28px rgba(var(--purple-rgb),.4); transform:translateY(-2px); }
   /* NOTE: .social-btn (Google/Apple/Discord) deliberately has NO glow hover. */
+  /* v58 (Apple logo visibility): the Apple glyph is currentColor =
+     --icon-strong, which is white on the dark root. Cloud and Magazine are
+     LIGHT-surface themes that never overrode it, so the logo vanished on
+     their near-white buttons. Only those (and Light mode, already handled)
+     get a black glyph — dark themes keep white for contrast. */
+  body[data-ptheme="cloud"] .social-btn[data-social="apple"], body[data-ptheme="magazine"] .social-btn[data-social="apple"] { color:#000; }
   /* ---------------- login background structure -----------------------------
      The Glitter Wrap starfield (glitter-wrap.js, the vanilla port of the
      user-supplied component) renders its canvas into #login-bg: a full-
@@ -624,6 +680,27 @@ try {
      derived from the server's official_end_time (start + duration). It can
      never run before the countdown finishes, because the server never sets
      'active' early. */
+  /* v58: COMMUNITY VOTING — sits inside the battle card, same surfaces and
+     tokens as the challenge rows; the ballot is two artist tiles. */
+  .vote-box { margin-top:12px; padding:12px; border:1px solid rgba(var(--pink-rgb),.45); border-radius:12px; background:linear-gradient(180deg, rgba(var(--pink-rgb),.08), rgba(var(--purple-rgb),.05)); }
+  .vote-head { display:flex; justify-content:space-between; align-items:center; gap:10px; font-weight:800; letter-spacing:1.2px; font-size:12.5px; }
+  .vote-head time { color:var(--pink); font-size:15px; font-variant-numeric:tabular-nums; letter-spacing:2px; }
+  .vote-sub { font-size:12.5px; margin-top:4px; }
+  .vote-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+  .vote-opt { position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px 10px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--text); font:inherit; cursor:pointer; margin:0; text-align:center; transition:border-color .2s ease, transform .15s ease; }
+  .vote-opt:hover { border-color:var(--purple); transform:translateY(-1px); filter:none; }
+  .vote-opt:disabled { cursor:default; transform:none; }
+  .vote-opt.mine { border-color:var(--pink); box-shadow:0 0 0 1px var(--pink) inset, 0 0 18px -6px rgba(var(--pink-rgb),.6); }
+  .vote-opt.leader:not(.mine) { border-color:rgba(var(--purple-rgb),.7); }
+  .vote-ava { width:44px; height:44px; border-radius:50%; background:var(--surface-2); border:2px solid rgba(var(--purple-rgb),.65); display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:var(--icon-strong); }
+  .vote-name { font-weight:800; font-size:13.5px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .vote-count { font-size:22px; font-weight:900; letter-spacing:1px; color:var(--pink); font-variant-numeric:tabular-nums; line-height:1; }
+  .vote-count small { display:block; font-size:10px; font-weight:800; letter-spacing:1.5px; color:var(--muted); margin-top:3px; }
+  .vote-bar { width:100%; height:5px; border-radius:999px; background:var(--surface-2); overflow:hidden; }
+  .vote-bar i { display:block; height:100%; width:0; background:linear-gradient(90deg, var(--pink), var(--purple)); transition:width .5s ease; }
+  .vote-cta { font-size:10.5px; font-weight:800; letter-spacing:1.2px; color:var(--pink); }
+  .vote-opt.mine .vote-cta::before { content:"✓ "; }
+  .vote-tick { position:absolute; top:6px; right:8px; font-size:12px; color:var(--pink); font-weight:900; }
   .battle-clock { margin-top:10px; padding:10px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); font-size:14px; font-weight:800; letter-spacing:1.5px; display:flex; justify-content:space-between; align-items:center; }
   .battle-clock time { color:var(--pink); font-size:17px; font-variant-numeric:tabular-nums; letter-spacing:2px; }
   #view-login { border-color:rgba(var(--pink-rgb),.4); box-shadow:0 0 0 1px rgba(var(--purple-rgb),.22), 0 0 20px rgba(var(--pink-rgb),.16), 0 0 44px rgba(var(--purple-rgb),.16); }
@@ -949,6 +1026,22 @@ try {
   <linearGradient id="aa-grad" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#FF3CAC"></stop><stop offset="1" stop-color="#7B2CFF"></stop>
   </linearGradient>
+  <!-- v58: the Premium emblem — gem stops read the THEME tokens, so the mark
+       is pink/purple by default, ember on Flame, mint/blue on Glowing… -->
+  <linearGradient id="pe-grad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" style="stop-color:var(--pink,#FF3CAC)"></stop><stop offset="1" style="stop-color:var(--purple,#7B2CFF)"></stop>
+  </linearGradient>
+  <symbol id="pe-sym" viewBox="0 0 24 24">
+    <!-- plate + gem colours come from CSS vars via presentation attrs (they
+         inherit INTO the <use> shadow tree, which class selectors do not) -->
+    <path d="M12 1.2 21.4 6.6v10.8L12 22.8 2.6 17.4V6.6z" fill="var(--pe-plate, rgba(0,0,0,.4))" stroke="var(--pe-ring, rgba(255,60,172,.6))" stroke-width="1"/>
+    <path d="M7.4 7.2h9.2l3 3.6L12 19.4 4.4 10.8z" fill="url(#pe-grad)"/>
+    <path d="M7.4 7.2h9.2l-1.4 3.6H8.8z" fill="rgba(255,255,255,.32)"/>
+    <path d="M8.8 10.8h6.4L12 19.4z" fill="rgba(0,0,0,.22)"/>
+    <path d="M4.4 10.8h4.4L12 19.4z" fill="rgba(255,255,255,.18)"/>
+    <path d="M15.2 10.8h4.4L12 19.4z" fill="rgba(0,0,0,.28)"/>
+    <path d="M4.4 10.8h15.2M7.4 7.2l1.4 3.6L12 19.4l3.2-8.6 1.4-3.6M12 7.2l-3.2 3.6M12 7.2l3.2 3.6" fill="none" stroke="rgba(255,255,255,.6)" stroke-width=".6"/>
+  </symbol>
 </defs></svg>
 <header id="top-header">
   <div class="nav-left">
@@ -1500,6 +1593,9 @@ try {
         <button type="button" id="btn-launch" class="hidden">⚔ LAUNCH BATTLE</button>
         <p class="muted hidden" id="launch-wait-note" style="font-size:12.5px; margin:8px 0 0">Challenge revealed — waiting for the host to launch…</p>
       </div>
+      <!-- v58: COMMUNITY VOTING — the 2-minute window after the clock. Real
+           votes (POST /api/rooms/:code/vote), one per user, server-enforced. -->
+      <div id="vote-box" class="vote-box hidden"></div>
       <p class="muted" id="battle-note" style="margin-top:8px">The host locks the challenge — the 3-2-1 countdown starts the battle.</p>
       <!-- v44 (Go Live): honest coming-soon entry point. It lives in the
            battle UI where a livestream would start — but it is a
@@ -1559,7 +1655,7 @@ try {
   <section id="view-account" class="view hidden">
     <!-- v57: the Premium diamond badge in the card's top-right corner.
          Shows only for actual Premium users (server entitlement). -->
-    <span id="card-prem" class="prem-star hidden" title="Art Arena Premium"><span class="prem-diamond" aria-label="Art Arena Premium" role="img"><img src="/premium-diamond.png" alt=""></span></span>
+    <span id="card-prem" class="prem-star hidden" title="Art Arena Premium" role="link" tabindex="0"><span class="prem-emblem" role="img" aria-label="Art Arena Premium"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>
     <div id="unverified-banner" class="banner hidden">
       ⚠ Email not verified — a code was sent to your email.
       <div style="margin-top:8px">
@@ -1655,7 +1751,7 @@ try {
     <!-- v53: UI Customization lives HERE for Premium members (no standalone
          nav slot). Free members see an honest locked teaser. -->
     <div class="settings-appearance" id="settings-themes" style="margin-top:18px">
-      <label>UI Customization <span class="prem-chip"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM</span>
+      <label>UI Customization <span class="prem-chip"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>
         <div id="settings-theme-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-top:10px"></div>
       </label>
       <div id="settings-theme-custom" class="pth-custom hidden">
@@ -1760,7 +1856,7 @@ try {
       <span class="drawer-ava" id="drawer-avatar">•</span>
       <span class="drawer-who">
         <span class="drawer-name" id="drawer-name">…</span>
-        <span class="drawer-username" id="drawer-username">@…</span> <span id="drawer-prem" class="prem-chip hidden"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM</span>
+        <span class="drawer-username" id="drawer-username">@…</span> <span id="drawer-prem" class="prem-chip hidden"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>
       </span>
     </div>
     <nav id="drawer-nav" aria-label="Main"></nav>
@@ -2173,9 +2269,32 @@ window.addEventListener('aa-glitch-fullscreen', (e) => {
   // v56: rebuilt per activation — block placement, band timing and the
   // system message differ every time (a takeover should never repeat itself)
   const GLITCH_TAGS = ['ART ARENA — SIGNAL DISRUPTION', 'CHALLENGE PROTOCOL BREACH', 'ARENA GRID UNSTABLE', 'RAW STREAM LEAK', 'BATTLE FEED CORRUPTED'];
-  let html = '<div class="fs-logo-wrap"><img class="fs-logo" alt="" src="' + (THEME_LOGOS.glitch || '/logo.png') + '">' +
-    '<img class="fs-ghost g1" alt="" src="' + (THEME_LOGOS.glitch || '/logo.png') + '">' +
-    '<img class="fs-ghost g2" alt="" src="' + (THEME_LOGOS.glitch || '/logo.png') + '"></div>';
+  const LOGO = THEME_LOGOS.glitch || '/logo.png';
+  // v58 CHAOS: the logo is cut into 5–8 horizontal shards, each with its own
+  // displacement / skew / timing, so it visibly tears apart and re-forms.
+  const nSh = 5 + Math.floor(Math.random() * 4);
+  let shards = '';
+  for (let i = 0; i < nSh; i++) {
+    const top = (i / nSh) * 100, bot = 100 - ((i + 1) / nSh) * 100;
+    const dx1 = (Math.random() * 60 - 30).toFixed(0), dx2 = (Math.random() * 40 - 20).toFixed(0);
+    const dy1 = (Math.random() * 10 - 5).toFixed(0), dy2 = (Math.random() * 8 - 4).toFixed(0);
+    const sk = (Math.random() * 16 - 8).toFixed(1);
+    shards += '<div class="fs-shard" style="clip-path:inset(' + top.toFixed(1) + '% 0 ' + bot.toFixed(1) + '% 0); --dx1:' + dx1 + 'px; --dx2:' + dx2 + 'px; --dy1:' + dy1 + 'px; --dy2:' + dy2 + 'px; --sk:' + sk + 'deg; animation-duration:' + (0.45 + Math.random() * 0.5).toFixed(2) + 's; animation-delay:' + (Math.random() * 0.4).toFixed(2) + 's"><img alt="" src="' + LOGO + '"></div>';
+  }
+  let html = '<div class="fs-logo-wrap shatter"><img class="fs-logo" alt="" src="' + LOGO + '">' + shards +
+    '<img class="fs-ghost g1" alt="" src="' + LOGO + '">' +
+    '<img class="fs-ghost g2" alt="" src="' + LOGO + '"></div>';
+  // stray DUPLICATES of the logo flashing up in unexpected places (a slice of it, recoloured)
+  const nDup = 3 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < nDup; i++) {
+    html += '<div class="fs-dup" style="left:' + Math.floor(Math.random() * 70) + '%; top:' + Math.floor(Math.random() * 84) + '%; --d:' + (0.9 + Math.random() * 0.9).toFixed(2) + 's; --delay:' + (Math.random() * 1.6).toFixed(2) + 's; --hue:' + Math.floor(Math.random() * 360) + 'deg; --ct:' + Math.floor(Math.random() * 50) + '%; --cb:' + Math.floor(Math.random() * 40) + '%; transform:rotate(' + (Math.random() * 16 - 8).toFixed(1) + 'deg)"><img alt="" src="' + LOGO + '"></div>';
+  }
+  // UI TEARING bands — thin strips that rip sideways across the live page
+  const nTear = 4 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < nTear; i++) {
+    html += '<div class="fs-tear" style="--y:' + Math.floor(Math.random() * 96) + '%; --h:' + (2 + Math.random() * 7).toFixed(1) + '%; --tx:' + (Math.random() * 120 - 60).toFixed(0) + 'px; --d:' + (0.45 + Math.random() * 0.5).toFixed(2) + 's; --delay:' + (Math.random() * 0.8).toFixed(2) + 's"></div>';
+  }
+  html += '<div class="fs-corrupt"></div>'; // three brief corrupted frames
   for (let i = 0; i < 6; i++) html += '<div class="fs-slice' + (i % 2 ? ' b' : '') + '" style="animation-delay:' + (i * 0.17).toFixed(2) + 's; animation-duration:' + (0.8 + (i % 3) * 0.25).toFixed(2) + 's"></div>';
   html += '<div class="fs-slice v"></div><div class="fs-slice v" style="animation-delay:.5s; animation-duration:1.1s"></div>';
   for (let b = 0; b < 12; b++) {
@@ -2189,7 +2308,9 @@ window.addEventListener('aa-glitch-fullscreen', (e) => {
   fs.classList.remove('on'); void fs.offsetWidth; fs.classList.add('on');
   document.body.classList.add('pth-fsglitch');
   const dur = (e && e.detail && e.detail.duration) || 3000;
-  setTimeout(() => { fs.classList.remove('on'); document.body.classList.remove('pth-fsglitch'); pthFsActive = false; }, dur);
+  // v58: recovery is absolute — the overlay is emptied (no stray fragments
+  // survive) and every body/main class comes off; layout was never touched.
+  setTimeout(() => { fs.classList.remove('on'); fs.innerHTML = ''; document.body.classList.remove('pth-fsglitch'); pthFsActive = false; }, dur);
 });
 
 async function refreshMe() {
@@ -2311,7 +2432,86 @@ function countdownTick() {
     numEl.style.animation = '';
   }
 }
+// ================= v58: COMMUNITY VOTING (client) ==========================
+// Everything shown here is the SERVER's truth from the room payload:
+// battle.voting = { open, ends_at, total, options[{user_id,username,
+// display_name,votes}], my_vote, can_vote, is_artist }. The countdown is
+// derived from ends_at on server time; the tally re-renders on every poll
+// and on the live 'vote' room event. Voting is one POST; the unique index
+// on (battle, voter) is what makes refresh/reopen harmless.
+let voteBoxKey = null, voteBusy = false;
+function renderVoteBox(d, isSpectator) {
+  const box = $('#vote-box');
+  const v = d.battle && d.battle.voting;
+  if (!v || !(d.battle.status === 'judging' || (d.battle.status === 'complete' && v.total > 0))) {
+    box.classList.add('hidden'); box.innerHTML = ''; voteBoxKey = null; return;
+  }
+  box.classList.remove('hidden');
+  const closed = !v.open;
+  const key = JSON.stringify([v, d.battle.status, me && me.id]);
+  if (key === voteBoxKey) { voteClockTick(); return; } // tally unchanged — only the clock moves
+  voteBoxKey = key;
+  const total = v.total || 0;
+  const top = Math.max.apply(null, v.options.map((o) => o.votes).concat([0]));
+  const winnerId = d.battle.result && d.battle.result.winner_username
+    ? (v.options.find((o) => o.username === d.battle.result.winner_username) || {}).user_id : null;
+  const tiles = v.options.map((o) => {
+    const mine = v.my_vote === o.user_id;
+    const pct = total ? Math.round((o.votes / total) * 100) : 0;
+    const canClick = v.can_vote && !closed;
+    const cls = 'vote-opt' + (mine ? ' mine' : '') + (o.votes === top && top > 0 ? ' leader' : '');
+    const name = esc(o.display_name || '@' + o.username);
+    const cta = closed
+      ? (winnerId === o.user_id ? IC.trophy + ' WINNER' : (mine ? 'YOUR VOTE' : ''))
+      : (mine ? 'YOUR VOTE' : (canClick ? 'VOTE' : ''));
+    return '<button type="button" class="' + cls + '" data-vote-for="' + esc(o.user_id) + '"' + (canClick ? '' : ' disabled') + ' aria-pressed="' + (mine ? 'true' : 'false') + '">' +
+      (mine ? '<span class="vote-tick">✓</span>' : '') +
+      '<span class="vote-ava">' + esc(String(o.username || '?').slice(0, 2).toUpperCase()) + '</span>' +
+      '<span class="vote-name" title="@' + esc(o.username) + '">' + name + '</span>' +
+      '<span class="vote-count">' + o.votes + '<small>' + (o.votes === 1 ? 'VOTE' : 'VOTES') + '</small></span>' +
+      '<span class="vote-bar"><i style="width:' + pct + '%"></i></span>' +
+      (cta ? '<span class="vote-cta">' + cta + '</span>' : '') +
+      '</button>';
+  }).join('');
+  let sub;
+  if (closed) sub = 'Voting closed · ' + total + ' vote' + (total === 1 ? '' : 's') + ' counted.';
+  else if (v.is_artist) sub = 'The community is deciding — artists cannot vote in their own battle.';
+  else if (v.my_vote) sub = 'Your vote is in. One vote per person — the tally updates live.';
+  else if (!me) sub = 'Sign in to vote.';
+  else sub = 'Pick the artwork you prefer. One vote per person — it cannot be changed.';
+  box.innerHTML =
+    '<div class="vote-head"><span>' + IC.vote + ' ' + (closed ? 'COMMUNITY VOTE' : 'COMMUNITY VOTING') + '</span>' +
+    (closed ? '<span class="muted" style="font-size:12px; letter-spacing:.5px">' + total + ' TOTAL</span>' : '<time id="vote-clock">02:00</time>') + '</div>' +
+    '<div class="vote-sub muted">' + sub + '</div>' +
+    '<div class="vote-grid">' + tiles + '</div>';
+  voteClockTick();
+}
+function voteClockTick() {
+  const el = document.getElementById('vote-clock');
+  const b = lastRoomData && lastRoomData.battle;
+  if (!el || !b || !b.voting || !b.voting.ends_at) return;
+  const remain = Math.max(0, Math.floor((new Date(b.voting.ends_at).getTime() - serverNow()) / 1000));
+  const m = Math.floor(remain / 60), s = remain % 60;
+  el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  if (remain === 0 && !voteBusy) refreshRoom(); // the server decides; pick up the result promptly
+}
+$('#vote-box').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-vote-for]');
+  if (!btn || btn.disabled || voteBusy || !currentRoomCode) return;
+  voteBusy = true;
+  btn.disabled = true;
+  try {
+    const d = await api('/api/rooms/' + currentRoomCode + '/vote', { user_id: btn.dataset.voteFor });
+    renderRoom(d);
+    toast('🗳 Vote counted — thank you!');
+  } catch (err) {
+    if (!handleAuthError(err)) toast(err.message);
+    refreshRoom();
+  } finally { voteBusy = false; }
+});
+
 function battleClockTick() {
+  voteClockTick(); // v58: the voting countdown shares the 500 ms tick
   if (!lastRoomData) return;
   const b = lastRoomData.battle;
   if (!b || b.status !== 'active' || !b.official_end_time) return;
@@ -2735,7 +2935,7 @@ const BATTLE_STATUS_BADGE = {
   waiting: IC.hourglass + ' WAITING', ready: IC.check + ' READY', locked: IC.lock + ' LOCKED', randomizing: IC.dice + ' RANDOMIZING',
   challenge_locked: IC.target + ' CHALLENGE LOCKED', countdown: IC.clock + ' COUNTDOWN', active: IC.brush + ' LIVE',
   time_expired: IC.clock + ' TIME IS UP', submitting: IC.send + ' SUBMITTING', submission_locked: IC.lock + ' SUBMISSIONS LOCKED',
-  judging: IC.vote + ' JUDGING', result: IC.trophy + ' RESULT', complete: IC.check + ' COMPLETE',
+  judging: IC.vote + ' COMMUNITY VOTING', result: IC.trophy + ' RESULT', complete: IC.check + ' COMPLETE',
   forfeited: IC.flag + ' FORFEITED', cancelled: IC.x + ' CANCELLED', disqualified: IC.ban + ' DISQUALIFIED',
 };
 // v36: honest status notes for the battle card.
@@ -2747,6 +2947,7 @@ const BATTLE_NOTE_BY_STATUS = {
   challenge_locked: '🎯 Challenge locked — the 3-2-1 countdown starts the battle.',
   countdown: '⏱ 3-2-1 — the battle starts the instant the countdown hits zero.',
   active: '🎨 LIVE — draw until the clock runs out, then come back to submit.',
+  judging: '🗳 Community Voting — the community has 2 minutes to pick the winner.', // v58
 };
 const fmtTime = (s) => {
   if (s < 60) return s + 's';
@@ -3079,7 +3280,9 @@ function renderRoom(d) {
   const isInLobby = d.status === 'lobby';
   const isSpectator = d.spectators.some((s) => s.is_you);
 
-  if (isHost && isInLobby) {
+  // v58: matchmaking battles (auto_start) use the FIXED default settings —
+  // no settings form, even for the host. The summary shows what's fixed.
+  if (isHost && isInLobby && !d.auto_start) {
     $('#settings-static').classList.add('hidden');
     $('#settings-edit').classList.remove('hidden');
     $('#setting-type').value = d.battle_type;
@@ -3110,7 +3313,8 @@ function renderRoom(d) {
       '<span>' + (BATTLE_TYPE_LABELS[d.battle_type] || d.battle_type) + '</span>' +
       (d.randomizer_config && d.randomizer_config.categories && d.randomizer_config.categories.length
         ? '<span>' + IC.dice + ' ' + d.randomizer_config.categories.map((c) => (CAT_ICONS[c] || IC.dice) + ' ' + esc(CAT_NAMES[c] || c)).join(' · ') + '</span>'
-        : '');
+        : '') +
+      (d.auto_start && isInLobby ? '<span class="muted" style="flex-basis:100%; font-size:12px">' + IC.lock + ' Matchmaking battle — fixed default settings</span>' : '');
   }
 
   currentBattleId = d.battle ? d.battle.id : null;
@@ -3177,6 +3381,7 @@ function renderRoom(d) {
     // 'active' (the server flips it there only AFTER the 3-2-1 countdown
     // finishes) — the timer cannot begin before the countdown ends.
     $('#battle-clock').classList.toggle('hidden', !(d.battle.status === 'active' && d.battle.official_end_time));
+    renderVoteBox(d, isSpectator); // v58: Community Voting (window + live tally)
     // v36: the full-screen 3-2-1 countdown, synced to the server's
     // countdown_ends_at (startCountdownOverlay below).
     if (d.battle.status !== 'challenge_locked') { $('#btn-reroll').classList.add('hidden'); $('#btn-launch').classList.add('hidden'); $('#launch-wait-note').classList.add('hidden'); }
@@ -3198,6 +3403,7 @@ function renderRoom(d) {
     $('#battle-note').style.display = (isSpectator || !['active', 'countdown'].includes(d.battle.status)) ? 'block' : 'none';
   } else {
     $('#battle-card').classList.add('hidden');
+    $('#vote-box').classList.add('hidden'); // v58
     stopCountdownOverlay(); // v36: no battle → no countdown
   }
 
@@ -3220,10 +3426,15 @@ function renderRoom(d) {
       detail = 'The battle ended without a result. It is preserved in your battle history.';
     } else if (!winnerName) {
       headline = IC.users + ' DRAW';
-      detail = 'The clock ran out with no deciding winner — recorded as a draw for both artists.';
+      const vt = d.battle.voting;
+      detail = vt && vt.total > 0
+        ? 'The community vote ended in a tie (' + vt.total + ' vote' + (vt.total === 1 ? '' : 's') + ') — recorded as a draw for both artists.'
+        : (vt ? 'No community votes were cast — recorded as a draw for both artists.' : 'The clock ran out with no deciding winner — recorded as a draw for both artists.');
     } else if (myOutcome === 'win') {
       headline = IC.trophy + ' VICTORY';
-      detail = 'You beat ' + esc(winnerName) + '. The result and both artworks are saved to history.';
+      const vt = d.battle.voting, loser = d.battle.players.find((p) => p.username.toLowerCase() !== me.username.toLowerCase());
+      detail = 'You beat ' + esc(loser ? (loser.display_name || '@' + loser.username) : 'your opponent') +
+        (vt && vt.total ? ' — the community voted ' + vt.options.map((o) => o.votes).sort((a, b) => b - a).join('–') + '.' : '.') + ' The result is saved to history.';
     } else if (myOutcome === 'loss') {
       headline = IC.flag + ' DEFEAT';
       detail = esc(winnerName) + ' took this one. The result and both artworks are saved to history.';
@@ -3252,7 +3463,7 @@ function renderRoom(d) {
     } else expiryEl.classList.add('hidden');
     // v51: the owner gets Edit Room here (settings apply to the rematch).
     const roomOwner = !!(d.host && me && d.host.user_id === me.id); // seats are released at completion — meInRoom is gone post-battle
-    $('#btn-edit-room').classList.toggle('hidden', !(rematchable && roomOwner));
+    $('#btn-edit-room').classList.toggle('hidden', !(rematchable && roomOwner && !d.auto_start)); // v58: fixed settings for matchmaking rooms
     if (rematchable) {
       const fromName = pending ? (pending.from_display_name || '@' + pending.from_username) : null;
       $('#pb-rematch-state').innerHTML =
@@ -3589,6 +3800,8 @@ function rtToastText(ev) {
     case 'started':          return null; // the 3-2-1 overlay covers this
     case 'countdown':        return null; // the countdown IS the message
     case 'battle_active':    return null; // GO! + the battle clock cover this
+    case 'voting_opened':     return '🗳 Time is up! Community Voting is open for 2 minutes.'; // v58
+    case 'vote':              return null; // v58: the tally itself is the message
     case 'battle_ended':      return '🏁 The battle has ended — see the result!';
     case 'rematch_requested': return '⚔️ ' + who + ' requested a rematch';
     case 'challenge_rerolled': return '🎲 ' + who + ' re-rolled the challenge';
@@ -5208,7 +5421,7 @@ async function openProfile(userId) {
   $('#pm-body').innerHTML =
     '<div style="display:flex; align-items:center; gap:12px; margin:8px 0 2px">' +
     (u.avatar_url ? '<img class="prof-modal-ava" src="' + esc(u.avatar_url) + '" alt="">' : '<span class="prof-modal-ava-fallback">' + esc((u.display_name || u.username || '?').charAt(0).toUpperCase()) + '</span>') +
-    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + (u.premium ? ' <span class="prem-chip"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM</span>' : '') + '</div>' +
+    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + (u.premium ? ' <span class="prem-chip"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>' : '') + '</div>' +
     '<div class="muted" style="font-size:13px">@' + esc(u.username) + '</div></div></div>' +
     (u.bio ? '<p class="muted" style="margin:10px 0 0; font-size:13.5px">' + esc(u.bio) + '</p>' : '') +
     '<div class="prof-stats-row">' +
@@ -5311,7 +5524,7 @@ async function renderPremiumPage() {
   mePremium = !!d.premium;
   applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
   $('#prem-status').innerHTML = d.premium
-    ? '<span class="prem-chip big"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM ACTIVE</span> <span class="muted" style="font-size:12px; margin-left:8px">test mode · customize your themes in <a href="#" id="prem-to-settings" style="color:var(--pink); font-weight:700">Settings</a></span>'
+    ? '<span class="prem-chip big"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM ACTIVE</span> <span class="muted" style="font-size:12px; margin-left:8px">test mode · customize your themes in <a href="#" id="prem-to-settings" style="color:var(--pink); font-weight:700">Settings</a></span>'
     : '<span class="muted" style="font-size:13px">You are on the <b>Free</b> plan.</span>';
   $('#prem-activate-wrap').classList.toggle('hidden', d.premium);
   $('#prem-revoke-wrap').classList.toggle('hidden', !d.premium);
@@ -5325,7 +5538,7 @@ async function renderPremiumPage() {
     const active = t.key === activeKey;
     return '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" data-theme-key="' + esc(t.key) + '" data-locked="' + (locked ? '1' : '') + '">' +
       '<span class="swatch-logo"><img src="' + ((t.key && THEME_LOGOS[t.key]) ? THEME_LOGOS[t.key] : '/logo.png') + '" alt="" loading="lazy"></span>' +
-      '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span></span>' : '') + '</span>' +
+      '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
       '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
       (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
       (locked ? '<span class="swatch-lock">🔒</span>' : '') + '</div>';
@@ -5431,7 +5644,7 @@ async function renderSettingsThemes() {
   const card = (t, active, locked, attr) =>
     '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" ' + attr + '>' +
     '<span class="swatch-logo"><img data-swatch-logo="' + esc(t.key) + '" src="' + pthLogoFor(t.key) + '" alt=""></span>' +
-    '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span></span>' : '') + '</span>' +
+    '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
     (t.customizable ? '<span class="swatch-chips"><i style="background:' + esc(t.c1 || 'var(--pink)') + '"></i><i style="background:' + esc(t.c2 || 'var(--purple)') + '"></i></span>' : '') +
     (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
     (locked ? '<span class="swatch-lock">🔒</span>' : '') + '</div>';
@@ -5622,6 +5835,19 @@ function openUpsell(title, body) {
   modalOpen('#premium-upsell');
 }
 $('#btn-premium-mini').addEventListener('click', () => show('premium')); // v53: ⭐ → upgrade page
+// v58 (Premium navigation fix): EVERY Premium badge is a route to the Premium
+// page — the drawer chip, the profile-card diamond, the Settings label chip
+// and any PREMIUM chip in rendered content. Premium members have no ⭐ (it
+// hides once entitled), so these were the only "Premium" affordances left and
+// they did nothing. One delegated handler, one destination: show('premium').
+document.addEventListener('click', (e) => {
+  const hit = e.target.closest('#card-prem, #drawer-prem, .prem-chip[data-go-premium], .prem-chip:not(.big)');
+  if (!hit) return;
+  if (hit.closest('.theme-swatch, #prem-status, #pm-body')) return; // theme cards + the page itself + profile modal keep their own behaviour
+  e.preventDefault();
+  closeDrawer();
+  show('premium');
+});
 $('#ups-close').addEventListener('click', () => modalClose('#premium-upsell'));
 document.addEventListener('click', (e) => { // v53: premium page → Settings pointer
   if (e.target && e.target.id === 'prem-to-settings') { e.preventDefault(); show('settings'); }

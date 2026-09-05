@@ -43,7 +43,7 @@ const { pool, HttpError, ah, requireAuth, premiumOf,
 const rt = require('./realtime');
 const { lockChallengeCore } = require('./challenge');
 const { notifyUser } = require('./notify'); // v52: the ONE notifier (rematch requests)
-const { finishBattleIfDue } = require('./battle-end');
+const { finishBattleIfDue, decideBattleIfDue, voteState, announce } = require('./battle-end');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -149,7 +149,8 @@ async function latestBattle(roomId) {
   const { rows } = await pool.query(
     `SELECT b.id, b.status, b.result_method, b.time_limit_seconds,
             b.competition_type, b.created_at,
-            b.start_time, b.official_end_time, b.countdown_ends_at -- v36: the synced clock
+            b.start_time, b.official_end_time, b.countdown_ends_at, -- v36: the synced clock
+            b.voting_ends_at                                        -- v58: the voting window
        FROM battles b
       WHERE b.room_id = $1
       ORDER BY b.created_at DESC
@@ -234,10 +235,17 @@ async function roomPayload(code, me) {
         LIMIT 1`, [room.id]);
     if (due.rows[0]) {
       const r = await finishBattleIfDue(due.rows[0].id);
-      if (r) {
-        rt.emitRoom(r.code, { action: 'battle_ended', battle_id: r.battleId, outcome: r.outcome });
-        return roomPayload(code, me); // fresh read — players were released
-      }
+      if (r) { announce(r); return roomPayload(code, me); } // fresh read
+    }
+    // v58: same heal for a voting window that has closed
+    const vdue = await pool.query(
+      `SELECT id FROM battles
+        WHERE room_id = $1 AND status = 'judging'
+          AND voting_ends_at IS NOT NULL AND voting_ends_at <= now()
+        LIMIT 1`, [room.id]);
+    if (vdue.rows[0]) {
+      const r = await decideBattleIfDue(vdue.rows[0].id);
+      if (r) { announce(r); return roomPayload(code, me); } // fresh read — players were released
     }
   } catch (_) { /* fall through to the current state */ }
   const [players, spectators, battleRow, hostRow] = await Promise.all([
@@ -274,6 +282,24 @@ async function roomPayload(code, me) {
     battle = await latestBattle(room.id);
   }
   const challenge = battle ? await battleChallengePayload(battle.id) : null;
+  // v58: Community Voting state — during the window (live tally, my vote,
+  // whether I may vote) and after it (the final count on the result panel).
+  let voting = null;
+  if (battle && battle.result_method === 'voting_community' &&
+      (battle.status === 'judging' || battle.status === 'result' || battle.status === 'complete')) {
+    const vs = await voteState(battle.id, me);
+    const open = battle.status === 'judging' && battle.voting_ends_at && new Date(battle.voting_ends_at).getTime() > Date.now();
+    const isArtist = !!(me && vs.options.some((o) => o.user_id === me));
+    voting = {
+      open: !!open,
+      ends_at: battle.voting_ends_at || null,
+      total: vs.total,
+      options: vs.options,
+      my_vote: vs.my_vote,
+      can_vote: !!(open && me && !isArtist && !vs.my_vote),
+      is_artist: isArtist,
+    };
+  }
   // v44: a pending rematch request (post-battle UI state) — null when none.
   // v51: reads also RUN THE EXPIRY SWEEP — a rematch request older than
   // 2 minutes is expired server-side and the requester's seat (if they
@@ -353,6 +379,8 @@ async function roomPayload(code, me) {
       official_end_time: battle.official_end_time || null,
       countdown_ends_at: battle.countdown_ends_at || null,
       result: battle.result || null, // v44: official result (winner NULL = draw)
+      voting_ends_at: battle.voting_ends_at || null, // v58
+      voting,                                         // v58: Community Voting
       reroll, // v52: Premium re-roll window (server-computed for THIS user)
       challenge,
     } : null,
@@ -1126,6 +1154,9 @@ router.patch('/:code', ah(async (req, res) => {
   // in-flight battle locks settings.
   if (room.status !== 'lobby' && room.status !== 'ended')
     throw new HttpError(409, 'Settings are locked while the battle is in progress.');
+  // v58: the Battle button's match uses the FIXED default settings.
+  if (room.auto_start)
+    throw new HttpError(409, 'Matchmaking battles use the fixed default settings (1v1 · public · community votes · 1 hour · randomizer).');
 
   const b = req.body || {};
   const sets = [];
@@ -1377,6 +1408,58 @@ router.delete('/:code', ah(async (req, res) => {
   rt.emitRoom(room.code, { action: 'deleted', by: req.user.username });
   if (room.visibility === 'public') rt.broadcastRoomsList('closed');
   res.json({ ok: true, archived: true });
+}));
+
+// ---------------------------------------------------------------------------
+// v58: COMMUNITY VOTING — POST /:code/vote { user_id }
+// One REAL row in battle_votes per (battle, voter): the unique index is the
+// authority, so refreshing/reopening/double-clicking can never vote twice.
+// Eligible: any signed-in user who is NOT one of the two artists (the
+// ck_no_self_vote check backs this at the DB too), only while the window is
+// open (server clock). The room gets a live 'vote' event with the new tally.
+// ---------------------------------------------------------------------------
+router.post('/:code/vote', ah(async (req, res) => {
+  const room = await roomByCode(req.params.code);
+  if (!room) throw new HttpError(404, 'Room not found.');
+  const votedFor = String((req.body || {}).user_id || '').trim();
+  if (!/^[0-9a-f-]{36}$/i.test(votedFor)) throw new HttpError(400, 'Pick an artist to vote for.');
+  const client = await pool.connect();
+  let battleId = null;
+  try {
+    await client.query('BEGIN');
+    const { rows: br } = await client.query(
+      `SELECT id, status, result_method, voting_ends_at FROM battles
+        WHERE room_id = $1 ORDER BY created_at DESC LIMIT 1 FOR UPDATE`, [room.id]);
+    const b = br[0];
+    if (!b || b.result_method !== 'voting_community') throw new HttpError(409, 'This battle has no community vote.');
+    if (b.status !== 'judging' || !b.voting_ends_at) throw new HttpError(409, b.status === 'complete' ? 'Voting has closed — the result is in.' : 'Voting has not opened yet.');
+    if (new Date(b.voting_ends_at).getTime() <= Date.now()) throw new HttpError(409, 'Voting has closed — counting the votes now.');
+    battleId = b.id;
+    const { rows: parts } = await client.query(
+      `SELECT user_id FROM battle_participants WHERE battle_id = $1`, [b.id]);
+    if (parts.some((p) => p.user_id === req.user.id)) throw new HttpError(403, 'Artists cannot vote in their own battle.');
+    if (!parts.some((p) => p.user_id === votedFor)) throw new HttpError(400, 'That artist is not in this battle.');
+    try {
+      await client.query(
+        `INSERT INTO battle_votes (battle_id, voter_id, voted_for) VALUES ($1, $2, $3)`,
+        [b.id, req.user.id, votedFor]);
+    } catch (e) {
+      if (e.code === '23505') throw new HttpError(409, 'You have already voted in this battle.');
+      throw e;
+    }
+    await client.query(
+      `INSERT INTO battle_event_log (battle_id, event_type, actor_id, payload)
+       VALUES ($1, 'vote_cast', $2, $3)`, [b.id, req.user.id, JSON.stringify({ voted_for: votedFor })]);
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+  const vs = await voteState(battleId, null);
+  rt.emitRoom(room.code, { action: 'vote', total: vs.total, tally: vs.options.map((o) => ({ user_id: o.user_id, votes: o.votes })) });
+  res.json(await roomPayload(room.code, req.user.id));
 }));
 
 // ---------------------------------------------------------------------------
@@ -1633,7 +1716,8 @@ router.post('/:code/rematch/cancel', ah(async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // MATCHMAKING — room creation for the /api/matchmaking queue (v35).
-// Private 1v1, auto_start: the battle begins on its own once both artists
+// v58: PUBLIC 1v1 · 1 h · Community Votes · default Randomizer, auto_start:
+// the battle begins on its own once both artists
 // have picked their canvas. `client` lets the caller join the room insert
 // to the queue transaction (atomic match).
 // ---------------------------------------------------------------------------
@@ -1643,9 +1727,14 @@ async function createMatchRoom(userA, userB, client) {
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       const { rows } = await q.query(
+        // v58: the FIXED default battle — 1v1 · PUBLIC · Community Votes ·
+        // 1 hour · Randomizer on (Character / Environment / Object / Style).
+        // Not editable: PATCH refuses auto_start rooms (see below).
         `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
-                                   time_limit_seconds, result_method, battle_mode, auto_start)
-         VALUES ($1, $2, NULL, 'casual', 'private', 2, 1200, 'voting_community', '1v1', true)
+                                   time_limit_seconds, result_method, battle_mode, auto_start,
+                                   randomizer_config)
+         VALUES ($1, $2, NULL, 'casual', 'public', 2, 3600, 'voting_community', '1v1', true,
+                 '{"categories":["character","environment","object","style"]}'::jsonb)
          RETURNING id`,
         [newRoomCode(), userA.id]
       );

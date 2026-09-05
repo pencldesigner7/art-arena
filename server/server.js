@@ -1220,6 +1220,57 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // direction concepts in. One concise concept per category, as ever.
     ['v53 randomizer: broader open-concept pool (re-seed)',
      `DELETE FROM randomizer_elements`],
+      // ---------------- v58 ----------------
+    // v58 FIX (Rooms error): production carries a foreign key
+    // matchmaking_queue.matched_room_id -> battle_rooms(id) that the shipped
+    // schema dump lost (it had NO action clause → RESTRICT). Deleting a room
+    // that was minted by matchmaking then failed with
+    //   "update or delete on table battle_rooms violates foreign key
+    //    constraint matchmaking_queue_matched_room_id_fkey".
+    // The queue row is HISTORY (status matched/cancelled/expired) — it must
+    // never pin a room. Recreate the constraint as ON DELETE SET NULL, so the
+    // record survives (auditable) while the room can go. Idempotent: drops
+    // whichever definition exists, re-adds the right one, and never touches
+    // rows. (rooms.js also cancels live rows explicitly — belt and braces.)
+    ['v58 matchmaking_queue.matched_room_id → ON DELETE SET NULL',
+     `DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM pg_constraint
+                    WHERE conname = 'matchmaking_queue_matched_room_id_fkey'
+                      AND conrelid = 'matchmaking_queue'::regclass
+                      AND confdeltype <> 'n') THEN
+          ALTER TABLE matchmaking_queue DROP CONSTRAINT matchmaking_queue_matched_room_id_fkey;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                        WHERE conname = 'matchmaking_queue_matched_room_id_fkey'
+                          AND conrelid = 'matchmaking_queue'::regclass) THEN
+          -- orphans from earlier hard deletes would block the ADD; null them first
+          UPDATE matchmaking_queue q SET matched_room_id = NULL
+           WHERE matched_room_id IS NOT NULL
+             AND NOT EXISTS (SELECT 1 FROM battle_rooms r WHERE r.id = q.matched_room_id);
+          ALTER TABLE matchmaking_queue
+            ADD CONSTRAINT matchmaking_queue_matched_room_id_fkey
+            FOREIGN KEY (matched_room_id) REFERENCES battle_rooms(id) ON DELETE SET NULL;
+        END IF;
+      END $$;`],
+    // v58 COMMUNITY VOTING: one vote per voter per battle — enforced by the
+    // database, so refreshing/reopening can never double-vote.
+    ['v58 battle_votes primary key',
+     `DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                        WHERE conrelid = 'battle_votes'::regclass AND contype = 'p') THEN
+          ALTER TABLE battle_votes ADD CONSTRAINT battle_votes_pkey PRIMARY KEY (id);
+        END IF;
+      END $$;`],
+    ['v58 battle_votes: one vote per voter per battle',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_battle_vote_once ON battle_votes (battle_id, voter_id)`],
+    ['v58 battle_votes lookup index',
+     `CREATE INDEX IF NOT EXISTS idx_battle_votes_battle ON battle_votes (battle_id)`],
+    // v58: the voting window is a real timestamp on the battle row — the
+    // sweeper closes it, the client counts down to it (server time).
+    ['v58 battles.voting_ends_at (community voting window)',
+     `ALTER TABLE battles ADD COLUMN IF NOT EXISTS voting_ends_at timestamptz`],
+    ['v58 notification types: battle_result',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'battle_result'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {
