@@ -516,9 +516,10 @@
   // small working canvas and upscaled with smoothing OFF (crisp blocks —
   // never blurry). A soft centre vignette keeps the UI readable on top.
   ThemeScene.PIXEL = {
-    navy: '#0B1A3A', navy2: '#16245C', violet: '#5A1F9E', magenta: '#FF2ED1', pink: '#FF7AE0',
-    cyan: '#3EE8FF', cyan2: '#C6FBFF', gold: '#FFD23F', gold2: '#FFF1A6', orange: '#FF7A2F',
-    lime: '#8CFF5A', white: '#FFFFFF', ink: '#070B1C'
+    // v59: pushed toward the logo's own saturation — every hue is at full chroma
+    navy: '#0C1C4A', navy2: '#1B2C7A', violet: '#6A22C4', magenta: '#FF2ED1', pink: '#FF7AE0',
+    cyan: '#2BF0FF', cyan2: '#C6FBFF', gold: '#FFD91F', gold2: '#FFF3A8', orange: '#FF7A1F',
+    lime: '#9BFF4A', red: '#FF3B6B', white: '#FFFFFF', ink: '#070B1C'
   };
   ThemeScene.prototype.bakePixel = function () {
     var P = ThemeScene.PIXEL, S = 5;
@@ -529,7 +530,7 @@
     var i, x, y;
     // 1) static backdrop: navy → violet vertical bands with 2x2 checker dithered seams
     var bg = mk(pw, ph), bx = bg.getContext('2d');
-    var bands = ['#060C24', P.navy, '#1A1E6E', '#3A1C8C', P.violet, '#8A1E9C', '#C22AB8'];
+    var bands = ['#0A1240', '#16267A', '#2A2AB0', '#4A24C8', '#7A26D8', '#A82CD8', '#D633C6', '#F23FB4']; // v59: brighter, more saturated sky
     for (i = 0; i < bands.length; i++) {
       var yT = Math.floor(ph * i / bands.length), yB = Math.floor(ph * (i + 1) / bands.length);
       bx.fillStyle = bands[i]; bx.fillRect(0, yT, pw, yB - yT);
@@ -540,9 +541,9 @@
     var gy = Math.floor(ph * 0.86);
     bx.fillStyle = P.gold; bx.fillRect(0, gy, pw, 1);
     bx.fillStyle = P.orange; bx.fillRect(0, gy + 1, pw, 1);
-    bx.fillStyle = '#12082E'; bx.fillRect(0, gy + 2, pw, ph - gy - 2);
+    bx.fillStyle = '#1E0A4A'; bx.fillRect(0, gy + 2, pw, ph - gy - 2);
     // perspective grid on the floor (synthwave pixel floor — magenta lines)
-    bx.fillStyle = P.magenta; bx.globalAlpha = 0.55;
+    bx.fillStyle = P.magenta; bx.globalAlpha = 0.85;
     for (y = gy + 3; y < ph; y += 3 + Math.floor((y - gy) / 6)) bx.fillRect(0, y, pw, 1);
     for (i = -6; i <= 6; i++) { for (y = gy + 2; y < ph; y++) { var fx = Math.round(cx + i * (y - gy) * 1.6); if (fx >= 0 && fx < pw) bx.fillRect(fx, y, 1, 1); } }
     bx.globalAlpha = 1;
@@ -556,8 +557,10 @@
       if (dd < 0.18) continue;
       if (y > gy) continue;
       var sz = dd < 0.45 ? 1 : (dd < 0.75 ? 2 : 3);
-      bx.globalAlpha = 0.6 + 0.4 * dd;
-      bx.fillStyle = dd < 0.4 ? P.gold2 : (dd < 0.7 ? P.cyan : P.magenta);
+      bx.globalAlpha = 0.8 + 0.2 * dd;
+      // v59: hue drifts with the ANGLE too, so the dot screen has real colour variety
+      var ang = Math.atan2(y - cy, x - cx), sec = ((Math.floor((ang + 3.1416) / 6.2832 * 6) % 6) + 6) % 6;
+      bx.fillStyle = dd < 0.4 ? (sec & 1 ? P.gold2 : P.white) : (dd < 0.7 ? [P.cyan, P.lime, P.gold, P.cyan, P.pink, P.cyan2][sec] : [P.magenta, P.orange, P.pink, P.red, P.magenta, P.gold][sec]);
       bx.fillRect(x, y, sz, sz);
     }
     bx.globalAlpha = 1;
@@ -566,13 +569,14 @@
     // 3) SUNBURST rays — baked once as a rotatable sprite: 12 chunky wedges,
     //    gold / magenta / cyan in turn, bright and clean over the navy field
     var rr = Math.ceil(maxR) + 4, rays = mk(rr * 2, rr * 2), rx = rays.getContext('2d');
-    var N = 12, rayCols = [P.gold, P.magenta, P.cyan, P.orange];
+    var N = 16, rayCols = [P.gold, P.magenta, P.cyan, P.orange, P.lime, P.pink, P.red, P.cyan2]; // v59: 16 wedges, 8 hues
     var wedge = function (a0, a1, r0, r1) { rx.beginPath(); rx.moveTo(rr + Math.cos(a0) * r0, rr + Math.sin(a0) * r0); rx.lineTo(rr + Math.cos(a0) * r1, rr + Math.sin(a0) * r1); rx.lineTo(rr + Math.cos(a1) * r1, rr + Math.sin(a1) * r1); rx.lineTo(rr + Math.cos(a1) * r0, rr + Math.sin(a1) * r0); rx.closePath(); rx.fill(); };
     for (i = 0; i < N; i++) {
-      var a0 = (i / N) * 6.2832, a1 = a0 + (0.46 / N) * 6.2832, aw = (a1 - a0) * 0.12;
+      var a0 = (i / N) * 6.2832, a1 = a0 + (0.52 / N) * 6.2832, aw = (a1 - a0) * 0.12;
       rx.globalAlpha = 0.9; rx.fillStyle = P.ink; wedge(a0 - aw, a1 + aw, 0, rr);          // ink outline → crisp wedge edges
-      rx.globalAlpha = 0.85; rx.fillStyle = rayCols[i % 4]; wedge(a0, a1, 0, rr);
-      rx.globalAlpha = 0.5; rx.fillStyle = P.white; wedge(a0 + (a1 - a0) * 0.3, a0 + (a1 - a0) * 0.5, 0, rr); // highlight stripe
+      rx.globalAlpha = 1; rx.fillStyle = rayCols[i % rayCols.length]; wedge(a0, a1, 0, rr);   // v59: opaque → pure colour, no ink bleed
+      rx.globalAlpha = 0.55; rx.fillStyle = P.white; wedge(a0 + (a1 - a0) * 0.3, a0 + (a1 - a0) * 0.5, 0, rr); // highlight stripe
+      rx.globalAlpha = 0.35; rx.fillStyle = P.ink; wedge(a0 + (a1 - a0) * 0.82, a1, 0, rr); // shade edge → depth
     }
     // a bright core disc — the burst origin reads as a sun behind the logo
     rx.globalAlpha = 1; rx.fillStyle = P.gold2; rx.beginPath(); rx.arc(rr, rr, 9, 0, 6.2832); rx.fill();
@@ -623,7 +627,7 @@
     //    a soft dark column where the cards live — the art stays vivid at the edges
     var v = mk(256, 256), vx = v.getContext('2d');
     var rg = vx.createRadialGradient(128, 128, 30, 128, 128, 150);
-    rg.addColorStop(0, 'rgba(7,11,28,.55)'); rg.addColorStop(0.55, 'rgba(7,11,28,.22)'); rg.addColorStop(1, 'rgba(7,11,28,0)');
+    rg.addColorStop(0, 'rgba(7,11,28,.42)'); rg.addColorStop(0.55, 'rgba(7,11,28,.16)'); rg.addColorStop(1, 'rgba(7,11,28,0)'); // v59: lighter — colour reaches the centre
     vx.fillStyle = rg; vx.fillRect(0, 0, 256, 256);
     this.spr.pxVignette = v;
   };

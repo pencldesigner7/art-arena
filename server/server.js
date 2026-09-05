@@ -49,6 +49,7 @@ const rooms = require('./rooms');
 const matchmaking = require('./matchmaking');
 const battleEnd = require('./battle-end');
 const googleAuth = require('./google-auth');
+const discordAuth = require('./discord-auth'); // v59: same architecture, Discord provider
 const multer = require('multer');
 const { initRealtime, closeRealtime } = require('./realtime');
 const randomizerRouter = require('./randomizer');
@@ -426,6 +427,7 @@ app.post('/api/auth/reset-password', ah(async (req, res) => {
 // ./google-auth for the full flow + security notes. The client secret stays
 // server-side; the browser only ever talks to these /api/auth/google routes.
 app.use('/api/auth/google', googleAuth.router);
+app.use('/api/auth/discord', discordAuth.router);
 
 // ------------------------ 9. DRAWING APPS (reference) ------------------------
 // v33: the "Choose your canvas" picker is driven entirely by this list.
@@ -964,6 +966,9 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
   console.log('GOOGLE auth: ' + (googleAuth.isConfigured()
     ? 'configured — “Continue with Google” is live.'
     : 'not configured — Google button stays in “coming soon” until GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET are set in server/.env.'));
+  console.log('DISCORD auth: ' + (discordAuth.isConfigured()
+    ? 'configured — “Continue with Discord” is live.'
+    : 'not configured — Discord button stays in “coming soon” until DISCORD_CLIENT_ID + DISCORD_CLIENT_SECRET are set in server/.env.'));
   console.log(`MAIL provider: ${mailProvider.name}` +
     (mailProvider.name === 'dev-inbox'
       ? ' — codes go to the simulated inbox: GET /api/dev/outbox?to=<email> (never shown on forms).'
@@ -1271,6 +1276,9 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
      `ALTER TABLE battles ADD COLUMN IF NOT EXISTS voting_ends_at timestamptz`],
     ['v58 notification types: battle_result',
      `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'battle_result'`],
+    // v59: Discord joins the linked-platform enum (user_platform_accounts.platform).
+    ['v59 platform_name gains discord (Sign in with Discord)',
+     `ALTER TYPE public.platform_name ADD VALUE IF NOT EXISTS 'discord'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

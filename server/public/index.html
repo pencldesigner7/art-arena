@@ -445,9 +445,22 @@ try {
   .pth-dot { width:38px; height:38px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0; background:var(--dot,#888); box-shadow:inset 0 0 0 3px rgba(0,0,0,.2); transition:transform .12s; }
   .pth-dot:hover { transform:scale(1.12); border-color:var(--pink); }
   .pth-arrow { color:var(--muted); font-size:16px; }
-  .pth-dir-wrap { display:flex; align-items:center; gap:7px; }
-  .pth-dir-wrap input[type="range"] { width:96px; accent-color:var(--pink); }
-  .pth-dir-deg { font-size:11.5px; color:var(--muted); width:34px; }
+  .pth-dir-wrap { display:flex; align-items:center; gap:8px; flex:1 1 150px; min-width:150px; }
+  /* v59: the direction slider inherited the GLOBAL input rule (padding 10px
+     12px, border, margin-top, surface background). A padded/bordered range is
+     drawn as a box that is wider than its real track, so the thumb's min/max
+     stopped 12px+ short of the visible ends and the box had "dead" space.
+     Reset the box model completely and size track + thumb explicitly so the
+     thumb's travel (thumb-radius … width − thumb-radius) IS the drawn track. */
+  .pth-dir-wrap input[type="range"] { -webkit-appearance:none; appearance:none; flex:1 1 auto; width:auto; min-width:90px; height:18px; margin:0; padding:0; border:0; border-radius:0; background:transparent; cursor:pointer; accent-color:var(--pink); }
+  .pth-dir-wrap input[type="range"]:focus { outline:none; }
+  .pth-dir-wrap input[type="range"]:focus-visible { outline:2px solid var(--purple); outline-offset:3px; border-radius:9px; }
+  .pth-dir-wrap input[type="range"]::-webkit-slider-runnable-track { height:6px; border-radius:3px; background:linear-gradient(90deg, var(--pth-c1, var(--pink)) 0%, var(--pth-c1, var(--pink)) var(--pth-dir-pct, 37.5%), var(--line) var(--pth-dir-pct, 37.5%), var(--line) 100%); }
+  .pth-dir-wrap input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; margin-top:-5px; border-radius:50%; background:var(--pth-c1, var(--pink)); border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.4); }
+  .pth-dir-wrap input[type="range"]::-moz-range-track { height:6px; border-radius:3px; background:var(--line); }
+  .pth-dir-wrap input[type="range"]::-moz-range-progress { height:6px; border-radius:3px; background:var(--pth-c1, var(--pink)); }
+  .pth-dir-wrap input[type="range"]::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:var(--pth-c1, var(--pink)); border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.4); }
+  .pth-dir-deg { font-size:11.5px; color:var(--muted); width:34px; text-align:right; flex:0 0 auto; }
   #pth-save { margin-left:auto; }
   #pth-deactivate { border-color:var(--pink); color:var(--pink); font-weight:700; }
 
@@ -592,6 +605,15 @@ try {
   .friend-add:hover { border-color:var(--pink); color:var(--pink); }
   .friend-add.accept { border-color:var(--pink); color:var(--pink); }
   .friend-chip { font-size:11px; color:var(--muted); border:1px dashed var(--line); border-radius:8px; padding:3px 8px; white-space:nowrap; }
+  /* v59: every relation state is an actionable control */
+  .friend-add.pending { border-style:dashed; color:var(--muted); }
+  .friend-add.pending:hover { border-color:var(--danger-tx); color:var(--danger-tx); }
+  .friend-add.decline { color:var(--muted); }
+  .friend-add.decline:hover { border-color:var(--danger-tx); color:var(--danger-tx); }
+  .friend-add.remove { border-color:rgba(var(--pink-rgb),.5); color:var(--pink); }
+  .friend-add.remove:hover { border-color:var(--danger-tx); color:var(--danger-tx); }
+  .friend-pair { display:inline-flex; gap:4px; }
+  #pm-friend.is-remove { background:transparent; border:1px solid var(--pink); color:var(--pink); }
   /* v50: LIVE page + Go Live modal. Token-based throughout (Dark/Light for
      free); one restrained animation — the pulsing live dot. */
   .live-grid { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
@@ -719,6 +741,8 @@ try {
      fake Google login. Armed state gets the Google-blue affordance. */
   .social-btn.google-live { border-color:rgba(66,133,244,.55); }
   .social-btn.google-live:hover { border-color:#4285F4; background:rgba(66,133,244,.12); }
+  .social-btn.discord-live { border-color:rgba(88,101,242,.6); }
+  .social-btn.discord-live:hover { border-color:#5865F2; background:rgba(88,101,242,.14); }
   .auth-signup { text-align:center; margin-top:24px; font-size:14px; color:var(--muted); }
   .pw-toggle span { display:inline-flex; }
   .pw-toggle svg { display:block; }
@@ -1573,6 +1597,7 @@ try {
         <div id="cat-grid" class="cat-grid"></div>
         <span id="cat-difficulty" class="muted" style="font-size:12px; display:block; margin-top:4px"></span>
       </label>
+      <button type="button" id="settings-edit-done" class="secondary hidden" style="width:100%; margin-top:10px">✓ Done editing</button>
     </div>
 
     <div id="battle-card" class="card battle-card hidden">
@@ -1924,6 +1949,7 @@ try {
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="pm-close">Close</button>
         <button type="button" id="pm-friend" style="flex:1"></button>
+        <button type="button" id="pm-friend-decline" class="secondary hidden">Decline</button>
       </div>
     </div>
   </div>
@@ -1946,6 +1972,17 @@ try {
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="kc-cancel">Cancel</button>
         <button type="button" id="kc-confirm" class="danger" style="flex:1">Kick</button>
+      </div>
+    </div>
+  </div>
+  <!-- v59: remove-friend confirmation (same modal family as Kick) -->
+  <div id="unfriend-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="uf-title">
+      <h3 id="uf-title">Remove friend?</h3>
+      <p class="muted" id="uf-text" style="margin:6px 0 0; font-size:14px"></p>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="uf-cancel">Cancel</button>
+        <button type="button" id="uf-confirm" class="danger" style="flex:1">Remove Friend</button>
       </div>
     </div>
   </div>
@@ -3079,6 +3116,9 @@ const timeModal = (() => {
 let timeRenderKey = null;
 let currentRoomCode = null;
 let currentBattleId = null;
+// v59: post-battle "Edit Room" — the editor stays open across polls/WS
+// re-renders until the host closes it (or leaves / the room changes).
+let roomEditOpen = null; // room code the editor is open for, or null
 let categoriesCache = null;
 let catRenderKey = null;
 
@@ -3212,33 +3252,59 @@ function paintFriendChips() {
   document.querySelectorAll('#room-players .friend-slot').forEach((slot) => {
     const uid = slot.dataset.uid, name = slot.dataset.name;
     let html;
-    if (friendState.friends.has(uid)) html = '<span class="friend-chip">✓ Friends</span>';
-    else if (friendState.incoming[uid]) html = '<button type="button" class="friend-add accept" data-fr-accept="' + esc(uid) + '" data-fr-req="' + esc(friendState.incoming[uid]) + '" data-name="' + esc(name) + '">✓ Accept request</button>';
-    else if (friendState.out.has(uid)) html = '<span class="friend-chip">Request sent</span>';
+    // v59: all four relation states are ACTIONABLE (backend state is the truth,
+    // refreshFriendState(true) re-reads it after every action):
+    //   none → Add Friend · sent → Pending (click = cancel) ·
+    //   received → Accept / Decline · friends → Remove Friend (confirmed)
+    if (friendState.friends.has(uid)) html = '<button type="button" class="friend-add remove" data-fr-remove="' + esc(uid) + '" data-name="' + esc(name) + '" title="Remove friend">✓ Friends · Remove</button>';
+    else if (friendState.incoming[uid]) html = '<span class="friend-pair"><button type="button" class="friend-add accept" data-fr-accept="' + esc(uid) + '" data-fr-req="' + esc(friendState.incoming[uid]) + '" data-name="' + esc(name) + '">✓ Accept</button><button type="button" class="friend-add decline" data-fr-decline="' + esc(uid) + '" data-fr-req="' + esc(friendState.incoming[uid]) + '" data-name="' + esc(name) + '">✕ Decline</button></span>';
+    else if (friendState.out.has(uid)) html = '<button type="button" class="friend-add pending" data-fr-cancel="' + esc(uid) + '" data-name="' + esc(name) + '" title="Cancel request">⏳ Pending · Cancel</button>';
     else html = '<button type="button" class="friend-add" data-fr-add="' + esc(uid) + '" data-name="' + esc(name) + '">＋ Add Friend</button>';
     if (slot.dataset.painted !== html) { slot.innerHTML = html; slot.dataset.painted = html; }
   });
 }
+// v59: remove-friend confirmation — one modal, whoever asked (seat chip or
+// profile modal) passes an onDone to repaint its own surface.
+let ufTarget = null;
+function confirmUnfriend(uid, name, onDone) {
+  ufTarget = { uid, name, onDone };
+  $('#uf-text').textContent = '@' + name + ' will be removed from your friends. They are not notified; you can add each other again any time.';
+  modalOpen('#unfriend-modal');
+}
+$('#uf-cancel').addEventListener('click', () => modalClose('#unfriend-modal'));
+$('#unfriend-modal').addEventListener('click', (e) => { if (e.target.id === 'unfriend-modal') modalClose('#unfriend-modal'); });
+$('#uf-confirm').addEventListener('click', async () => {
+  const t = ufTarget; ufTarget = null;
+  modalClose('#unfriend-modal');
+  if (!t) return;
+  try { await api('/api/friends/' + t.uid, undefined, 'DELETE'); toast('@' + t.name + ' removed from your friends.'); }
+  catch (err) { toast(err.message); }
+  await refreshFriendState(true); paintFriendChips();
+  if (t.onDone) t.onDone();
+});
 $('#room-players').addEventListener('click', async (e) => {
-  const add = e.target.closest('[data-fr-add]');
-  if (add) {
-    add.disabled = true;
-    try {
-      const r = await api('/api/friends/request', { user_id: add.dataset.frAdd }, 'POST');
-      toast(r.status === 'friends' ? 'You and @' + add.dataset.name + ' are friends now.' : 'Friend request sent to @' + add.dataset.name + '.');
-    } catch (err) { toast(err.message); } // 409s = already friends/pending → state refresh below shows the right chip
-    await refreshFriendState(true); paintFriendChips();
-    return;
-  }
-  const acc = e.target.closest('[data-fr-accept]');
-  if (acc) {
-    acc.disabled = true;
-    try {
-      await api('/api/friends/requests/' + acc.dataset.frReq + '/accept', {}, 'POST');
-      toast('You and @' + acc.dataset.name + ' are friends now.');
-    } catch (err) { toast(err.message); }
-    await refreshFriendState(true); paintFriendChips();
-  }
+  const btn = e.target.closest('[data-fr-add],[data-fr-accept],[data-fr-decline],[data-fr-cancel],[data-fr-remove]');
+  if (!btn) return;
+  e.stopPropagation();
+  const name = btn.dataset.name;
+  if (btn.dataset.frRemove) { confirmUnfriend(btn.dataset.frRemove, name); return; }
+  btn.disabled = true;
+  try {
+    if (btn.dataset.frAdd) {
+      const r = await api('/api/friends/request', { user_id: btn.dataset.frAdd }, 'POST');
+      toast(r.status === 'friends' ? 'You and @' + name + ' are friends now.' : 'Friend request sent to @' + name + '.');
+    } else if (btn.dataset.frAccept) {
+      await api('/api/friends/requests/' + btn.dataset.frReq + '/accept', {}, 'POST');
+      toast('You and @' + name + ' are friends now.');
+    } else if (btn.dataset.frDecline) {
+      await api('/api/friends/requests/' + btn.dataset.frReq + '/decline', {}, 'POST');
+      toast('Request from @' + name + ' declined.');
+    } else if (btn.dataset.frCancel) {
+      await api('/api/friends/' + btn.dataset.frCancel, undefined, 'DELETE');
+      toast('Friend request to @' + name + ' cancelled.');
+    }
+  } catch (err) { toast(err.message); } // 409s = state moved on → the refresh below shows the truth
+  await refreshFriendState(true); paintFriendChips();
 });
 
 function renderRoom(d) {
@@ -3282,7 +3348,15 @@ function renderRoom(d) {
 
   // v58: matchmaking battles (auto_start) use the FIXED default settings —
   // no settings form, even for the host. The summary shows what's fixed.
-  if (isHost && isInLobby && !d.auto_start) {
+  // v59: the post-battle editor (Edit Room) is the SAME form. It used to be
+  // shown by a one-off classList.remove that the next renderRoom (2.5 s poll,
+  // any WS room.event, even the PATCH response) immediately undid → "modal
+  // appears then disappears". Now it is state (roomEditOpen), honoured here.
+  const roomOwnerPost = !!(d.host && me && d.host.user_id === me.id) && d.status === 'ended' && !d.auto_start;
+  if (roomEditOpen && (roomEditOpen !== d.code || !roomOwnerPost)) roomEditOpen = null; // room changed / re-opened / not ours
+  const editingPost = roomEditOpen === d.code;
+  $('#settings-edit-done').classList.toggle('hidden', !editingPost);
+  if ((isHost && isInLobby && !d.auto_start) || editingPost) {
     $('#settings-static').classList.add('hidden');
     $('#settings-edit').classList.remove('hidden');
     $('#setting-type').value = d.battle_type;
@@ -3836,6 +3910,10 @@ function rtHandle(msg) {
   // never interrupt a countdown: the shake is silent and self-stopping.
   if (msg.type === 'notification') {
     onNotificationPush(msg.notification);
+    // v59: friend_request / friend_accepted change MY relation to someone in
+    // the room → repaint the seat chips right away (no 25 s cache wait).
+    if (msg.notification && /^friend_/.test(String(msg.notification.type || '')))
+      refreshFriendState(true).then(paintFriendChips).catch(() => {});
     return;
   }
   // v51: kicked from a room (server-side removal) — leave instantly with a
@@ -4197,30 +4275,34 @@ async function enterAccount() {
 // Google login. Clicking an armed button is a full-page redirect to our
 // own /api/auth/google — the consent URL is built server-side, and the
 // Google client secret never touches this page.
+// v59: Discord follows the exact same contract (/api/auth/discord/*).
+// Apple is NOT implemented — it keeps the honest "coming soon" toast.
+const SOCIAL_LIVE = { google: 'Google', discord: 'Discord' };
 document.querySelectorAll('[data-social]').forEach((b) => {
-  if (b.dataset.social === 'google') return; // handled by initGoogleButton()
+  if (SOCIAL_LIVE[b.dataset.social]) return; // handled by initSocialButton()
   const name = b.dataset.social;
   b.addEventListener('click', () =>
     toast(name.charAt(0).toUpperCase() + name.slice(1) + ' sign-in is coming soon.'));
 });
-function initGoogleButton() {
-  const b = document.querySelector('[data-social="google"]');
+function initSocialButton(key) {
+  const b = document.querySelector('[data-social="' + key + '"]');
   if (!b) return;
-  const comingSoon = () => toast('Google sign-in is coming soon.');
+  const label = SOCIAL_LIVE[key];
+  const comingSoon = () => toast(label + ' sign-in is coming soon.');
   const arm = () => {
-    b.classList.add('google-live');
-    b.title = 'Continue with Google';
-    b.addEventListener('click', () => location.assign('/api/auth/google'));
+    b.classList.add(key + '-live');
+    b.title = 'Continue with ' + label;
+    b.addEventListener('click', () => location.assign('/api/auth/' + key));
   };
   if (typeof fetch !== 'function') { b.addEventListener('click', comingSoon); return; }
   try {
-    fetch('/api/auth/google/status', { cache: 'no-store' })
+    fetch('/api/auth/' + key + '/status', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => (j && j.available ? arm() : b.addEventListener('click', comingSoon)))
       .catch(() => b.addEventListener('click', comingSoon));
   } catch (_) { b.addEventListener('click', comingSoon); }
 }
-initGoogleButton();
+Object.keys(SOCIAL_LIVE).forEach(initSocialButton);
 
 // ----------------- v26: home cards · join modal · drawer · bell ------------
 // Homepage action cards + "VIEW ALL" + the LIVE BATTLES strip route through
@@ -5240,34 +5322,43 @@ function parseHashQuery(h) {
   });
   return out;
 }
-window.__aaGoogleHandoff = null;
-(function handleGoogleReturn() {
-  const m = (location.hash || '').match(/^#aa-google=(ok|error)(?:&(.+))?$/);
+window.__aaGoogleHandoff = null; // (name kept: init() awaits it for every provider)
+(function handleOAuthReturn() {
+  const m = (location.hash || '').match(/^#aa-(google|discord)=(ok|error)(?:&(.+))?$/);
   if (!m) return;
+  const key = m[1], label = SOCIAL_LIVE[key] || key;
   const cleanup = () => {
     try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
   };
-  if (m[1] === 'error') {
+  if (m[2] === 'error') {
     cleanup();
-    const q = parseHashQuery(m[2] || '');
+    const q = parseHashQuery(m[3] || '');
+    const consoleHint = key === 'google' ? 'Google Cloud' : 'the Discord Developer Portal';
     const why = {
-      cancelled: 'Google sign-in was cancelled — try again, or use email + password.',
-      bad_state: 'That Google sign-in link expired — please try again.',
-      token: 'Google rejected the sign-in link (the redirect URIs in Google Cloud may need updating).',
-      profile: 'Google did not share a profile email — please use email + password.',
-      network: 'Could not reach Google — check your connection and try again.',
-      email_taken: 'This Google email already has an Art Arena account — sign in with email + password.',
+      cancelled: label + ' sign-in was cancelled — try again, or use email + password.',
+      bad_state: 'That ' + label + ' sign-in link expired — please try again.',
+      token: label + ' rejected the sign-in link (the redirect URIs in ' + consoleHint + ' may need updating).',
+      profile: label + ' did not share a profile email — please use email + password.',
+      network: 'Could not reach ' + label + ' — check your connection and try again.',
+      email_taken: 'This ' + label + ' email already has an Art Arena account — sign in with email + password.',
       account_locked: 'This account is locked — contact support if you believe this is a mistake.',
-    }[q.reason || 'other'] || 'Google sign-in did not complete — please try again.';
-    show('login');
-    msg('msg-login', why, false);
+    }[q.reason || 'other'] || label + ' sign-in did not complete — please try again.';
+    // v59 root-cause fix: this IIFE runs at parse time, BEFORE later `let`
+    // bindings (liveTicker …) that show() touches exist → TDZ ReferenceError,
+    // and the explanation was never shown (Google had the same bug). Hand
+    // the message to init() through the same handoff promise instead.
+    window.__aaGoogleHandoff = (async () => {
+      await Promise.resolve(); // yield: the rest of the script (later `let`s) must finish parsing first
+      show('login');
+      msg('msg-login', why, false);
+    })();
     return;
   }
-  const q = parseHashQuery(m[2] || '');
+  const q = parseHashQuery(m[3] || '');
   if (!q.h) { cleanup(); return; }
   window.__aaGoogleHandoff = (async () => {
     try {
-      const d = await api('/api/auth/google/complete', { handoff: q.h });
+      const d = await api('/api/auth/' + key + '/complete', { handoff: q.h });
       cleanup();
       setSessionToken(d.session_token);
       await enterAccount();
@@ -5276,7 +5367,7 @@ window.__aaGoogleHandoff = null;
       cleanup();
       setSessionToken(null);
       show('login');
-      msg('msg-login', (err && err.message) || 'Google sign-in did not complete — please try again.', false);
+      msg('msg-login', (err && err.message) || label + ' sign-in did not complete — please try again.', false);
     }
   })();
 })();
@@ -5430,22 +5521,45 @@ async function openProfile(userId) {
     '<div class="prof-stat-cell"><b>' + st.losses + '</b><span>LOSSES</span></div>' +
     '<div class="prof-stat-cell"><b>' + st.draws + '</b><span>DRAWS</span></div></div>' +
     (u.joined_at ? '<p class="muted" style="font-size:11.5px; margin:10px 0 0">Joined ' + new Date(u.joined_at).toLocaleDateString() + '</p>' : '');
-  const btn = $('#pm-friend');
+  const btn = $('#pm-friend'), dec = $('#pm-friend-decline');
+  btn.classList.remove('is-remove', 'secondary'); dec.classList.add('hidden');
+  // v59: the button says what it DOES in every state (never a dead label)
   if (isMe) { btn.textContent = 'This is you'; btn.dataset.mode = 'none'; btn.disabled = true; }
-  else if (isFriend) { btn.textContent = '✓ Friends'; btn.dataset.mode = 'friends'; btn.disabled = false; }
-  else if (iSent) { btn.textContent = 'Request sent'; btn.dataset.mode = 'sent'; btn.disabled = false; }
-  else if (theySent) { btn.textContent = 'Accept request'; btn.dataset.mode = 'accept'; btn.disabled = false; }
+  else if (isFriend) { btn.textContent = 'Remove Friend'; btn.dataset.mode = 'friends'; btn.disabled = false; btn.classList.add('is-remove'); }
+  else if (iSent) { btn.textContent = '⏳ Pending · Cancel request'; btn.dataset.mode = 'sent'; btn.disabled = false; btn.classList.add('secondary'); }
+  else if (theySent) { btn.textContent = '✓ Accept request'; btn.dataset.mode = 'accept'; btn.disabled = false; dec.classList.remove('hidden'); }
   else { btn.textContent = '+ Add Friend'; btn.dataset.mode = 'add'; btn.disabled = false; }
+}
+async function pmIncomingRequestId(id) {
+  const fr = await api('/api/friends');
+  const r = (fr.incoming || []).find((x) => x.user_id === id);
+  return r ? r.id : null;
 }
 $('#pm-friend').addEventListener('click', async () => {
   const mode = $('#pm-friend').dataset.mode, id = pmUserId;
   if (!mode || mode === 'none' || !id) return;
+  if (mode === 'friends') { // confirmed removal; the modal re-renders itself afterwards
+    const name = ($('#pm-body').textContent.match(/@([A-Za-z0-9_]+)/) || [])[1] || 'this artist';
+    confirmUnfriend(id, name, () => { if (pmUserId === id) openProfile(id); });
+    return;
+  }
+  $('#pm-friend').disabled = true;
   try {
-    if (mode === 'add' || mode === 'sent') { await api('/api/friends/request', { user_id: id }, 'POST'); toast(mode === 'add' ? 'Friend request sent.' : 'Request already pending.'); }
-    else if (mode === 'accept') { const fr = await api('/api/friends'); const r = (fr.incoming || []).find((x) => x.user_id === id); if (r) { await api('/api/friends/requests/' + r.id + '/accept', {}, 'POST'); toast('You are now friends! 🤝'); } }
-    else if (mode === 'friends') { await api('/api/friends/' + id, undefined, 'DELETE'); toast('Friend removed.'); }
+    if (mode === 'add') { const r = await api('/api/friends/request', { user_id: id }, 'POST'); toast(r.status === 'friends' ? 'You are now friends! 🤝' : 'Friend request sent.'); }
+    else if (mode === 'sent') { await api('/api/friends/' + id, undefined, 'DELETE'); toast('Friend request cancelled.'); }
+    else if (mode === 'accept') { const rid = await pmIncomingRequestId(id); if (rid) { await api('/api/friends/requests/' + rid + '/accept', {}, 'POST'); toast('You are now friends! 🤝'); } else toast('That request is no longer pending.'); }
   } catch (err) { toast(err.message); }
+  refreshFriendState(true).then(paintFriendChips); // keep the room seats in sync too
   openProfile(id); // re-render with the LIVE relation state
+});
+$('#pm-friend-decline').addEventListener('click', async () => {
+  const id = pmUserId; if (!id) return;
+  $('#pm-friend-decline').disabled = true;
+  try { const rid = await pmIncomingRequestId(id); if (rid) { await api('/api/friends/requests/' + rid + '/decline', {}, 'POST'); toast('Friend request declined.'); } else toast('That request is no longer pending.'); }
+  catch (err) { toast(err.message); }
+  $('#pm-friend-decline').disabled = false;
+  refreshFriendState(true).then(paintFriendChips);
+  openProfile(id);
 });
 
 // ------------------------ room owner context menu ----------------------------
@@ -5502,8 +5616,15 @@ $('#kc-confirm').addEventListener('click', async () => {
 // Edit Room (owner, post-battle): reopen the host settings editor — changes
 // apply immediately via the existing PATCH flow and shape the REMATCH.
 $('#btn-edit-room').addEventListener('click', () => {
-  $('#settings-edit').classList.remove('hidden');
+  if (!currentRoomCode) return;
+  roomEditOpen = currentRoomCode;
+  if (lastRoomData && lastRoomData.code === currentRoomCode) renderRoom(lastRoomData); // populate + show NOW (no poll wait)
   $('#settings-edit').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+$('#settings-edit-done').addEventListener('click', () => {
+  roomEditOpen = null;
+  if (lastRoomData && lastRoomData.code === currentRoomCode) renderRoom(lastRoomData);
+  $('#post-battle') && $('#post-battle').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
 
 // Rematch expiry countdown (display only — the server enforces the window).
@@ -5669,7 +5790,7 @@ async function renderSettingsThemes() {
     const cu = d.ui_custom || { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
     $('#pth-c1').value = cu.c1; $('#pth-c2').value = cu.c2; $('#pth-dir').value = cu.dir;
     $('#pth-c1-dot').style.setProperty('--dot', cu.c1); $('#pth-c2-dot').style.setProperty('--dot', cu.c2);
-    $('#pth-dir-deg').textContent = cu.dir + '°';
+    pthDirPaint();
   } else {
     customRow.classList.add('hidden');
   }
@@ -5805,7 +5926,14 @@ $('#pth-c2-dot').addEventListener('click', (e) => {
   if ($('#settings-theme-custom').classList.contains('hidden')) return;
   pthWheel.open(e.currentTarget, $('#pth-c2').value, (hx) => { $('#pth-c2').value = hx; $('#pth-c2-dot').style.setProperty('--dot', hx); pthLivePreview(); });
 });
-$('#pth-dir').addEventListener('input', () => { $('#pth-dir-deg').textContent = $('#pth-dir').value + '°'; pthLivePreview(); });
+function pthDirPaint() {
+  const r = $('#pth-dir');
+  if (!r) return;
+  const min = Number(r.min) || 0, max = Number(r.max) || 360;
+  r.style.setProperty('--pth-dir-pct', ((Number(r.value) - min) / (max - min) * 100) + '%');
+  $('#pth-dir-deg').textContent = r.value + '°';
+}
+$('#pth-dir').addEventListener('input', () => { pthDirPaint(); pthLivePreview(); });
 $('#pth-save').addEventListener('click', async () => {
   if (!activeThemeKey) return;
   const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };

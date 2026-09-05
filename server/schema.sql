@@ -264,7 +264,8 @@ CREATE TYPE public.payment_status AS ENUM (
 CREATE TYPE public.platform_name AS ENUM (
     'youtube',
     'twitch',
-    'google'
+    'google',
+    'discord'
 );
 
 
