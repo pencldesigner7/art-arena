@@ -197,6 +197,18 @@ async function sanitizeTheme(userId, theme) {
   return p.active ? theme : null;
 }
 
+// v61: THE ONE avatar URL builder. Every payload (me, public profile,
+// matchmaking brief) must produce the identical, stable, versioned URL for
+// the same stored picture — before v61 three copies disagreed (one had no
+// ?v=, one used updated_at), so a picture could flip between a cached and
+// an uncached URL and briefly "vanish".
+function avatarUrlOf(key, updatedAt) {
+  if (!key) return null;
+  const m = String(key).match(/-(\d{10,15})\./);
+  const v = m ? m[1] : (updatedAt ? new Date(updatedAt).getTime() : 0);
+  return '/avatars/' + key + '?v=' + v;
+}
+
 async function fullUser(u) {
   const { rows } = await pool.query(
     `SELECT p.bio, p.country_code, p.drawing_app_key, p.is_discoverable,
@@ -240,12 +252,7 @@ async function fullUser(u) {
       // returns the SAME stable URL for the bytes on disk, and a refresh /
       // navigation / logout-login can never surface a stale cached image.
       // Legacy keys (<uuid>.<ext>) fall back to the profile updated_at.
-      avatar_url: p.avatar_storage_key
-        ? '/avatars/' + p.avatar_storage_key + '?v=' + (function (k, ua) {
-            const m = k.match(/-(\d{10,15})\./);
-            return m ? m[1] : (ua ? new Date(ua).getTime() : 0);
-          })(p.avatar_storage_key, p.updated_at)
-        : null,
+      avatar_url: avatarUrlOf(p.avatar_storage_key, p.updated_at),
     },
     stats: {
       battles: p.battles || 0,
@@ -284,6 +291,7 @@ module.exports = {
   requireAuth,
   authUserPayload,
   fullUser,
+  avatarUrlOf,
   PREMIUM_THEMES,
   themeCatalog,
   sanitizeThemeCustom,

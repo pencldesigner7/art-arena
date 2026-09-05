@@ -24,7 +24,7 @@
  * ============================================================================
  */
 const express = require('express');
-const { pool, HttpError, ah, requireAuth } = require('./lib');
+const { pool, HttpError, ah, requireAuth, avatarUrlOf } = require('./lib');
 const rt = require('./realtime');
 const { createMatchRoom, activeRoomOf } = require('./rooms'); // v44: shared one-active-seat rule
 
@@ -56,10 +56,7 @@ async function userBrief(userId) {
     id: r.id,
     username: r.username,
     display_name: r.display_name,
-    // Same versioned URL shape lib.fullUser uses — avatars cache-bust on upload.
-    avatar_url: r.avatar_storage_key
-      ? '/avatars/' + r.avatar_storage_key + '?v=' + (r.updated_at ? new Date(r.updated_at).getTime() : 0)
-      : null,
+    avatar_url: avatarUrlOf(r.avatar_storage_key, r.updated_at), // v61: one builder everywhere
   };
 }
 

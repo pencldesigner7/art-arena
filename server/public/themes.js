@@ -583,34 +583,10 @@
     rx.fillStyle = P.white; rx.beginPath(); rx.arc(rr, rr, 5, 0, 6.2832); rx.fill();
     rx.globalAlpha = 1;
     this.spr.pxRays = rays; this.pxRayAng = 0; this.pxRayR = rr;
-    // 4) comic STAR-BURSTS (the white spiky shapes) — pixel sprites in 3 sizes,
-    //    white fill, ink outline, a cyan/magenta inner spark
-    var starSprite = function (R, fill, inner) {
-      var c = mk(R * 2 + 4, R * 2 + 4), g = c.getContext('2d'), k, spikes = 8;
-      var poly = function (rad0, rad1) {
-        g.beginPath();
-        for (k = 0; k < spikes * 2; k++) { var an = (k / (spikes * 2)) * 6.2832 - 1.5708, rd = (k % 2) ? rad1 : rad0; g.lineTo(R + 2 + Math.cos(an) * rd, R + 2 + Math.sin(an) * rd); }
-        g.closePath();
-      };
-      g.fillStyle = P.ink; poly(R + 1.6, R * 0.5 + 1.6); g.fill();
-      g.fillStyle = fill; poly(R, R * 0.5); g.fill();
-      g.fillStyle = inner; poly(R * 0.42, R * 0.18); g.fill();
-      return c;
-    };
-    this.spr.pxStarBig = starSprite(13, P.white, P.cyan);
-    this.spr.pxStarMid = starSprite(8, P.gold2, P.orange);
-    this.spr.pxStarSm = starSprite(4, P.lime, P.white);
-    this.spr.pxStarPink = starSprite(8, P.pink, P.magenta);
-    // fixed comic composition: big bursts pinned to the corners/edges, mids
-    // spread around, smalls scattered — like the reference frame
-    this.pxBursts = [
-      { s: 'big', x: pw * 0.06, y: ph * 0.16, ph: rnd(0, 6.28) }, { s: 'big', x: pw * 0.94, y: ph * 0.72, ph: rnd(0, 6.28) },
-      { s: 'big', x: pw * 0.90, y: ph * 0.10, ph: rnd(0, 6.28) }, { s: 'big', x: pw * 0.10, y: ph * 0.80, ph: rnd(0, 6.28) },
-      { s: 'mid', x: pw * 0.30, y: ph * 0.90, ph: rnd(0, 6.28) }, { s: 'mid', x: pw * 0.72, y: ph * 0.88, ph: rnd(0, 6.28) },
-      { s: 'mid', x: pw * 0.22, y: ph * 0.06, ph: rnd(0, 6.28) }, { s: 'mid', x: pw * 0.66, y: ph * 0.04, ph: rnd(0, 6.28) }
-    ];
-    this.pxBursts.push({ s: 'pink', x: pw * 0.14, y: ph * 0.48, ph: rnd(0, 6.28) }, { s: 'pink', x: pw * 0.86, y: ph * 0.40, ph: rnd(0, 6.28) });
-    for (i = 0; i < 14; i++) this.pxBursts.push({ s: 'sm', x: rnd(2, pw - 2), y: rnd(2, ph * 0.84), ph: rnd(0, 6.28) });
+    // 4) v61: the comic star-bursts are REMOVED (no stars of any kind in
+    //    the pixel scene) — the burst rays, the halftone field and the clouds
+    //    carry the composition.
+    this.pxBursts = [];
     // 5) drifting chunky clouds — slab + two bumps, cyan tint with an ink under-edge
     this.pxClouds = [];
     for (i = 0; i < 5; i++) {
@@ -620,9 +596,8 @@
         v: depth === 0 ? 1.0 : depth === 1 ? 2.0 : 3.4, a: depth === 0 ? 0.7 : depth === 1 ? 0.85 : 1,
         b1: rnd(0.15, 0.4), b2: rnd(0.6, 0.85), bw: rnd(0.18, 0.3) });
     }
-    // 6) twinkles — single pixels in gold / cyan / white (slow sine gate)
+    // 6) v61: twinkle stars removed as well.
     this.pxStars = [];
-    for (i = 0; i < 40; i++) this.pxStars.push({ x: rnd(0, pw) | 0, y: rnd(0, ph) | 0, ph: rnd(0, 6.28), sp: rnd(0.6, 1.4), c: i % 3 === 0 ? P.gold2 : i % 3 === 1 ? P.cyan2 : P.white });
     // 7) centre READABILITY vignette (screen-space, drawn after the upscale):
     //    a soft dark column where the cards live — the art stays vivid at the edges
     var v = mk(256, 256), vx = v.getContext('2d');
@@ -795,7 +770,7 @@
       for (i = 0; i < pst.length; i++) pst[i].ph += pst[i].sp * dt;
       var pbs = this.pxBursts || [];
       for (i = 0; i < pbs.length; i++) pbs[i].ph += dt * 1.1;
-      this.pxRayAng = (this.pxRayAng || 0) + dt * 0.06;  // v57: the sunburst turns, slowly
+      this.pxRayAng = (this.pxRayAng || 0) + dt * 0.10;  // v61: a touch faster (was 0.06) — still a lazy, stepped turn
     } else if (this.theme === 'glowing') {
       for (i = 0; i < this.p.length; i++) { p = this.p[i]; p.ph += dt * 0.8; p.ang += dt * 0.12; p.x += Math.cos(p.ang) * p.v * dt; p.y += Math.sin(p.ang) * p.v * dt; if (p.x < -p.r) p.x = w + p.r; if (p.x > w + p.r) p.x = -p.r; if (p.y < -p.r) p.y = h + p.r; if (p.y > h + p.r) p.y = -p.r; }
       for (i = 0; i < this.sparks.length; i++) { var k = this.sparks[i]; k.ph += dt * 1.7; k.y -= k.v * dt; if (k.y < -6) { k.y = h + 6; k.x = rnd(0, w); } }
@@ -976,7 +951,7 @@
         // sunburst rays: rotation quantized to 1/48 turn so the wedges step
         // like frames of a sprite (pixel motion, not a smooth spin)
         if (this.spr.pxRays) {
-          var qa = Math.round((this.pxRayAng || 0) / (6.2832 / 48)) * (6.2832 / 48);
+          var qa = Math.round((this.pxRayAng || 0) / (6.2832 / 64)) * (6.2832 / 64); // v61: 64 steps
           g2.save(); g2.translate(this.pxCenter.x, this.pxCenter.y); g2.rotate(qa);
           g2.drawImage(this.spr.pxRays, -this.pxRayR, -this.pxRayR);
           g2.restore();
@@ -996,20 +971,7 @@
           g2.fillRect(cx2, cy2 + pc3.h - 1, pc3.w, 1); g2.fillRect(cx2 + 1, cy2 + pc3.h - 2, Math.max(1, pc3.w - 2), 1);
           g2.globalAlpha = 1;
         }
-        // comic star-bursts (a slow 1px "breathe" — sprite swap, never a blur)
-        for (i = 0; i < (this.pxBursts || []).length; i++) {
-          var bb = this.pxBursts[i];
-          var spr = bb.s === 'big' ? this.spr.pxStarBig : bb.s === 'mid' ? this.spr.pxStarMid : bb.s === 'pink' ? this.spr.pxStarPink : this.spr.pxStarSm;
-          if (!spr) continue;
-          var grow = Math.sin(bb.ph) > 0.6 ? 1 : 0;
-          g2.drawImage(spr, (bb.x - spr.width / 2 - grow) | 0, (bb.y - spr.height / 2 - grow) | 0, spr.width + grow * 2, spr.height + grow * 2);
-        }
-        // twinkles
-        for (i = 0; i < (this.pxStars || []).length; i++) {
-          var st3 = this.pxStars[i];
-          var on = Math.sin(st3.ph);
-          if (on > 0.25) { g2.fillStyle = st3.c; g2.globalAlpha = Math.min(1, on); g2.fillRect(st3.x, st3.y, 1, 1); if (on > 0.85) { g2.fillRect(st3.x - 1, st3.y, 3, 1); g2.fillRect(st3.x, st3.y - 1, 1, 3); } g2.globalAlpha = 1; }
-        }
+        // v61: no star-bursts / twinkles — removed by request
         // upscale with NEAREST — chunky pixels, no smoothing
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(px, 0, 0, pw, ph, 0, 0, pw * S, ph * S);

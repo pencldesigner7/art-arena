@@ -277,10 +277,6 @@
    "tags": []
   },
   {
-   "name": "Sprite",
-   "tags": []
-  },
-  {
    "name": "Goblin",
    "tags": []
   },
@@ -294,10 +290,6 @@
   },
   {
    "name": "Slime",
-   "tags": []
-  },
-  {
-   "name": "Mushman",
    "tags": []
   },
   {
@@ -326,46 +318,6 @@
   },
   {
    "name": "Ghost",
-   "tags": []
-  },
-  {
-   "name": "Spirit",
-   "tags": []
-  },
-  {
-   "name": "Shadow",
-   "tags": []
-  },
-  {
-   "name": "Silhouette",
-   "tags": []
-  },
-  {
-   "name": "Child",
-   "tags": []
-  },
-  {
-   "name": "Elder",
-   "tags": []
-  },
-  {
-   "name": "Warrior",
-   "tags": []
-  },
-  {
-   "name": "Saint",
-   "tags": []
-  },
-  {
-   "name": "Monster",
-   "tags": []
-  },
-  {
-   "name": "Beast",
-   "tags": []
-  },
-  {
-   "name": "Serpent",
    "tags": []
   },
   {
@@ -405,19 +357,11 @@
    "tags": []
   },
   {
-   "name": "Coral",
-   "tags": []
-  },
-  {
    "name": "Turtle",
    "tags": []
   },
   {
    "name": "Crocodile",
-   "tags": []
-  },
-  {
-   "name": "Snake",
    "tags": []
   },
   {
@@ -565,27 +509,7 @@
    "tags": []
   },
   {
-   "name": "Stranger",
-   "tags": []
-  },
-  {
-   "name": "Traveler",
-   "tags": []
-  },
-  {
-   "name": "Wanderer",
-   "tags": []
-  },
-  {
    "name": "Hermit",
-   "tags": []
-  },
-  {
-   "name": "Exile",
-   "tags": []
-  },
-  {
-   "name": "Outsider",
    "tags": []
   },
   {
@@ -601,10 +525,6 @@
    "tags": []
   },
   {
-   "name": "Familiar",
-   "tags": []
-  },
-  {
    "name": "Gargoyle",
    "tags": []
   },
@@ -617,67 +537,615 @@
    "tags": []
   },
   {
-   "name": "Titan",
+   "name": "Detective",
    "tags": []
   },
   {
-   "name": "God",
+   "name": "Clown",
    "tags": []
   },
   {
-   "name": "Goddess",
+   "name": "Alien",
    "tags": []
   },
   {
-   "name": "Idol",
+   "name": "Gladiator",
    "tags": []
   },
   {
-   "name": "Statue",
+   "name": "Beekeeper",
    "tags": []
   },
   {
-   "name": "Doll",
+   "name": "Archaeologist",
    "tags": []
   },
   {
-   "name": "Puppet",
+   "name": "Firefighter",
    "tags": []
   },
   {
-   "name": "Marionette",
+   "name": "Astronomer",
    "tags": []
   },
   {
-   "name": "Mask",
+   "name": "Librarian",
    "tags": []
   },
   {
-   "name": "Face",
+   "name": "Surgeon",
    "tags": []
   },
   {
-   "name": "Portrait",
+   "name": "Nurse",
    "tags": []
   },
   {
-   "name": "Self",
+   "name": "Pilot",
    "tags": []
   },
   {
-   "name": "Observer",
+   "name": "Sailor",
    "tags": []
   },
   {
-   "name": "Dreamer",
+   "name": "Cowboy",
    "tags": []
   },
   {
-   "name": "Prophet",
+   "name": "Sheriff",
    "tags": []
   },
   {
-   "name": "Muse",
+   "name": "Viking",
+   "tags": []
+  },
+  {
+   "name": "Spartan",
+   "tags": []
+  },
+  {
+   "name": "Musketeer",
+   "tags": []
+  },
+  {
+   "name": "Jester",
+   "tags": []
+  },
+  {
+   "name": "King",
+   "tags": []
+  },
+  {
+   "name": "Wizard",
+   "tags": []
+  },
+  {
+   "name": "Genie",
+   "tags": []
+  },
+  {
+   "name": "Mummy",
+   "tags": []
+  },
+  {
+   "name": "Skeleton",
+   "tags": []
+  },
+  {
+   "name": "Scarecrow",
+   "tags": []
+  },
+  {
+   "name": "Snowman",
+   "tags": []
+  },
+  {
+   "name": "Yeti",
+   "tags": []
+  },
+  {
+   "name": "Bigfoot",
+   "tags": []
+  },
+  {
+   "name": "Unicorn",
+   "tags": []
+  },
+  {
+   "name": "Pegasus",
+   "tags": []
+  },
+  {
+   "name": "Hydra",
+   "tags": []
+  },
+  {
+   "name": "Gorgon",
+   "tags": []
+  },
+  {
+   "name": "Cat",
+   "tags": []
+  },
+  {
+   "name": "Dog",
+   "tags": []
+  },
+  {
+   "name": "Horse",
+   "tags": []
+  },
+  {
+   "name": "Goat",
+   "tags": []
+  },
+  {
+   "name": "Sheep",
+   "tags": []
+  },
+  {
+   "name": "Cow",
+   "tags": []
+  },
+  {
+   "name": "Pig",
+   "tags": []
+  },
+  {
+   "name": "Chicken",
+   "tags": []
+  },
+  {
+   "name": "Duck",
+   "tags": []
+  },
+  {
+   "name": "Goose",
+   "tags": []
+  },
+  {
+   "name": "Swan",
+   "tags": []
+  },
+  {
+   "name": "Parrot",
+   "tags": []
+  },
+  {
+   "name": "Toucan",
+   "tags": []
+  },
+  {
+   "name": "Hummingbird",
+   "tags": []
+  },
+  {
+   "name": "Crow",
+   "tags": []
+  },
+  {
+   "name": "Bat",
+   "tags": []
+  },
+  {
+   "name": "Mouse",
+   "tags": []
+  },
+  {
+   "name": "Rat",
+   "tags": []
+  },
+  {
+   "name": "Squirrel",
+   "tags": []
+  },
+  {
+   "name": "Raccoon",
+   "tags": []
+  },
+  {
+   "name": "Skunk",
+   "tags": []
+  },
+  {
+   "name": "Badger",
+   "tags": []
+  },
+  {
+   "name": "Beaver",
+   "tags": []
+  },
+  {
+   "name": "Kangaroo",
+   "tags": []
+  },
+  {
+   "name": "Sloth",
+   "tags": []
+  },
+  {
+   "name": "Elephant",
+   "tags": []
+  },
+  {
+   "name": "Rhino",
+   "tags": []
+  },
+  {
+   "name": "Hippo",
+   "tags": []
+  },
+  {
+   "name": "Giraffe",
+   "tags": []
+  },
+  {
+   "name": "Zebra",
+   "tags": []
+  },
+  {
+   "name": "Gorilla",
+   "tags": []
+  },
+  {
+   "name": "Monkey",
+   "tags": []
+  },
+  {
+   "name": "Chimpanzee",
+   "tags": []
+  },
+  {
+   "name": "Camel",
+   "tags": []
+  },
+  {
+   "name": "Llama",
+   "tags": []
+  },
+  {
+   "name": "Alpaca",
+   "tags": []
+  },
+  {
+   "name": "Bison",
+   "tags": []
+  },
+  {
+   "name": "Ox",
+   "tags": []
+  },
+  {
+   "name": "Crab",
+   "tags": []
+  },
+  {
+   "name": "Lobster",
+   "tags": []
+  },
+  {
+   "name": "Shrimp",
+   "tags": []
+  },
+  {
+   "name": "Seahorse",
+   "tags": []
+  },
+  {
+   "name": "Stingray",
+   "tags": []
+  },
+  {
+   "name": "Pufferfish",
+   "tags": []
+  },
+  {
+   "name": "Anglerfish",
+   "tags": []
+  },
+  {
+   "name": "Salmon",
+   "tags": []
+  },
+  {
+   "name": "Koi",
+   "tags": []
+  },
+  {
+   "name": "Axolotl",
+   "tags": []
+  },
+  {
+   "name": "Chameleon",
+   "tags": []
+  },
+  {
+   "name": "Iguana",
+   "tags": []
+  },
+  {
+   "name": "Tortoise",
+   "tags": []
+  },
+  {
+   "name": "Bee",
+   "tags": []
+  },
+  {
+   "name": "Ant",
+   "tags": []
+  },
+  {
+   "name": "Ladybug",
+   "tags": []
+  },
+  {
+   "name": "Dragonfly",
+   "tags": []
+  },
+  {
+   "name": "Moth",
+   "tags": []
+  },
+  {
+   "name": "Mantis",
+   "tags": []
+  },
+  {
+   "name": "Grasshopper",
+   "tags": []
+  },
+  {
+   "name": "Mosquito",
+   "tags": []
+  },
+  {
+   "name": "Firefly",
+   "tags": []
+  },
+  {
+   "name": "Caterpillar",
+   "tags": []
+  },
+  {
+   "name": "Worm",
+   "tags": []
+  },
+  {
+   "name": "Plumber",
+   "tags": []
+  },
+  {
+   "name": "Miner",
+   "tags": []
+  },
+  {
+   "name": "Lumberjack",
+   "tags": []
+  },
+  {
+   "name": "Gardener",
+   "tags": []
+  },
+  {
+   "name": "Barista",
+   "tags": []
+  },
+  {
+   "name": "Waiter",
+   "tags": []
+  },
+  {
+   "name": "Painter",
+   "tags": []
+  },
+  {
+   "name": "Sculptor",
+   "tags": []
+  },
+  {
+   "name": "Photographer",
+   "tags": []
+  },
+  {
+   "name": "Journalist",
+   "tags": []
+  },
+  {
+   "name": "Teacher",
+   "tags": []
+  },
+  {
+   "name": "Student",
+   "tags": []
+  },
+  {
+   "name": "Scientist",
+   "tags": []
+  },
+  {
+   "name": "Programmer",
+   "tags": []
+  },
+  {
+   "name": "Astrologer",
+   "tags": []
+  },
+  {
+   "name": "Fortune Teller",
+   "tags": []
+  },
+  {
+   "name": "Magician",
+   "tags": []
+  },
+  {
+   "name": "Acrobat",
+   "tags": []
+  },
+  {
+   "name": "Juggler",
+   "tags": []
+  },
+  {
+   "name": "Mime",
+   "tags": []
+  },
+  {
+   "name": "Wrestler",
+   "tags": []
+  },
+  {
+   "name": "Racer",
+   "tags": []
+  },
+  {
+   "name": "Skater",
+   "tags": []
+  },
+  {
+   "name": "Surfer",
+   "tags": []
+  },
+  {
+   "name": "Diver",
+   "tags": []
+  },
+  {
+   "name": "Climber",
+   "tags": []
+  },
+  {
+   "name": "Explorer",
+   "tags": []
+  },
+  {
+   "name": "Spy",
+   "tags": []
+  },
+  {
+   "name": "Thief",
+   "tags": []
+  },
+  {
+   "name": "Bounty Hunter",
+   "tags": []
+  },
+  {
+   "name": "Mercenary",
+   "tags": []
+  },
+  {
+   "name": "Guard",
+   "tags": []
+  },
+  {
+   "name": "General",
+   "tags": []
+  },
+  {
+   "name": "Soldier",
+   "tags": []
+  },
+  {
+   "name": "Sniper",
+   "tags": []
+  },
+  {
+   "name": "Medic",
+   "tags": []
+  },
+  {
+   "name": "Nun",
+   "tags": []
+  },
+  {
+   "name": "Shaman",
+   "tags": []
+  },
+  {
+   "name": "Necromancer",
+   "tags": []
+  },
+  {
+   "name": "Summoner",
+   "tags": []
+  },
+  {
+   "name": "Illusionist",
+   "tags": []
+  },
+  {
+   "name": "Enchantress",
+   "tags": []
+  },
+  {
+   "name": "Dryad",
+   "tags": []
+  },
+  {
+   "name": "Nymph",
+   "tags": []
+  },
+  {
+   "name": "Satyr",
+   "tags": []
+  },
+  {
+   "name": "Faun",
+   "tags": []
+  },
+  {
+   "name": "Harpy",
+   "tags": []
+  },
+  {
+   "name": "Valkyrie",
+   "tags": []
+  },
+  {
+   "name": "Djinn",
+   "tags": []
+  },
+  {
+   "name": "Homunculus",
+   "tags": []
+  },
+  {
+   "name": "Gremlin",
+   "tags": []
+  },
+  {
+   "name": "Leprechaun",
+   "tags": []
+  },
+  {
+   "name": "Pixie",
+   "tags": []
+  },
+  {
+   "name": "Ogre",
+   "tags": []
+  },
+  {
+   "name": "Giant",
+   "tags": []
+  },
+  {
+   "name": "Lich",
+   "tags": []
+  },
+  {
+   "name": "Ghoul",
+   "tags": []
+  },
+  {
+   "name": "Poltergeist",
+   "tags": []
+  },
+  {
+   "name": "Mimic",
    "tags": []
   }
  ],
@@ -827,19 +1295,11 @@
    "tags": []
   },
   {
-   "name": "Overlook",
-   "tags": []
-  },
-  {
    "name": "Cliff",
    "tags": []
   },
   {
    "name": "Valley",
-   "tags": []
-  },
-  {
-   "name": "Plateau",
    "tags": []
   },
   {
@@ -864,38 +1324,6 @@
   },
   {
    "name": "Pond",
-   "tags": []
-  },
-  {
-   "name": "Marsh",
-   "tags": []
-  },
-  {
-   "name": "Bog",
-   "tags": []
-  },
-  {
-   "name": "Fen",
-   "tags": []
-  },
-  {
-   "name": "Heath",
-   "tags": []
-  },
-  {
-   "name": "Moor",
-   "tags": []
-  },
-  {
-   "name": "Prairie",
-   "tags": []
-  },
-  {
-   "name": "Steppe",
-   "tags": []
-  },
-  {
-   "name": "Grassland",
    "tags": []
   },
   {
@@ -995,14 +1423,6 @@
    "tags": []
   },
   {
-   "name": "Cloister",
-   "tags": []
-  },
-  {
-   "name": "Huts",
-   "tags": []
-  },
-  {
    "name": "Longhouse",
    "tags": []
   },
@@ -1019,10 +1439,6 @@
    "tags": []
   },
   {
-   "name": "Ladder",
-   "tags": []
-  },
-  {
    "name": "Windmill",
    "tags": []
   },
@@ -1035,14 +1451,6 @@
    "tags": []
   },
   {
-   "name": "Stables",
-   "tags": []
-  },
-  {
-   "name": "Blacksmith",
-   "tags": []
-  },
-  {
    "name": "Apothecary",
    "tags": []
   },
@@ -1051,15 +1459,7 @@
    "tags": []
   },
   {
-   "name": "Inn",
-   "tags": []
-  },
-  {
    "name": "Cafe",
-   "tags": []
-  },
-  {
-   "name": "Bar",
    "tags": []
   },
   {
@@ -1068,10 +1468,6 @@
   },
   {
    "name": "Bakery",
-   "tags": []
-  },
-  {
-   "name": "Butcher",
    "tags": []
   },
   {
@@ -1099,19 +1495,11 @@
    "tags": []
   },
   {
-   "name": "Clinic",
-   "tags": []
-  },
-  {
    "name": "Observatory",
    "tags": []
   },
   {
    "name": "Planetarium",
-   "tags": []
-  },
-  {
-   "name": "Aquarium",
    "tags": []
   },
   {
@@ -1135,39 +1523,11 @@
    "tags": []
   },
   {
-   "name": "Colosseum",
-   "tags": []
-  },
-  {
    "name": "Pyramid",
    "tags": []
   },
   {
-   "name": "Ziggurat",
-   "tags": []
-  },
-  {
-   "name": "Acropolis",
-   "tags": []
-  },
-  {
-   "name": "Amphitheater",
-   "tags": []
-  },
-  {
    "name": "Fountain",
-   "tags": []
-  },
-  {
-   "name": "Plaza",
-   "tags": []
-  },
-  {
-   "name": "Square",
-   "tags": []
-  },
-  {
-   "name": "Boulevard",
    "tags": []
   },
   {
@@ -1187,10 +1547,6 @@
    "tags": []
   },
   {
-   "name": "Jetty",
-   "tags": []
-  },
-  {
    "name": "Subway",
    "tags": []
   },
@@ -1200,10 +1556,6 @@
   },
   {
    "name": "Bunker",
-   "tags": []
-  },
-  {
-   "name": "Silo",
    "tags": []
   },
   {
@@ -1223,19 +1575,11 @@
    "tags": []
   },
   {
-   "name": "Antenna Farm",
-   "tags": []
-  },
-  {
    "name": "Server Room",
    "tags": []
   },
   {
    "name": "Control Room",
-   "tags": []
-  },
-  {
-   "name": "Tunnel",
    "tags": []
   },
   {
@@ -1251,23 +1595,7 @@
    "tags": []
   },
   {
-   "name": "Rift",
-   "tags": []
-  },
-  {
    "name": "Chasm",
-   "tags": []
-  },
-  {
-   "name": "Gorge",
-   "tags": []
-  },
-  {
-   "name": "Grotto",
-   "tags": []
-  },
-  {
-   "name": "Cavern",
    "tags": []
   },
   {
@@ -1291,18 +1619,6 @@
    "tags": []
   },
   {
-   "name": "Corridor",
-   "tags": []
-  },
-  {
-   "name": "Hallway",
-   "tags": []
-  },
-  {
-   "name": "Atrium",
-   "tags": []
-  },
-  {
    "name": "Courtyard",
    "tags": []
   },
@@ -1319,63 +1635,11 @@
    "tags": []
   },
   {
-   "name": "Shore",
-   "tags": []
-  },
-  {
    "name": "Coast",
    "tags": []
   },
   {
-   "name": "Reef",
-   "tags": []
-  },
-  {
    "name": "Lagoon",
-   "tags": []
-  },
-  {
-   "name": "Fjord",
-   "tags": []
-  },
-  {
-   "name": "Cove",
-   "tags": []
-  },
-  {
-   "name": "Bay",
-   "tags": []
-  },
-  {
-   "name": "Gulf",
-   "tags": []
-  },
-  {
-   "name": "Sea",
-   "tags": []
-  },
-  {
-   "name": "Strait",
-   "tags": []
-  },
-  {
-   "name": "Channel",
-   "tags": []
-  },
-  {
-   "name": "Islet",
-   "tags": []
-  },
-  {
-   "name": "Atoll",
-   "tags": []
-  },
-  {
-   "name": "Archipelago",
-   "tags": []
-  },
-  {
-   "name": "Stalactite Hall",
    "tags": []
   },
   {
@@ -1391,22 +1655,6 @@
    "tags": []
   },
   {
-   "name": "Snowy Slope",
-   "tags": []
-  },
-  {
-   "name": "Sandy Beach",
-   "tags": []
-  },
-  {
-   "name": "Muddy Field",
-   "tags": []
-  },
-  {
-   "name": "Glass City",
-   "tags": []
-  },
-  {
    "name": "Neon Street",
    "tags": []
   },
@@ -1419,23 +1667,463 @@
    "tags": []
   },
   {
-   "name": "Hidden Valley",
-   "tags": []
-  },
-  {
-   "name": "Forbidden Zone",
-   "tags": []
-  },
-  {
    "name": "Wasteland",
    "tags": []
   },
   {
-   "name": "Dead Zone",
+   "name": "Hut",
    "tags": []
   },
   {
-   "name": "Fertile Land",
+   "name": "Forge",
+   "tags": []
+  },
+  {
+   "name": "Butcher Shop",
+   "tags": []
+  },
+  {
+   "name": "Haunted House",
+   "tags": []
+  },
+  {
+   "name": "Shopping Mall",
+   "tags": []
+  },
+  {
+   "name": "Volcanic Island",
+   "tags": []
+  },
+  {
+   "name": "Hot Spring",
+   "tags": []
+  },
+  {
+   "name": "Amusement Park",
+   "tags": []
+  },
+  {
+   "name": "Gas Station",
+   "tags": []
+  },
+  {
+   "name": "Train Station",
+   "tags": []
+  },
+  {
+   "name": "Airport",
+   "tags": []
+  },
+  {
+   "name": "Parking Lot",
+   "tags": []
+  },
+  {
+   "name": "Junkyard",
+   "tags": []
+  },
+  {
+   "name": "Graveyard",
+   "tags": []
+  },
+  {
+   "name": "Ice Rink",
+   "tags": []
+  },
+  {
+   "name": "Skate Park",
+   "tags": []
+  },
+  {
+   "name": "Playground",
+   "tags": []
+  },
+  {
+   "name": "Casino",
+   "tags": []
+  },
+  {
+   "name": "Spaceship",
+   "tags": []
+  },
+  {
+   "name": "Submarine",
+   "tags": []
+  },
+  {
+   "name": "Pirate Ship",
+   "tags": []
+  },
+  {
+   "name": "Airship",
+   "tags": []
+  },
+  {
+   "name": "Train",
+   "tags": []
+  },
+  {
+   "name": "Bus Stop",
+   "tags": []
+  },
+  {
+   "name": "Elevator",
+   "tags": []
+  },
+  {
+   "name": "Sewer",
+   "tags": []
+  },
+  {
+   "name": "Prison",
+   "tags": []
+  },
+  {
+   "name": "Courtroom",
+   "tags": []
+  },
+  {
+   "name": "Classroom",
+   "tags": []
+  },
+  {
+   "name": "Gym",
+   "tags": []
+  },
+  {
+   "name": "Swimming Pool",
+   "tags": []
+  },
+  {
+   "name": "Locker Room",
+   "tags": []
+  },
+  {
+   "name": "Supermarket",
+   "tags": []
+  },
+  {
+   "name": "Bookshop",
+   "tags": []
+  },
+  {
+   "name": "Toy Store",
+   "tags": []
+  },
+  {
+   "name": "Pet Shop",
+   "tags": []
+  },
+  {
+   "name": "Flower Shop",
+   "tags": []
+  },
+  {
+   "name": "Arcade",
+   "tags": []
+  },
+  {
+   "name": "Nightclub",
+   "tags": []
+  },
+  {
+   "name": "Concert Hall",
+   "tags": []
+  },
+  {
+   "name": "Opera House",
+   "tags": []
+  },
+  {
+   "name": "Ballroom",
+   "tags": []
+  },
+  {
+   "name": "Palace",
+   "tags": []
+  },
+  {
+   "name": "Fortress",
+   "tags": []
+  },
+  {
+   "name": "Watchtower",
+   "tags": []
+  },
+  {
+   "name": "Drawbridge",
+   "tags": []
+  },
+  {
+   "name": "Wizard Tower",
+   "tags": []
+  },
+  {
+   "name": "Dragon Lair",
+   "tags": []
+  },
+  {
+   "name": "Witch Hut",
+   "tags": []
+  },
+  {
+   "name": "Enchanted Forest",
+   "tags": []
+  },
+  {
+   "name": "Fairy Ring",
+   "tags": []
+  },
+  {
+   "name": "Mushroom Forest",
+   "tags": []
+  },
+  {
+   "name": "Redwood Forest",
+   "tags": []
+  },
+  {
+   "name": "Cherry Orchard",
+   "tags": []
+  },
+  {
+   "name": "Sunflower Field",
+   "tags": []
+  },
+  {
+   "name": "Cornfield",
+   "tags": []
+  },
+  {
+   "name": "Pumpkin Patch",
+   "tags": []
+  },
+  {
+   "name": "Farm",
+   "tags": []
+  },
+  {
+   "name": "Ranch",
+   "tags": []
+  },
+  {
+   "name": "Campsite",
+   "tags": []
+  },
+  {
+   "name": "Cabin",
+   "tags": []
+  },
+  {
+   "name": "Ski Resort",
+   "tags": []
+  },
+  {
+   "name": "Iceberg",
+   "tags": []
+  },
+  {
+   "name": "Ice Shelf",
+   "tags": []
+  },
+  {
+   "name": "Snowfield",
+   "tags": []
+  },
+  {
+   "name": "Tide Pool",
+   "tags": []
+  },
+  {
+   "name": "Kelp Forest",
+   "tags": []
+  },
+  {
+   "name": "Shipwreck",
+   "tags": []
+  },
+  {
+   "name": "Sunken Temple",
+   "tags": []
+  },
+  {
+   "name": "Deep Sea",
+   "tags": []
+  },
+  {
+   "name": "Sandbar",
+   "tags": []
+  },
+  {
+   "name": "Mangrove",
+   "tags": []
+  },
+  {
+   "name": "Riverbank",
+   "tags": []
+  },
+  {
+   "name": "Moon",
+   "tags": []
+  },
+  {
+   "name": "Mars",
+   "tags": []
+  },
+  {
+   "name": "Asteroid Belt",
+   "tags": []
+  },
+  {
+   "name": "Black Hole",
+   "tags": []
+  },
+  {
+   "name": "Nebula",
+   "tags": []
+  },
+  {
+   "name": "Alien Planet",
+   "tags": []
+  },
+  {
+   "name": "Space Colony",
+   "tags": []
+  },
+  {
+   "name": "Cyberpunk City",
+   "tags": []
+  },
+  {
+   "name": "Floating Island",
+   "tags": []
+  },
+  {
+   "name": "Crystal Forest",
+   "tags": []
+  },
+  {
+   "name": "Salt Flat",
+   "tags": []
+  },
+  {
+   "name": "Geyser",
+   "tags": []
+  },
+  {
+   "name": "Hot Desert",
+   "tags": []
+  },
+  {
+   "name": "Rock Garden",
+   "tags": []
+  },
+  {
+   "name": "Zen Garden",
+   "tags": []
+  },
+  {
+   "name": "Hedge Maze",
+   "tags": []
+  },
+  {
+   "name": "Rooftop Garden",
+   "tags": []
+  },
+  {
+   "name": "Fire Escape",
+   "tags": []
+  },
+  {
+   "name": "Back Alley",
+   "tags": []
+  },
+  {
+   "name": "Subway Platform",
+   "tags": []
+  },
+  {
+   "name": "Bridge Underpass",
+   "tags": []
+  },
+  {
+   "name": "Construction Site",
+   "tags": []
+  },
+  {
+   "name": "Scrapyard",
+   "tags": []
+  },
+  {
+   "name": "Oil Rig",
+   "tags": []
+  },
+  {
+   "name": "Wind Farm",
+   "tags": []
+  },
+  {
+   "name": "Reservoir",
+   "tags": []
+  },
+  {
+   "name": "Canal",
+   "tags": []
+  },
+  {
+   "name": "Ferris Wheel",
+   "tags": []
+  },
+  {
+   "name": "Roller Coaster",
+   "tags": []
+  },
+  {
+   "name": "Carousel",
+   "tags": []
+  },
+  {
+   "name": "Big Top",
+   "tags": []
+  },
+  {
+   "name": "Dressing Room",
+   "tags": []
+  },
+  {
+   "name": "Recording Studio",
+   "tags": []
+  },
+  {
+   "name": "Newsroom",
+   "tags": []
+  },
+  {
+   "name": "Bank Vault",
+   "tags": []
+  },
+  {
+   "name": "Aquarium Tunnel",
+   "tags": []
+  },
+  {
+   "name": "Butterfly House",
+   "tags": []
+  },
+  {
+   "name": "Beehive",
+   "tags": []
+  },
+  {
+   "name": "Anthill",
+   "tags": []
+  },
+  {
+   "name": "Aquarium Hall",
+   "tags": []
+  },
+  {
+   "name": "Canal Lock",
    "tags": []
   }
  ],
@@ -1565,51 +2253,11 @@
    "tags": []
   },
   {
-   "name": "Rope",
-   "tags": []
-  },
-  {
-   "name": "Chain",
-   "tags": []
-  },
-  {
    "name": "Lock",
    "tags": []
   },
   {
-   "name": "Door",
-   "tags": []
-  },
-  {
-   "name": "Window",
-   "tags": []
-  },
-  {
    "name": "Wheel",
-   "tags": []
-  },
-  {
-   "name": "Gear",
-   "tags": []
-  },
-  {
-   "name": "Button",
-   "tags": []
-  },
-  {
-   "name": "Switch",
-   "tags": []
-  },
-  {
-   "name": "Antenna",
-   "tags": []
-  },
-  {
-   "name": "Satellite",
-   "tags": []
-  },
-  {
-   "name": "Drone",
    "tags": []
   },
   {
@@ -1669,27 +2317,7 @@
    "tags": []
   },
   {
-   "name": "Totem",
-   "tags": []
-  },
-  {
-   "name": "Idol",
-   "tags": []
-  },
-  {
-   "name": "Bust",
-   "tags": []
-  },
-  {
-   "name": "Portrait",
-   "tags": []
-  },
-  {
    "name": "Photograph",
-   "tags": []
-  },
-  {
-   "name": "Sketch",
    "tags": []
   },
   {
@@ -1745,10 +2373,6 @@
    "tags": []
   },
   {
-   "name": "Film",
-   "tags": []
-  },
-  {
    "name": "Reel",
    "tags": []
   },
@@ -1793,35 +2417,11 @@
    "tags": []
   },
   {
-   "name": "Harmonica",
-   "tags": []
-  },
-  {
-   "name": "Xylophone",
-   "tags": []
-  },
-  {
-   "name": "Maracas",
-   "tags": []
-  },
-  {
    "name": "Tambourine",
    "tags": []
   },
   {
-   "name": "Viola",
-   "tags": []
-  },
-  {
-   "name": "Cello",
-   "tags": []
-  },
-  {
    "name": "Harp",
-   "tags": []
-  },
-  {
-   "name": "Organ",
    "tags": []
   },
   {
@@ -1873,10 +2473,6 @@
    "tags": []
   },
   {
-   "name": "Butterfly",
-   "tags": []
-  },
-  {
    "name": "Butterfly Net",
    "tags": []
   },
@@ -1889,15 +2485,7 @@
    "tags": []
   },
   {
-   "name": "Pinwheel",
-   "tags": []
-  },
-  {
    "name": "Yo-yo",
-   "tags": []
-  },
-  {
-   "name": "Die",
    "tags": []
   },
   {
@@ -1905,19 +2493,7 @@
    "tags": []
   },
   {
-   "name": "Card",
-   "tags": []
-  },
-  {
    "name": "Dice",
-   "tags": []
-  },
-  {
-   "name": "Marble",
-   "tags": []
-  },
-  {
-   "name": "Top",
    "tags": []
   },
   {
@@ -1930,10 +2506,6 @@
   },
   {
    "name": "Action Figure",
-   "tags": []
-  },
-  {
-   "name": "Robot Toy",
    "tags": []
   },
   {
@@ -1985,23 +2557,7 @@
    "tags": []
   },
   {
-   "name": "Sail",
-   "tags": []
-  },
-  {
-   "name": "Oar",
-   "tags": []
-  },
-  {
    "name": "Anchor",
-   "tags": []
-  },
-  {
-   "name": "Helm",
-   "tags": []
-  },
-  {
-   "name": "Bouy",
    "tags": []
   },
   {
@@ -2073,14 +2629,6 @@
    "tags": []
   },
   {
-   "name": "Mortar",
-   "tags": []
-  },
-  {
-   "name": "Pestle",
-   "tags": []
-  },
-  {
    "name": "Ladle",
    "tags": []
   },
@@ -2090,30 +2638,6 @@
   },
   {
    "name": "Kettle",
-   "tags": []
-  },
-  {
-   "name": "Coffeepot",
-   "tags": []
-  },
-  {
-   "name": "Grinder",
-   "tags": []
-  },
-  {
-   "name": "Sieve",
-   "tags": []
-  },
-  {
-   "name": "Funnel",
-   "tags": []
-  },
-  {
-   "name": "Strainer",
-   "tags": []
-  },
-  {
-   "name": "Colander",
    "tags": []
   },
   {
@@ -2129,23 +2653,7 @@
    "tags": []
   },
   {
-   "name": "Urn",
-   "tags": []
-  },
-  {
    "name": "Chalice",
-   "tags": []
-  },
-  {
-   "name": "Flagon",
-   "tags": []
-  },
-  {
-   "name": "Tankard",
-   "tags": []
-  },
-  {
-   "name": "Jug",
    "tags": []
   },
   {
@@ -2157,31 +2665,11 @@
    "tags": []
   },
   {
-   "name": "Magic Eye",
-   "tags": []
-  },
-  {
-   "name": "Eyeball",
-   "tags": []
-  },
-  {
-   "name": "Tooth",
-   "tags": []
-  },
-  {
    "name": "Bone",
    "tags": []
   },
   {
    "name": "Skull",
-   "tags": []
-  },
-  {
-   "name": "Spine",
-   "tags": []
-  },
-  {
-   "name": "Tail",
    "tags": []
   },
   {
@@ -2193,47 +2681,7 @@
    "tags": []
   },
   {
-   "name": "Fang",
-   "tags": []
-  },
-  {
-   "name": "Claw",
-   "tags": []
-  },
-  {
-   "name": "Whisker",
-   "tags": []
-  },
-  {
-   "name": "Tuft",
-   "tags": []
-  },
-  {
-   "name": "Scale",
-   "tags": []
-  },
-  {
    "name": "Shell",
-   "tags": []
-  },
-  {
-   "name": "Acorn",
-   "tags": []
-  },
-  {
-   "name": "Chestnut",
-   "tags": []
-  },
-  {
-   "name": "Nut",
-   "tags": []
-  },
-  {
-   "name": "Berry",
-   "tags": []
-  },
-  {
-   "name": "Fruit",
    "tags": []
   },
   {
@@ -2241,47 +2689,7 @@
    "tags": []
   },
   {
-   "name": "Pear",
-   "tags": []
-  },
-  {
-   "name": "Plum",
-   "tags": []
-  },
-  {
-   "name": "Cherry",
-   "tags": []
-  },
-  {
-   "name": "Grape",
-   "tags": []
-  },
-  {
-   "name": "Melon",
-   "tags": []
-  },
-  {
    "name": "Pumpkin",
-   "tags": []
-  },
-  {
-   "name": "Gourd",
-   "tags": []
-  },
-  {
-   "name": "Cucumber",
-   "tags": []
-  },
-  {
-   "name": "Pepper",
-   "tags": []
-  },
-  {
-   "name": "Onion",
-   "tags": []
-  },
-  {
-   "name": "Garlic",
    "tags": []
   },
   {
@@ -2289,215 +2697,7 @@
    "tags": []
   },
   {
-   "name": "Toadstool",
-   "tags": []
-  },
-  {
-   "name": "Fungus",
-   "tags": []
-  },
-  {
-   "name": "Moss",
-   "tags": []
-  },
-  {
-   "name": "Lichen",
-   "tags": []
-  },
-  {
-   "name": "Fern",
-   "tags": []
-  },
-  {
-   "name": "Leaf",
-   "tags": []
-  },
-  {
-   "name": "Twig",
-   "tags": []
-  },
-  {
-   "name": "Branch",
-   "tags": []
-  },
-  {
-   "name": "Log",
-   "tags": []
-  },
-  {
-   "name": "Stump",
-   "tags": []
-  },
-  {
-   "name": "Root",
-   "tags": []
-  },
-  {
-   "name": "Vine",
-   "tags": []
-  },
-  {
-   "name": "Tendril",
-   "tags": []
-  },
-  {
-   "name": "Thorn",
-   "tags": []
-  },
-  {
-   "name": "Prick",
-   "tags": []
-  },
-  {
-   "name": "Bloom",
-   "tags": []
-  },
-  {
-   "name": "Petal",
-   "tags": []
-  },
-  {
-   "name": "Stamen",
-   "tags": []
-  },
-  {
-   "name": "Blossom",
-   "tags": []
-  },
-  {
-   "name": "Bud",
-   "tags": []
-  },
-  {
-   "name": "Bulb",
-   "tags": []
-  },
-  {
-   "name": "Tuber",
-   "tags": []
-  },
-  {
-   "name": "Corm",
-   "tags": []
-  },
-  {
-   "name": "Rhizome",
-   "tags": []
-  },
-  {
-   "name": "Bark",
-   "tags": []
-  },
-  {
-   "name": "Sap",
-   "tags": []
-  },
-  {
-   "name": "Resin",
-   "tags": []
-  },
-  {
-   "name": "Amber",
-   "tags": []
-  },
-  {
-   "name": "Tar",
-   "tags": []
-  },
-  {
-   "name": "Ash",
-   "tags": []
-  },
-  {
-   "name": "Soot",
-   "tags": []
-  },
-  {
-   "name": "Dust",
-   "tags": []
-  },
-  {
-   "name": "Grain",
-   "tags": []
-  },
-  {
-   "name": "Powder",
-   "tags": []
-  },
-  {
-   "name": "Salt",
-   "tags": []
-  },
-  {
-   "name": "Sugar",
-   "tags": []
-  },
-  {
-   "name": "Spice",
-   "tags": []
-  },
-  {
-   "name": "Cinnamon",
-   "tags": []
-  },
-  {
-   "name": "Clove",
-   "tags": []
-  },
-  {
-   "name": "Nutmeg",
-   "tags": []
-  },
-  {
-   "name": "Vanilla",
-   "tags": []
-  },
-  {
-   "name": "Saffron",
-   "tags": []
-  },
-  {
-   "name": "Turmeric",
-   "tags": []
-  },
-  {
-   "name": "Paprika",
-   "tags": []
-  },
-  {
-   "name": "Oregano",
-   "tags": []
-  },
-  {
-   "name": "Basil",
-   "tags": []
-  },
-  {
-   "name": "Mint",
-   "tags": []
-  },
-  {
-   "name": "Lavender",
-   "tags": []
-  },
-  {
    "name": "Rose",
-   "tags": []
-  },
-  {
-   "name": "Tulip",
-   "tags": []
-  },
-  {
-   "name": "Lily",
-   "tags": []
-  },
-  {
-   "name": "Orchid",
-   "tags": []
-  },
-  {
-   "name": "Daisy",
    "tags": []
   },
   {
@@ -2505,55 +2705,7 @@
    "tags": []
   },
   {
-   "name": "Daffodil",
-   "tags": []
-  },
-  {
-   "name": "Hibiscus",
-   "tags": []
-  },
-  {
    "name": "Lotus",
-   "tags": []
-  },
-  {
-   "name": "Peony",
-   "tags": []
-  },
-  {
-   "name": "Iris",
-   "tags": []
-  },
-  {
-   "name": "Marigold",
-   "tags": []
-  },
-  {
-   "name": "Chrysanthemum",
-   "tags": []
-  },
-  {
-   "name": "Carnation",
-   "tags": []
-  },
-  {
-   "name": "Jasmine",
-   "tags": []
-  },
-  {
-   "name": "Wisteria",
-   "tags": []
-  },
-  {
-   "name": "Ivy",
-   "tags": []
-  },
-  {
-   "name": "Hedge",
-   "tags": []
-  },
-  {
-   "name": "Fence",
    "tags": []
   },
   {
@@ -2561,79 +2713,7 @@
    "tags": []
   },
   {
-   "name": "Wall",
-   "tags": []
-  },
-  {
-   "name": "Stone",
-   "tags": []
-  },
-  {
-   "name": "Pebble",
-   "tags": []
-  },
-  {
    "name": "Boulder",
-   "tags": []
-  },
-  {
-   "name": "Rock",
-   "tags": []
-  },
-  {
-   "name": "Gravel",
-   "tags": []
-  },
-  {
-   "name": "Sand",
-   "tags": []
-  },
-  {
-   "name": "Silt",
-   "tags": []
-  },
-  {
-   "name": "Mud",
-   "tags": []
-  },
-  {
-   "name": "Clay",
-   "tags": []
-  },
-  {
-   "name": "Slate",
-   "tags": []
-  },
-  {
-   "name": "Granite",
-   "tags": []
-  },
-  {
-   "name": "Basalt",
-   "tags": []
-  },
-  {
-   "name": "Obsidian",
-   "tags": []
-  },
-  {
-   "name": "Quartz",
-   "tags": []
-  },
-  {
-   "name": "Feldspar",
-   "tags": []
-  },
-  {
-   "name": "Mica",
-   "tags": []
-  },
-  {
-   "name": "Topaz",
-   "tags": []
-  },
-  {
-   "name": "Sapphire",
    "tags": []
   },
   {
@@ -2641,81 +2721,805 @@
    "tags": []
   },
   {
-   "name": "Emerald",
-   "tags": []
-  },
-  {
    "name": "Diamond",
    "tags": []
   },
   {
-   "name": "Opal",
+   "name": "Umbrella",
    "tags": []
   },
   {
-   "name": "Pearl",
+   "name": "Traffic Cone",
    "tags": []
   },
   {
-   "name": "Coral",
+   "name": "Rubber Duck",
    "tags": []
   },
   {
-   "name": "Ivory",
+   "name": "Treasure Chest",
+   "tags": []
+  },
+  {
+   "name": "Hot Air Balloon",
+   "tags": []
+  },
+  {
+   "name": "Shopping Cart",
+   "tags": []
+  },
+  {
+   "name": "Toothbrush",
+   "tags": []
+  },
+  {
+   "name": "Remote Control",
+   "tags": []
+  },
+  {
+   "name": "Sock",
+   "tags": []
+  },
+  {
+   "name": "Loaf of Bread",
+   "tags": []
+  },
+  {
+   "name": "Headphones",
+   "tags": []
+  },
+  {
+   "name": "Backpack",
+   "tags": []
+  },
+  {
+   "name": "Sunglasses",
+   "tags": []
+  },
+  {
+   "name": "Boots",
+   "tags": []
+  },
+  {
+   "name": "Cactus",
+   "tags": []
+  },
+  {
+   "name": "Snow Globe",
+   "tags": []
+  },
+  {
+   "name": "Music Box",
+   "tags": []
+  },
+  {
+   "name": "Paper Plane",
+   "tags": []
+  },
+  {
+   "name": "Origami Crane",
+   "tags": []
+  },
+  {
+   "name": "Fishing Rod",
+   "tags": []
+  },
+  {
+   "name": "Lightbulb",
+   "tags": []
+  },
+  {
+   "name": "Magnet",
+   "tags": []
+  },
+  {
+   "name": "Padlock",
+   "tags": []
+  },
+  {
+   "name": "Suitcase",
+   "tags": []
+  },
+  {
+   "name": "Gramophone",
+   "tags": []
+  },
+  {
+   "name": "Game Controller",
+   "tags": []
+  },
+  {
+   "name": "Trophy",
+   "tags": []
+  },
+  {
+   "name": "Medal",
+   "tags": []
+  },
+  {
+   "name": "Envelope",
+   "tags": []
+  },
+  {
+   "name": "Pocket Watch",
+   "tags": []
+  },
+  {
+   "name": "Binoculars",
+   "tags": []
+  },
+  {
+   "name": "Wrench",
+   "tags": []
+  },
+  {
+   "name": "Screwdriver",
+   "tags": []
+  },
+  {
+   "name": "Saw",
+   "tags": []
+  },
+  {
+   "name": "Shovel",
+   "tags": []
+  },
+  {
+   "name": "Rake",
+   "tags": []
+  },
+  {
+   "name": "Watering Can",
+   "tags": []
+  },
+  {
+   "name": "Bucket",
+   "tags": []
+  },
+  {
+   "name": "Broom",
+   "tags": []
+  },
+  {
+   "name": "Toaster",
+   "tags": []
+  },
+  {
+   "name": "Chair",
+   "tags": []
+  },
+  {
+   "name": "Throne",
+   "tags": []
+  },
+  {
+   "name": "Bench",
+   "tags": []
+  },
+  {
+   "name": "Bed",
+   "tags": []
+  },
+  {
+   "name": "Sofa",
+   "tags": []
+  },
+  {
+   "name": "Bathtub",
+   "tags": []
+  },
+  {
+   "name": "Spinning Top",
+   "tags": []
+  },
+  {
+   "name": "Playing Card",
+   "tags": []
+  },
+  {
+   "name": "Ship Wheel",
+   "tags": []
+  },
+  {
+   "name": "Rubber Band",
+   "tags": []
+  },
+  {
+   "name": "Paperclip",
+   "tags": []
+  },
+  {
+   "name": "Stapler",
+   "tags": []
+  },
+  {
+   "name": "Scissors",
+   "tags": []
+  },
+  {
+   "name": "Tape Measure",
+   "tags": []
+  },
+  {
+   "name": "Toolbox",
+   "tags": []
+  },
+  {
+   "name": "Ladder",
+   "tags": []
+  },
+  {
+   "name": "Wheelbarrow",
+   "tags": []
+  },
+  {
+   "name": "Tire",
+   "tags": []
+  },
+  {
+   "name": "Steering Wheel",
+   "tags": []
+  },
+  {
+   "name": "Traffic Light",
+   "tags": []
+  },
+  {
+   "name": "Mailbox",
+   "tags": []
+  },
+  {
+   "name": "Fire Hydrant",
+   "tags": []
+  },
+  {
+   "name": "Street Lamp",
+   "tags": []
+  },
+  {
+   "name": "Dumbbell",
+   "tags": []
+  },
+  {
+   "name": "Basketball",
+   "tags": []
+  },
+  {
+   "name": "Football",
+   "tags": []
+  },
+  {
+   "name": "Tennis Racket",
+   "tags": []
+  },
+  {
+   "name": "Baseball Bat",
+   "tags": []
+  },
+  {
+   "name": "Hockey Stick",
+   "tags": []
+  },
+  {
+   "name": "Bowling Ball",
+   "tags": []
+  },
+  {
+   "name": "Frisbee",
+   "tags": []
+  },
+  {
+   "name": "Boomerang",
+   "tags": []
+  },
+  {
+   "name": "Slingshot",
+   "tags": []
+  },
+  {
+   "name": "Fishing Net",
+   "tags": []
+  },
+  {
+   "name": "Harpoon",
+   "tags": []
+  },
+  {
+   "name": "Cannon",
+   "tags": []
+  },
+  {
+   "name": "Crossbow",
+   "tags": []
+  },
+  {
+   "name": "Katana",
+   "tags": []
+  },
+  {
+   "name": "Nunchaku",
+   "tags": []
+  },
+  {
+   "name": "Boxing Glove",
+   "tags": []
+  },
+  {
+   "name": "Gas Mask",
+   "tags": []
+  },
+  {
+   "name": "Top Hat",
+   "tags": []
+  },
+  {
+   "name": "Ring",
+   "tags": []
+  },
+  {
+   "name": "Earring",
+   "tags": []
+  },
+  {
+   "name": "Locket",
+   "tags": []
+  },
+  {
+   "name": "Pocket Knife",
+   "tags": []
+  },
+  {
+   "name": "Lighter",
+   "tags": []
+  },
+  {
+   "name": "Matchbox",
+   "tags": []
+  },
+  {
+   "name": "Candlestick",
+   "tags": []
+  },
+  {
+   "name": "Chandelier",
+   "tags": []
+  },
+  {
+   "name": "Birdcage",
+   "tags": []
+  },
+  {
+   "name": "Aquarium",
+   "tags": []
+  },
+  {
+   "name": "Fishbowl",
+   "tags": []
+  },
+  {
+   "name": "Plant Pot",
+   "tags": []
+  },
+  {
+   "name": "Bonsai",
+   "tags": []
+  },
+  {
+   "name": "Pumpkin Lantern",
+   "tags": []
+  },
+  {
+   "name": "Piñata",
+   "tags": []
+  },
+  {
+   "name": "Party Hat",
+   "tags": []
+  },
+  {
+   "name": "Gift Box",
+   "tags": []
+  },
+  {
+   "name": "Ribbon",
+   "tags": []
+  },
+  {
+   "name": "Balloon Animal",
+   "tags": []
+  },
+  {
+   "name": "Rocking Horse",
+   "tags": []
+  },
+  {
+   "name": "Sandcastle",
+   "tags": []
+  },
+  {
+   "name": "Bucket Hat",
+   "tags": []
+  },
+  {
+   "name": "Flip Flops",
+   "tags": []
+  },
+  {
+   "name": "Life Ring",
+   "tags": []
+  },
+  {
+   "name": "Snorkel",
+   "tags": []
+  },
+  {
+   "name": "Flippers",
+   "tags": []
+  },
+  {
+   "name": "Diving Helmet",
+   "tags": []
+  },
+  {
+   "name": "Jetpack",
+   "tags": []
+  },
+  {
+   "name": "Ray Gun",
+   "tags": []
+  },
+  {
+   "name": "Robot Arm",
+   "tags": []
+  },
+  {
+   "name": "Circuit Board",
+   "tags": []
+  },
+  {
+   "name": "Floppy Disk",
+   "tags": []
+  },
+  {
+   "name": "Cassette Player",
+   "tags": []
+  },
+  {
+   "name": "Boombox",
+   "tags": []
+  },
+  {
+   "name": "Vinyl Player",
+   "tags": []
+  },
+  {
+   "name": "Microphone",
+   "tags": []
+  },
+  {
+   "name": "Speaker",
+   "tags": []
+  },
+  {
+   "name": "Jukebox",
+   "tags": []
+  },
+  {
+   "name": "Pinball Machine",
+   "tags": []
+  },
+  {
+   "name": "Arcade Cabinet",
+   "tags": []
+  },
+  {
+   "name": "Vending Machine",
+   "tags": []
+  },
+  {
+   "name": "Cash Register",
+   "tags": []
+  },
+  {
+   "name": "Piggy Bank",
+   "tags": []
+  },
+  {
+   "name": "Wallet",
+   "tags": []
+  },
+  {
+   "name": "Briefcase",
+   "tags": []
+  },
+  {
+   "name": "Newspaper",
+   "tags": []
+  },
+  {
+   "name": "Postcard",
+   "tags": []
+  },
+  {
+   "name": "Stamp",
+   "tags": []
+  },
+  {
+   "name": "Passport",
+   "tags": []
+  },
+  {
+   "name": "Ticket",
+   "tags": []
+  },
+  {
+   "name": "Sundial",
+   "tags": []
+  },
+  {
+   "name": "Weather Vane",
+   "tags": []
+  },
+  {
+   "name": "Windsock",
+   "tags": []
+  },
+  {
+   "name": "Message in a Bottle",
+   "tags": []
+  },
+  {
+   "name": "Treasure Map",
+   "tags": []
+  },
+  {
+   "name": "Spyglass",
+   "tags": []
+  },
+  {
+   "name": "Eyepatch",
+   "tags": []
+  },
+  {
+   "name": "Hook Hand",
+   "tags": []
+  },
+  {
+   "name": "Peg Leg",
+   "tags": []
+  },
+  {
+   "name": "Quiver",
+   "tags": []
+  },
+  {
+   "name": "Gauntlet",
+   "tags": []
+  },
+  {
+   "name": "Chainmail",
+   "tags": []
+  },
+  {
+   "name": "Breastplate",
+   "tags": []
+  },
+  {
+   "name": "Visor",
+   "tags": []
+  },
+  {
+   "name": "Banner",
+   "tags": []
+  },
+  {
+   "name": "Flag",
+   "tags": []
+  },
+  {
+   "name": "Brazier",
+   "tags": []
+  },
+  {
+   "name": "Crystal Skull",
+   "tags": []
+  },
+  {
+   "name": "Voodoo Doll",
+   "tags": []
+  },
+  {
+   "name": "Ouija Board",
+   "tags": []
+  },
+  {
+   "name": "Tarot Card",
+   "tags": []
+  },
+  {
+   "name": "Dreamcatcher",
+   "tags": []
+  },
+  {
+   "name": "Wind Chime",
+   "tags": []
+  },
+  {
+   "name": "Prayer Beads",
+   "tags": []
+  },
+  {
+   "name": "Incense",
+   "tags": []
+  },
+  {
+   "name": "Gong",
+   "tags": []
+  },
+  {
+   "name": "Egg",
+   "tags": []
+  },
+  {
+   "name": "Banana",
+   "tags": []
+  },
+  {
+   "name": "Pineapple",
+   "tags": []
+  },
+  {
+   "name": "Watermelon",
+   "tags": []
+  },
+  {
+   "name": "Coconut",
+   "tags": []
+  },
+  {
+   "name": "Lemon",
+   "tags": []
+  },
+  {
+   "name": "Strawberry",
+   "tags": []
+  },
+  {
+   "name": "Carrot",
+   "tags": []
+  },
+  {
+   "name": "Corn",
+   "tags": []
+  },
+  {
+   "name": "Potato",
+   "tags": []
+  },
+  {
+   "name": "Tomato",
+   "tags": []
+  },
+  {
+   "name": "Avocado",
+   "tags": []
+  },
+  {
+   "name": "Broccoli",
+   "tags": []
+  },
+  {
+   "name": "Donut",
+   "tags": []
+  },
+  {
+   "name": "Cupcake",
+   "tags": []
+  },
+  {
+   "name": "Pizza Slice",
+   "tags": []
+  },
+  {
+   "name": "Burger",
+   "tags": []
+  },
+  {
+   "name": "Hot Dog",
+   "tags": []
+  },
+  {
+   "name": "Taco",
+   "tags": []
+  },
+  {
+   "name": "Sushi",
+   "tags": []
+  },
+  {
+   "name": "Noodles",
+   "tags": []
+  },
+  {
+   "name": "Ice Cream Cone",
+   "tags": []
+  },
+  {
+   "name": "Lollipop",
+   "tags": []
+  },
+  {
+   "name": "Cotton Candy",
+   "tags": []
+  },
+  {
+   "name": "Popcorn",
+   "tags": []
+  },
+  {
+   "name": "Pretzel",
+   "tags": []
+  },
+  {
+   "name": "Croissant",
+   "tags": []
+  },
+  {
+   "name": "Cheese Wheel",
+   "tags": []
+  },
+  {
+   "name": "Honey Jar",
+   "tags": []
+  },
+  {
+   "name": "Milk Carton",
+   "tags": []
+  },
+  {
+   "name": "Soda Can",
+   "tags": []
+  },
+  {
+   "name": "Coffee Cup",
+   "tags": []
+  },
+  {
+   "name": "Beer Mug",
+   "tags": []
+  },
+  {
+   "name": "Thermos",
+   "tags": []
+  },
+  {
+   "name": "Lunchbox",
+   "tags": []
+  },
+  {
+   "name": "Picnic Basket",
+   "tags": []
+  },
+  {
+   "name": "Wine Glass",
    "tags": []
   }
  ],
  "style": [
   {
-   "name": "Watercolour",
+   "name": "Manga",
    "tags": []
   },
   {
-   "name": "Acrylic",
+   "name": "Anime",
    "tags": []
   },
   {
-   "name": "Gouache",
+   "name": "Comic Book",
    "tags": []
   },
   {
-   "name": "Ink",
-   "tags": []
-  },
-  {
-   "name": "Charcoal",
-   "tags": []
-  },
-  {
-   "name": "Pencil",
-   "tags": []
-  },
-  {
-   "name": "Graphite",
-   "tags": []
-  },
-  {
-   "name": "Chalk",
-   "tags": []
-  },
-  {
-   "name": "Pastel",
-   "tags": []
-  },
-  {
-   "name": "Crayon",
-   "tags": []
-  },
-  {
-   "name": "Marker",
-   "tags": []
-  },
-  {
-   "name": "Spray Paint",
-   "tags": []
-  },
-  {
-   "name": "Airbrush",
+   "name": "Cartoon",
    "tags": []
   },
   {
@@ -2723,47 +3527,47 @@
    "tags": []
   },
   {
-   "name": "Vector Art",
+   "name": "Watercolor",
    "tags": []
   },
   {
-   "name": "Collage",
+   "name": "Oil Painting",
    "tags": []
   },
   {
-   "name": "Paper Cut",
+   "name": "Digital Painting",
    "tags": []
   },
   {
-   "name": "Linocut",
+   "name": "Pencil Sketch",
    "tags": []
   },
   {
-   "name": "Woodcut",
+   "name": "Ink Drawing",
    "tags": []
   },
   {
-   "name": "Lithograph",
+   "name": "Line Art",
    "tags": []
   },
   {
-   "name": "Screen Print",
+   "name": "Charcoal Drawing",
    "tags": []
   },
   {
-   "name": "Ukiyo-e",
+   "name": "Pastel",
    "tags": []
   },
   {
-   "name": "Art Nouveau",
+   "name": "Gouache",
    "tags": []
   },
   {
-   "name": "Art Deco",
+   "name": "Acrylic Painting",
    "tags": []
   },
   {
-   "name": "Cubism",
+   "name": "Pop Art",
    "tags": []
   },
   {
@@ -2779,15 +3583,27 @@
    "tags": []
   },
   {
-   "name": "Pop Art",
+   "name": "Cubism",
+   "tags": []
+  },
+  {
+   "name": "Art Nouveau",
+   "tags": []
+  },
+  {
+   "name": "Art Deco",
+   "tags": []
+  },
+  {
+   "name": "Ukiyo-e",
+   "tags": []
+  },
+  {
+   "name": "Graffiti",
    "tags": []
   },
   {
    "name": "Minimalism",
-   "tags": []
-  },
-  {
-   "name": "Maximalism",
    "tags": []
   },
   {
@@ -2799,519 +3615,15 @@
    "tags": []
   },
   {
-   "name": "Photorealism",
+   "name": "Noir",
    "tags": []
   },
   {
-   "name": "Illustration",
+   "name": "Cel Shading",
    "tags": []
   },
   {
-   "name": "Concept Art",
-   "tags": []
-  },
-  {
-   "name": "Storyboard",
-   "tags": []
-  },
-  {
-   "name": "Comic Art",
-   "tags": []
-  },
-  {
-   "name": "Manga",
-   "tags": []
-  },
-  {
-   "name": "Anime",
-   "tags": []
-  },
-  {
-   "name": "Cartoon",
-   "tags": []
-  },
-  {
-   "name": "Caricature",
-   "tags": []
-  },
-  {
-   "name": "Woodblock Print",
-   "tags": []
-  },
-  {
-   "name": "Fresco",
-   "tags": []
-  },
-  {
-   "name": "Mosaic",
-   "tags": []
-  },
-  {
-   "name": "Tattoo",
-   "tags": []
-  },
-  {
-   "name": "Graffiti",
-   "tags": []
-  },
-  {
-   "name": "Sticker Art",
-   "tags": []
-  },
-  {
-   "name": "Zine Art",
-   "tags": []
-  },
-  {
-   "name": "Doodle",
-   "tags": []
-  },
-  {
-   "name": "Sketch",
-   "tags": []
-  },
-  {
-   "name": "Study",
-   "tags": []
-  },
-  {
-   "name": "Thumbnail",
-   "tags": []
-  },
-  {
-   "name": "Render",
-   "tags": []
-  },
-  {
-   "name": "Environment Art",
-   "tags": []
-  },
-  {
-   "name": "Character Design",
-   "tags": []
-  },
-  {
-   "name": "Prop Design",
-   "tags": []
-  },
-  {
-   "name": "Line Art",
-   "tags": []
-  },
-  {
-   "name": "Crosshatch",
-   "tags": []
-  },
-  {
-   "name": "Pointillism",
-   "tags": []
-  },
-  {
-   "name": "Impasto",
-   "tags": []
-  },
-  {
-   "name": "Sfumato",
-   "tags": []
-  },
-  {
-   "name": "Chiaroscuro",
-   "tags": []
-  },
-  {
-   "name": "Tonalism",
-   "tags": []
-  },
-  {
-   "name": "Color Field",
-   "tags": []
-  },
-  {
-   "name": "Flat Design",
-   "tags": []
-  },
-  {
-   "name": "Isometric",
-   "tags": []
-  },
-  {
-   "name": "Axonometric",
-   "tags": []
-  },
-  {
-   "name": "Perspective",
-   "tags": []
-  },
-  {
-   "name": "One-point Perspective",
-   "tags": []
-  },
-  {
-   "name": "Two-point Perspective",
-   "tags": []
-  },
-  {
-   "name": "Three-point Perspective",
-   "tags": []
-  },
-  {
-   "name": "Bird's-eye View",
-   "tags": []
-  },
-  {
-   "name": "Worm's-eye View",
-   "tags": []
-  },
-  {
-   "name": "Dutch Angle",
-   "tags": []
-  },
-  {
-   "name": "Fisheye",
-   "tags": []
-  },
-  {
-   "name": "Wide Angle",
-   "tags": []
-  },
-  {
-   "name": "Macro",
-   "tags": []
-  },
-  {
-   "name": "Close-up",
-   "tags": []
-  },
-  {
-   "name": "Medium Shot",
-   "tags": []
-  },
-  {
-   "name": "Long Shot",
-   "tags": []
-  },
-  {
-   "name": "Extreme Close-up",
-   "tags": []
-  },
-  {
-   "name": "Over-the-shoulder",
-   "tags": []
-  },
-  {
-   "name": "Silhouette",
-   "tags": []
-  },
-  {
-   "name": "Negative Space",
-   "tags": []
-  },
-  {
-   "name": "Symmetry",
-   "tags": []
-  },
-  {
-   "name": "Asymmetry",
-   "tags": []
-  },
-  {
-   "name": "Golden Ratio",
-   "tags": []
-  },
-  {
-   "name": "Bokeh",
-   "tags": []
-  },
-  {
-   "name": "Motion Lines",
-   "tags": []
-  },
-  {
-   "name": "Action Lines",
-   "tags": []
-  },
-  {
-   "name": "Impact Frame",
-   "tags": []
-  },
-  {
-   "name": "Sound Effects",
-   "tags": []
-  },
-  {
-   "name": "Onomatopoeia",
-   "tags": []
-  },
-  {
-   "name": "Halftone",
-   "tags": []
-  },
-  {
-   "name": "Screen Tone",
-   "tags": []
-  },
-  {
-   "name": "Claymation",
-   "tags": []
-  },
-  {
-   "name": "Stop Motion",
-   "tags": []
-  },
-  {
-   "name": "Pixel",
-   "tags": []
-  },
-  {
-   "name": "8-bit",
-   "tags": []
-  },
-  {
-   "name": "16-bit",
-   "tags": []
-  },
-  {
-   "name": "Vaporwave",
-   "tags": []
-  },
-  {
-   "name": "Synthwave",
-   "tags": []
-  },
-  {
-   "name": "Lo-fi",
-   "tags": []
-  },
-  {
-   "name": "Hi-fi",
-   "tags": []
-  },
-  {
-   "name": "Glitch",
-   "tags": []
-  },
-  {
-   "name": "Glitch Art",
-   "tags": []
-  },
-  {
-   "name": "Datamosh",
-   "tags": []
-  },
-  {
-   "name": "Vhs",
-   "tags": []
-  },
-  {
-   "name": "Analog",
-   "tags": []
-  },
-  {
-   "name": "Film Grain",
-   "tags": []
-  },
-  {
-   "name": "Grain",
-   "tags": []
-  },
-  {
-   "name": "Noise",
-   "tags": []
-  },
-  {
-   "name": "Static",
-   "tags": []
-  },
-  {
-   "name": "Chromatic Aberration",
-   "tags": []
-  },
-  {
-   "name": "Lens Flare",
-   "tags": []
-  },
-  {
-   "name": "Bloom",
-   "tags": []
-  },
-  {
-   "name": "Vignette",
-   "tags": []
-  },
-  {
-   "name": "Duotone",
-   "tags": []
-  },
-  {
-   "name": "Tritone",
-   "tags": []
-  },
-  {
-   "name": "Posterization",
-   "tags": []
-  },
-  {
-   "name": "Threshold",
-   "tags": []
-  },
-  {
-   "name": "Invert",
-   "tags": []
-  },
-  {
-   "name": "Contrast",
-   "tags": []
-  },
-  {
-   "name": "Saturation",
-   "tags": []
-  },
-  {
-   "name": "Desaturation",
-   "tags": []
-  },
-  {
-   "name": "Sepia",
-   "tags": []
-  },
-  {
-   "name": "Thermal",
-   "tags": []
-  },
-  {
-   "name": "Night Vision",
-   "tags": []
-  },
-  {
-   "name": "X-ray",
-   "tags": []
-  },
-  {
-   "name": "Ultraviolet",
-   "tags": []
-  },
-  {
-   "name": "Long Exposure",
-   "tags": []
-  },
-  {
-   "name": "Double Exposure",
-   "tags": []
-  },
-  {
-   "name": "Multiple Exposure",
-   "tags": []
-  },
-  {
-   "name": "Time-lapse",
-   "tags": []
-  },
-  {
-   "name": "Timelapse",
-   "tags": []
-  },
-  {
-   "name": "Loop",
-   "tags": []
-  },
-  {
-   "name": "Seamless",
-   "tags": []
-  },
-  {
-   "name": "Tileable",
-   "tags": []
-  },
-  {
-   "name": "Pattern",
-   "tags": []
-  },
-  {
-   "name": "Texture",
-   "tags": []
-  },
-  {
-   "name": "Grunge",
-   "tags": []
-  },
-  {
-   "name": "Foil",
-   "tags": []
-  },
-  {
-   "name": "Embroidery",
-   "tags": []
-  },
-  {
-   "name": "Knit",
-   "tags": []
-  },
-  {
-   "name": "Lace",
-   "tags": []
-  },
-  {
-   "name": "Quilt",
-   "tags": []
-  },
-  {
-   "name": "Patchwork",
-   "tags": []
-  },
-  {
-   "name": "Drawn",
-   "tags": []
-  },
-  {
-   "name": "Woven",
-   "tags": []
-  },
-  {
-   "name": "Sewn",
-   "tags": []
-  },
-  {
-   "name": "Built",
-   "tags": []
-  },
-  {
-   "name": "Cast",
-   "tags": []
-  },
-  {
-   "name": "Minimalist",
-   "tags": []
-  },
-  {
-   "name": "Maximalist",
-   "tags": []
-  },
-  {
-   "name": "Abstract",
-   "tags": []
-  },
-  {
-   "name": "Surreal",
-   "tags": []
-  },
-  {
-   "name": "Realistic",
-   "tags": []
-  },
-  {
-   "name": "Impressionist",
-   "tags": []
-  },
-  {
-   "name": "Expressionist",
-   "tags": []
-  },
-  {
-   "name": "Cubist",
-   "tags": []
-  },
-  {
-   "name": "Gothic",
+   "name": "Lowbrow Art",
    "tags": []
   }
  ],
@@ -3389,51 +3701,7 @@
    "tags": []
   },
   {
-   "name": "Profane",
-   "tags": []
-  },
-  {
    "name": "Intimate",
-   "tags": []
-  },
-  {
-   "name": "Empty",
-   "tags": []
-  },
-  {
-   "name": "Full",
-   "tags": []
-  },
-  {
-   "name": "Alive",
-   "tags": []
-  },
-  {
-   "name": "Still",
-   "tags": []
-  },
-  {
-   "name": "Timeless",
-   "tags": []
-  },
-  {
-   "name": "Heavy",
-   "tags": []
-  },
-  {
-   "name": "Light",
-   "tags": []
-  },
-  {
-   "name": "Warm",
-   "tags": []
-  },
-  {
-   "name": "Cold",
-   "tags": []
-  },
-  {
-   "name": "Hot",
    "tags": []
   },
   {
@@ -3457,138 +3725,6 @@
    "tags": []
   },
   {
-   "name": "Submissive",
-   "tags": []
-  },
-  {
-   "name": "Proud",
-   "tags": []
-  },
-  {
-   "name": "Guilty",
-   "tags": []
-  },
-  {
-   "name": "Innocent",
-   "tags": []
-  },
-  {
-   "name": "Pure",
-   "tags": []
-  },
-  {
-   "name": "Lucky",
-   "tags": []
-  },
-  {
-   "name": "Unlucky",
-   "tags": []
-  },
-  {
-   "name": "Random",
-   "tags": []
-  },
-  {
-   "name": "Free",
-   "tags": []
-  },
-  {
-   "name": "Broken",
-   "tags": []
-  },
-  {
-   "name": "Whole",
-   "tags": []
-  },
-  {
-   "name": "Strong",
-   "tags": []
-  },
-  {
-   "name": "Weak",
-   "tags": []
-  },
-  {
-   "name": "Powerful",
-   "tags": []
-  },
-  {
-   "name": "Fragile",
-   "tags": []
-  },
-  {
-   "name": "Resilient",
-   "tags": []
-  },
-  {
-   "name": "Stuck",
-   "tags": []
-  },
-  {
-   "name": "Unstuck",
-   "tags": []
-  },
-  {
-   "name": "Awake",
-   "tags": []
-  },
-  {
-   "name": "Asleep",
-   "tags": []
-  },
-  {
-   "name": "Absent",
-   "tags": []
-  },
-  {
-   "name": "Present",
-   "tags": []
-  },
-  {
-   "name": "Lost",
-   "tags": []
-  },
-  {
-   "name": "Found",
-   "tags": []
-  },
-  {
-   "name": "Hidden",
-   "tags": []
-  },
-  {
-   "name": "Vulnerable",
-   "tags": []
-  },
-  {
-   "name": "Open",
-   "tags": []
-  },
-  {
-   "name": "Torn",
-   "tags": []
-  },
-  {
-   "name": "Futuristic",
-   "tags": []
-  },
-  {
-   "name": "Ancient",
-   "tags": []
-  },
-  {
-   "name": "Mystical",
-   "tags": []
-  },
-  {
-   "name": "Serenity",
-   "tags": []
-  },
-  {
-   "name": "Chaos",
-   "tags": []
-  },
-  {
    "name": "Heroic",
    "tags": []
   },
@@ -3601,19 +3737,135 @@
    "tags": []
   },
   {
-   "name": "Nostalgia",
-   "tags": []
-  },
-  {
    "name": "Sacred",
    "tags": []
   },
   {
-   "name": "Cosmic",
+   "name": "Playful",
    "tags": []
   },
   {
-   "name": "Underwater",
+   "name": "Dreamy",
+   "tags": []
+  },
+  {
+   "name": "Dramatic",
+   "tags": []
+  },
+  {
+   "name": "Romantic",
+   "tags": []
+  },
+  {
+   "name": "Lonely",
+   "tags": []
+  },
+  {
+   "name": "Anxious",
+   "tags": []
+  },
+  {
+   "name": "Curious",
+   "tags": []
+  },
+  {
+   "name": "Menacing",
+   "tags": []
+  },
+  {
+   "name": "Solemn",
+   "tags": []
+  },
+  {
+   "name": "Festive",
+   "tags": []
+  },
+  {
+   "name": "Rebellious",
+   "tags": []
+  },
+  {
+   "name": "Majestic",
+   "tags": []
+  },
+  {
+   "name": "Gloomy",
+   "tags": []
+  },
+  {
+   "name": "Cheerful",
+   "tags": []
+  },
+  {
+   "name": "Brooding",
+   "tags": []
+  },
+  {
+   "name": "Frantic",
+   "tags": []
+  },
+  {
+   "name": "Lazy",
+   "tags": []
+  },
+  {
+   "name": "Fierce",
+   "tags": []
+  },
+  {
+   "name": "Shy",
+   "tags": []
+  },
+  {
+   "name": "Bold",
+   "tags": []
+  },
+  {
+   "name": "Haunting",
+   "tags": []
+  },
+  {
+   "name": "Uplifting",
+   "tags": []
+  },
+  {
+   "name": "Absurd",
+   "tags": []
+  },
+  {
+   "name": "Sinister",
+   "tags": []
+  },
+  {
+   "name": "Mischievous",
+   "tags": []
+  },
+  {
+   "name": "Sombre",
+   "tags": []
+  },
+  {
+   "name": "Elegant",
+   "tags": []
+  },
+  {
+   "name": "Gritty",
+   "tags": []
+  },
+  {
+   "name": "Wistful",
+   "tags": []
+  },
+  {
+   "name": "Hypnotic",
+   "tags": []
+  },
+  {
+   "name": "Radiant",
+   "tags": []
+  },
+  {
+   "name": "Restless",
    "tags": []
   }
  ],
@@ -3655,43 +3907,31 @@
    "tags": []
   },
   {
-   "name": "Bioluminescent",
+   "name": "Bioluminescence",
    "tags": []
   },
   {
-   "name": "Neon",
+   "name": "Neon Light",
    "tags": []
   },
   {
-   "name": "Fluorescent",
+   "name": "Fluorescent Light",
    "tags": []
   },
   {
-   "name": "Incandescent",
+   "name": "Incandescent Light",
    "tags": []
   },
   {
-   "name": "Natural",
+   "name": "Soft Light",
    "tags": []
   },
   {
-   "name": "Artificial",
+   "name": "Hard Light",
    "tags": []
   },
   {
-   "name": "Harsh",
-   "tags": []
-  },
-  {
-   "name": "Soft",
-   "tags": []
-  },
-  {
-   "name": "Direct",
-   "tags": []
-  },
-  {
-   "name": "Backlit",
+   "name": "Backlight",
    "tags": []
   },
   {
@@ -3735,11 +3975,7 @@
    "tags": []
   },
   {
-   "name": "Lamp Light",
-   "tags": []
-  },
-  {
-   "name": "Candle",
+   "name": "Lamplight",
    "tags": []
   },
   {
@@ -3747,31 +3983,19 @@
    "tags": []
   },
   {
-   "name": "God Ray",
+   "name": "God Rays",
    "tags": []
   },
   {
-   "name": "Volumetric",
+   "name": "Volumetric Light",
    "tags": []
   },
   {
-   "name": "Caustic",
+   "name": "Caustics",
    "tags": []
   },
   {
-   "name": "Reflection",
-   "tags": []
-  },
-  {
-   "name": "Glow",
-   "tags": []
-  },
-  {
-   "name": "Aura",
-   "tags": []
-  },
-  {
-   "name": "Halo",
+   "name": "Reflected Light",
    "tags": []
   },
   {
@@ -3807,23 +4031,11 @@
    "tags": []
   },
   {
-   "name": "Butterfly",
-   "tags": []
-  },
-  {
-   "name": "Broad Light",
-   "tags": []
-  },
-  {
-   "name": "Short Light",
-   "tags": []
-  },
-  {
    "name": "Top Light",
    "tags": []
   },
   {
-   "name": "Bottom Light",
+   "name": "Underlight",
    "tags": []
   },
   {
@@ -3851,10 +4063,6 @@
    "tags": []
   },
   {
-   "name": "Back Light",
-   "tags": []
-  },
-  {
    "name": "Edge Light",
    "tags": []
   },
@@ -3863,15 +4071,7 @@
    "tags": []
   },
   {
-   "name": "Eye Light",
-   "tags": []
-  },
-  {
    "name": "Catchlight",
-   "tags": []
-  },
-  {
-   "name": "Moon Glow",
    "tags": []
   },
   {
@@ -3883,47 +4083,15 @@
    "tags": []
   },
   {
-   "name": "Comet",
-   "tags": []
-  },
-  {
    "name": "Eclipse",
    "tags": []
   },
   {
-   "name": "Solar Flare",
+   "name": "Lightning",
    "tags": []
   },
   {
-   "name": "Nebula Glow",
-   "tags": []
-  },
-  {
-   "name": "Plasma",
-   "tags": []
-  },
-  {
-   "name": "Neon Pink",
-   "tags": []
-  },
-  {
-   "name": "Neon Blue",
-   "tags": []
-  },
-  {
-   "name": "Neon Green",
-   "tags": []
-  },
-  {
-   "name": "Neon Purple",
-   "tags": []
-  },
-  {
-   "name": "Holographic",
-   "tags": []
-  },
-  {
-   "name": "Laser",
+   "name": "Laser Light",
    "tags": []
   },
   {
@@ -3931,163 +4099,11 @@
    "tags": []
   },
   {
-   "name": "Flash",
+   "name": "Camera Flash",
    "tags": []
   },
   {
-   "name": "Spark",
-   "tags": []
-  },
-  {
-   "name": "Ember",
-   "tags": []
-  },
-  {
-   "name": "Flame",
-   "tags": []
-  },
-  {
-   "name": "Smoke",
-   "tags": []
-  },
-  {
-   "name": "Fog",
-   "tags": []
-  },
-  {
-   "name": "Mist",
-   "tags": []
-  },
-  {
-   "name": "Haze",
-   "tags": []
-  },
-  {
-   "name": "Dust",
-   "tags": []
-  },
-  {
-   "name": "Glitter",
-   "tags": []
-  },
-  {
-   "name": "Sparkle",
-   "tags": []
-  },
-  {
-   "name": "Shimmer",
-   "tags": []
-  },
-  {
-   "name": "Glimmer",
-   "tags": []
-  },
-  {
-   "name": "Flicker",
-   "tags": []
-  },
-  {
-   "name": "Pulse",
-   "tags": []
-  },
-  {
-   "name": "Breathe",
-   "tags": []
-  },
-  {
-   "name": "Fade",
-   "tags": []
-  },
-  {
-   "name": "Glare",
-   "tags": []
-  },
-  {
-   "name": "Gloss",
-   "tags": []
-  },
-  {
-   "name": "Sheen",
-   "tags": []
-  },
-  {
-   "name": "Glossy",
-   "tags": []
-  },
-  {
-   "name": "Matte",
-   "tags": []
-  },
-  {
-   "name": "Waxy",
-   "tags": []
-  },
-  {
-   "name": "Oily",
-   "tags": []
-  },
-  {
-   "name": "Wet",
-   "tags": []
-  },
-  {
-   "name": "Steamy",
-   "tags": []
-  },
-  {
-   "name": "Icy",
-   "tags": []
-  },
-  {
-   "name": "Crystalline",
-   "tags": []
-  },
-  {
-   "name": "Prismatic",
-   "tags": []
-  },
-  {
-   "name": "Rainbow",
-   "tags": []
-  },
-  {
-   "name": "Iridescent",
-   "tags": []
-  },
-  {
-   "name": "Opalescent",
-   "tags": []
-  },
-  {
-   "name": "Pearlescent",
-   "tags": []
-  },
-  {
-   "name": "Metallic",
-   "tags": []
-  },
-  {
-   "name": "Chrome",
-   "tags": []
-  },
-  {
-   "name": "Gold",
-   "tags": []
-  },
-  {
-   "name": "Silver",
-   "tags": []
-  },
-  {
-   "name": "Bronze",
-   "tags": []
-  },
-  {
-   "name": "Copper",
-   "tags": []
-  },
-  {
-   "name": "Obsidian Glow",
+   "name": "Ember Glow",
    "tags": []
   },
   {
@@ -4099,43 +4115,71 @@
    "tags": []
   },
   {
-   "name": "Sun Spot",
-   "tags": []
-  },
-  {
    "name": "Light Shaft",
    "tags": []
   },
   {
-   "name": "Streaks",
+   "name": "Window Light",
    "tags": []
   },
   {
-   "name": "Beams",
+   "name": "Dappled Light",
    "tags": []
   },
   {
-   "name": "Rays",
+   "name": "Streetlight",
    "tags": []
   },
   {
-   "name": "Cone",
+   "name": "Headlights",
    "tags": []
   },
   {
-   "name": "Darkness",
+   "name": "Screen Glow",
    "tags": []
   },
   {
-   "name": "Shadow",
+   "name": "Black Light",
    "tags": []
   },
   {
-   "name": "Shadows",
+   "name": "Holographic Light",
    "tags": []
   },
   {
-   "name": "Contrast",
+   "name": "Prismatic Light",
+   "tags": []
+  },
+  {
+   "name": "Iridescence",
+   "tags": []
+  },
+  {
+   "name": "Fog Light",
+   "tags": []
+  },
+  {
+   "name": "Searchlight",
+   "tags": []
+  },
+  {
+   "name": "Flashlight",
+   "tags": []
+  },
+  {
+   "name": "Night Vision",
+   "tags": []
+  },
+  {
+   "name": "Infrared",
+   "tags": []
+  },
+  {
+   "name": "X-ray",
+   "tags": []
+  },
+  {
+   "name": "Long Shadows",
    "tags": []
   },
   {
@@ -4147,15 +4191,15 @@
    "tags": []
   },
   {
-   "name": "Backlight",
+   "name": "Twilight",
    "tags": []
   },
   {
-   "name": "Underlight",
+   "name": "Midnight",
    "tags": []
   },
   {
-   "name": "Topdown",
+   "name": "Rainbow Light",
    "tags": []
   }
  ],
@@ -7600,15 +7644,747 @@
  ],
  "wildcard": [
   {
+   "name": "Egg",
+   "tags": []
+  },
+  {
+   "name": "Banana",
+   "tags": []
+  },
+  {
+   "name": "Rubber Duck",
+   "tags": []
+  },
+  {
+   "name": "Toothbrush",
+   "tags": []
+  },
+  {
+   "name": "Spoon",
+   "tags": []
+  },
+  {
+   "name": "Traffic Cone",
+   "tags": []
+  },
+  {
+   "name": "Shopping Cart",
+   "tags": []
+  },
+  {
+   "name": "Sock",
+   "tags": []
+  },
+  {
+   "name": "Remote Control",
+   "tags": []
+  },
+  {
+   "name": "Loaf of Bread",
+   "tags": []
+  },
+  {
+   "name": "Pineapple",
+   "tags": []
+  },
+  {
+   "name": "Pigeon",
+   "tags": []
+  },
+  {
+   "name": "Snail",
+   "tags": []
+  },
+  {
+   "name": "Goldfish",
+   "tags": []
+  },
+  {
+   "name": "Potato",
+   "tags": []
+  },
+  {
+   "name": "Cactus",
+   "tags": []
+  },
+  {
+   "name": "Umbrella",
+   "tags": []
+  },
+  {
+   "name": "Balloon",
+   "tags": []
+  },
+  {
+   "name": "Teapot",
+   "tags": []
+  },
+  {
+   "name": "Slipper",
+   "tags": []
+  },
+  {
+   "name": "Pizza Slice",
+   "tags": []
+  },
+  {
+   "name": "Donut",
+   "tags": []
+  },
+  {
+   "name": "Watermelon",
+   "tags": []
+  },
+  {
+   "name": "Toaster",
+   "tags": []
+  },
+  {
+   "name": "Garden Gnome",
+   "tags": []
+  },
+  {
+   "name": "Paper Plane",
+   "tags": []
+  },
+  {
+   "name": "Mailbox",
+   "tags": []
+  },
+  {
+   "name": "Fire Hydrant",
+   "tags": []
+  },
+  {
+   "name": "Kite",
+   "tags": []
+  },
+  {
+   "name": "Lollipop",
+   "tags": []
+  },
+  {
+   "name": "Ice Cream Cone",
+   "tags": []
+  },
+  {
+   "name": "Sunglasses",
+   "tags": []
+  },
+  {
+   "name": "Top Hat",
+   "tags": []
+  },
+  {
+   "name": "Cardboard Box",
+   "tags": []
+  },
+  {
+   "name": "Bubble Wrap",
+   "tags": []
+  },
+  {
+   "name": "Sticky Note",
+   "tags": []
+  },
+  {
+   "name": "Rubber Band",
+   "tags": []
+  },
+  {
+   "name": "Paperclip",
+   "tags": []
+  },
+  {
+   "name": "Traffic Light",
+   "tags": []
+  },
+  {
+   "name": "Vending Machine",
+   "tags": []
+  },
+  {
+   "name": "Disco Ball",
+   "tags": []
+  },
+  {
+   "name": "Roller Skates",
+   "tags": []
+  },
+  {
+   "name": "Bowling Pin",
+   "tags": []
+  },
+  {
+   "name": "Rubber Chicken",
+   "tags": []
+  },
+  {
+   "name": "Plunger",
+   "tags": []
+  },
+  {
+   "name": "Fork",
+   "tags": []
+  },
+  {
+   "name": "Cheese",
+   "tags": []
+  },
+  {
+   "name": "Pickle",
+   "tags": []
+  },
+  {
+   "name": "Onion",
+   "tags": []
+  },
+  {
+   "name": "Broccoli",
+   "tags": []
+  },
+  {
+   "name": "Carrot",
+   "tags": []
+  },
+  {
+   "name": "Avocado",
+   "tags": []
+  },
+  {
+   "name": "Taco",
+   "tags": []
+  },
+  {
+   "name": "Noodles",
+   "tags": []
+  },
+  {
+   "name": "Fried Egg",
+   "tags": []
+  },
+  {
+   "name": "Coffee Cup",
+   "tags": []
+  },
+  {
+   "name": "Straw",
+   "tags": []
+  },
+  {
+   "name": "Lemon",
+   "tags": []
+  },
+  {
+   "name": "Coconut",
+   "tags": []
+  },
+  {
+   "name": "Pretzel",
+   "tags": []
+  },
+  {
+   "name": "Bagel",
+   "tags": []
+  },
+  {
+   "name": "Waffle",
+   "tags": []
+  },
+  {
+   "name": "Pancake",
+   "tags": []
+  },
+  {
+   "name": "Popcorn",
+   "tags": []
+  },
+  {
+   "name": "Gummy Bear",
+   "tags": []
+  },
+  {
+   "name": "Jellybean",
+   "tags": []
+  },
+  {
+   "name": "Marshmallow",
+   "tags": []
+  },
+  {
+   "name": "Candy Cane",
+   "tags": []
+  },
+  {
+   "name": "Fortune Cookie",
+   "tags": []
+  },
+  {
+   "name": "Sock Puppet",
+   "tags": []
+  },
+  {
+   "name": "Yo-yo",
+   "tags": []
+  },
+  {
+   "name": "Slinky",
+   "tags": []
+  },
+  {
+   "name": "Rubik's Cube",
+   "tags": []
+  },
+  {
+   "name": "Kazoo",
+   "tags": []
+  },
+  {
+   "name": "Whistle",
+   "tags": []
+  },
+  {
+   "name": "Boomerang",
+   "tags": []
+  },
+  {
+   "name": "Frisbee",
+   "tags": []
+  },
+  {
+   "name": "Pool Noodle",
+   "tags": []
+  },
+  {
+   "name": "Inflatable Flamingo",
+   "tags": []
+  },
+  {
+   "name": "Beach Ball",
+   "tags": []
+  },
+  {
+   "name": "Snorkel",
+   "tags": []
+  },
+  {
+   "name": "Flip Flops",
+   "tags": []
+  },
+  {
+   "name": "Bathtub",
+   "tags": []
+  },
+  {
+   "name": "Toilet Paper",
+   "tags": []
+  },
+  {
+   "name": "Hairdryer",
+   "tags": []
+  },
+  {
+   "name": "Vacuum Cleaner",
+   "tags": []
+  },
+  {
+   "name": "Washing Machine",
+   "tags": []
+  },
+  {
+   "name": "Lawn Mower",
+   "tags": []
+  },
+  {
+   "name": "Wheelbarrow",
+   "tags": []
+  },
+  {
+   "name": "Ladder",
+   "tags": []
+  },
+  {
+   "name": "Doormat",
+   "tags": []
+  },
+  {
+   "name": "Coat Hanger",
+   "tags": []
+  },
+  {
+   "name": "Lampshade",
+   "tags": []
+  },
+  {
+   "name": "Lightbulb",
+   "tags": []
+  },
+  {
+   "name": "Battery",
+   "tags": []
+  },
+  {
+   "name": "Extension Cord",
+   "tags": []
+  },
+  {
+   "name": "Floppy Disk",
+   "tags": []
+  },
+  {
+   "name": "Keyboard",
+   "tags": []
+  },
+  {
+   "name": "Mouse",
+   "tags": []
+  },
+  {
+   "name": "Stapler",
+   "tags": []
+  },
+  {
+   "name": "Calculator",
+   "tags": []
+  },
+  {
+   "name": "Ruler",
+   "tags": []
+  },
+  {
+   "name": "Pencil Sharpener",
+   "tags": []
+  },
+  {
+   "name": "Glue Stick",
+   "tags": []
+  },
+  {
+   "name": "Crayon",
+   "tags": []
+  },
+  {
+   "name": "Eraser",
+   "tags": []
+  },
+  {
+   "name": "Balloon Dog",
+   "tags": []
+  },
+  {
+   "name": "Party Hat",
+   "tags": []
+  },
+  {
+   "name": "Piñata",
+   "tags": []
+  },
+  {
+   "name": "Confetti",
+   "tags": []
+  },
+  {
+   "name": "Birthday Cake",
+   "tags": []
+  },
+  {
+   "name": "Candle",
+   "tags": []
+  },
+  {
+   "name": "Trophy",
+   "tags": []
+  },
+  {
+   "name": "Rubber Glove",
+   "tags": []
+  },
+  {
+   "name": "Traffic Barrier",
+   "tags": []
+  },
+  {
+   "name": "Manhole Cover",
+   "tags": []
+  },
+  {
+   "name": "Shopping Bag",
+   "tags": []
+  },
+  {
+   "name": "Receipt",
+   "tags": []
+  },
+  {
+   "name": "Coin",
+   "tags": []
+  },
+  {
+   "name": "Button",
+   "tags": []
+  },
+  {
+   "name": "Zipper",
+   "tags": []
+  },
+  {
+   "name": "Safety Pin",
+   "tags": []
+  },
+  {
+   "name": "Thimble",
+   "tags": []
+  },
+  {
+   "name": "Spool of Thread",
+   "tags": []
+  },
+  {
+   "name": "Knitting Needles",
+   "tags": []
+  },
+  {
+   "name": "Wool Ball",
+   "tags": []
+  },
+  {
+   "name": "Feather Duster",
+   "tags": []
+  },
+  {
+   "name": "Sponge",
+   "tags": []
+  },
+  {
+   "name": "Bar of Soap",
+   "tags": []
+  },
+  {
+   "name": "Rubber Boot",
+   "tags": []
+  },
+  {
+   "name": "Raincoat",
+   "tags": []
+  },
+  {
+   "name": "Scarf",
+   "tags": []
+  },
+  {
+   "name": "Mitten",
+   "tags": []
+  },
+  {
+   "name": "Beanie",
+   "tags": []
+  },
+  {
+   "name": "Bow Tie",
+   "tags": []
+  },
+  {
+   "name": "Moustache",
+   "tags": []
+  },
+  {
+   "name": "Wig",
+   "tags": []
+  },
+  {
+   "name": "Dentures",
+   "tags": []
+  },
+  {
+   "name": "Glasses",
+   "tags": []
+  },
+  {
+   "name": "Monocle",
+   "tags": []
+  },
+  {
+   "name": "Hamster",
+   "tags": []
+  },
+  {
+   "name": "Hedgehog",
+   "tags": []
+  },
+  {
+   "name": "Duckling",
+   "tags": []
+  },
+  {
+   "name": "Chick",
+   "tags": []
+  },
+  {
+   "name": "Frog",
+   "tags": []
+  },
+  {
+   "name": "Toad",
+   "tags": []
+  },
+  {
+   "name": "Worm",
+   "tags": []
+  },
+  {
+   "name": "Ladybug",
+   "tags": []
+  },
+  {
+   "name": "Bumblebee",
+   "tags": []
+  },
+  {
+   "name": "Butterfly",
+   "tags": []
+  },
+  {
+   "name": "Jellyfish",
+   "tags": []
+  },
+  {
+   "name": "Crab",
+   "tags": []
+  },
+  {
+   "name": "Seagull",
+   "tags": []
+  },
+  {
+   "name": "Sloth",
+   "tags": []
+  },
+  {
+   "name": "Llama",
+   "tags": []
+  },
+  {
+   "name": "Capybara",
+   "tags": []
+  },
+  {
+   "name": "Penguin",
+   "tags": []
+  },
+  {
+   "name": "Puffin",
+   "tags": []
+  },
+  {
+   "name": "Platypus",
+   "tags": []
+  },
+  {
+   "name": "Narwhal",
+   "tags": []
+  },
+  {
+   "name": "Axolotl",
+   "tags": []
+  },
+  {
+   "name": "Pug",
+   "tags": []
+  },
+  {
+   "name": "Corgi",
+   "tags": []
+  },
+  {
+   "name": "Kitten",
+   "tags": []
+  },
+  {
+   "name": "Bunny",
+   "tags": []
+  },
+  {
+   "name": "Cowboy Penguin",
+   "tags": []
+  },
+  {
+   "name": "Detective Spoon",
+   "tags": []
+  },
+  {
+   "name": "Business Duck",
+   "tags": []
+  },
+  {
+   "name": "Ninja Cat",
+   "tags": []
+  },
+  {
+   "name": "Pirate Hamster",
+   "tags": []
+  },
+  {
+   "name": "Wizard Frog",
+   "tags": []
+  },
+  {
+   "name": "Astronaut Goldfish",
+   "tags": []
+  },
+  {
+   "name": "Knight Snail",
+   "tags": []
+  },
+  {
+   "name": "Chef Octopus",
+   "tags": []
+  },
+  {
+   "name": "Samurai Rabbit",
+   "tags": []
+  },
+  {
+   "name": "Robot Pigeon",
+   "tags": []
+  },
+  {
+   "name": "King Potato",
+   "tags": []
+  },
+  {
+   "name": "Vampire Banana",
+   "tags": []
+  },
+  {
+   "name": "Cactus in a Suit",
+   "tags": []
+  },
+  {
+   "name": "Toaster with Legs",
+   "tags": []
+  },
+  {
+   "name": "Sunglasses on a Snail",
+   "tags": []
+  },
+  {
+   "name": "Egg with a Crown",
+   "tags": []
+  },
+  {
+   "name": "Sock with Teeth",
+   "tags": []
+  },
+  {
+   "name": "Traffic Cone Wizard",
+   "tags": []
+  },
+  {
+   "name": "Donut Astronaut",
+   "tags": []
+  },
+  {
    "name": "Upside Down",
-   "tags": []
-  },
-  {
-   "name": "Only Circles",
-   "tags": []
-  },
-  {
-   "name": "Perfectly Symmetrical",
    "tags": []
   },
   {
@@ -7616,71 +8392,11 @@
    "tags": []
   },
   {
-   "name": "Two Viewpoints",
-   "tags": []
-  },
-  {
    "name": "No Outlines",
    "tags": []
   },
   {
-   "name": "All Outlines",
-   "tags": []
-  },
-  {
-   "name": "Torn Edges",
-   "tags": []
-  },
-  {
-   "name": "Razor Sharp",
-   "tags": []
-  },
-  {
-   "name": "Double Exposure",
-   "tags": []
-  },
-  {
-   "name": "Long Exposure",
-   "tags": []
-  },
-  {
-   "name": "Motion Blur",
-   "tags": []
-  },
-  {
-   "name": "Freeze Frame",
-   "tags": []
-  },
-  {
-   "name": "Time-lapse",
-   "tags": []
-  },
-  {
-   "name": "Stop Motion",
-   "tags": []
-  },
-  {
-   "name": "3d",
-   "tags": []
-  },
-  {
-   "name": "2d",
-   "tags": []
-  },
-  {
-   "name": "Flat",
-   "tags": []
-  },
-  {
-   "name": "Isometric",
-   "tags": []
-  },
-  {
-   "name": "No Perspective",
-   "tags": []
-  },
-  {
-   "name": "Aerial View",
+   "name": "Only Circles",
    "tags": []
   },
   {
@@ -7688,7 +8404,19 @@
    "tags": []
   },
   {
-   "name": "Macro Lens",
+   "name": "Isometric",
+   "tags": []
+  },
+  {
+   "name": "X-ray",
+   "tags": []
+  },
+  {
+   "name": "Symmetrical",
+   "tags": []
+  },
+  {
+   "name": "Aerial View",
    "tags": []
   },
   {
@@ -7696,95 +8424,27 @@
    "tags": []
   },
   {
-   "name": "Celestial Scale",
-   "tags": []
-  },
-  {
-   "name": "Underground",
-   "tags": []
-  },
-  {
    "name": "Underwater",
    "tags": []
   },
   {
-   "name": "Through Glass",
+   "name": "In a Snow Globe",
    "tags": []
   },
   {
-   "name": "Through Leaves",
+   "name": "Inside a Bubble",
    "tags": []
   },
   {
-   "name": "Zoom Out",
+   "name": "On a Postage Stamp",
    "tags": []
   },
   {
-   "name": "Pan Left",
+   "name": "As a Sticker",
    "tags": []
   },
   {
-   "name": "Pan Right",
-   "tags": []
-  },
-  {
-   "name": "Tilt Up",
-   "tags": []
-  },
-  {
-   "name": "Tilt Down",
-   "tags": []
-  },
-  {
-   "name": "Fold It",
-   "tags": []
-  },
-  {
-   "name": "Unfold It",
-   "tags": []
-  },
-  {
-   "name": "Cut It",
-   "tags": []
-  },
-  {
-   "name": "Layer It",
-   "tags": []
-  },
-  {
-   "name": "X-ray It",
-   "tags": []
-  },
-  {
-   "name": "Glow It",
-   "tags": []
-  },
-  {
-   "name": "Shadow It",
-   "tags": []
-  },
-  {
-   "name": "Mirror It",
-   "tags": []
-  },
-  {
-   "name": "Shrink It",
-   "tags": []
-  },
-  {
-   "name": "Simplify It",
-   "tags": []
-  },
-  {
-   "name": "Exaggerate It",
-   "tags": []
-  },
-  {
-   "name": "Invert It",
-   "tags": []
-  },
-  {
-   "name": "Double It",
+   "name": "As a Statue",
    "tags": []
   }
  ]

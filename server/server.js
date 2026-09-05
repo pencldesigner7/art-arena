@@ -39,7 +39,7 @@ const {
   pool, DEV, SESSION_TTL_DAYS, COOKIE_NAME,
   sha256, HttpError, ah, parseCookies, maskToken,
   sessionTokenFromRequest, requireAuth,
-  authUserPayload, fullUser, cookieOpts,
+  authUserPayload, fullUser, avatarUrlOf, cookieOpts,
   premiumOf,
   themeCatalog,
   sanitizeTheme,
@@ -553,7 +553,32 @@ app.put('/api/account/profile', requireAuth, ah(async (req, res) => {
 // rejects files that lie about their type.
 const AVATARS_DIR = path.join(__dirname, 'avatars');
 fs.mkdirSync(AVATARS_DIR, { recursive: true });
-app.use('/avatars', express.static(AVATARS_DIR, { fallthrough: false, maxAge: '1d' }));
+// v61 (root cause of the "profile picture sometimes disappears" bug): the
+// app container is STATELESS (see Dockerfile) — a redeploy / restart / new
+// instance wipes server/avatars/, while user_profiles.avatar_storage_key
+// still points at the vanished file → 404 → broken picture until the next
+// upload. The bytes now live in Postgres (user_profiles.avatar_data) and are
+// served from there; the local file is only a warm cache. Existing pictures
+// whose file is still on disk are back-filled into the DB on first request.
+const AVATAR_MIME = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
+app.get('/avatars/:key', ah(async (req, res) => {
+  const key = String(req.params.key || '');
+  if (!/^[0-9a-f-]{36}(-\d{10,15})?\.(png|jpg|jpeg|webp)$/i.test(key)) throw new HttpError(404, 'Not found.');
+  const ext = key.split('.').pop().toLowerCase();
+  res.set('Cache-Control', 'public, max-age=31536000, immutable'); // keys are immutable (epoch-versioned)
+  const file = path.join(AVATARS_DIR, key);
+  const { rows } = await pool.query(
+    `SELECT user_id, avatar_data FROM user_profiles WHERE avatar_storage_key = $1`, [key]);
+  if (rows[0] && rows[0].avatar_data) {
+    res.type(AVATAR_MIME[ext] || 'application/octet-stream');
+    return res.send(rows[0].avatar_data);
+  }
+  if (fs.existsSync(file)) { // legacy (pre-v61) picture still on disk → serve + back-fill the DB
+    if (rows[0]) { try { await pool.query(`UPDATE user_profiles SET avatar_data = $1 WHERE user_id = $2 AND avatar_storage_key = $3`, [fs.readFileSync(file), rows[0].user_id, key]); } catch (_) {} }
+    return res.sendFile(file);
+  }
+  throw new HttpError(404, 'Not found.');
+}));
 
 const avatarUpload = multer({
   storage: multer.memoryStorage(),
@@ -588,11 +613,9 @@ app.post('/api/account/avatar', requireAuth, avatarUpload.single('image'), ah(as
   const prev = await pool.query('SELECT avatar_storage_key FROM user_profiles WHERE user_id = $1', [req.user.id]);
   const oldKey = prev.rows[0] && prev.rows[0].avatar_storage_key;
   if (oldKey && oldKey !== key) { try { fs.unlinkSync(path.join(AVATARS_DIR, oldKey)); } catch (_) {} }
-  await pool.query('UPDATE user_profiles SET avatar_storage_key = $1, updated_at = now() WHERE user_id = $2', [key, req.user.id]);
-  // Cache-buster = the epoch embedded in the key — identical to the value
-  // fullUser() derives, so the upload response and every later payload
-  // return the SAME stable URL for the bytes on disk.
-  res.json({ avatar_url: '/avatars/' + key + '?v=' + key.match(/-(\d{10,15})\./)[1] });
+  // v61: the DB holds the bytes (durable across redeploys); disk = cache.
+  await pool.query('UPDATE user_profiles SET avatar_storage_key = $1, avatar_data = $2, updated_at = now() WHERE user_id = $3', [key, f.buffer, req.user.id]);
+  res.json({ avatar_url: avatarUrlOf(key) }); // identical to what fullUser() derives
 }));
 
 app.delete('/api/account/avatar', requireAuth, ah(async (req, res) => {
@@ -600,7 +623,7 @@ app.delete('/api/account/avatar', requireAuth, ah(async (req, res) => {
   const oldKey = prev.rows[0] && prev.rows[0].avatar_storage_key;
   if (oldKey) {
     try { fs.unlinkSync(path.join(AVATARS_DIR, oldKey)); } catch (_) {}
-    await pool.query('UPDATE user_profiles SET avatar_storage_key = NULL, updated_at = now() WHERE user_id = $1', [req.user.id]);
+    await pool.query('UPDATE user_profiles SET avatar_storage_key = NULL, avatar_data = NULL, updated_at = now() WHERE user_id = $1', [req.user.id]);
   }
   res.json({ avatar_url: null });
 }));
@@ -786,7 +809,7 @@ app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Invalid user id.');
   const { rows } = await pool.query(
     `SELECT u.id, u.username, u.display_name, u.created_at AS joined_at,
-            p.bio, p.avatar_storage_key,
+            p.bio, p.avatar_storage_key, p.updated_at AS profile_updated_at,
             s.battles, s.wins, s.losses, s.draws
        FROM users u
        LEFT JOIN user_profiles p ON p.user_id = u.id
@@ -801,7 +824,7 @@ app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
     user: {
       id: r.id, username: r.username, display_name: r.display_name, joined_at: r.joined_at,
       bio: r.bio || null,
-      avatar_url: r.avatar_storage_key ? '/avatars/' + r.avatar_storage_key : null,
+      avatar_url: avatarUrlOf(r.avatar_storage_key, r.profile_updated_at), // v61: versioned like every other payload
       premium: prem.active, // v52: Premium badge on View Profile
     },
     statistics: {
@@ -829,6 +852,19 @@ async function areFriends(a, b) {
   );
   return !!rows[0];
 }
+// v61: a friend_request notification is a live CONTROL (Accept / Decline).
+// Once the request is resolved — accepted, declined, cancelled by the sender,
+// or auto-accepted because both sides asked — the notification is stamped
+// `handled` so the panel renders the outcome instead of dead buttons that
+// would 409. Same pattern as rematch_request (rooms.js).
+async function markFriendRequestHandled(requestId, outcome) {
+  await pool.query(
+    `UPDATE notifications
+        SET payload = payload || jsonb_build_object('handled', $2::text)
+      WHERE type = 'friend_request' AND payload->>'request_id' = $1 AND payload->>'handled' IS NULL`,
+    [String(requestId), outcome]
+  );
+}
 app.post('/api/friends/request', requireAuth, ah(async (req, res) => {
   const target = String((req.body || {}).user_id || '');
   if (!target || target === req.user.id) throw new HttpError(400, 'You cannot friend yourself.');
@@ -849,6 +885,7 @@ app.post('/api/friends/request', requireAuth, ah(async (req, res) => {
   );
   if (inc[0]) { // they asked US first — accept their request instead of a second one
     await pool.query(`UPDATE friend_requests SET status='accepted', responded_at=now() WHERE id=$1`, [inc[0].id]);
+    await markFriendRequestHandled(inc[0].id, 'accepted');
     await pool.query(
       `INSERT INTO friendships (user_a, user_b) VALUES (LEAST($1::uuid,$2::uuid), GREATEST($1::uuid,$2::uuid))`,
       [req.user.id, target]
@@ -889,6 +926,7 @@ app.post('/api/friends/requests/:id/accept', requireAuth, ah(async (req, res) =>
     [String(req.params.id), req.user.id]
   );
   if (!rows[0]) throw new HttpError(409, 'That friend request is no longer pending.');
+  await markFriendRequestHandled(req.params.id, 'accepted');
   await pool.query(
     `INSERT INTO friendships (user_a, user_b) VALUES (LEAST($1::uuid,$2::uuid), GREATEST($1::uuid,$2::uuid))`,
     [req.user.id, rows[0].from_user]
@@ -900,10 +938,14 @@ app.post('/api/friends/requests/:id/accept', requireAuth, ah(async (req, res) =>
 app.post('/api/friends/requests/:id/decline', requireAuth, ah(async (req, res) => {
   const { rows } = await pool.query(
     `UPDATE friend_requests SET status = 'declined', responded_at = now()
-      WHERE id = $1 AND to_user = $2 AND status = 'pending' RETURNING id`,
+      WHERE id = $1 AND to_user = $2 AND status = 'pending' RETURNING id, from_user`,
     [String(req.params.id), req.user.id]
   );
   if (!rows[0]) throw new HttpError(409, 'That friend request is no longer pending.');
+  await markFriendRequestHandled(req.params.id, 'declined');
+  // v61: the sender's "Pending · Cancel" chip must flip back to "Add Friend"
+  // live (no 25 s cache wait) — a silent relation-change push, no notification row.
+  rtHub.sendToUser(rows[0].from_user, { type: 'friends.changed', reason: 'declined', user_id: req.user.id });
   res.json({ ok: true });
 }));
 app.delete('/api/friends/:userId', requireAuth, ah(async (req, res) => {
@@ -915,11 +957,14 @@ app.delete('/api/friends/:userId', requireAuth, ah(async (req, res) => {
   );
   // …and/or cancel MY outgoing pending request (both are "remove" from the
   // user's point of view; the other side is untouched).
-  await pool.query(
+  const { rows: cancelled } = await pool.query(
     `UPDATE friend_requests SET status='cancelled', responded_at=now()
-      WHERE from_user = $1 AND to_user = $2 AND status = 'pending'`,
+      WHERE from_user = $1 AND to_user = $2 AND status = 'pending' RETURNING id`,
     [req.user.id, other]
   );
+  for (const r of cancelled) await markFriendRequestHandled(r.id, 'cancelled');
+  // v61: the other side's Accept/Decline (or "Friends · Remove") must update live.
+  rtHub.sendToUser(other, { type: 'friends.changed', reason: cancelled.length ? 'cancelled' : 'removed', user_id: req.user.id });
   res.json({ ok: true });
 }));
 
@@ -1288,6 +1333,20 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
      `DELETE FROM randomizer_elements WHERE category = 'color' AND name NOT LIKE '#%'`],
     ['v60 randomizer: category label → Colour Combination',
      `UPDATE randomizer_categories SET display_name = 'Colour Combination' WHERE key = 'color' AND display_name <> 'Colour Combination'`],
+      // ---------------- v61 ----------------
+    // v61 randomizer NORMALIZATION: atomic, neutral concepts only (no
+    // modifiers), Drawing Style = exactly the 30 canonical styles, wildcards
+    // = simple unexpected things. Every non-colour category is re-seeded
+    // from randomizer_seed.json (seed.js refills EMPTY categories at boot).
+    // The colour-combination dataset (v60) is untouched. Locked challenges
+    // keep their stored values (battle_challenge_elements.value).
+    ['v61 randomizer: normalized atomic pool (re-seed all non-colour categories)',
+     `DELETE FROM randomizer_elements WHERE category <> 'color' AND source = 'official'
+        AND NOT EXISTS (SELECT 1 FROM randomizer_elements v WHERE v.category = 'style' AND v.name = 'Lowbrow Art')`],
+    ['v61 user_profiles.avatar_data (profile pictures persist in the DB — the container disk is ephemeral)',
+     `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS avatar_data bytea`],
+    ['v61 randomizer: Style category label → Drawing Style',
+     `UPDATE randomizer_categories SET display_name = 'Drawing Style' WHERE key = 'style' AND display_name <> 'Drawing Style'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {
