@@ -157,10 +157,13 @@
     this.dead = false;
     this.motion = true;
     this.theme = 'cloud';
+    var selfR = this;
+    this._onResize = function () { if (!selfR.dead && !selfR.motion && selfR.staticFrame) selfR.staticFrame(); }; // v57
+    window.addEventListener('resize', this._onResize);
     this.canvas = document.createElement('canvas');
     this.canvas.setAttribute('aria-hidden', 'true');
     var cs = this.canvas.style;
-    cs.position = 'absolute'; cs.inset = '0'; cs.width = '100%'; cs.height = '100%'; cs.display = 'block';
+    cs.position = 'absolute'; cs.inset = '0'; cs.width = '100%'; cs.height = '100%'; cs.display = 'block'; cs.pointerEvents = 'none'; cs.userSelect = 'none';
     host.appendChild(this.canvas);
     var gl = this.canvas.getContext('webgl', { alpha: false, antialias: false, depth: false, preserveDrawingBuffer: true });
     if (!gl) { console.error('CloudSky: WebGL unavailable'); return; }
@@ -183,17 +186,20 @@
     var u = function (name) { if (!(name in locs)) locs[name] = gl.getUniformLocation(prog, name); return locs[name]; };
 
     var raf = 0, last = 0, nearX = 0, farX = 0, cirrusX = 0, leanX = 0, leanY = 0;
-    var ptr = { x: 0, y: 0, inside: false };
 
-    var render = function (now) {
-      if (self.dead) return;
-      var dt = Math.min(0.05, (now - last) / 1000);
+    // v57: paint ONE frame (no scheduling). Used by the loop, by the
+    // synchronous first paint and by staticFrame()/setMotion(false), so an
+    // opaque (alpha:false) WebGL canvas is never left un-rendered — that
+    // black canvas was the "homepage turns black with Animations OFF" bug.
+    var paint = function (now) {
+      if (self.dead) return false;
+      var dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
       last = now;
       var v = PRESET;
       var k = 1 - Math.exp(-v.damping * 0.12 * dt);
-      leanX += ((ptr.inside ? ptr.x : 0) - leanX) * k;
-      leanY += ((ptr.inside ? ptr.y : 0) - leanY) * k;
-      var gust = 1 + leanX * v.wind;
+      // v57: no pointer input — the sky never leans toward a cursor
+      leanX = 0; leanY = 0; void k;
+      var gust = 1;
       var rate = (v.speed / 50) * gust;
       nearX = (nearX - NEAR_DRIFT * rate * dt) % 1000;
       farX = (farX - FAR_DRIFT * rate * dt) % 1000;
@@ -201,7 +207,7 @@
 
       var dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       var cw = host.clientWidth || 0, ch = host.clientHeight || 0;
-      if (!cw || !ch || document.hidden) { raf = requestAnimationFrame(render); return; } // hidden: skip the draw, keep the clock
+      if (!cw || !ch || document.hidden) return false; // hidden / unsized: skip the draw, keep the clock
       var bw = Math.max(1, Math.round(cw * dpr)), bh = Math.max(1, Math.round(ch * dpr));
       if (self.canvas.width !== bw || self.canvas.height !== bh) { self.canvas.width = bw; self.canvas.height = bh; }
       gl.viewport(0, 0, bw, bh);
@@ -225,39 +231,48 @@
       gl.uniform3f(u('uCloud'), cld[0], cld[1], cld[2]);
       gl.uniform4f(u('uGlow'), glow[0], glow[1], glow[2], glow[3]);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      return true;
+    };
+    var render = function (now) {
+      if (self.dead) return;
+      paint(now);
       raf = requestAnimationFrame(render);
     };
 
-    // The host layer is pointer-transparent, so parallax tracks the pointer
-    // at window level (still zoom-invariant: the rect ratio is used).
-    this._track = function (e) {
-      var r = self.canvas.getBoundingClientRect();
-      if (r.width <= 0 || r.height <= 0) return;
-      ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      ptr.y = 1 - ((e.clientY - r.top) / r.height) * 2;
-      ptr.inside = true;
-    };
-    this._onLeave = function () { ptr.inside = false; };
-    window.addEventListener('pointermove', this._track, { passive: true });
-    window.addEventListener('pointerleave', this._onLeave, { passive: true });
+    // v57: the sky is a PURE BACKGROUND — it never listens to the pointer
+    // (no move/hover/drag/leave handlers, no parallax lean). The parallax
+    // rests at the neutral centre; the only motion is the wind drift.
+    // The host (#home-bg / #login-bg) is pointer-events:none, so nothing
+    // here can ever intercept a click, a tap or a keystroke.
+    this._track = null;
+    this._onLeave = null;
 
     this.setMotion = function (on) {
       self.motion = !!on;
-      if (!on) { if (raf) { cancelAnimationFrame(raf); raf = 0; } } // last WebGL frame stays on screen
-      else if (!raf && !self.dead) { last = 0; raf = requestAnimationFrame(render); }
+      if (!on) {
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        self.staticFrame(); // v57: a frozen sky is a PAINTED sky, never a black canvas
+      } else if (!raf && !self.dead) { last = 0; raf = requestAnimationFrame(render); }
     };
-    this.staticFrame = function () {}; // the canvas IS the static frame
+    // v57: a real static frame — one synchronous render at the current clock.
+    this.staticFrame = function () {
+      if (self.dead) return;
+      var painted = paint(performance.now());
+      if (!painted) { // host not laid out yet (e.g. display:none → block this tick): retry next frame
+        requestAnimationFrame(function () { if (!self.dead && !self.motion) paint(performance.now()); });
+      }
+    };
     this.dispose = function () {
       self.dead = true;
       if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener('pointermove', self._track);
-      window.removeEventListener('pointerleave', self._onLeave);
+      window.removeEventListener('resize', self._onResize);
       try { gl.getExtension('WEBGL_lose_context'); } catch (e) {} // context dies with the removed canvas
       if (self.canvas.parentNode) self.canvas.parentNode.removeChild(self.canvas);
     };
 
     last = 0;
-    raf = requestAnimationFrame(render);
+    paint(performance.now());                 // v57: first frame NOW (synchronous)
+    if (self.motion) raf = requestAnimationFrame(render);
   }
 
   window.CloudSkyScene = CloudSkyScene;

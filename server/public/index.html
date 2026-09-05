@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="56">
+<meta name="aa-ui-version" content="57">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -370,6 +370,11 @@ try {
   /* ---- Glowing: hierarchy — primary actions + logo glow; everything else
        stays calm. One glow scale, applied with intent. ---- */
   body[data-ptheme="glowing"] #top-brand img { filter:drop-shadow(0 0 14px rgba(var(--pink-rgb),.55)); }
+  /* v57: the glowing wordmark GLOWS wherever it appears (home, auth, legal,
+     about, drawer, theme cards) — a live halo on top of the baked glow */
+  body[data-ptheme="glowing"] img[data-aa-logo] { filter:drop-shadow(0 0 10px rgba(var(--pink-rgb),.55)) drop-shadow(0 0 26px rgba(var(--purple-rgb),.35)); animation:pth-glow-breathe 3.8s ease-in-out infinite; }
+  body[data-ptheme="glowing"] .swatch-logo img[data-swatch-logo="glowing"], .swatch-logo img[src*="glowing"] { filter:drop-shadow(0 0 8px rgba(110,212,191,.55)); }
+  @keyframes pth-glow-breathe { 0%,100% { filter:drop-shadow(0 0 10px rgba(var(--pink-rgb),.5)) drop-shadow(0 0 26px rgba(var(--purple-rgb),.3)); } 50% { filter:drop-shadow(0 0 16px rgba(var(--pink-rgb),.8)) drop-shadow(0 0 34px rgba(var(--purple-rgb),.45)); } }
   /* v54 hierarchy: home destination cards are <button>s — under Glowing they
      must NOT wear the primary CTA gradient+glow. They stay calm surfaces with
      a faint halo; only primary actions burn bright. */
@@ -421,12 +426,25 @@ try {
 
   /* ---- v55: premium star badge (dashboard profile card) ---- */
   #view-account { position:relative; }
-  /* v56: a medal, not a chip — gold medallion with beveled facets, metal
-     ring and sparkles. Never interactive; the slow shine is motion (the
-     global Animations OFF rule freezes it with everything else). */
-  .prem-star { position:absolute; top:12px; right:12px; z-index:5; width:38px; height:38px; pointer-events:none; filter:drop-shadow(0 0 7px rgba(255,203,92,.42)) drop-shadow(0 2px 5px rgba(0,0,0,.5)); }
-  .prem-star svg { width:38px; height:38px; display:block; animation:prem-medal-shine 7s ease-in-out infinite; }
-  @keyframes prem-medal-shine { 0%,100% { transform:scale(1); filter:brightness(1); } 50% { transform:scale(1.05); filter:brightness(1.14); } }
+  /* v57: the Premium DIAMOND — the supplied gem art (background removed),
+     one shared badge in every Premium location. Never interactive. The
+     motion is a gentle float + a soft glow pulse + a passing shimmer sweep:
+     premium and calm, never busy. Animations OFF freezes it (global rule),
+     reduced-motion collapses it to stillness. */
+  .prem-star { position:absolute; top:10px; right:12px; z-index:5; width:44px; height:44px; pointer-events:none; }
+  .prem-diamond { position:relative; display:inline-block; width:44px; height:44px; vertical-align:middle; pointer-events:none; user-select:none; animation:prem-diamond-float 4.2s ease-in-out infinite; }
+  .prem-diamond > img { display:block; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 6px rgba(226,120,255,.45)) drop-shadow(0 3px 5px rgba(0,0,0,.45)); animation:prem-diamond-glow 3.6s ease-in-out infinite; }
+  .prem-diamond::after { content:""; position:absolute; inset:0; -webkit-mask:url(/premium-diamond.png) center/contain no-repeat; mask:url(/premium-diamond.png) center/contain no-repeat; background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.7) 50%, transparent 60%); background-size:260% 100%; background-position:120% 0; mix-blend-mode:screen; animation:prem-diamond-shimmer 5.5s ease-in-out infinite; }
+  .prem-diamond.sm { width:18px; height:18px; }
+  .prem-diamond.md { width:28px; height:28px; }
+  .prem-diamond.lg { width:64px; height:64px; }
+  .prem-chip .prem-diamond { width:14px; height:14px; margin-right:1px; }
+  .prem-chip.big .prem-diamond { width:18px; height:18px; }
+  @keyframes prem-diamond-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2.5px); } }
+  @keyframes prem-diamond-glow { 0%,100% { filter:drop-shadow(0 0 5px rgba(226,120,255,.35)) drop-shadow(0 3px 5px rgba(0,0,0,.45)) brightness(1); } 50% { filter:drop-shadow(0 0 11px rgba(226,120,255,.75)) drop-shadow(0 3px 5px rgba(0,0,0,.45)) brightness(1.08); } }
+  @keyframes prem-diamond-shimmer { 0%,55% { background-position:120% 0; } 80%,100% { background-position:-120% 0; } }
+  @media (prefers-reduced-motion: reduce) { .prem-diamond, .prem-diamond > img, .prem-diamond::after { animation:none !important; } }
+  @media (max-width:420px) { .prem-star { width:36px; height:36px; top:8px; right:10px; } .prem-star .prem-diamond { width:36px; height:36px; } }
 
   /* ---- v55: theme-aware destination icons (Battle / Create / Join /
        History / Saved). Decorative treatments AROUND an icon whose color
@@ -1539,21 +1557,9 @@ try {
        real-data lists (honest empty states until battles exist). The old
        always-visible save-profile form now lives behind "Edit Profile". -->
   <section id="view-account" class="view hidden">
-    <!-- v55: Premium star badge — a real badge in the card's top-right corner
-         (not a button-looking chip). Shows only for actual Premium users. -->
-    <span id="card-prem" class="prem-star hidden" title="Art Arena Premium"><svg viewBox="0 0 40 40" aria-hidden="true">
-      <defs>
-        <linearGradient id="premg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF3C4"/><stop offset=".48" stop-color="#FFD75E"/><stop offset="1" stop-color="#C8901A"/></linearGradient>
-        <linearGradient id="premr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A0"/><stop offset=".55" stop-color="#D9A63A"/><stop offset="1" stop-color="#8C5D13"/></linearGradient>
-      </defs>
-      <circle cx="20" cy="20" r="18.2" fill="none" stroke="url(#premr)" stroke-width="2.7"/>
-      <circle cx="20" cy="20" r="16" fill="#17171f" stroke="rgba(255,255,255,.28)" stroke-width="1"/>
-      <path d="M20 10.2l2.1 4.2 4.6.7-3.3 3.2.8 4.6-4.2-2.2-4.2 2.2.8-4.6-3.3-3.2 4.6-.7z" fill="#8C5D13" transform="translate(0,.8)"/>
-      <path d="M20 10.2l2.1 4.2 4.6.7-3.3 3.2.8 4.6-4.2-2.2-4.2 2.2.8-4.6-3.3-3.2 4.6-.7z" fill="url(#premg)" stroke="#8C5D13" stroke-width=".7" stroke-linejoin="round"/>
-      <path d="M20 10.2l2.1 4.2-2.1 6.1-2.1-6.1z" fill="rgba(255,255,255,.4)"/>
-      <path d="M31.5 7.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="#FFF3C4"/>
-      <circle cx="35.6" cy="13.8" r="1" fill="#FFE9A0"/>
-    </svg></span>
+    <!-- v57: the Premium diamond badge in the card's top-right corner.
+         Shows only for actual Premium users (server entitlement). -->
+    <span id="card-prem" class="prem-star hidden" title="Art Arena Premium"><span class="prem-diamond" aria-label="Art Arena Premium" role="img"><img src="/premium-diamond.png" alt=""></span></span>
     <div id="unverified-banner" class="banner hidden">
       ⚠ Email not verified — a code was sent to your email.
       <div style="margin-top:8px">
@@ -1649,7 +1655,7 @@ try {
     <!-- v53: UI Customization lives HERE for Premium members (no standalone
          nav slot). Free members see an honest locked teaser. -->
     <div class="settings-appearance" id="settings-themes" style="margin-top:18px">
-      <label>UI Customization <span class="prem-chip">PREMIUM</span>
+      <label>UI Customization <span class="prem-chip"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM</span>
         <div id="settings-theme-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-top:10px"></div>
       </label>
       <div id="settings-theme-custom" class="pth-custom hidden">
@@ -1754,7 +1760,7 @@ try {
       <span class="drawer-ava" id="drawer-avatar">•</span>
       <span class="drawer-who">
         <span class="drawer-name" id="drawer-name">…</span>
-        <span class="drawer-username" id="drawer-username">@…</span> <span id="drawer-prem" class="prem-chip hidden">★ PREMIUM</span>
+        <span class="drawer-username" id="drawer-username">@…</span> <span id="drawer-prem" class="prem-chip hidden"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM</span>
       </span>
     </div>
     <nav id="drawer-nav" aria-label="Main"></nav>
@@ -2046,7 +2052,8 @@ let mePremium = false;
 let activeThemeKey = null, activeThemeCustom = null;
 const THEME_LOGOS = {
   flame: '/themes/flame.png', cloud: '/themes/cloud.png', glitch: '/themes/glitch.png',
-  graffiti: '/themes/graffiti.png', stitch: '/themes/stitch.png', glowing: '/themes/glowing.png',
+  graffiti: '/themes/graffiti.png', stitch: '/themes/stitch.png',
+  glowing: '/themes/glowing.png?v=57', // v57: FILLED wordmark (bg removed, green→blue fill, baked glow) — versioned so no page keeps the old hollow file
   magazine: '/themes/magazine.png', // v55: the supplied cutout logo (bg removed, art exact)
   pixel: '/themes/pixel.png',        // v56: the supplied pixel-art logo (as-is, NEAREST-scaled)
 };
@@ -2412,7 +2419,7 @@ function startHomeBg() {
   }
   if (homeBgScene && homeBgScene.__kind === 'theme') { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
   host.classList.add('on');
-  if (homeBgScene) { homeBgScene.setTheme(homeBgThemeKey()); return; }
+  if (homeBgScene) { homeBgScene.setTheme(homeBgThemeKey()); try { homeBgScene.setMotion(animIsOn()); } catch (_) {} return; }
   if (!window.RisingLines) {
     // same fresh-tab race guard as the auth starfield: the app script runs
     // before the effect scripts at the bottom of <body>; retry until they
@@ -5201,7 +5208,7 @@ async function openProfile(userId) {
   $('#pm-body').innerHTML =
     '<div style="display:flex; align-items:center; gap:12px; margin:8px 0 2px">' +
     (u.avatar_url ? '<img class="prof-modal-ava" src="' + esc(u.avatar_url) + '" alt="">' : '<span class="prof-modal-ava-fallback">' + esc((u.display_name || u.username || '?').charAt(0).toUpperCase()) + '</span>') +
-    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + (u.premium ? ' <span class="prem-chip">★ PREMIUM</span>' : '') + '</div>' +
+    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + (u.premium ? ' <span class="prem-chip"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM</span>' : '') + '</div>' +
     '<div class="muted" style="font-size:13px">@' + esc(u.username) + '</div></div></div>' +
     (u.bio ? '<p class="muted" style="margin:10px 0 0; font-size:13.5px">' + esc(u.bio) + '</p>' : '') +
     '<div class="prof-stats-row">' +
@@ -5304,7 +5311,7 @@ async function renderPremiumPage() {
   mePremium = !!d.premium;
   applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
   $('#prem-status').innerHTML = d.premium
-    ? '<span class="prem-chip big">★ PREMIUM ACTIVE</span> <span class="muted" style="font-size:12px; margin-left:8px">test mode · customize your themes in <a href="#" id="prem-to-settings" style="color:var(--pink); font-weight:700">Settings</a></span>'
+    ? '<span class="prem-chip big"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span> PREMIUM ACTIVE</span> <span class="muted" style="font-size:12px; margin-left:8px">test mode · customize your themes in <a href="#" id="prem-to-settings" style="color:var(--pink); font-weight:700">Settings</a></span>'
     : '<span class="muted" style="font-size:13px">You are on the <b>Free</b> plan.</span>';
   $('#prem-activate-wrap').classList.toggle('hidden', d.premium);
   $('#prem-revoke-wrap').classList.toggle('hidden', !d.premium);
@@ -5318,7 +5325,7 @@ async function renderPremiumPage() {
     const active = t.key === activeKey;
     return '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" data-theme-key="' + esc(t.key) + '" data-locked="' + (locked ? '1' : '') + '">' +
       '<span class="swatch-logo"><img src="' + ((t.key && THEME_LOGOS[t.key]) ? THEME_LOGOS[t.key] : '/logo.png') + '" alt="" loading="lazy"></span>' +
-      '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip">P</span>' : '') + '</span>' +
+      '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span></span>' : '') + '</span>' +
       '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
       (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
       (locked ? '<span class="swatch-lock">🔒</span>' : '') + '</div>';
@@ -5424,7 +5431,7 @@ async function renderSettingsThemes() {
   const card = (t, active, locked, attr) =>
     '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" ' + attr + '>' +
     '<span class="swatch-logo"><img data-swatch-logo="' + esc(t.key) + '" src="' + pthLogoFor(t.key) + '" alt=""></span>' +
-    '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip">P</span>' : '') + '</span>' +
+    '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-diamond" aria-hidden="true"><img src="/premium-diamond.png" alt=""></span></span>' : '') + '</span>' +
     (t.customizable ? '<span class="swatch-chips"><i style="background:' + esc(t.c1 || 'var(--pink)') + '"></i><i style="background:' + esc(t.c2 || 'var(--purple)') + '"></i></span>' : '') +
     (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
     (locked ? '<span class="swatch-lock">🔒</span>' : '') + '</div>';

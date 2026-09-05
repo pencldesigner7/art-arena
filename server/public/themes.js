@@ -508,68 +508,108 @@
     return out;
   };
 
-  // PIXEL (v56) — an animated pixel-art world built from the supplied
-  // reference: dithered sky bands, a blocky sun, drifting chunky clouds,
-  // stepped hill silhouettes, twinkling sparkles. Rendered at 1/6 resolution
-  // and upscaled with smoothing OFF — every edge is a real, chunky pixel.
+  // PIXEL (v57) — a pop-art PIXEL world in the pixel logo's own palette
+  // (magenta / cyan / gold / violet on deep navy), built from the supplied
+  // comic reference: a radial halftone dot field, a sunburst of chunky rays,
+  // bold comic star-bursts, drifting blocky clouds and twinkles. Every
+  // element is a deliberate pixel shape: rendered at 1/S resolution on a
+  // small working canvas and upscaled with smoothing OFF (crisp blocks —
+  // never blurry). A soft centre vignette keeps the UI readable on top.
+  ThemeScene.PIXEL = {
+    navy: '#0E1E2C', navy2: '#142A3D', violet: '#4B2C7A', magenta: '#E337C4', pink: '#FF7AE0',
+    cyan: '#77D5DF', cyan2: '#BFF3F7', gold: '#F5C542', gold2: '#FFE58A', white: '#FFFFFF', ink: '#0A1420'
+  };
   ThemeScene.prototype.bakePixel = function () {
-    var S = 6;
+    var P = ThemeScene.PIXEL, S = 5;
     this.pxScale = S;
-    var pw = Math.max(4, Math.ceil(this.w / S)), ph = Math.max(4, Math.ceil(this.h / S));
+    var pw = Math.max(8, Math.ceil(this.w / S)), ph = Math.max(8, Math.ceil(this.h / S));
     this.spr.px = mk(pw, ph);                 // working frame (dynamic)
-    var sky = ['#4E7FA6', '#6D99B8', '#8FB3CC', '#B7D2E2', '#E4EFF6']; // ref: muted blue-gray → pale
-    // static backdrop: bands + Bayer seams + stepped hills + sun halo
+    var cx = pw / 2, cy = ph * 0.42;          // burst origin (upper-centre, behind the logo)
+    var i, x, y;
+    // 1) static backdrop: navy → violet vertical bands with 2x2 checker dithered seams
     var bg = mk(pw, ph), bx = bg.getContext('2d');
-    var bands = sky.length, b2, dx, dy;
-    for (b2 = 0; b2 < bands; b2++) {
-      var yTop = Math.floor(ph * b2 / bands), yBot = Math.floor(ph * (b2 + 1) / bands);
-      bx.fillStyle = sky[b2]; bx.fillRect(0, yTop, pw, yBot - yTop);
-      if (b2 > 0) { // 2x2 checker dither blends the seam — the retro signature
-        bx.fillStyle = sky[b2 - 1];
-        for (dy = 0; dy < 3; dy++) for (dx = 0; dx < pw; dx++) {
-          if ((((dx + dy) & 1) === 0) && ((dx * 7 + dy * 3) % 5 !== 0)) bx.fillRect(dx, yTop + dy, 1, 1);
-        }
-      }
+    var bands = [P.navy, '#122438', '#1A2A4A', '#2A2A5C', P.violet];
+    for (i = 0; i < bands.length; i++) {
+      var yT = Math.floor(ph * i / bands.length), yB = Math.floor(ph * (i + 1) / bands.length);
+      bx.fillStyle = bands[i]; bx.fillRect(0, yT, pw, yB - yT);
+      if (i > 0) { bx.fillStyle = bands[i - 1]; for (y = 0; y < 3; y++) for (x = 0; x < pw; x++) if (((x + y) & 1) === 0 && ((x * 7 + y * 3) % 5) !== 0) bx.fillRect(x, yT + y, 1, 1); }
     }
-    // stepped hills: heights quantized to whole blocks (two parallax layers)
-    var hills = [
-      { base: 0.84, amp: 0.09, step: 11, c: '#9CC298', off: 0 },   // sage (ref greens)
-      { base: 0.92, amp: 0.06, step: 8, c: '#3E5A48', off: 37 }
-    ];
-    hills.forEach(function (hl) {
-      bx.fillStyle = hl.c;
-      for (var hx = 0; hx < pw; hx++) {
-        var q = Math.floor((hx + hl.off) / hl.step);
-        var hh = Math.round(ph * (hl.base + hl.amp * Math.sin(q * 1.7 + hl.off)));
-        bx.fillRect(hx, hh, 1, ph - hh);
-      }
-    });
-    // blocky sun with a dithered halo (top-right)
-    var sx = pw - 13, sy = 6;
-    bx.fillStyle = 'rgba(244,249,252,.35)';
-    for (dy = -3; dy <= 3; dy++) for (dx = -3; dx <= 3; dx++) {
-      if (Math.abs(dx) + Math.abs(dy) <= 3 && ((dx + dy) & 1) === 0) bx.fillRect(sx + dx, sy + dy, 1, 1);
+    // 2) radial HALFTONE dot field (the comic signature): sparse 1px dots
+    //    near the burst origin, 2px dots at the rim — grid 6px, offset rows
+    //    so it reads as a dot screen, never as a mesh. Cyan near, pink far.
+    var maxR = Math.sqrt(cx * cx + Math.max(cy, ph - cy) * Math.max(cy, ph - cy));
+    var row = 0;
+    for (y = 3; y < ph; y += 6, row++) for (x = (row & 1) ? 6 : 3; x < pw; x += 6) {
+      var dd = Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)) / maxR;
+      if (dd < 0.18) continue;
+      var sz = dd < 0.62 ? 1 : 2;
+      bx.globalAlpha = 0.35 + 0.45 * dd;
+      bx.fillStyle = dd < 0.5 ? P.cyan : P.pink;
+      bx.fillRect(x, y, sz, sz);
     }
-    bx.fillStyle = '#F4F9FC';
-    for (dy = -2; dy <= 2; dy++) for (dx = -2; dx <= 2; dx++) if (Math.abs(dx) + Math.abs(dy) <= 2) bx.fillRect(sx + dx, sy + dy, 1, 1);
+    bx.globalAlpha = 1;
     this.spr.pxBg = bg;
-    this.pxSun = { x: sx, y: sy };
-    // drifting chunky clouds — main slab + two deterministic bumps
-    this.pxClouds = [];
-    for (var i = 0; i < 6; i++) {
-      var depth = i < 2 ? 0 : (i < 5 ? 1 : 2);
-      var wpx = depth === 0 ? rnd(10, 15) : depth === 1 ? rnd(16, 25) : rnd(26, 40);
-      this.pxClouds.push({
-        x: rnd(-30, pw + 10), y: rnd(2, ph * 0.38), w: wpx | 0,
-        h: Math.max(2, Math.round(wpx * rnd(0.3, 0.42))),
-        v: depth === 0 ? 1.2 : depth === 1 ? 2.4 : 4.2,
-        a: depth === 0 ? 0.55 : depth === 1 ? 0.75 : 0.95,
-        b1: rnd(0.15, 0.4), b2: rnd(0.6, 0.85), bw: rnd(0.18, 0.3)
-      });
+    this.pxCenter = { x: cx, y: cy };
+    // 3) SUNBURST rays — baked once as a rotatable sprite: 12 chunky wedges,
+    //    gold / magenta / cyan in turn, bright and clean over the navy field
+    var rr = Math.ceil(maxR) + 4, rays = mk(rr * 2, rr * 2), rx = rays.getContext('2d');
+    var N = 12, rayCols = [P.gold, P.magenta, P.cyan];
+    for (i = 0; i < N; i++) {
+      var a0 = (i / N) * 6.2832, a1 = a0 + (0.42 / N) * 6.2832;
+      rx.fillStyle = rayCols[i % 3];
+      rx.globalAlpha = 0.55;
+      rx.beginPath(); rx.moveTo(rr, rr);
+      rx.lineTo(rr + Math.cos(a0) * rr, rr + Math.sin(a0) * rr);
+      rx.lineTo(rr + Math.cos(a1) * rr, rr + Math.sin(a1) * rr);
+      rx.closePath(); rx.fill();
     }
-    // twinkling sparkles (white + the logo cyan; slow, flash-safe)
+    rx.globalAlpha = 1;
+    this.spr.pxRays = rays; this.pxRayAng = 0; this.pxRayR = rr;
+    // 4) comic STAR-BURSTS (the white spiky shapes) — pixel sprites in 3 sizes,
+    //    white fill, ink outline, a cyan/magenta inner spark
+    var starSprite = function (R, fill, inner) {
+      var c = mk(R * 2 + 4, R * 2 + 4), g = c.getContext('2d'), k, spikes = 8;
+      var poly = function (rad0, rad1) {
+        g.beginPath();
+        for (k = 0; k < spikes * 2; k++) { var an = (k / (spikes * 2)) * 6.2832 - 1.5708, rd = (k % 2) ? rad1 : rad0; g.lineTo(R + 2 + Math.cos(an) * rd, R + 2 + Math.sin(an) * rd); }
+        g.closePath();
+      };
+      g.fillStyle = P.ink; poly(R + 1.6, R * 0.5 + 1.6); g.fill();
+      g.fillStyle = fill; poly(R, R * 0.5); g.fill();
+      g.fillStyle = inner; poly(R * 0.42, R * 0.18); g.fill();
+      return c;
+    };
+    this.spr.pxStarBig = starSprite(11, P.white, P.cyan);
+    this.spr.pxStarMid = starSprite(7, P.white, P.magenta);
+    this.spr.pxStarSm = starSprite(4, P.gold2, P.gold);
+    // fixed comic composition: big bursts pinned to the corners/edges, mids
+    // spread around, smalls scattered — like the reference frame
+    this.pxBursts = [
+      { s: 'big', x: pw * 0.06, y: ph * 0.16, ph: rnd(0, 6.28) }, { s: 'big', x: pw * 0.94, y: ph * 0.72, ph: rnd(0, 6.28) },
+      { s: 'big', x: pw * 0.90, y: ph * 0.10, ph: rnd(0, 6.28) }, { s: 'big', x: pw * 0.10, y: ph * 0.80, ph: rnd(0, 6.28) },
+      { s: 'mid', x: pw * 0.30, y: ph * 0.90, ph: rnd(0, 6.28) }, { s: 'mid', x: pw * 0.72, y: ph * 0.88, ph: rnd(0, 6.28) },
+      { s: 'mid', x: pw * 0.22, y: ph * 0.06, ph: rnd(0, 6.28) }, { s: 'mid', x: pw * 0.66, y: ph * 0.04, ph: rnd(0, 6.28) }
+    ];
+    for (i = 0; i < 10; i++) this.pxBursts.push({ s: 'sm', x: rnd(2, pw - 2), y: rnd(2, ph - 2), ph: rnd(0, 6.28) });
+    // 5) drifting chunky clouds — slab + two bumps, cyan tint with an ink under-edge
+    this.pxClouds = [];
+    for (i = 0; i < 5; i++) {
+      var depth = i < 2 ? 0 : (i < 4 ? 1 : 2);
+      var wpx = depth === 0 ? rnd(10, 15) : depth === 1 ? rnd(16, 24) : rnd(26, 36);
+      this.pxClouds.push({ x: rnd(-30, pw + 10), y: rnd(2, ph * 0.3), w: wpx | 0, h: Math.max(2, Math.round(wpx * rnd(0.3, 0.42))),
+        v: depth === 0 ? 1.0 : depth === 1 ? 2.0 : 3.4, a: depth === 0 ? 0.45 : depth === 1 ? 0.6 : 0.8,
+        b1: rnd(0.15, 0.4), b2: rnd(0.6, 0.85), bw: rnd(0.18, 0.3) });
+    }
+    // 6) twinkles — single pixels in gold / cyan / white (slow sine gate)
     this.pxStars = [];
-    for (var t2 = 0; t2 < 26; t2++) this.pxStars.push({ x: rnd(0, pw) | 0, y: rnd(0, ph * 0.5) | 0, ph: rnd(0, 6.28), sp: rnd(0.7, 1.3), c: Math.random() < 0.3 ? '#77D5DF' : '#F4F9FC' });
+    for (i = 0; i < 40; i++) this.pxStars.push({ x: rnd(0, pw) | 0, y: rnd(0, ph) | 0, ph: rnd(0, 6.28), sp: rnd(0.6, 1.4), c: i % 3 === 0 ? P.gold2 : i % 3 === 1 ? P.cyan2 : P.white });
+    // 7) centre READABILITY vignette (screen-space, drawn after the upscale):
+    //    a soft dark column where the cards live — the art stays vivid at the edges
+    var v = mk(256, 256), vx = v.getContext('2d');
+    var rg = vx.createRadialGradient(128, 128, 30, 128, 128, 150);
+    rg.addColorStop(0, 'rgba(10,20,32,.62)'); rg.addColorStop(0.55, 'rgba(10,20,32,.3)'); rg.addColorStop(1, 'rgba(10,20,32,0)');
+    vx.fillStyle = rg; vx.fillRect(0, 0, 256, 256);
+    this.spr.pxVignette = v;
   };
 
   // GLOWING — layered light fields + drifting sparks + edge vignette. The
@@ -733,6 +773,9 @@
       for (i = 0; i < pcx.length; i++) { pcx[i].x += pcx[i].v * dt; if (pcx[i].x - 45 > this.spr.px.width) pcx[i].x = -45; }
       var pst = this.pxStars || [];
       for (i = 0; i < pst.length; i++) pst[i].ph += pst[i].sp * dt;
+      var pbs = this.pxBursts || [];
+      for (i = 0; i < pbs.length; i++) pbs[i].ph += dt * 1.1;
+      this.pxRayAng = (this.pxRayAng || 0) + dt * 0.06;  // v57: the sunburst turns, slowly
     } else if (this.theme === 'glowing') {
       for (i = 0; i < this.p.length; i++) { p = this.p[i]; p.ph += dt * 0.8; p.ang += dt * 0.12; p.x += Math.cos(p.ang) * p.v * dt; p.y += Math.sin(p.ang) * p.v * dt; if (p.x < -p.r) p.x = w + p.r; if (p.x > w + p.r) p.x = -p.r; if (p.y < -p.r) p.y = h + p.r; if (p.y > h + p.r) p.y = -p.r; }
       for (i = 0; i < this.sparks.length; i++) { var k = this.sparks[i]; k.ph += dt * 1.7; k.y -= k.v * dt; if (k.y < -6) { k.y = h + 6; k.x = rnd(0, w); } }
@@ -904,34 +947,53 @@
         }
       }
     } else if (this.theme === 'pixel') {
-      var px = this.spr.px, S = this.pxScale || 6;
+      var px = this.spr.px, S = this.pxScale || 5, PX = ThemeScene.PIXEL;
       if (px) {
         var g2 = px.getContext('2d');
         var pw = px.width, ph = px.height;
+        g2.imageSmoothingEnabled = false;
         g2.drawImage(this.spr.pxBg, 0, 0);
-        // drifting chunky clouds: light slab + slate under-edge + two bumps
+        // sunburst rays: rotation quantized to 1/48 turn so the wedges step
+        // like frames of a sprite (pixel motion, not a smooth spin)
+        if (this.spr.pxRays) {
+          var qa = Math.round((this.pxRayAng || 0) / (6.2832 / 48)) * (6.2832 / 48);
+          g2.save(); g2.translate(this.pxCenter.x, this.pxCenter.y); g2.rotate(qa);
+          g2.drawImage(this.spr.pxRays, -this.pxRayR, -this.pxRayR);
+          g2.restore();
+        }
+        // drifting chunky clouds
         for (i = 0; i < (this.pxClouds || []).length; i++) {
           var pc3 = this.pxClouds[i];
           var cx2 = pc3.x | 0, cy2 = pc3.y | 0;
           g2.globalAlpha = pc3.a;
-          g2.fillStyle = '#F4F9FC';
+          g2.fillStyle = PX.cyan2;
           g2.fillRect(cx2, cy2, pc3.w, pc3.h);
           g2.fillRect(cx2 + Math.round(pc3.b1 * pc3.w), cy2 - 2, Math.round(pc3.bw * pc3.w), 2);
           g2.fillRect(cx2 + Math.round(pc3.b2 * pc3.w), cy2 - 1, Math.round(pc3.bw * pc3.w * 0.8), 1);
-          g2.fillStyle = '#8FA9BC';
+          g2.fillStyle = PX.ink;
           g2.fillRect(cx2, cy2 + pc3.h - 1, pc3.w, 1);
           g2.globalAlpha = 1;
         }
-        // twinkling sparkles (slow sine gate — flash-safe)
+        // comic star-bursts (a slow 1px "breathe" — sprite swap, never a blur)
+        for (i = 0; i < (this.pxBursts || []).length; i++) {
+          var bb = this.pxBursts[i];
+          var spr = bb.s === 'big' ? this.spr.pxStarBig : bb.s === 'mid' ? this.spr.pxStarMid : this.spr.pxStarSm;
+          if (!spr) continue;
+          var grow = Math.sin(bb.ph) > 0.6 ? 1 : 0;
+          g2.drawImage(spr, (bb.x - spr.width / 2 - grow) | 0, (bb.y - spr.height / 2 - grow) | 0, spr.width + grow * 2, spr.height + grow * 2);
+        }
+        // twinkles
         for (i = 0; i < (this.pxStars || []).length; i++) {
           var st3 = this.pxStars[i];
           var on = Math.sin(st3.ph);
-          if (on > 0.25) { g2.fillStyle = st3.c; g2.globalAlpha = Math.min(1, on); g2.fillRect(st3.x, st3.y, 1, 1); g2.globalAlpha = 1; }
+          if (on > 0.25) { g2.fillStyle = st3.c; g2.globalAlpha = Math.min(1, on); g2.fillRect(st3.x, st3.y, 1, 1); if (on > 0.85) { g2.fillRect(st3.x - 1, st3.y, 3, 1); g2.fillRect(st3.x, st3.y - 1, 1, 3); } g2.globalAlpha = 1; }
         }
         // upscale with NEAREST — chunky pixels, no smoothing
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(px, 0, 0, pw, ph, 0, 0, pw * S, ph * S);
         ctx.imageSmoothingEnabled = true;
+        // readability: soft centre column over the burst origin
+        if (this.spr.pxVignette) ctx.drawImage(this.spr.pxVignette, w * 0.5 - Math.max(w, h) * 0.55, h * 0.42 - Math.max(w, h) * 0.55, Math.max(w, h) * 1.1, Math.max(w, h) * 1.1);
       }
     } else if (this.theme === 'glowing') {
       // deep base
@@ -975,7 +1037,10 @@
     }
   };
 
-  ThemeScene.prototype.staticFrame = function () { this.step(0.016); this.draw(); };
+  ThemeScene.prototype.staticFrame = function () {
+    if (this.cloudSky) { try { this.cloudSky.staticFrame(); } catch (e) {} return; } // v57: the shader paints its own still
+    this.step(0.016); this.draw();
+  };
 
   ThemeScene.prototype.dispose = function () {
     this.dead = true;

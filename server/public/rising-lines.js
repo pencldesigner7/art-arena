@@ -97,12 +97,16 @@
     this._resize();
     this._initParticles();
     var self = this;
-    this._ro = new ResizeObserver(function () { self._resize(); self._initParticles(); });
+    this._ro = new ResizeObserver(function () { self._resize(); self._initParticles(); if (self._motion === false && !self._disposed) { try { self._draw(0.016); } catch (e) {} } });
     this._ro.observe(host);
     this._io = new IntersectionObserver(function (entries) { self._visible = entries[0].isIntersecting; }, { threshold: 0.05 });
     this._io.observe(host);
     this._loop = this._loop.bind(this);
     this._lastT = performance.now();
+    // v57 (black-screen fix): ALWAYS paint one frame synchronously, so the
+    // layer is never an empty canvas — even when the app boots with
+    // Animations OFF and the loop is frozen before its first tick.
+    this._draw(0.016);
     this._raf = requestAnimationFrame(this._loop);
   }
 
@@ -113,6 +117,9 @@
     if (this._motion && !this._raf && !this._disposed) {
       this._lastT = performance.now();
       this._raf = requestAnimationFrame(this._loop);
+    } else if (!this._motion && !this._disposed) {
+      // v57: freezing must leave a PAINTED frame behind (never a blank canvas)
+      try { this._draw(0.016); } catch (e) {}
     }
   };
   RisingLines.prototype._resize = function () {
@@ -260,6 +267,9 @@
   // LIVE theme swap — recolors in place; particles/timing untouched.
   RisingLines.prototype.setTheme = function (theme) {
     if (PALETTES[theme]) this._theme = theme;
+    // v57: with the loop frozen (Animations OFF) the palette swap must still
+    // reach the screen — repaint one static frame.
+    if (this._motion === false && !this._disposed) { try { this._draw(0.016); } catch (e) {} }
   };
   RisingLines.prototype.getTheme = function () { return this._theme; };
 
