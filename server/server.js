@@ -898,7 +898,7 @@ app.post('/api/friends/request', requireAuth, ah(async (req, res) => {
     [req.user.id, target]
   );
   await notifyUser(target, 'friend_request', {
-    request_id: reqs[0].id, username: req.user.username, display_name: req.user.display_name,
+    request_id: reqs[0].id, from_user_id: req.user.id, username: req.user.username, display_name: req.user.display_name,
   });
   res.status(201).json({ status: 'requested' });
 }));
@@ -969,6 +969,7 @@ app.delete('/api/friends/:userId', requireAuth, ah(async (req, res) => {
 }));
 
 app.use('/api/rooms', rooms.router);
+app.use('/api', require('./friends').router); // v61: Friends page (list/presence, room invites, 3v3 team drafts)
 // v50: YouTube LIVE foundation (OAuth + broadcasts) + the LIVE page feed.
 const youtube = require('./youtube');
 app.use('/api/youtube', youtube.router);
@@ -1345,6 +1346,23 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
         AND NOT EXISTS (SELECT 1 FROM randomizer_elements v WHERE v.category = 'style' AND v.name = 'Lowbrow Art')`],
     ['v61 user_profiles.avatar_data (profile pictures persist in the DB — the container disk is ephemeral)',
      `ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS avatar_data bytea`],
+    ['v61 notification types: team_invitation',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'team_invitation'`],
+    ['v61 team_drafts (3v3 team-selection foundation)',
+     `CREATE TABLE IF NOT EXISTS team_drafts (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        captain_id uuid NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        name text,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now())`],
+    ['v61 team_draft_members',
+     `CREATE TABLE IF NOT EXISTS team_draft_members (
+        draft_id uuid NOT NULL REFERENCES team_drafts(id) ON DELETE CASCADE,
+        user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        position smallint NOT NULL,
+        status text NOT NULL DEFAULT 'drafted' CHECK (status IN ('drafted','invited','accepted','declined')),
+        invited_at timestamptz, responded_at timestamptz,
+        PRIMARY KEY (draft_id, user_id))`],
     ['v61 randomizer: Style category label → Drawing Style',
      `UPDATE randomizer_categories SET display_name = 'Drawing Style' WHERE key = 'style' AND display_name <> 'Drawing Style'`],
 ];

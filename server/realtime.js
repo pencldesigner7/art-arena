@@ -76,6 +76,12 @@ function sendToUser(userId, obj) {
   if (DEV) console.log(`  ⚡ rt ${obj && obj.type} → user:${String(userId).slice(0, 8)}… (delivered=${delivered})`);
 }
 
+/** v61: presence — true while the user has at least one open socket. */
+function isUserOnline(userId) {
+  for (const c of clients) if (c.user && c.user.id === userId && c.ws.readyState === 1) return true;
+  return false;
+}
+
 function broadcast(channel, message) {
   const data = JSON.stringify(message);
   let delivered = 0;
@@ -234,4 +240,4 @@ function closeRealtime() {
   wss = null;
 }
 
-module.exports = { initRealtime, closeRealtime, emitRoom, broadcastRoomsList, sendToUser, LOBBY_CHANNEL };
+module.exports = { initRealtime, closeRealtime, emitRoom, broadcastRoomsList, sendToUser, isUserOnline, LOBBY_CHANNEL };

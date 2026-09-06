@@ -684,7 +684,17 @@ router.get('/', ah(async (req, res) => {
 // v35: creator controls — battle mode (1v1 / 3v3 / tournament) + max
 // players (2..16; 1v1 always seats exactly 2).
 // ---------------------------------------------------------------------------
-router.post('/', ah(async (req, res) => {
+// v61: the create logic is a reusable function — the Friends page's
+// "open a 3v3 room for my team" goes through EXACTLY this path (same
+// validation, same seat rules, same broadcast). Returns the room payload.
+async function createRoomForUser(user, b) {
+  const req = { user, body: b || {} };
+  let out = null;
+  await createRoomImpl(req, { status() { return this; }, json(p) { out = p; } });
+  return out;
+}
+router.post('/', ah(createRoomImpl));
+async function createRoomImpl(req, res) {
   const b = req.body || {};
   // v44 (one active room per artist): creating a room seats the creator as
   // host + player 1 — that IS active participation, so it is blocked while
@@ -780,7 +790,7 @@ router.post('/', ah(async (req, res) => {
   const payload = await roomPayload(rows[0].code, req.user.id);
   if (visibility === 'public') rt.broadcastRoomsList('created');
   res.status(201).json(payload);
-}));
+}
 
 // ---------------------------------------------------------------------------
 // DETAIL
@@ -1774,4 +1784,4 @@ async function canViewRoom(code, user) {
     : { ok: false, reason: 'You do not have access to that room.' };
 }
 
-module.exports = { router, canViewRoom, roomByCode, roomPayload, battleChallengePayload, createMatchRoom, startCountdownSweeper, startRematchSweeper, activeRoomOf };
+module.exports = { router, canViewRoom, roomByCode, roomPayload, battleChallengePayload, createMatchRoom, createRoomForUser, startCountdownSweeper, startRematchSweeper, activeRoomOf };

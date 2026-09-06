@@ -236,7 +236,7 @@ try {
   #drawer-prem:hover, label .prem-chip:hover { filter:brightness(1.12); }
   body[data-ptheme="flame"] { --pink:var(--pth-c1,#FF5A00); --purple:var(--pth-c2,#FFC300); --pink-rgb:var(--pth-c1-rgb,255,90,0); --purple-rgb:var(--pth-c2-rgb,255,195,0); --muted:#c9a587; --line:#4a2a12; --btn-line:#4a2a12; --surface:#180d05; --surface-hover:#1f1108; --surface-2:#2a170a; --bg:#0e0703; --panel:#170d05; --auth-card:rgba(20,11,4,.86); --auth-page-bg:#0e0703; }
   body[data-ptheme="flame"] .card, body[data-ptheme="flame"] .time-modal { border-color:rgba(255,120,20,.35); box-shadow:0 0 22px -12px rgba(255,110,0,.5); }
-  body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#FF5A00), var(--pth-c2,#FFC300)); background-size:180% 180%; animation:pth-flame-shift 5s ease-in-out infinite; color:#1d0e02; border:none; font-weight:800; }
+  body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#FF5A00), var(--pth-c2,#FFC300)); background-size:180% 180%; animation:pth-flame-shift 5s ease-in-out infinite; color:#1d0e02; border:none; font-weight:800; }
   @keyframes pth-flame-shift { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
   body[data-ptheme="cloud"] { --pink:#3E8EE0; --purple:#6FB6F2; --pink-rgb:62,142,224; --purple-rgb:111,182,242; --surface:#eaf4fd; --surface-hover:#e2eefa; --surface-2:#d7e9f9; --bg:#f2f8ff; --panel:#e6f1fb; --line:#c3dcf2; --text:#20344a; --muted:#5f7794; --header-bg:rgba(242,248,255,.9); --nav-bg:rgba(234,244,253,.97); --btn-line:#c3dcf2; --auth-card:rgba(242,248,255,.88); --auth-page-bg:#eaf4fd; }
   body[data-ptheme="cloud"] .card, body[data-ptheme="cloud"] .time-modal { border-radius:18px; border-color:#c3dcf2; box-shadow:0 10px 30px -18px rgba(62,142,224,.4); }
@@ -249,20 +249,20 @@ try {
   body[data-ptheme="graffiti"] { --pink:#F4F4F4; --purple:#C7C7C7; --pink-rgb:244,244,244; --purple-rgb:199,199,199; --surface:#181818; --surface-hover:#202020; --surface-2:#282828; --bg:#101010; --panel:#151515; --line:#3d3d3d; --muted:#b0b0b0; --btn-line:#3d3d3d; --auth-card:rgba(14,14,14,.9); --auth-page-bg:#0d0d0d; }
   body[data-ptheme="graffiti"] .card, body[data-ptheme="graffiti"] .time-modal { border-width:2px; border-color:#3d3d3d; border-radius:14px 5px 13px 6px; background-color:rgba(16,16,16,.9); }
   body[data-ptheme="graffiti"] .home-card:hover, body[data-ptheme="graffiti"] .card:hover { transform:rotate(-.35deg) translateY(-2px); }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { position:relative; border-radius:9px 6px 10px 6px; background:#F4F4F4; color:#0d0d0d; font-weight:800; border:none; box-shadow:3px 3px 0 rgba(0,0,0,.55); overflow:visible; }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):hover { transform:rotate(-1deg) translateY(-1px); }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { position:relative; border-radius:9px 6px 10px 6px; background:#F4F4F4; color:#0d0d0d; font-weight:800; border:none; box-shadow:3px 3px 0 rgba(0,0,0,.55); overflow:visible; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):hover { transform:rotate(-1deg) translateY(-1px); }
   /* v55: buttons DRIP — white paint runs with tapered bodies and bulbous
      heads (like real gravity-thickened paint), not a line and a dot. */
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini)::after { content:""; position:absolute; top:99%; left:7%; right:7%; height:16px; pointer-events:none; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='16'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M8 0 L13 0 L11.6 8 L9.4 8 Z'/%3E%3Ccircle cx='10.5' cy='10.6' r='3.1'/%3E%3Cpath d='M44 0 L48.4 0 L47.4 5.6 L45 5.6 Z'/%3E%3Ccircle cx='46.2' cy='7.4' r='2.5'/%3E%3Cpath d='M74 0 L77.6 0 L76.8 10 L74.8 10 Z'/%3E%3Ccircle cx='75.8' cy='12.9' r='3.4'/%3E%3C/g%3E%3C/svg%3E") repeat-x bottom left; background-size:96px 16px; transform-origin:top center; transition:transform .35s ease; }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):hover::after { transform:scaleY(1.22); }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn)::after { content:""; position:absolute; top:99%; left:7%; right:7%; height:16px; pointer-events:none; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='16'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M8 0 L13 0 L11.6 8 L9.4 8 Z'/%3E%3Ccircle cx='10.5' cy='10.6' r='3.1'/%3E%3Cpath d='M44 0 L48.4 0 L47.4 5.6 L45 5.6 Z'/%3E%3Ccircle cx='46.2' cy='7.4' r='2.5'/%3E%3Cpath d='M74 0 L77.6 0 L76.8 10 L74.8 10 Z'/%3E%3Ccircle cx='75.8' cy='12.9' r='3.4'/%3E%3C/g%3E%3C/svg%3E") repeat-x bottom left; background-size:96px 16px; transform-origin:top center; transition:transform .35s ease; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):hover::after { transform:scaleY(1.22); }
   /* v56: every button drips DIFFERENTLY — length, width, position, count and
      shape vary by sibling position (B: two long runs · C: one heavy run ·
      D: four short flicks, mirrored · E: split pair, shifted). */
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):nth-child(2n)::after { height:24px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='24'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M26 0 L31.5 0 L29.2 15 L28.1 15 Z'/%3E%3Ccircle cx='28.7' cy='17.6' r='3.6'/%3E%3Cpath d='M64 0 L68.5 0 L66.9 10.5 L65.6 10.5 Z'/%3E%3Ccircle cx='66.3' cy='12.7' r='2.9'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 24px; }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):nth-child(3n)::after { height:13px; left:18%; right:24%; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='13'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M42 0 L49 0 L46.4 8.2 L44.6 8.2 Z'/%3E%3Ccircle cx='45.5' cy='9.7' r='3.4'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 13px; }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):nth-child(5n+2)::after { height:19px; left:12%; right:30%; transform:scaleX(-1); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='19'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M12 0 L16 0 L14.9 7 L13.2 7 Z'/%3E%3Ccircle cx='14' cy='8.4' r='2.4'/%3E%3Cpath d='M38 0 L43.5 0 L41.6 11 L39.9 11 Z'/%3E%3Ccircle cx='40.8' cy='13' r='2.8'/%3E%3Cpath d='M70 0 L74 0 L73.2 6 L70.9 6 Z'/%3E%3Ccircle cx='72' cy='7.3' r='2.2'/%3E%3Cpath d='M88 0 L91 0 L90.4 4.4 L88.7 4.4 Z'/%3E%3Ccircle cx='89.6' cy='5.4' r='1.9'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 19px; }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):nth-child(7n+3)::after { height:17px; left:26%; right:14%; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='17'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M18 0 L23 0 L21.7 9.5 L19.4 9.5 Z'/%3E%3Ccircle cx='20.6' cy='11.4' r='3'/%3E%3Cpath d='M76 0 L82 0 L80.5 8 L77.6 8 Z'/%3E%3Ccircle cx='79.2' cy='10' r='3.3'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 17px; }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):nth-child(5n+2):hover::after { transform:scaleX(-1) scaleY(1.22); }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):nth-child(2n)::after { height:24px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='24'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M26 0 L31.5 0 L29.2 15 L28.1 15 Z'/%3E%3Ccircle cx='28.7' cy='17.6' r='3.6'/%3E%3Cpath d='M64 0 L68.5 0 L66.9 10.5 L65.6 10.5 Z'/%3E%3Ccircle cx='66.3' cy='12.7' r='2.9'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 24px; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):nth-child(3n)::after { height:13px; left:18%; right:24%; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='13'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M42 0 L49 0 L46.4 8.2 L44.6 8.2 Z'/%3E%3Ccircle cx='45.5' cy='9.7' r='3.4'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 13px; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):nth-child(5n+2)::after { height:19px; left:12%; right:30%; transform:scaleX(-1); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='19'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M12 0 L16 0 L14.9 7 L13.2 7 Z'/%3E%3Ccircle cx='14' cy='8.4' r='2.4'/%3E%3Cpath d='M38 0 L43.5 0 L41.6 11 L39.9 11 Z'/%3E%3Ccircle cx='40.8' cy='13' r='2.8'/%3E%3Cpath d='M70 0 L74 0 L73.2 6 L70.9 6 Z'/%3E%3Ccircle cx='72' cy='7.3' r='2.2'/%3E%3Cpath d='M88 0 L91 0 L90.4 4.4 L88.7 4.4 Z'/%3E%3Ccircle cx='89.6' cy='5.4' r='1.9'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 19px; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):nth-child(7n+3)::after { height:17px; left:26%; right:14%; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='17'%3E%3Cg fill='%23F4F4F4'%3E%3Cpath d='M18 0 L23 0 L21.7 9.5 L19.4 9.5 Z'/%3E%3Ccircle cx='20.6' cy='11.4' r='3'/%3E%3Cpath d='M76 0 L82 0 L80.5 8 L77.6 8 Z'/%3E%3Ccircle cx='79.2' cy='10' r='3.3'/%3E%3C/g%3E%3C/svg%3E"); background-size:96px 17px; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):nth-child(5n+2):hover::after { transform:scaleX(-1) scaleY(1.22); }
   /* v56: readability on the wall — the wordmark and headings carry a hard
      shadow so they sit ON the graffiti instead of fighting it */
   body[data-ptheme="graffiti"] .home-logo img, body[data-ptheme="graffiti"] .legal-logo { filter:drop-shadow(0 3px 12px rgba(0,0,0,.9)) drop-shadow(0 1px 2px rgba(0,0,0,.95)); }
@@ -272,9 +272,9 @@ try {
   body[data-ptheme="graffiti"] .card::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.5; background:radial-gradient(circle at 88% 8%, rgba(var(--purple-rgb),.16) 0 2px, transparent 3px), radial-gradient(circle at 92% 14%, rgba(var(--pink-rgb),.2) 0 2.5px, transparent 4px), radial-gradient(circle at 85% 16%, rgba(var(--purple-rgb),.14) 0 1.6px, transparent 3px); }
   body[data-ptheme="stitch"] { --pink:#FF6A5A; --purple:#D8A25C; --pink-rgb:255,106,90; --purple-rgb:216,162,92; --surface:#1f1a24; --surface-hover:#251f2b; --surface-2:#2e2735; --bg:#171320; --panel:#1e1926; --line:#4a3f56; --muted:#b3a3c0; --btn-line:#4a3f56; --auth-card:rgba(26,21,30,.88); --auth-page-bg:#171320; }
   body[data-ptheme="stitch"] .card, body[data-ptheme="stitch"] .time-modal, body[data-ptheme="stitch"] .settings-appearance { border:1.5px dashed #6b5a7a; border-radius:14px; background-image:repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 2px, transparent 2px 5px); }
-  body[data-ptheme="stitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { border:1.5px dashed #b392cb; border-radius:12px; }
+  body[data-ptheme="stitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { border:1.5px dashed #b392cb; border-radius:12px; }
   body[data-ptheme="glowing"] { --pink:var(--pth-c1,#6ED4BF); --purple:var(--pth-c2,#51A8D9); --pink-rgb:var(--pth-c1-rgb,110,212,191); --purple-rgb:var(--pth-c2-rgb,81,168,217); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
-  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 18px -4px var(--pth-c1,#6ED4BF); }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 18px -4px var(--pth-c1,#6ED4BF); }
   /* v61: GLOWING containers use SOLID theme-coloured borders — no halo
      box-shadow. Glow stays only on intentional accents (logo, icons, primary
      buttons, active nav, focus rings). */
@@ -283,7 +283,7 @@ try {
   body[data-ptheme="magazine"] { --pink:#E6483E; --purple:#2B2B36; --pink-rgb:230,72,62; --purple-rgb:43,43,54; --surface:#f4f1ea; --surface-hover:#eeebe2; --surface-2:#e6e2d7; --bg:#e9e5dc; --panel:#f0ede5; --line:#c9c3b4; --text:#23211d; --muted:#6f6a5e; --header-bg:rgba(240,237,229,.92); --nav-bg:rgba(244,241,234,.97); --btn-line:#c9c3b4; --auth-card:rgba(244,241,234,.9); --auth-page-bg:#e9e5dc; }
   body[data-ptheme="magazine"] .card { border:none; border-left:5px solid #23211d; border-radius:2px; box-shadow:3px 4px 0 rgba(35,33,29,.22); transform:rotate(-.25deg); }
   body[data-ptheme="magazine"] .home-card:hover, body[data-ptheme="magazine"] .card:hover { transform:rotate(.3deg) translateY(-2px); }
-  body[data-ptheme="magazine"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:#23211d; color:#f4f1ea; border-radius:2px; box-shadow:2px 3px 0 #E6483E; }
+  body[data-ptheme="magazine"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:#23211d; color:#f4f1ea; border-radius:2px; box-shadow:2px 3px 0 #E6483E; }
 
   /* ---- v56: PIXELATED — the UI itself goes pixel. Sharp corners, chunky
        borders, hard offset shadows, arcade gradient buttons, stepped
@@ -291,9 +291,9 @@ try {
        (magenta #E337C4 + cyan #77D5DF) on the reference's dark navy. ---- */
   body[data-ptheme="pixel"] { --pink:#E337C4; --purple:#77D5DF; --pink-rgb:227,55,196; --purple-rgb:119,213,223; --surface:#16283A; --surface-hover:#1C3247; --surface-2:#243A52; --bg:#0E1E2C; --panel:#12243A; --line:#2E4A63; --muted:#9FB6C9; --btn-line:#2E4A63; --auth-card:rgba(14,30,44,.93); --auth-page-bg:#0E1E2C; }
   body[data-ptheme="pixel"] .card, body[data-ptheme="pixel"] .time-modal, body[data-ptheme="pixel"] .settings-appearance { border:3px solid #2E4A63; border-radius:0; box-shadow:4px 4px 0 rgba(0,0,0,.5); }
-  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { border-radius:0; border:3px solid #0A1420; background:linear-gradient(135deg, #E337C4, #77D5DF); color:#0A0A14; font-weight:800; box-shadow:4px 4px 0 #000; }
-  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 #000; }
-  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):active { transform:translate(2px,2px); box-shadow:1px 1px 0 #000; }
+  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { border-radius:0; border:3px solid #0A1420; background:linear-gradient(135deg, #E337C4, #77D5DF); color:#0A0A14; font-weight:800; box-shadow:4px 4px 0 #000; }
+  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 #000; }
+  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):active { transform:translate(2px,2px); box-shadow:1px 1px 0 #000; }
   body[data-ptheme="pixel"] h1, body[data-ptheme="pixel"] h2, body[data-ptheme="pixel"] .legal-title { text-shadow:2px 2px 0 rgba(0,0,0,.75); letter-spacing:.5px; }
   body[data-ptheme="pixel"] input, body[data-ptheme="pixel"] textarea, body[data-ptheme="pixel"] select { border-radius:0; }
   body[data-ptheme="pixel"] .badge, body[data-ptheme="pixel"] .state-chip { border-radius:0; }
@@ -430,7 +430,15 @@ try {
   body[data-ptheme="glowing"] button.home-card:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:var(--surface); color:var(--text); border:1px solid rgba(var(--pink-rgb),.55); font-weight:700; box-shadow:none; } /* v61: solid border, no glow */
   body[data-ptheme="glowing"] button.home-card:hover { border-color:var(--pink); background:var(--surface-hover); box-shadow:none; }
   body[data-ptheme="glowing"] #bottom-nav button.tab.active { color:var(--pink); text-shadow:0 0 12px rgba(var(--pink-rgb),.6); border-top-color:var(--pink); }
-  body[data-ptheme="glowing"] #drawer-nav button.active { box-shadow:0 0 16px -6px rgba(var(--pink-rgb),.55); }
+  /* v61: sidebar rows are NAVIGATION, not primary buttons — the theme's
+     primary-button glow/gradient must never reach them (that was the source
+     of the stray glowing bars behind Community / LIVE / Profile …). Rows use
+     a clean theme-coloured border; the hover box IS the row box. */
+  body[data-ptheme="glowing"] #drawer-nav button, body[data-ptheme="glowing"] #drawer-nav button:hover, body[data-ptheme="glowing"] #drawer-nav button.active { box-shadow:none; background-image:none; animation:none; }
+  body[data-ptheme="glowing"] #drawer-nav button:hover { background-color:rgba(var(--pink-rgb),.08); border-color:rgba(var(--pink-rgb),.35); color:var(--text); }
+  body[data-ptheme="glowing"] #drawer-nav button.active { background-color:rgba(var(--pink-rgb),.1); border-color:var(--pink); color:var(--text); }
+  body[data-ptheme="glowing"] #drawer-nav button.active svg { color:var(--pink); filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.6)); } /* the one intentional accent */
+  body[data-ptheme="glowing"] .room-ctxmenu button, body[data-ptheme="glowing"] .notif-actions button.secondary { box-shadow:none; }
   body[data-ptheme="glowing"] input:focus, body[data-ptheme="glowing"] textarea:focus, body[data-ptheme="glowing"] select:focus { border-color:var(--pink); box-shadow:0 0 12px -3px rgba(var(--pink-rgb),.5); }
   body[data-ptheme="glowing"] .theme-swatch.active { box-shadow:0 0 0 1px var(--pink) inset, 0 0 18px -6px rgba(var(--pink-rgb),.6); }
 
@@ -622,6 +630,13 @@ try {
   .friend-add.decline:hover { border-color:var(--danger-tx); color:var(--danger-tx); }
   .friend-add.remove { border-color:rgba(var(--pink-rgb),.5); color:var(--pink); }
   .friend-add.remove:hover { border-color:var(--danger-tx); color:var(--danger-tx); }
+  /* v61: final past-tense states — one control, not clickable, no hover change */
+  .friend-add.done { cursor:default; opacity:1; }
+  .friend-add.done.accepted, .friend-add.done.accepted:hover { border-color:var(--ok-tx); color:var(--ok-tx); background:rgba(46,204,113,.08); }
+  .friend-add.done.declined, .friend-add.done.declined:hover { border-color:var(--line); color:var(--muted); background:transparent; }
+  .notif-actions .fr-final { cursor:default; opacity:1; }
+  .notif-actions .fr-final.accepted { background:none; border:1px solid var(--ok-tx); color:var(--ok-tx); }
+  .notif-actions .fr-final.declined { background:none; border:1px solid var(--line); color:var(--muted); }
   .friend-pair { display:inline-flex; gap:4px; }
   #pm-friend.is-remove { background:transparent; border:1px solid var(--pink); color:var(--pink); }
   /* v50: LIVE page + Go Live modal. Token-based throughout (Dark/Light for
@@ -650,6 +665,46 @@ try {
   .glv-status { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; letter-spacing:1px; padding:3px 10px; border-radius:999px; border:1px solid var(--btn-line); }
   /* v51: notifications history, room context menu, profile modal, kick confirm. */
   .notif-list { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  /* v61: Friends page */
+  .fr-head { display:flex; align-items:baseline; gap:10px; }
+  .fr-tabs { display:flex; gap:6px; margin:6px 0 14px; border-bottom:1px solid var(--line); }
+  .fr-tab { margin:0; background:none; border:0; border-bottom:2px solid transparent; border-radius:0; padding:8px 12px; color:var(--muted); font-weight:800; font-size:13px; letter-spacing:.5px; }
+  .fr-tab.active { color:var(--pink); border-bottom-color:var(--pink); }
+  .fr-tab:hover { filter:none; color:var(--text); background:none; }
+  .fr-list { display:flex; flex-direction:column; gap:8px; }
+  .fr-row { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+  .fr-ava { position:relative; width:44px; height:44px; flex:0 0 auto; border-radius:50%; background:var(--surface-2); border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--pink); overflow:visible; }
+  .fr-ava img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
+  .fr-ava .dot { position:absolute; right:-1px; bottom:-1px; width:12px; height:12px; border-radius:50%; background:#6b7280; border:2px solid var(--surface); }
+  .fr-row.online .fr-ava .dot { background:#22c55e; }
+  .fr-row.online .fr-ava { border-color:rgba(34,197,94,.6); }
+  .fr-info { flex:1; min-width:0; }
+  .fr-name { font-weight:800; font-size:14.5px; overflow-wrap:anywhere; }
+  .fr-name .muted { display:block; font-size:12px; }
+  .fr-info { min-width:110px; }
+  .fr-sub { color:var(--muted); font-size:12px; margin-top:1px; }
+  .fr-actions { display:flex; gap:6px; flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end; }
+  .fr-actions button { margin:0; padding:7px 10px; font-size:12px; border-radius:8px; white-space:nowrap; }
+  .fr-actions .mini { padding:6px 9px; }
+  .fr-row.picked { border-color:var(--pink); background:rgba(var(--pink-rgb),.06); }
+  .team-board { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:stretch; }
+  .team-col-title { font-size:11.5px; font-weight:800; letter-spacing:1.5px; margin-bottom:8px; }
+  .team-slots { display:flex; flex-direction:column; gap:6px; }
+  .team-slot { display:flex; flex-direction:column; justify-content:center; min-height:52px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-weight:700; font-size:13.5px; background:var(--surface-2); position:relative; }
+  .team-slot small { color:var(--muted); font-weight:500; font-size:11.5px; }
+  .team-slot.empty { border-style:dashed; color:var(--muted); background:transparent; }
+  .team-slot.me { border-color:var(--pink); }
+  .team-slot .team-status { position:absolute; right:8px; top:8px; font-size:10.5px; font-weight:800; letter-spacing:.6px; color:var(--muted); text-transform:uppercase; }
+  .team-slot .team-status.accepted { color:var(--ok-tx); } .team-slot .team-status.declined { color:var(--danger-tx); }
+  .team-slot .team-x { position:absolute; right:6px; bottom:6px; margin:0; padding:2px 7px; font-size:11px; }
+  .team-vs { align-self:center; font-weight:900; letter-spacing:2px; color:var(--pink); padding:0 4px; }
+  .team-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .team-actions button { margin:0; flex:1; }
+  .inv-rooms { display:flex; flex-direction:column; gap:6px; max-height:300px; overflow:auto; }
+  .inv-room { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin:0; text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:10px 12px; font-weight:700; }
+  .inv-room:hover { filter:none; border-color:var(--pink); }
+  .inv-room small { color:var(--muted); font-weight:500; }
+  @media (max-width:520px) { .team-board { grid-template-columns:1fr; } .team-vs { text-align:center; } .fr-row { flex-wrap:wrap; } .fr-actions { width:100%; justify-content:flex-start; } }
   .notif-item { display:flex; gap:10px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 13px; font-size:14px; }
   .notif-item.unread { border-color:var(--pink); box-shadow:0 0 0 1px rgba(var(--pink-rgb),.28); }
   .notif-ico { flex:0 0 auto; width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(var(--pink-rgb),.2), rgba(var(--purple-rgb),.25)); color:var(--pink); }
@@ -1476,6 +1531,67 @@ try {
     <div id="notif-empty" class="live-empty hidden"><b>No notifications yet</b><span>Friend requests and activity will appear here.</span></div>
   </section>
 
+  <!-- ============================= FRIENDS (v61) ============================= -->
+  <!-- The dedicated Friends page: the real friendships list (v51 backend)
+       with presence, room invitations through the real rooms API, and the
+       3v3 team-selection foundation (team_drafts). -->
+  <section id="view-friends" class="view hidden">
+    <div class="fr-head"><h1>FRIENDS</h1><span class="muted" id="fr-count"></span></div>
+    <div class="fr-tabs" role="tablist">
+      <button type="button" class="fr-tab active util-btn" data-frtab="list" role="tab">All friends</button>
+      <button type="button" class="fr-tab util-btn" data-frtab="team" role="tab">3v3 Team</button>
+    </div>
+    <div id="fr-pane-list">
+      <div id="fr-list" class="fr-list"></div>
+      <div id="fr-empty" class="live-empty hidden"><b>No friends yet</b><span>Add artists from a room seat or their profile — they'll appear here.</span></div>
+    </div>
+    <div id="fr-pane-team" class="hidden">
+      <div class="card">
+        <div class="big" style="font-size:15px">3v3 TEAM BATTLE</div>
+        <p class="muted" style="margin:6px 0 12px; font-size:13px">Pick two friends for your side. Team A is you and your picks; Team B is the opposing three. Full 3v3 battle mechanics are still in development — today you can build your team, invite them and open a 6-seat 3v3 room.</p>
+        <label style="margin-bottom:10px">Team name (optional)<input id="team-name" maxlength="40" placeholder="e.g. Ink Wolves"></label>
+        <div class="team-board">
+          <div class="team-col">
+            <div class="team-col-title">TEAM A <span class="muted">· your side</span></div>
+            <div id="team-a-slots" class="team-slots"></div>
+          </div>
+          <div class="team-vs">VS</div>
+          <div class="team-col">
+            <div class="team-col-title">TEAM B <span class="muted">· opponents</span></div>
+            <div class="team-slots">
+              <div class="team-slot empty">Player 1<small>fills in the 3v3 room</small></div>
+              <div class="team-slot empty">Player 2<small>fills in the 3v3 room</small></div>
+              <div class="team-slot empty">Player 3<small>fills in the 3v3 room</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="team-actions">
+          <button type="button" id="team-save" class="secondary">Save team</button>
+          <button type="button" id="team-invite">Invite teammates</button>
+          <button type="button" id="team-open-room" class="secondary">Open 3v3 room</button>
+        </div>
+        <div class="msg" id="msg-team"></div>
+      </div>
+      <div class="card">
+        <div class="big" style="font-size:13px; letter-spacing:1px">PICK FROM YOUR FRIENDS</div>
+        <div id="team-pick" class="fr-list" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- v61: invite-a-friend → choose one of my rooms -->
+  <div id="invite-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="inv-title" style="width:min(420px,100%)">
+      <h3 id="inv-title">INVITE TO ROOM</h3>
+      <p class="muted" id="inv-sub" style="margin:0 0 10px; font-size:13.5px"></p>
+      <div id="inv-rooms" class="inv-rooms"></div>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="inv-close">Close</button>
+        <button type="button" id="inv-create" class="secondary" style="flex:1">Create a room first</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============================= HELP ============================= -->
   <section id="view-help" class="view dest hidden">
     <div class="dest-ico"><svg class="ic ic-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.3 9.2a2.9 2.9 0 0 1 5.5 1c0 1.9-2.7 2.3-2.7 3.9"/><line x1="12" y1="17.3" x2="12.01" y2="17.4"/></svg></div>
@@ -1841,9 +1957,16 @@ try {
         </div>
       </label>
     </div>
+    <!-- v61: Free plan — the only extra control is the upgrade route. -->
+    <div class="settings-appearance hidden" id="settings-upgrade" style="margin-top:18px">
+      <label>Premium
+        <p class="muted" style="margin:6px 0 10px; font-size:13px">Exclusive UI customization (eight complete themes + manual colours) and challenge re-rolls.</p>
+        <button type="button" id="settings-upgrade-btn" style="width:100%; margin:0">Upgrade to Premium</button>
+      </label>
+    </div>
     <!-- v53: UI Customization lives HERE for Premium members (no standalone
-         nav slot). Free members see an honest locked teaser. -->
-    <div class="settings-appearance" id="settings-themes" style="margin-top:18px">
+         nav slot). v61: hidden entirely for free members (see renderSettingsThemes). -->
+    <div class="settings-appearance hidden" id="settings-themes" style="margin-top:18px">
       <label>UI Customization <span class="prem-chip"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>
         <div id="settings-theme-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-top:10px"></div>
       </label>
@@ -2153,6 +2276,7 @@ const DRAWER_NAV = [
   { id: 'arena',         label: 'Arena',         view: 'arena' },
   { id: 'community',     label: 'Community',     view: 'community' },
   { id: 'live',          label: 'LIVE',           view: 'live' },
+  { id: 'friends',       label: 'Friends',       view: 'friends' }, // v61
   { id: '__divider' },
   { id: 'profile',       label: 'Profile',       view: 'account' },
   { id: 'settings',      label: 'Settings',      view: 'settings' },
@@ -2170,6 +2294,7 @@ const NAV_ICONS = {
   notifications: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
   help: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.3 9.2a2.9 2.9 0 0 1 5.5 1c0 1.9-2.7 2.3-2.7 3.9"/><line x1="12" y1="17.3" x2="12.01" y2="17.4"/></svg>',
   about: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><line x1="12" y1="11" x2="12" y2="16.5"/><line x1="12" y1="7.8" x2="12.01" y2="7.9"/></svg>',
+  friends: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/></svg>',
   live: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M7.4 7.4a6.5 6.5 0 0 0 0 9.2M16.6 16.6a6.5 6.5 0 0 0 0-9.2M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></svg>',
 };
 // v29: back button throughout the app. Every non-home view has a parent;
@@ -2177,12 +2302,12 @@ const NAV_ICONS = {
 const BACK_TARGETS = {
   rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena', live: 'arena',
   account: 'arena', quickmatch: 'arena', findartist: 'arena', grandarena: 'arena',
-  notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena',
+  notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena',
   battlehistory: 'account', savedartworks: 'account', settings: 'account',
 };
 
 // Destination screens that live UNDER a tab (they keep that tab highlighted).
-const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena' };
+const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena' };
 
 function renderNav() {
   $('#bottom-nav').innerHTML = NAV.map((t) =>
@@ -2191,7 +2316,7 @@ function renderNav() {
   $('#drawer-nav').innerHTML = DRAWER_NAV.map((t) =>
     t.id === '__divider'
       ? '<div class="drawer-divider" role="presentation"></div>'
-      : `<button type="button" data-navtab="${t.id}" data-view="${t.view}"${t.action ? ` data-action="${t.action}"` : ''}>${NAV_ICONS[t.id] || ''}<span>${t.label}</span></button>`
+      : `<button type="button" class="nav-row" data-navtab="${t.id}" data-view="${t.view}"${t.action ? ` data-action="${t.action}"` : ''}>${NAV_ICONS[t.id] || ''}<span>${t.label}</span></button>`
   ).join('');
 }
 renderNav();
@@ -2201,7 +2326,7 @@ const APP_VIEWS = [...NAV.map((t) => t.view), ...Object.keys(TAB_CHILDREN)];
 
 // v38: drawer rows map to their own id when the view IS a drawer destination;
 // everything else falls back to the main tab (bottom-nav logic untouched).
-const DRAWER_TAB_OWN = { notifications: 'notifications', help: 'help', about: 'about' };
+const DRAWER_TAB_OWN = { notifications: 'notifications', help: 'help', about: 'about', friends: 'friends' };
 function drawerTabFor(name) {
   return DRAWER_TAB_OWN[name] || tabFor(name);
 }
@@ -2367,7 +2492,7 @@ window.__pthGlitchAllowed = function () {
 // visible primary buttons; always readable, always clickable.
 window.addEventListener('aa-glitch-burst', () => {
   if (activeThemeKey !== 'glitch' || !animIsOn()) return;
-  const btns = Array.from(document.querySelectorAll('body[data-ptheme="glitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini)'))
+  const btns = Array.from(document.querySelectorAll('body[data-ptheme="glitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn)'))
     .filter((x) => x.offsetParent !== null);
   const n = Math.min(3, btns.length);
   for (let i = 0; i < n; i++) {
@@ -2808,7 +2933,8 @@ function show(name) {
   else if (name === 'live') { startPolling(refreshLive); startLiveTicker(); } // v50: LIVE feed + countdowns
   else if (name === 'room') startPolling(refreshRoom);
   else if (name === 'premium') renderPremiumPage(); // v52: entitlement + catalog, server truth
-  else if (name === 'settings') renderSettingsThemes(); // v53: UI Customization lives in Settings
+  else if (name === 'settings') { $('#settings-themes').classList.toggle('hidden', !mePremium); $('#settings-upgrade').classList.toggle('hidden', mePremium); renderSettingsThemes(); } // v53/v61: entitlement-gated section, server re-checked on every visit
+  else if (name === 'friends') { friendsPageLoad(); startPolling(friendsPageLoad); } // v61: presence + rooms stay live
   else if (name === 'matchmaking') { mmOnEnter(); } // v35: real search (v45: the searching LINE carries the visual)
   else if (name === 'join') refreshJoinList();              // v35: live public list
   else if (name === 'battlehistory') loadBattleHistory();
@@ -3325,11 +3451,26 @@ const serverNow = () => Date.now() + serverClockSkewMs;
 // throttled so room polling never spams it. Sending dedupes server-side
 // (409s are handled as state refreshes, never as scary errors).
 const friendState = { at: 0, friends: new Set(), out: new Set(), incoming: {} };
+// v61: the FINAL past-tense state after I respond to someone's request —
+// set only from a successful API result (accept → 'accepted', decline →
+// 'declined'), shown as a single non-interactive "✓ Accepted" / "Declined"
+// control everywhere that user appears (seat chip, profile modal). It
+// survives repaints and WS refreshes; it is cleared only when the relation
+// moves on again (a new incoming request, or a friendship removed).
+const friendOutcome = {}; // uid → 'accepted' | 'declined'
+function friendOutcomeHtml(uid) {
+  const o = friendOutcome[uid];
+  if (!o) return null;
+  return o === 'accepted'
+    ? '<button type="button" class="friend-add done accepted" disabled aria-disabled="true">✓ Accepted</button>'
+    : '<button type="button" class="friend-add done declined" disabled aria-disabled="true">Declined</button>';
+}
 // v61: ONE reaction to "my relation to someone changed" — room seat chips,
 // the open profile modal and the open Notifications view all re-read the
 // server truth. Used by WS pushes and by every local accept/decline/cancel.
 function onFriendRelationChanged() {
   refreshFriendState(true).then(paintFriendChips).catch(() => {});
+  if (currentView === 'friends') friendsPageLoad();
   if (pmUserId && !$('#profile-modal').classList.contains('hidden')) openProfile(pmUserId);
   if (currentView === 'notifications') loadNotifications();
 }
@@ -3342,6 +3483,14 @@ async function refreshFriendState(force) {
     friendState.out = new Set((d.outgoing || []).map((r) => r.user_id));
     friendState.incoming = {};
     (d.incoming || []).forEach((r) => { friendState.incoming[r.user_id] = r.id; });
+    // outcome memory follows the server truth: a NEW incoming request (they
+    // asked again) or a friendship that was 'accepted' but no longer exists
+    // (removed) invalidates the past-tense chip.
+    Object.keys(friendOutcome).forEach((uid) => {
+      if (friendState.incoming[uid]) delete friendOutcome[uid];
+      else if (friendOutcome[uid] === 'accepted' && !friendState.friends.has(uid)) delete friendOutcome[uid];
+      else if (friendOutcome[uid] === 'declined' && (friendState.friends.has(uid) || friendState.out.has(uid))) delete friendOutcome[uid];
+    });
   } catch (_) {}
 }
 function paintFriendChips() {
@@ -3352,7 +3501,9 @@ function paintFriendChips() {
     // refreshFriendState(true) re-reads it after every action):
     //   none → Add Friend · sent → Pending (click = cancel) ·
     //   received → Accept / Decline · friends → Remove Friend (confirmed)
-    if (friendState.friends.has(uid)) html = '<button type="button" class="friend-add remove" data-fr-remove="' + esc(uid) + '" data-name="' + esc(name) + '" title="Remove friend">✓ Friends · Remove</button>';
+    // v61: a request I just answered shows its FINAL state (✓ Accepted / Declined).
+    if (friendOutcomeHtml(uid)) html = friendOutcomeHtml(uid);
+    else if (friendState.friends.has(uid)) html = '<button type="button" class="friend-add remove" data-fr-remove="' + esc(uid) + '" data-name="' + esc(name) + '" title="Remove friend">✓ Friends · Remove</button>';
     else if (friendState.incoming[uid]) html = '<span class="friend-pair"><button type="button" class="friend-add accept" data-fr-accept="' + esc(uid) + '" data-fr-req="' + esc(friendState.incoming[uid]) + '" data-name="' + esc(name) + '">✓ Accept</button><button type="button" class="friend-add decline" data-fr-decline="' + esc(uid) + '" data-fr-req="' + esc(friendState.incoming[uid]) + '" data-name="' + esc(name) + '">✕ Decline</button></span>';
     else if (friendState.out.has(uid)) html = '<button type="button" class="friend-add pending" data-fr-cancel="' + esc(uid) + '" data-name="' + esc(name) + '" title="Cancel request">⏳ Pending · Cancel</button>';
     else html = '<button type="button" class="friend-add" data-fr-add="' + esc(uid) + '" data-name="' + esc(name) + '">＋ Add Friend</button>';
@@ -3391,9 +3542,11 @@ $('#room-players').addEventListener('click', async (e) => {
       toast(r.status === 'friends' ? 'You and @' + name + ' are friends now.' : 'Friend request sent to @' + name + '.');
     } else if (btn.dataset.frAccept) {
       await api('/api/friends/requests/' + btn.dataset.frReq + '/accept', {}, 'POST');
+      friendOutcome[btn.dataset.frAccept] = 'accepted'; delete friendState.incoming[btn.dataset.frAccept]; friendState.friends.add(btn.dataset.frAccept); paintFriendChips();
       toast('You and @' + name + ' are friends now.');
     } else if (btn.dataset.frDecline) {
       await api('/api/friends/requests/' + btn.dataset.frReq + '/decline', {}, 'POST');
+      friendOutcome[btn.dataset.frDecline] = 'declined'; delete friendState.incoming[btn.dataset.frDecline]; paintFriendChips();
       toast('Request from @' + name + ' declined.');
     } else if (btn.dataset.frCancel) {
       await api('/api/friends/' + btn.dataset.frCancel, undefined, 'DELETE');
@@ -4018,7 +4171,8 @@ function rtHandle(msg) {
   }
   // v61: silent relation change (declined / cancelled / removed by the other
   // side) — no notification row, but every friend control must follow live.
-  if (msg.type === 'friends.changed') { onFriendRelationChanged(); return; }
+  if (msg.type === 'friends.changed') { onFriendRelationChanged(); if (currentView === 'friends') friendsPageLoad(); return; }
+  if (msg.type === 'team.changed') { if (currentView === 'friends') friendsPageLoad(); return; }
   // v51: kicked from a room (server-side removal) — leave instantly with a
   // gentle explanation, never a dead room view.
   if (msg.type === 'room.kicked') {
@@ -5532,7 +5686,9 @@ const NOTIF_TEXT = {
   friend_accepted: (p) => (p.display_name || '@' + p.username) + ' accepted your friend request — you are now friends!',
   rematch_request: (p) => (p.from_display_name || '@' + p.from_username) + ' wants a rematch.',
   premium_activated: () => 'Welcome to Art Arena Premium! Your Premium features are now unlocked.',
-  battle_invitation: (p) => 'Battle invitation.', room_invitation: (p) => 'Room invitation.',
+  battle_invitation: (p) => 'Battle invitation.',
+  room_invitation: (p) => (p.from_display_name || '@' + p.from_username) + ' invited you to ' + (p.room_name ? '"' + p.room_name + '"' : 'their room') + (p.battle_mode && p.battle_mode !== '1v1' ? ' (' + p.battle_mode + ')' : '') + '.',
+  team_invitation: (p) => (p.from_display_name || '@' + p.from_username) + ' picked you for their 3v3 team' + (p.team_name ? ' "' + p.team_name + '"' : '') + '.',
   message: (p) => 'New message.', livestream_start: (p) => 'A livestream is starting.',
 };
 function notifWhen(iso) {
@@ -5554,16 +5710,24 @@ async function loadNotifications() {
     const isRR = n.type === 'rematch_request' && n.payload && n.payload.room_code && !n.payload.handled;
     const rrDone = n.type === 'rematch_request' && n.payload && n.payload.handled;
     const isPM = n.type === 'premium_activated';
-    return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '">' +
+    const isRI = n.type === 'room_invitation' && n.payload && n.payload.room_code && !n.payload.handled;   // v61
+    const riDone = n.type === 'room_invitation' && n.payload && n.payload.handled;
+    const isTI = n.type === 'team_invitation' && n.payload && n.payload.draft_id && !n.payload.handled;    // v61
+    const tiDone = n.type === 'team_invitation' && n.payload && n.payload.handled;
+    return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '"' + (n.payload && n.payload.from_user_id ? ' data-from-uid="' + esc(n.payload.from_user_id) + '"' : '') + '>' +
       '<span class="notif-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-      (n.type.startsWith('friend') ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : n.type === 'premium_activated' ? '<path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.55L12 17.1l-5.9 3.15L7.25 13.7 2.5 9.3l6.6-1.04z"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
+      (n.type.startsWith('friend') || n.type === 'team_invitation' || n.type === 'room_invitation' ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : n.type === 'premium_activated' ? '<path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.55L12 17.1l-5.9 3.15L7.25 13.7 2.5 9.3l6.6-1.04z"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
       '</svg></span>' +
       '<div class="notif-body"><div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
       (isPM ? '<div class="notif-actions"><button type="button" class="notif-cta" data-pm-customize="1">Customize UI</button></div>' : '') +
       (isReq ? '<div class="notif-actions"><button type="button" data-fr-accept="' + esc(n.payload.request_id) + '">Accept</button><button type="button" class="secondary" data-fr-decline="' + esc(n.payload.request_id) + '">Decline</button></div>' : '') +
+      (isRI ? '<div class="notif-actions"><button type="button" data-ri-join="' + esc(n.payload.room_code) + '" data-nid="' + esc(n.id) + '">Join room</button><button type="button" class="secondary" data-ri-decline="' + esc(n.id) + '">Decline</button></div>' : '') +
+      (riDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Joined</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
+      (isTI ? '<div class="notif-actions"><button type="button" data-ti-accept="' + esc(n.payload.draft_id) + '">Join team</button><button type="button" class="secondary" data-ti-decline="' + esc(n.payload.draft_id) + '">Decline</button></div>' : '') +
+      (tiDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ On the team</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
       (isRR ? '<div class="notif-actions"><button type="button" data-rr-accept="' + esc(n.payload.room_code) + '">Accept</button><button type="button" class="secondary" data-rr-decline="' + esc(n.payload.room_code) + '">Decline</button></div>' : '') +
       (rrDone ? '<div class="notif-when" style="color:var(--ok-tx)">' + (n.payload.handled === 'accepted' ? '✓ accepted — battle starting' : '✓ declined') + '</div>' : '') +
-      (frDone ? '<div class="notif-when" style="color:var(--ok-tx)">' + ({ accepted: '✓ accepted — you are now friends', declined: '✓ declined', cancelled: 'request withdrawn' }[n.payload.handled] || '✓ handled') + '</div>' : '') +
+      (frDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Accepted</button>' : n.payload.handled === 'declined' ? '<button type="button" class="fr-final declined secondary" disabled>Declined</button>' : '<span class="notif-when">request withdrawn</span>') + '</div>' : '') +
       '</div></div>';
   }).join('');
   empty.classList.toggle('hidden', (d.notifications || []).length > 0);
@@ -5597,16 +5761,41 @@ $('#notif-list').addEventListener('click', async (e) => {
     loadNotifications(); // item re-renders in its handled state (still listed)
     return;
   }
+  // v61: room invitation → the REAL join flow; team invitation → draft answer
+  const rij = e.target.closest('[data-ri-join]'), rid = e.target.closest('[data-ri-decline]');
+  if (rij || rid) {
+    const box = (rij || rid).closest('.notif-actions'); box.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+    try {
+      if (rij) {
+        await api('/api/friends/invitations/' + rij.dataset.nid + '/accept', {}, 'POST');
+        const d = await api('/api/rooms/' + rij.dataset.riJoin + '/join', {}, 'POST');
+        if (d && d.room_full) { toast('That room filled up before you arrived.'); }
+        else { currentRoomCode = rij.dataset.riJoin; show('room'); if (d && d.code) renderRoom(d); return; }
+      } else { await api('/api/friends/invitations/' + rid.dataset.riDecline + '/decline', {}, 'POST'); toast('Invitation declined.'); }
+    } catch (err) { toast(err.message); }
+    loadNotifications(); return;
+  }
+  const tia = e.target.closest('[data-ti-accept]'), tid = e.target.closest('[data-ti-decline]');
+  if (tia || tid) {
+    const box = (tia || tid).closest('.notif-actions'); box.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+    try { await api('/api/teams/invitations/' + (tia || tid).dataset[tia ? 'tiAccept' : 'tiDecline'] + '/' + (tia ? 'accept' : 'decline'), {}, 'POST'); toast(tia ? 'You joined the team! 🤝' : 'Team invitation declined.'); }
+    catch (err) { toast(err.message); }
+    loadNotifications(); return;
+  }
   const acc = e.target.closest('[data-fr-accept]');
   const dec = e.target.closest('[data-fr-decline]');
   if (!acc && !dec) return;
   const id = (acc || dec).dataset[acc ? 'frAccept' : 'frDecline'];
-  (acc || dec).disabled = true; // v61: no double-submit while the request is in flight
+  const box = (acc || dec).closest('.notif-actions');
+  box.querySelectorAll('button').forEach((b) => { b.disabled = true; }); // v61: no double-submit / no second choice while in flight
   try {
-    if (acc) { await api('/api/friends/requests/' + id + '/accept', {}, 'POST'); toast('You are now friends! 🤝'); }
-    else { await api('/api/friends/requests/' + id + '/decline', {}, 'POST'); toast('Friend request declined.'); }
-  } catch (err) { toast(err.message); }
-  loadNotifications();
+    if (acc) { await api('/api/friends/requests/' + id + '/accept', {}, 'POST'); box.innerHTML = '<button type="button" class="fr-final accepted" disabled>✓ Accepted</button>'; toast('You are now friends! 🤝'); }
+    else { await api('/api/friends/requests/' + id + '/decline', {}, 'POST'); box.innerHTML = '<button type="button" class="fr-final declined secondary" disabled>Declined</button>'; toast('Friend request declined.'); }
+    // the seat chip / modal for that person shows the same final state
+    const nid = box.closest('.notif-item'); const uid = nid && nid.dataset.fromUid;
+    if (uid) { friendOutcome[uid] = acc ? 'accepted' : 'declined'; delete friendState.incoming[uid]; if (acc) friendState.friends.add(uid); paintFriendChips(); }
+  } catch (err) { toast(err.message); box.querySelectorAll('button').forEach((b) => { b.disabled = false; }); }
+  loadNotifications(); // re-render from the DB (payload.handled) — same final state, no flicker
   refreshFriendState(true).then(paintFriendChips).catch(() => {}); // v61: seats / profile modal follow immediately
   if (pmUserId && !$('#profile-modal').classList.contains('hidden')) openProfile(pmUserId);
 });
@@ -5649,7 +5838,10 @@ async function openProfile(userId) {
   const btn = $('#pm-friend'), dec = $('#pm-friend-decline');
   btn.classList.remove('is-remove', 'secondary'); dec.classList.add('hidden');
   // v59: the button says what it DOES in every state (never a dead label)
+  const outcome = friendOutcome[userId]; // v61: what I just chose, past tense
   if (isMe) { btn.textContent = 'This is you'; btn.dataset.mode = 'none'; btn.disabled = true; }
+  else if (outcome === 'accepted' && isFriend) { btn.textContent = '✓ Accepted'; btn.dataset.mode = 'none'; btn.disabled = true; }
+  else if (outcome === 'declined' && !isFriend && !iSent && !theySent) { btn.textContent = 'Declined'; btn.dataset.mode = 'none'; btn.disabled = true; btn.classList.add('secondary'); }
   else if (isFriend) { btn.textContent = 'Remove Friend'; btn.dataset.mode = 'friends'; btn.disabled = false; btn.classList.add('is-remove'); }
   else if (iSent) { btn.textContent = '⏳ Pending · Cancel request'; btn.dataset.mode = 'sent'; btn.disabled = false; btn.classList.add('secondary'); }
   else if (theySent) { btn.textContent = '✓ Accept request'; btn.dataset.mode = 'accept'; btn.disabled = false; dec.classList.remove('hidden'); }
@@ -5672,7 +5864,7 @@ $('#pm-friend').addEventListener('click', async () => {
   try {
     if (mode === 'add') { const r = await api('/api/friends/request', { user_id: id }, 'POST'); toast(r.status === 'friends' ? 'You are now friends! 🤝' : 'Friend request sent.'); }
     else if (mode === 'sent') { await api('/api/friends/' + id, undefined, 'DELETE'); toast('Friend request cancelled.'); }
-    else if (mode === 'accept') { const rid = await pmIncomingRequestId(id); if (rid) { await api('/api/friends/requests/' + rid + '/accept', {}, 'POST'); toast('You are now friends! 🤝'); } else toast('That request is no longer pending.'); }
+    else if (mode === 'accept') { const rid = await pmIncomingRequestId(id); if (rid) { await api('/api/friends/requests/' + rid + '/accept', {}, 'POST'); friendOutcome[id] = 'accepted'; $('#pm-friend-decline').classList.add('hidden'); toast('You are now friends! 🤝'); } else toast('That request is no longer pending.'); }
   } catch (err) { toast(err.message); }
   refreshFriendState(true).then(paintFriendChips); // keep the room seats in sync too
   openProfile(id); // re-render with the LIVE relation state
@@ -5680,7 +5872,7 @@ $('#pm-friend').addEventListener('click', async () => {
 $('#pm-friend-decline').addEventListener('click', async () => {
   const id = pmUserId; if (!id) return;
   $('#pm-friend-decline').disabled = true;
-  try { const rid = await pmIncomingRequestId(id); if (rid) { await api('/api/friends/requests/' + rid + '/decline', {}, 'POST'); toast('Friend request declined.'); } else toast('That request is no longer pending.'); }
+  try { const rid = await pmIncomingRequestId(id); if (rid) { await api('/api/friends/requests/' + rid + '/decline', {}, 'POST'); friendOutcome[id] = 'declined'; toast('Friend request declined.'); } else toast('That request is no longer pending.'); }
   catch (err) { toast(err.message); }
   $('#pm-friend-decline').disabled = false;
   refreshFriendState(true).then(paintFriendChips);
@@ -5703,7 +5895,7 @@ function roomMenuFor(seat) {
   m.style.left = Math.min(window.innerWidth - 210, 18) + 'px';
   m.style.top = Math.max(12, seat.getBoundingClientRect().top - 8) + 'px';
   m.innerHTML =
-    '<button type="button" data-act="profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.5-3.6 3.7-5.6 7.5-5.6s7 2 7.5 5.6"/></svg> View Profile</button>' +
+    '<button type="button" class="util-btn" data-act="profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.5-3.6 3.7-5.6 7.5-5.6s7 2 7.5 5.6"/></svg> View Profile</button>' +
     '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Kick User</button>';
   m.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-act]');
@@ -5783,7 +5975,6 @@ async function renderPremiumPage() {
     const locked = t.premium && !d.premium;
     const active = t.key === activeKey;
     return '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" data-theme-key="' + esc(t.key) + '" data-locked="' + (locked ? '1' : '') + '">' +
-      '<span class="swatch-logo"><img src="' + ((t.key && THEME_LOGOS[t.key]) ? THEME_LOGOS[t.key] : '/logo.png') + '" alt="" loading="lazy"></span>' +
       '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
       '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
       (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
@@ -5848,6 +6039,117 @@ $('#btn-launch').addEventListener('click', async () => {
     const d = await api('/api/rooms/' + currentRoomCode + '/launch', {}, 'POST');
     renderRoom(d);
   } catch (e) { toast(e.message); }
+});
+
+// ============ v61: FRIENDS PAGE — list · presence · room invites · 3v3 team ============
+// Data = /api/friends/list (real friendships + WS presence) and /api/teams/draft.
+// Room invitations go through the REAL rooms (host / lobby / free seat) and
+// the existing notification pipeline; joining uses the normal join route.
+let frTab = 'list', frData = null, teamDraft = null, teamPicks = [];
+function frAvatar(f) {
+  const ini = String((f.display_name || f.username || '?').charAt(0)).toUpperCase();
+  return '<span class="fr-ava">' + (f.avatar_url ? '<img src="' + esc(f.avatar_url) + '" alt="" data-initial="' + esc(ini) + '" onerror="this.onerror=null;avatarImgFailed(this)">' : esc(ini)) + '<i class="dot" title="' + (f.online ? 'Online' : 'Offline') + '"></i></span>';
+}
+async function friendsPageLoad() {
+  if (currentView !== 'friends') return;
+  try { [frData, teamDraft] = await Promise.all([api('/api/friends/list'), api('/api/teams/draft')]); }
+  catch (err) { if (!handleAuthError(err)) toast(err.message); return; }
+  if (!teamPicks.length && teamDraft && teamDraft.members) teamPicks = teamDraft.members.map((m) => m.id);
+  if (teamDraft && teamDraft.name && !$('#team-name').value) $('#team-name').value = teamDraft.name;
+  friendsPageRender();
+}
+function friendsPageRender() {
+  if (!frData) return;
+  const fs = frData.friends || [];
+  $('#fr-count').textContent = fs.length ? fs.length + ' friend' + (fs.length === 1 ? '' : 's') + ' · ' + frData.online_count + ' online' : '';
+  document.querySelectorAll('.fr-tab').forEach((t) => t.classList.toggle('active', t.dataset.frtab === frTab));
+  $('#fr-pane-list').classList.toggle('hidden', frTab !== 'list');
+  $('#fr-pane-team').classList.toggle('hidden', frTab !== 'team');
+  const myRoom = lastRoomData && currentRoomCode ? currentRoomCode : null;
+  $('#fr-list').innerHTML = fs.map((f) => {
+    const sub = f.online ? (f.room_code ? 'Online · in room #' + esc(f.room_code) : 'Online') : 'Offline';
+    return '<div class="fr-row' + (f.online ? ' online' : '') + '" data-uid="' + esc(f.id) + '">' + frAvatar(f) +
+      '<div class="fr-info"><div class="fr-name">' + esc(f.display_name || f.username) + ' <span class="muted" style="font-weight:500">@' + esc(f.username) + '</span></div><div class="fr-sub">' + sub + '</div></div>' +
+      '<div class="fr-actions">' +
+      '<button type="button" data-fr-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">Invite to room</button>' +
+      '<button type="button" class="secondary" data-fr-team="' + esc(f.id) + '">' + (teamPicks.includes(f.id) ? '✓ On my 3v3 team' : '+ 3v3 team') + '</button>' +
+      '<button type="button" class="mini util-btn" data-fr-profile="' + esc(f.id) + '">Profile</button>' +
+      '</div></div>';
+  }).join('');
+  $('#fr-empty').classList.toggle('hidden', fs.length > 0);
+  // team board
+  const meRow = '<div class="team-slot me">' + esc((me && (me.display_name || me.username)) || 'You') + '<small>captain · you</small></div>';
+  const slots = [meRow];
+  for (let i = 0; i < 2; i++) {
+    const uid = teamPicks[i]; const f = uid && fs.find((x) => x.id === uid);
+    const st = teamDraft && teamDraft.members ? (teamDraft.members.find((m) => m.id === uid) || {}).status : null;
+    slots.push(f
+      ? '<div class="team-slot">' + esc(f.display_name || f.username) + '<small>@' + esc(f.username) + (f.online ? ' · online' : '') + '</small>' + (st ? '<span class="team-status ' + esc(st) + '">' + esc(st) + '</span>' : '') + '<button type="button" class="mini util-btn team-x" data-team-remove="' + esc(f.id) + '">✕</button></div>'
+      : '<div class="team-slot empty">Player ' + (i + 2) + '<small>pick a friend below</small></div>');
+  }
+  $('#team-a-slots').innerHTML = slots.join('');
+  $('#team-pick').innerHTML = fs.length ? fs.map((f) => '<div class="fr-row' + (f.online ? ' online' : '') + (teamPicks.includes(f.id) ? ' picked' : '') + '">' + frAvatar(f) +
+    '<div class="fr-info"><div class="fr-name">' + esc(f.display_name || f.username) + '</div><div class="fr-sub">@' + esc(f.username) + (f.online ? ' · online' : '') + '</div></div>' +
+    '<div class="fr-actions"><button type="button" class="' + (teamPicks.includes(f.id) ? 'secondary' : '') + '" data-fr-team="' + esc(f.id) + '">' + (teamPicks.includes(f.id) ? 'Remove' : 'Add to team') + '</button></div></div>').join('')
+    : '<p class="muted" style="margin:0; font-size:13px">Add friends first — teammates are picked from your friends list.</p>';
+  const saved = teamDraft && teamDraft.members ? teamDraft.members.map((m) => m.id) : [];
+  const dirty = JSON.stringify(saved) !== JSON.stringify(teamPicks) || (($('#team-name').value || '').trim() !== (teamDraft && teamDraft.name || ''));
+  $('#team-save').disabled = !dirty;
+  $('#team-invite').disabled = dirty || !saved.length;
+  $('#team-open-room').disabled = dirty || !saved.length;
+}
+$('#view-friends').addEventListener('click', async (e) => {
+  const tab = e.target.closest('[data-frtab]'); if (tab) { frTab = tab.dataset.frtab; friendsPageRender(); return; }
+  const prof = e.target.closest('[data-fr-profile]'); if (prof) { openProfile(prof.dataset.frProfile); return; }
+  const team = e.target.closest('[data-fr-team]');
+  if (team) {
+    const id = team.dataset.frTeam;
+    if (teamPicks.includes(id)) teamPicks = teamPicks.filter((x) => x !== id);
+    else if (teamPicks.length >= 2) { toast('A 3v3 team is you plus two friends.'); return; }
+    else teamPicks.push(id);
+    friendsPageRender(); return;
+  }
+  const rm = e.target.closest('[data-team-remove]'); if (rm) { teamPicks = teamPicks.filter((x) => x !== rm.dataset.teamRemove); friendsPageRender(); return; }
+  const inv = e.target.closest('[data-fr-invite]'); if (inv) { openInviteModal(inv.dataset.frInvite, inv.dataset.name); return; }
+});
+$('#team-name').addEventListener('input', friendsPageRender);
+$('#team-save').addEventListener('click', async () => {
+  try { teamDraft = await api('/api/teams/draft', { member_ids: teamPicks, name: $('#team-name').value }, 'PUT'); msg('msg-team', 'Team saved.', true); }
+  catch (err) { msg('msg-team', err.message, false); }
+  friendsPageRender();
+});
+$('#team-invite').addEventListener('click', async () => {
+  try { const r = await api('/api/teams/draft/invite', {}, 'POST'); teamDraft = r; msg('msg-team', r.sent ? 'Team invitations sent to ' + r.sent + ' friend' + (r.sent === 1 ? '' : 's') + '.' : 'Everyone has already been invited.', true); }
+  catch (err) { msg('msg-team', err.message, false); }
+  friendsPageRender();
+});
+$('#team-open-room').addEventListener('click', async () => {
+  try {
+    const r = await api('/api/teams/draft/open-room', {}, 'POST');
+    toast('3v3 room #' + r.room_code + ' opened — invitations sent' + (r.invited.length ? ' to @' + r.invited.join(', @') : '') + '.');
+    currentRoomCode = r.room_code; show('room');
+  } catch (err) { msg('msg-team', err.message, false); }
+});
+// invite modal — choose one of my rooms (host, lobby, free seat)
+let invTarget = null;
+function openInviteModal(uid, name) {
+  invTarget = uid;
+  $('#inv-sub').textContent = 'Choose which of your rooms @' + name + ' should join.';
+  const rooms = (frData && frData.my_rooms) || [];
+  $('#inv-rooms').innerHTML = rooms.length
+    ? rooms.map((r) => '<button type="button" class="inv-room util-btn" data-inv-room="' + esc(r.code) + '"><span>' + esc(r.name || 'Room #' + r.code) + '<br><small>' + esc(MODE_LABELS[r.battle_mode] || r.battle_mode) + ' · ' + r.player_count + '/' + r.max_players + ' seated · ' + esc(r.visibility) + '</small></span><span class="muted">#' + esc(r.code) + '</span></button>').join('')
+    : '<p class="muted" style="margin:0; font-size:13.5px">You are not hosting an open room right now. Create one and come back — or use "Open 3v3 room" on the Team tab.</p>';
+  $('#inv-create').classList.toggle('hidden', rooms.length > 0);
+  modalOpen('#invite-modal');
+}
+$('#inv-close').addEventListener('click', () => modalClose('#invite-modal'));
+$('#inv-create').addEventListener('click', () => { modalClose('#invite-modal'); show('rooms'); });
+$('#invite-modal').addEventListener('click', async (e) => {
+  if (e.target.id === 'invite-modal') { modalClose('#invite-modal'); return; }
+  const b = e.target.closest('[data-inv-room]'); if (!b || !invTarget) return;
+  b.disabled = true;
+  try { await api('/api/friends/' + invTarget + '/invite', { room_code: b.dataset.invRoom }, 'POST'); toast('Invitation sent.'); modalClose('#invite-modal'); }
+  catch (err) { toast(err.message); b.disabled = false; }
 });
 
 // ============ v60: CHALLENGE REVEAL — the randomizer's results screen ============
@@ -5998,21 +6300,22 @@ async function renderSettingsThemes() {
   const grid = $('#settings-theme-grid'), customRow = $('#settings-theme-custom');
   const card = (t, active, locked, attr) =>
     '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" ' + attr + '>' +
-    '<span class="swatch-logo"><img data-swatch-logo="' + esc(t.key) + '" src="' + pthLogoFor(t.key) + '" alt=""></span>' +
     '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
+    '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
     (t.customizable ? '<span class="swatch-chips"><i style="background:' + esc(t.c1 || 'var(--pink)') + '"></i><i style="background:' + esc(t.c2 || 'var(--purple)') + '"></i></span>' : '') +
     (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
     (locked ? '<span class="swatch-lock">🔒</span>' : '') + '</div>';
   mePremium = !!d.premium; // v61: the server answer is the entitlement truth for this view
-  $('#settings-themes').classList.toggle('is-locked', !d.premium);
+  $('#btn-premium-mini').classList.toggle('hidden', mePremium); // header ⭐ follows the same truth
+  // v61: FREE plan = a simplified Settings page — Appearance (Light/Dark),
+  // Animations (On/Off) and ONE "Upgrade to Premium" button. The whole
+  // UI Customization section is not rendered at all for free members (the
+  // server rejects every theme write with 403 regardless). PREMIUM = the
+  // customization section, and NO upgrade button anywhere.
+  $('#settings-themes').classList.toggle('hidden', !d.premium);
+  $('#settings-upgrade').classList.toggle('hidden', d.premium);
   if (!d.premium) {
-    // v61: VIEW-LEVEL gate. Free members get a disabled, read-only preview
-    // and one honest route to upgrade. No control in this section works
-    // without the entitlement (the server rejects every write with 403 too).
-    grid.innerHTML = d.themes.filter((t) => t.premium).slice(0, 8).map((t) => card(t, false, true, 'data-upsell="1" aria-disabled="true"')).join('') +
-      '<div class="pth-locked-cta"><div class="big" style="font-size:14px">UI Customization is a Premium feature</div>' +
-      '<p class="muted" style="margin:6px 0 10px; font-size:13px">Eight complete visual systems that restyle the whole app, plus manual colours. Upgrade to unlock.</p>' +
-      '<button type="button" id="pth-upgrade" style="width:100%">Upgrade to Premium</button></div>';
+    grid.innerHTML = '';
     customRow.classList.add('hidden');
     $('#pth-deactivate').classList.add('hidden');
     return;
@@ -6022,7 +6325,7 @@ async function renderSettingsThemes() {
   // the active customizable card shows the logo IN the chosen colors
   if (activeKey !== 'default' && d.ui_custom) {
     pthTintedLogo(activeKey, d.ui_custom).then((url) => {
-      const el = grid.querySelector('[data-swatch-logo="' + activeKey + '"]');
+      const el = grid.querySelector('[data-swatch-logo="' + activeKey + '"]'); // v61: cards are text-only; kept for safety
       if (el && url) el.src = url;
     });
   }
@@ -6038,6 +6341,7 @@ async function renderSettingsThemes() {
   }
   pthRefreshCustomUI();
 }
+$('#settings-upgrade-btn').addEventListener('click', () => show('premium'));
 $('#settings-theme-grid').addEventListener('click', async (e) => {
   if (e.target.closest('#pth-upgrade')) { show('premium'); return; }
   if (!mePremium) { openUpsell('Design themes are Premium', 'UI Customization is part of Art Arena Premium. Upgrade to unlock all eight themes and manual colours.'); return; } // v61: the whole grid is inert for free members
