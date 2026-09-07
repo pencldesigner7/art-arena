@@ -1531,3 +1531,52 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS ui_theme text;
 
 -- Rematch requests join the ONE notification system (24 h TTL, bell, panel).
 ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'rematch_request';
+
+-- ============================================================================
+-- v62 — TWITCH GO LIVE (see server/twitch.js)
+-- One Twitch connection per Art Arena user (tokens SERVER-SIDE only — never
+-- returned by any API), and real stream sessions bound to rooms/battles.
+-- A session is 'preparing' the moment the host stages it; it only becomes
+-- 'live' when TWITCH CONFIRMS the broadcaster is genuinely streaming.
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.twitch_connections (
+    user_id uuid PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+    twitch_user_id text NOT NULL,
+    login text,
+    display_name text,
+    profile_image_url text,
+    access_token text NOT NULL,
+    refresh_token text,
+    token_expires_at timestamp with time zone,
+    scopes text,
+    status text NOT NULL DEFAULT 'active',   -- active | revoked
+    connected_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.twitch_stream_sessions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    room_id uuid NOT NULL REFERENCES public.battle_rooms(id) ON DELETE CASCADE,
+    host_user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    battle_id uuid REFERENCES public.battles(id) ON DELETE SET NULL,
+    broadcaster_twitch_id text,
+    broadcaster_login text,
+    broadcaster_display_name text,
+    broadcaster_profile_image_url text,
+    title text NOT NULL,
+    status text NOT NULL DEFAULT 'preparing'
+        CHECK (status IN ('preparing','live','ended')),
+    started_at timestamp with time zone,
+    ended_at timestamp with time zone,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+-- One active (preparing/live) stream session per room.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_twitch_session_active_per_room
+    ON public.twitch_stream_sessions (room_id) WHERE status IN ('preparing','live');
+CREATE INDEX IF NOT EXISTS idx_twitch_sessions_status
+    ON public.twitch_stream_sessions (status);
+CREATE INDEX IF NOT EXISTS idx_twitch_sessions_broadcaster
+    ON public.twitch_stream_sessions (broadcaster_twitch_id, status);
+CREATE INDEX IF NOT EXISTS idx_twitch_sessions_host
+    ON public.twitch_stream_sessions (host_user_id, created_at DESC);

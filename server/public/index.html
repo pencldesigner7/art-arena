@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="58">
+<meta name="aa-ui-version" content="62">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -663,6 +663,24 @@ try {
   .glv-note { font-size:12.5px; color:var(--muted); margin:8px 0 0; }
   .glv-setup { font-size:13.5px; background:var(--surface); border:1px dashed var(--line); border-radius:8px; padding:10px 12px; margin:10px 0 0; }
   .glv-status { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; letter-spacing:1px; padding:3px 10px; border-radius:999px; border:1px solid var(--btn-line); }
+  /* v62: Twitch Go Live — room stream state + settings connection row.
+     Same token language as glv (Dark/Light + every theme); the ONLY motion
+     is the existing pulsing live dot (respects Animations OFF). */
+  .tw-box { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .tw-line { display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:9px 12px; font-size:13px; }
+  .tw-line.is-live { border-color:var(--pink); box-shadow:0 0 0 1px rgba(var(--pink-rgb),.25), 0 0 14px rgba(var(--pink-rgb),.12); }
+  .tw-line .tw-who { font-weight:800; }
+  .tw-line .tw-watch { margin-left:auto; }
+  .tw-line .muted { font-size:12px; }
+  .tw-chip { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; letter-spacing:1.2px; padding:3px 9px; border-radius:999px; border:1px solid var(--pink); color:var(--pink); }
+  .tw-chip.preparing { border-color:var(--btn-line); color:var(--muted); letter-spacing:1px; }
+  .tw-embed { position:relative; width:100%; aspect-ratio:16/9; max-height:340px; border-radius:12px; overflow:hidden; background:#000; border:1px solid var(--line); }
+  .tw-embed iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .tw-connect { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:8px; }
+  .tw-connect img { width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); object-fit:cover; }
+  .tw-connect .tw-id { font-weight:800; font-size:14.5px; }
+  .tw-connect .tw-handle { color:var(--muted); font-size:12.5px; }
+  .tw-connect .tw-actions { margin-left:auto; display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
   /* v51: notifications history, room context menu, profile modal, kick confirm. */
   .notif-list { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
   /* v61: Friends page */
@@ -1328,6 +1346,12 @@ try {
         <li>For broadcasts you create we store the details you provide (title, privacy setting, scheduled start) and the broadcast status YouTube reports, so streams can be linked to battles and listed on the LIVE page. Art Arena does not transmit or store video today.</li>
         <li>You can disconnect YouTube at any time — this revokes our access at Google and deletes the connection.</li>
       </ul>
+      <h3>Twitch connection for GO LIVE (optional, v62)</h3>
+      <ul>
+        <li>If you use "Go Live via Twitch", we connect your Twitch account so you can livestream Art Arena battles from your own channel. We store your Twitch user ID, username, display name and profile picture, plus authorization tokens that are kept server-side only — tokens are never returned to your browser.</li>
+        <li>For a stream session we store the details you provide (stream title) and the session's status, and we register with Twitch to be told when your stream goes online/offline so a battle can be marked LIVE truthfully. Art Arena does not transmit or store video — you broadcast from your own streaming software.</li>
+        <li>You can disconnect Twitch at any time — this revokes our access at Twitch, ends your active Art Arena stream sessions and deletes the connection.</li>
+      </ul>
       <h3>Battle activity</h3>
       <ul>
         <li>Art Arena records the battle activity needed to run the Service: rooms you create or join (room name and settings), matchmaking entries, the battles you take part in, their results, your battle history and your statistics (such as battles played).</li>
@@ -1396,6 +1420,9 @@ try {
       <h2>LIVE and YouTube broadcasts</h2>
       <p>If you connect your YouTube account, a broadcast you create is a real broadcast on <strong>your own YouTube channel</strong>: Art Arena manages its metadata (title, privacy setting, schedule), links it to your battle and tracks its status. Creating a broadcast is not streaming — Art Arena does not transmit, record or store video today; sending your screen or audio to YouTube is a future feature and, until then, requires your own encoder. Broadcasts are also subject to YouTube's own terms, and going live from Art Arena requires an eligible battle.</p>
 
+      <h2>Twitch GO LIVE (v62)</h2>
+      <p>If you connect your Twitch account, Art Arena can stage a real stream session for an Art Arena battle on <strong>your own Twitch channel</strong>: it prepares the stream title you provide, links the session to your room/battle, and tracks its status through Twitch (including receiving Twitch's stream online/offline events). A battle is only marked LIVE when Twitch confirms your stream is actually online. Art Arena does not transmit, record or store video — you broadcast with your own streaming software, and your stream is subject to Twitch's terms of service. Connecting Twitch never creates or switches an Art Arena account.</p>
+
       <h2>Your account</h2>
       <ul>
         <li>Give accurate registration information and keep your password private. You're responsible for activity under your account.</li>
@@ -1448,7 +1475,7 @@ try {
        the broadcast live — never from a broadcast object merely existing). -->
   <section id="view-live" class="view hidden">
     <h1>LIVE</h1>
-    <p class="muted" style="margin:0 0 14px; font-size:14px">Watch Art Arena battles broadcast live on YouTube.</p>
+    <p class="muted" style="margin:0 0 14px; font-size:14px">Watch Art Arena battles broadcast live on YouTube and Twitch.</p>
     <h2>LIVE NOW</h2>
     <div id="live-now-list" class="live-grid"></div>
     <div id="live-now-empty" class="live-empty hidden"><b>No battles are live right now</b><span>When artists go live, their battles will appear here.</span></div>
@@ -1810,6 +1837,12 @@ try {
            battle UI where a livestream would start — but it is a
            placeholder, NOT streaming: no LIVE tab, no video infra yet. -->
       <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="#FF0000" d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.54 12 3.54 12 3.54s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg> GO LIVE VIA YOUTUBE</button>
+      <!-- v62: GO LIVE VIA TWITCH — the real Twitch flow. The box is filled
+           by renderRoom from the server-truth room payload (d.twitch): a
+           host with no session gets the GO LIVE button; everyone sees the
+           PREPARING chip or the 🔴 LIVE badge + watch embed when Twitch has
+           genuinely confirmed the stream. -->
+      <div id="twitch-room-box" style="margin-top:10px"></div>
     </div>
 
     <!-- v44: post-battle panel — the honest outcome + the two things an
@@ -1955,6 +1988,16 @@ try {
           <button type="button" class="theme-opt active" id="anim-on">ON</button>
           <button type="button" class="theme-opt" id="anim-off">OFF</button>
         </div>
+      </label>
+    </div>
+    <!-- v62: Twitch connection for GO LIVE (hosts only). Connects to the
+         CURRENTLY LOGGED-IN Art Arena account — never creates/switches one.
+         The connected state + Disconnect render from /api/twitch/connection
+         (tokens never leave the server). -->
+    <div class="settings-appearance" style="margin-top:18px" id="tw-settings-wrap">
+      <label>Livestreaming
+        <p class="muted" style="margin:6px 0 2px; font-size:13px">Connect your Twitch account to go live with Art Arena battle rooms. Your stream is broadcast from your own Twitch channel — Art Arena prepares it and confirms when you're genuinely live.</p>
+        <div id="tw-settings"></div>
       </label>
     </div>
     <!-- v61: Free plan — the only extra control is the upgrade route. -->
@@ -2207,6 +2250,21 @@ try {
       <div id="glv-body"></div>
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="glv-close">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- ============ v62: GO LIVE VIA TWITCH modal ===========================
+       States: setup (no Twitch credentials on this deployment) / connect
+       (OAuth entry — binds to the logged-in Art Arena account) / prepare
+       (connected: title + account + Prepare Stream) / status (session:
+       preparing until Twitch confirms the stream is online, then LIVE).
+       Never fakes a connection or a live state. -->
+  <div id="tw-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="tw-title" style="width:min(430px,100%)">
+      <h3 id="tw-title"><span class="live-dot"></span> GO LIVE VIA TWITCH</h3>
+      <div id="tw-body"></div>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="tw-close">Close</button>
       </div>
     </div>
   </div>
@@ -2933,7 +2991,7 @@ function show(name) {
   else if (name === 'live') { startPolling(refreshLive); startLiveTicker(); } // v50: LIVE feed + countdowns
   else if (name === 'room') startPolling(refreshRoom);
   else if (name === 'premium') renderPremiumPage(); // v52: entitlement + catalog, server truth
-  else if (name === 'settings') { $('#settings-themes').classList.toggle('hidden', !mePremium); $('#settings-upgrade').classList.toggle('hidden', mePremium); renderSettingsThemes(); } // v53/v61: entitlement-gated section, server re-checked on every visit
+  else if (name === 'settings') { $('#settings-themes').classList.toggle('hidden', !mePremium); $('#settings-upgrade').classList.toggle('hidden', mePremium); renderSettingsThemes(); renderTwitchSettings(); } // v53/v61: entitlement-gated section + v62: Twitch connection, server re-checked on every visit
   else if (name === 'friends') { friendsPageLoad(); startPolling(friendsPageLoad); } // v61: presence + rooms stay live
   else if (name === 'matchmaking') { mmOnEnter(); } // v35: real search (v45: the searching LINE carries the visual)
   else if (name === 'join') refreshJoinList();              // v35: live public list
@@ -3822,6 +3880,7 @@ function renderRoom(d) {
     const glvBattleLive = !!(d.battle && ['countdown', 'active'].includes(d.battle.status));
     $('#btn-go-live').classList.toggle('hidden', !(glvOwner && glvPre && !glvBattleLive));
   }
+  renderTwitchRoomBox(d); // v62: GO LIVE VIA TWITCH / preparing chip / 🔴 LIVE badge (server truth)
 
   const canStart = isHost && isInLobby && d.player_count === d.max_players;
   $('#btn-start').classList.toggle('hidden', !canStart);
@@ -4128,6 +4187,11 @@ function rtToastText(ev) {
     case 'countdown':        return null; // the countdown IS the message
     case 'battle_active':    return null; // GO! + the battle clock cover this
     case 'voting_opened':     return '🗳 Time is up! Community Voting is open for 2 minutes.'; // v58
+    // v62: Twitch Go Live — the room updates in realtime (refreshRoom runs
+    // after the toast), so LIVE appears/disappears without a page refresh.
+    case 'twitch_preparing':  return '🎥 ' + who + ' is preparing a Twitch stream for this battle';
+    case 'twitch_live':       return '🔴 ' + who + ' is LIVE on Twitch — watch this battle live!';
+    case 'twitch_ended':      return '🔴 ' + who + (ev.title ? '' : '') + ' ended the Twitch stream';
     case 'vote':              return null; // v58: the tally itself is the message
     case 'battle_ended':      return '🏁 The battle has ended — see the result!';
     case 'rematch_requested': return '⚔️ ' + who + ' requested a rematch';
@@ -6558,13 +6622,17 @@ function liveCard(x, isLive) {
   return `<div class="live-card${isLive ? ' is-live' : ''}">
     <div class="live-top">
       ${isLive ? '<span class="live-dot"></span><span class="live-badge">LIVE</span>' : '<span class="live-badge soon">UPCOMING</span>'}
-      <span class="live-platform">▶ YOUTUBE</span>
+      <span class="live-platform">${x.platform === 'twitch' ? '🔴 TWITCH' : '▶ YOUTUBE'}</span>
       ${!isLive && x.scheduledStart ? '<span class="live-count" data-live-start="' + esc(x.scheduledStart) + '"></span>' : ''}
     </div>
     <div class="live-title">${esc(x.title)}</div>
     <div class="live-meta">${esc(who)}${x.roomCode ? ' · ROOM ' + esc(x.roomCode) : ''}</div>
     ${x.challenge ? '<div class="live-challenge">' + esc(x.challenge) + '</div>' : ''}
     ${isLive && x.watchUrl ? '<div class="live-actions"><button type="button" data-watch="' + esc(x.watchUrl) + '">Watch Live</button></div>' : ''}
+    ${isLive && x.platform === 'twitch' && x.broadcaster && x.broadcaster.login
+      ? '<div class="live-meta" style="font-size:12px">' + (x.broadcaster.profile_image_url
+          ? '<img src="' + esc(x.broadcaster.profile_image_url) + '" alt="" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-right:6px;border:1px solid var(--line)">' : '') +
+        'Streaming from <b>@' + esc(x.broadcaster.login) + '</b> on Twitch</div>' : ''}
   </div>`;
 }
 async function refreshLive() {
@@ -6729,6 +6797,301 @@ window.__aaYoutubeHandoff = null;
   })();
 })();
 
+// ================== v62: TWITCH GO LIVE (account + room + LIVE) =============
+// Real Twitch integration: connect the logged-in Art Arena account to a
+// Twitch account, prepare a stream session for a battle room, and show LIVE
+// only when TWITCH confirms the broadcaster is genuinely streaming. No fake
+// live states, no mock connections — mirrors the YouTube v50 honesty rules.
+
+// ------------------------------ Settings connection -------------------------
+async function renderTwitchSettings() {
+  const wrap = $('#tw-settings');
+  if (!wrap) return;
+  wrap.innerHTML = '<p class="muted" style="font-size:13px; margin:8px 0 0">Checking Twitch…</p>';
+  let status = null, conn = null;
+  try { status = await api('/api/twitch/status'); } catch (_) {}
+  try { conn = await api('/api/twitch/connection'); } catch (_) {}
+  if (!status) return (wrap.innerHTML = '<p class="muted" style="font-size:13px; margin:8px 0 0">Could not reach the server — please try again.</p>');
+  if (!status.available) {
+    return (wrap.innerHTML =
+      '<p class="muted" style="font-size:13px; margin:8px 0 0">Twitch isn\'t configured on this deployment yet, so live battles can\'t be created here.</p>' +
+      '<div class="glv-setup"><b>Setup needed (developer):</b> set <code>TWITCH_CLIENT_ID</code>, <code>TWITCH_CLIENT_SECRET</code> and <code>TWITCH_REDIRECT_URI</code> in the server environment. See the v62 setup checklist.</div>');
+  }
+  if (!conn || !conn.connected) {
+    const revoked = conn && conn.revoked;
+    return (wrap.innerHTML =
+      '<div class="tw-connect">' +
+        '<div style="flex:1; min-width:0">' +
+          '<div class="tw-id">Twitch</div>' +
+          '<div class="tw-handle">' + (revoked ? 'Authorization expired or revoked — reconnect to continue.' : 'Connect your Twitch account to livestream Art Arena battles.') + '</div>' +
+        '</div>' +
+        '<button type="button" data-tw-connect style="white-space:nowrap">Connect Twitch</button>' +
+      '</div>' +
+      '<p class="glv-note">Art Arena asks for one permission: managing your stream title (scope: channel:manage:broadcast). Tokens stay on our server — never in your browser — and you can disconnect anytime.</p>');
+  }
+  const b = conn.broadcaster || {};
+  wrap.innerHTML =
+    '<div class="tw-connect">' +
+      (b.profile_image_url ? '<img src="' + esc(b.profile_image_url) + '" alt="">' : '<div class="tw-id" style="width:42px;height:42px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center">📺</div>') +
+      '<div style="flex:1; min-width:0">' +
+        '<div class="tw-id">' + esc(b.display_name || b.login || 'Twitch') + '</div>' +
+        '<div class="tw-handle">@' + esc(b.login || '') + ' · Twitch connected ✓</div>' +
+      '</div>' +
+      '<div class="tw-actions"><button type="button" class="secondary" data-tw-disconnect style="white-space:nowrap">Disconnect</button></div>' +
+    '</div>';
+}
+// Delegated clicks inside the settings connection card.
+document.addEventListener('click', async (e) => {
+  const box = e.target.closest('#tw-settings');
+  if (!box) return;
+  if (e.target.closest('[data-tw-connect]')) {
+    try { sessionStorage.setItem('aa-tw-return', 'settings'); } catch (_) {}
+    location.assign('/api/twitch/connect');
+    return;
+  }
+  if (e.target.closest('[data-tw-disconnect]')) {
+    const btn = e.target.closest('[data-tw-disconnect]');
+    btn.disabled = true; btn.textContent = 'Disconnecting…';
+    try { await api('/api/twitch/disconnect', {}, 'POST'); toast('Twitch disconnected.'); }
+    catch (err) { toast(err.message); }
+    renderTwitchSettings();
+  }
+});
+
+// ---------------------------- Room stream state ------------------------------
+// Renders the GO LIVE VIA TWITCH entry (host), the PREPARING chip (hosts and
+// viewers), or the 🔴 LIVE banner with a real Twitch embed (everyone) — all
+// from the room payload's server-truth `twitch` session. The embed uses
+// Twitch's official player with parent = this site's hostname.
+function twEmbedSrc(login) {
+  const parent = encodeURIComponent(location.hostname);
+  return 'https://player.twitch.tv/?channel=' + encodeURIComponent(login) + '&parent=' + parent + '&muted=true';
+}
+function renderTwitchRoomBox(d) {
+  const box = $('#twitch-room-box');
+  if (!box) return;
+  const t = d.twitch;
+  const isHost = !!(d.host && me && d.host.user_id === me.id);
+  if (!t) {
+    // No session. Only the host can prepare one — and only while the room is
+    // open (lobby/starting/in_battle). Spectators and guests see nothing.
+    const roomOpen = ['lobby', 'starting', 'in_battle'].includes(d.status);
+    box.innerHTML = (isHost && roomOpen)
+      ? '<button type="button" id="btn-go-live-twitch" class="secondary" style="width:100%"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429z"/></svg> GO LIVE VIA TWITCH</button>'
+      : '';
+    return;
+  }
+  const b = t.broadcaster || {};
+  const login = b.login || '';
+  if (t.status === 'preparing') {
+    box.innerHTML =
+      '<div class="tw-line">' +
+        '<span class="tw-chip preparing">PREPARING</span>' +
+        '<span class="tw-who" style="flex:1; min-width:0; overflow-wrap:anywhere">' + esc(t.title) + '</span>' +
+        (isHost ? '<button type="button" class="mini danger" data-tw-end-session="' + esc(t.id) + '">Cancel</button>' : '') +
+      '</div>' +
+      '<p class="glv-note" style="margin:0 0 0 2px">The host is preparing a Twitch stream — this battle will show LIVE the moment Twitch confirms the stream is online.</p>';
+    return;
+  }
+  if (t.status === 'live') {
+    const watchBtn = login
+      ? '<button type="button" class="tw-watch" data-watch="https://www.twitch.tv/' + esc(login) + '">▶ Watch on Twitch</button>' : '';
+    box.innerHTML =
+      '<div class="tw-line is-live">' +
+        '<span class="live-dot"></span><span class="tw-chip">LIVE ON TWITCH</span>' +
+        '<span class="tw-who" style="flex:1; min-width:0; overflow-wrap:anywhere">' + esc(t.title) + '</span>' +
+        (isHost ? '<button type="button" class="mini secondary" data-tw-end-session="' + esc(t.id) + '">End session</button>' : '') +
+      '</div>' +
+      '<div class="live-meta" style="font-size:12.5px">Streaming from ' +
+        (b.profile_image_url ? '<img src="' + esc(b.profile_image_url) + '" alt="" style="width:20px;height:20px;border-radius:50%;vertical-align:middle;margin:0 4px;border:1px solid var(--line)">' : '📺 ') +
+        '<b>@' + esc(login || '') + '</b> on Twitch' + (t.started_at ? ' · live since ' + new Date(t.started_at).toLocaleTimeString() : '') + '</div>' +
+      (login
+        ? '<div class="tw-embed hidden" id="tw-embed-box"><iframe src="' + twEmbedSrc(login) + '" allowfullscreen="true" scrolling="no" title="Twitch stream for this battle"></iframe></div>' +
+          '<div style="display:flex; gap:8px; margin-top:2px"><button type="button" id="tw-embed-toggle" class="secondary" style="flex:1; margin:0">▶ Watch live in this room</button>' + watchBtn + '</div>'
+        : '<p class="glv-note">This battle is live on Twitch.</p>');
+    const toggle = $('#tw-embed-toggle');
+    if (toggle) toggle.addEventListener('click', () => {
+      const eb = $('#tw-embed-box');
+      eb.classList.toggle('hidden');
+      toggle.textContent = eb.classList.contains('hidden') ? '▶ Watch live in this room' : 'Hide player';
+    });
+    return;
+  }
+  box.innerHTML = '';
+}
+// Delegated room actions: open the Go Live modal / end a stream session.
+document.addEventListener('click', async (e) => {
+  if (e.target.closest('#btn-go-live-twitch')) { twOpen(); return; }
+  const endBtn = e.target.closest('[data-tw-end-session]');
+  if (!endBtn) return;
+  const id = endBtn.dataset.twEndSession;
+  endBtn.disabled = true;
+  try {
+    await api('/api/twitch/sessions/' + id + '/end', {}, 'POST');
+    toast('Twitch stream session ended.');
+    refreshRoom();
+  } catch (err) {
+    endBtn.disabled = false;
+    toast(err.message);
+  }
+});
+
+// ---------------------------- Go Live modal ---------------------------------
+const TW_STATUS = {
+  preparing: ['PREPARING', 'The stream session is staged on your Twitch channel. Start broadcasting from your own streaming software (OBS, Streamlabs, etc.) — Art Arena marks this battle LIVE the moment Twitch confirms your stream is online.'],
+  live: ['LIVE', 'Twitch has confirmed this stream is live — the battle now shows 🔴 LIVE to everyone.'],
+  ended: ['ENDED', 'This stream session has ended.'],
+};
+function twOpen() { const b = $('#tw-modal'); b.classList.remove('hidden'); requestAnimationFrame(() => b.classList.add('open')); }
+function twClose() { const b = $('#tw-modal'); b.classList.remove('open'); setTimeout(() => b.classList.add('hidden'), 260); }
+$('#tw-close').addEventListener('click', twClose);
+$('#tw-modal').addEventListener('click', (e) => { if (e.target.id === 'tw-modal') twClose(); });
+function twBody(html) { $('#tw-body').innerHTML = html; }
+function twErr(text) { return '<p class="msg err" style="display:block; margin:10px 0 0">' + esc(text) + '</p>'; }
+
+async function openTwitchGoLive() {
+  twOpen();
+  twBody('<p class="muted" style="margin:10px 0 0">Checking Twitch…</p>');
+  const room = lastRoomData; // server truth from the open room
+  const roomSession = (room && room.twitch) || null;
+  if (roomSession) return twStatus(roomSession);
+
+  let status = null, conn = null;
+  try { status = await api('/api/twitch/status'); } catch (_) {}
+  try { conn = await api('/api/twitch/connection'); } catch (_) {}
+  if (!status) return twBody('<div class="glv-setup">Could not reach the server — please try again.</div>');
+  if (!status.available) {
+    return twBody(
+      '<p class="muted" style="margin:10px 0 0">Twitch isn\'t configured on this deployment yet, so live battles can\'t be created here.</p>' +
+      '<div class="glv-setup"><b>Setup needed (developer):</b> set <code>TWITCH_CLIENT_ID</code>, <code>TWITCH_CLIENT_SECRET</code> and <code>TWITCH_REDIRECT_URI</code> in the server environment (Twitch Developer Portal OAuth app + Render environment variables). See the v62 setup checklist.</div>' +
+      '<p class="glv-note">Nothing is streamed or stored in this state — the button stays honest instead of faking a connection.</p>');
+  }
+  if (!conn || !conn.connected) {
+    const revoked = conn && conn.revoked;
+    return twBody(
+      '<p class="muted" style="margin:10px 0 0">' + (revoked
+        ? 'Your Twitch authorization expired or was revoked — reconnect to continue.'
+        : 'You need to connect your Twitch account before you can livestream an Art Arena battle.') + '</p>' +
+      '<p class="glv-note">Art Arena asks for one permission: managing your stream title (scope: channel:manage:broadcast). Tokens stay on our server — never in your browser — and you can disconnect anytime.</p>' +
+      '<button type="button" data-tw-connect style="width:100%">Connect Twitch</button>');
+  }
+  twPrepare(conn);
+}
+
+function twChannelChip(conn) {
+  const b = conn && conn.broadcaster ? conn.broadcaster : {};
+  return '<div class="glv-channel">' +
+    (b.profile_image_url ? '<img src="' + esc(b.profile_image_url) + '" alt="">' : '') +
+    '<div><div class="nm">' + esc(b.display_name || b.login || 'Your channel') + '</div>' +
+    '<div class="muted" style="font-size:12px">@' + esc(b.login || '') + ' · Twitch connected ✓</div></div></div>';
+}
+
+function twPrepare(conn) {
+  // Default title from the battle room: "Art Arena Battle: Player A vs
+  // Player B" — from the server room payload (battle players first).
+  const pl = (lastRoomData && ((lastRoomData.battle && lastRoomData.battle.players && lastRoomData.battle.players.length ? lastRoomData.battle.players : null) || lastRoomData.players)) || [];
+  const who = pl.map((p) => '@' + p.username).join(' vs ');
+  const challenge = lastRoomData && lastRoomData.battle && lastRoomData.battle.challenge ? lastRoomData.battle.challenge.summary_text : '';
+  const preTitle = ('Art Arena Battle' + (who ? ': ' + who : '') + (challenge ? ' — ' + challenge : '')).slice(0, 100);
+  twBody(
+    twChannelChip(conn) +
+    '<label>Stream title<input id="tw-title-input" maxlength="100" value="' + esc(preTitle) + '"></label>' +
+    '<p class="glv-note">Battle: ROOM ' + esc(currentRoomCode || '—') + ' · your stream will be linked to this room and can appear on the LIVE page.</p>' +
+    '<button type="button" data-tw-prepare style="width:100%">Prepare Stream</button>' +
+    '<p class="glv-note">Art Arena stages this title on your Twitch channel and tracks the stream. You broadcast from your own streaming software — Art Arena never sends video, and this battle only shows LIVE after Twitch confirms your stream is online.</p>' +
+    '<p class="muted" style="font-size:12px; margin-top:8px; text-align:center">Or <a href="#" data-tw-disconnect-link style="color:var(--pink)">disconnect Twitch</a></p>');
+}
+
+function twStatus(session) {
+  const s = TW_STATUS[session.status] || TW_STATUS.preparing;
+  twBody(
+    '<div><span class="glv-status">' + (session.status === 'live' ? '<span class="live-dot" style="width:7px;height:7px"></span>' : '') + ' ' + s[0] + '</span></div>' +
+    '<div class="live-title" style="margin-top:10px">' + esc(session.title) + '</div>' +
+    '<div class="live-meta">Room session · ' + esc(session.status) + (session.started_at ? ' · started ' + new Date(session.started_at).toLocaleString() : '') + '</div>' +
+    '<p class="glv-note">' + s[1] + '</p>' +
+    (session.status === 'live' && session.broadcaster && session.broadcaster.login
+      ? '<div class="live-actions"><a href="https://www.twitch.tv/' + esc(session.broadcaster.login) + '" target="_blank" rel="noopener" style="display:block; text-align:center; padding:11px 20px; border-radius:8px; background:linear-gradient(90deg,var(--pink),var(--purple)); color:#fff; font-weight:700; margin-top:6px">Watch on Twitch</a></div>'
+      : '') +
+    ((session.status === 'preparing' || session.status === 'live')
+      ? '<button type="button" class="secondary" data-tw-end-session="' + esc(session.id) + '" style="width:100%; margin-top:10px">' + (session.status === 'preparing' ? 'Cancel session' : 'End session (stop tracking)') + '</button>'
+      : '') +
+    '<p class="muted" style="font-size:12px; margin-top:10px; text-align:center">Or <a href="#" data-tw-disconnect-link style="color:var(--pink)">disconnect Twitch</a></p>');
+}
+
+// One delegated listener covers every Twitch Go Live modal action.
+$('#tw-body').addEventListener('click', async (e) => {
+  if (e.target.closest('[data-tw-connect]') || e.target.closest('[data-tw-connect-link]')) {
+    try { sessionStorage.setItem('aa-tw-return', currentRoomCode || ''); } catch (_) {}
+    location.assign('/api/twitch/connect');
+    return;
+  }
+  if (e.target.closest('[data-tw-disconnect-link]')) {
+    try { await api('/api/twitch/disconnect', {}, 'POST'); toast('Twitch disconnected.'); }
+    catch (err) { toast(err.message); }
+    twClose();
+    renderTwitchSettings();
+    return;
+  }
+  if (e.target.closest('[data-tw-prepare]')) {
+    const btn = e.target.closest('[data-tw-prepare]');
+    btn.disabled = true; btn.textContent = 'Preparing on Twitch…';
+    try {
+      const d = await api('/api/twitch/sessions', {
+        roomCode: currentRoomCode,
+        title: $('#tw-title-input') ? $('#tw-title-input').value : '',
+      }, 'POST');
+      toast('Stream session prepared — start streaming to go LIVE.');
+      refreshRoom().then(() => { renderTwitchSettings(); twStatus({ ...d.session, broadcaster: { login: '' } }); });
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Prepare Stream';
+      $('#tw-body').insertAdjacentHTML('beforeend', twErr(err.message));
+    }
+    return;
+  }
+  if (e.target.closest('[data-tw-end-session]')) {
+    const id = e.target.closest('[data-tw-end-session]').dataset.twEndSession;
+    try { await api('/api/twitch/sessions/' + id + '/end', {}, 'POST'); toast('Twitch stream session ended.'); }
+    catch (err) { toast(err.message); }
+    twClose();
+    refreshRoom();
+    renderTwitchSettings();
+    return;
+  }
+});
+
+// ---------------------- Twitch OAuth return handoff -------------------------
+// #aa-twitch=ok|error&reason=… — mirrors the YouTube handoff. The
+// connection ALWAYS attaches to the Art Arena account that started the flow
+// (server-side state binding); the client only navigates back afterwards.
+window.__aaTwitchHandoff = null;
+(function handleTwitchReturn() {
+  const m = (location.hash || '').match(/^#aa-twitch=(ok|error)(?:&(.+))?$/);
+  if (!m) return;
+  const q = parseHashQuery(m[2] || '');
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
+  window.__aaTwitchHandoff = (async () => {
+    if (m[1] === 'error' || !sessionToken) {
+      const why = {
+        denied: 'Twitch connection was cancelled.',
+        bad_state: 'That Twitch connection link expired — please try again.',
+        setup: 'Twitch is not configured on this deployment yet.',
+        token: 'Twitch rejected the connection — please try again.',
+        identity: 'Your Twitch account could not be read — please try again.',
+        network: 'Could not reach Twitch — check your connection and try again.',
+      }[q.reason || 'other'] || 'Twitch connection did not complete — please try again.';
+      try { if (sessionToken) await enterAccount(); else show('login'); } catch (_) { show('login'); }
+      toast(why);
+      return;
+    }
+    await enterAccount();
+    toast('Twitch connected — GO LIVE is ready in your battle.');
+    let back = null;
+    try { back = sessionStorage.getItem('aa-tw-return'); sessionStorage.removeItem('aa-tw-return'); } catch (_) {}
+    if (back && back !== 'settings' && back !== 'room') { openRoom(back); setTimeout(() => openTwitchGoLive(), 700); }
+    else { show('settings'); renderTwitchSettings(); }
+  })();
+})();
+
 // ---------------------------------- init -----------------------------------
 (async function init() {
   rtChip();
@@ -6766,6 +7129,11 @@ window.__aaYoutubeHandoff = null;
     // (or toasted the failure reason).
     if (window.__aaYoutubeHandoff) {
       await window.__aaYoutubeHandoff;
+      return;
+    }
+    // v62: Twitch OAuth return (Go Live / settings connection flow).
+    if (window.__aaTwitchHandoff) {
+      await window.__aaTwitchHandoff;
       return;
     }
     // v44 fix (fresh-tab bug): a visitor with NO session token must never

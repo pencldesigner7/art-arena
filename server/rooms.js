@@ -248,13 +248,24 @@ async function roomPayload(code, me) {
       if (r) { announce(r); return roomPayload(code, me); } // fresh read — players were released
     }
   } catch (_) { /* fall through to the current state */ }
-  const [players, spectators, battleRow, hostRow] = await Promise.all([
+  const [players, spectators, battleRow, hostRow, twitchRow] = await Promise.all([
     activeParticipants(room.id),
     spectatorsOf(room.id),
     latestBattle(room.id),
     room.host_id
       ? pool.query('SELECT id, username, display_name FROM users WHERE id = $1', [room.host_id])
       : Promise.resolve({ rows: [{}] }),
+    // v62: the room's active Twitch stream session (preparing/live only —
+    // ended sessions are history and never surface as a live claim).
+    pool.query(
+      `SELECT id, status, title, started_at, broadcaster_twitch_id,
+              broadcaster_login, broadcaster_display_name, broadcaster_profile_image_url
+         FROM twitch_stream_sessions
+        WHERE room_id = $1 AND status IN ('preparing','live')
+        ORDER BY created_at DESC
+        LIMIT 1`,
+      [room.id]
+    ),
   ]);
   // v47 server fix: this was destructured as `const battle` above, so the
   // countdown self-heal below (`battle = await latestBattle(...)`) threw
@@ -262,6 +273,9 @@ async function roomPayload(code, me) {
   // countdown→active window it was supposed to heal. `let` fixes the heal.
   let battle = battleRow;
   const host = hostRow.rows[0];
+  // v62: the active Twitch session for this room — public info (the room
+  // badge + watch link come from here); tokens never leave the server.
+  const twitchSession = twitchRow.rows[0] || null;
   // v36: self-heal on read — if a countdown is already due but the sweeper
   // has not (yet) flipped it, flip it NOW (same atomic path) so a late
   // poller can never miss the start; then rebuild from fresh data.
@@ -384,6 +398,22 @@ async function roomPayload(code, me) {
       reroll, // v52: Premium re-roll window (server-computed for THIS user)
       challenge,
     } : null,
+    // v62: active Twitch stream session (preparing/live) for this room —
+    // the UI renders the 🔴 LIVE badge, watch link and embed from this.
+    // Server truth only: the session exists because the HOST prepared it and
+    // 'live' only ever means Twitch confirmed the stream.
+    twitch: twitchSession ? {
+      id: twitchSession.id,
+      status: twitchSession.status,
+      title: twitchSession.title,
+      started_at: twitchSession.started_at,
+      broadcaster: {
+        id: twitchSession.broadcaster_twitch_id,
+        login: twitchSession.broadcaster_login,
+        display_name: twitchSession.broadcaster_display_name || twitchSession.broadcaster_login,
+        profile_image_url: twitchSession.broadcaster_profile_image_url,
+      },
+    } : null,
   };
 }
 
@@ -434,6 +464,13 @@ async function startBattleInTx(client, room, players, actorId, opts) {
   await client.query(
     `UPDATE youtube_broadcasts SET battle_id = $2
       WHERE room_id = $1 AND battle_id IS NULL`,
+    [room.id, battleId]
+  );
+  // v62: same link for a prepared Twitch stream session (preparing/live) —
+  // the LIVE page chain (host → session → battle) completes here too.
+  await client.query(
+    `UPDATE twitch_stream_sessions SET battle_id = $2, updated_at = now()
+      WHERE room_id = $1 AND battle_id IS NULL AND status IN ('preparing','live')`,
     [room.id, battleId]
   );
   for (const p of seated) {

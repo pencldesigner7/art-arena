@@ -50,6 +50,7 @@ const matchmaking = require('./matchmaking');
 const battleEnd = require('./battle-end');
 const googleAuth = require('./google-auth');
 const discordAuth = require('./discord-auth'); // v59: same architecture, Discord provider
+const twitch = require('./twitch'); // v62: Twitch Go Live (OAuth connect + live detection)
 const multer = require('multer');
 const { initRealtime, closeRealtime } = require('./realtime');
 const randomizerRouter = require('./randomizer');
@@ -108,6 +109,11 @@ let schemaState = null; // null = not checked yet; [] = all good
 
 const app = express();
 app.disable('x-powered-by');
+// v62: Twitch EventSub webhook — MUST see the RAW request body (Twitch signs
+// message-id + timestamp + raw body with HMAC-SHA256). express.raw runs here,
+// before express.json, so this one route gets a Buffer while everything else
+// keeps the parsed JSON. Signature verification rejects anything forged.
+app.post('/api/twitch/eventsub', express.raw({ type: 'application/json', limit: '256kb' }), twitch.eventsubRoute);
 app.use(express.json({ limit: '64kb' }));
 // no-store for HTML: the dev preview must NEVER serve a stale page —
 // a stale page carries old session logic and causes phantom
@@ -973,9 +979,19 @@ app.use('/api', require('./friends').router); // v61: Friends page (list/presenc
 // v50: YouTube LIVE foundation (OAuth + broadcasts) + the LIVE page feed.
 const youtube = require('./youtube');
 app.use('/api/youtube', youtube.router);
+// v62: Twitch Go Live — account connection (OAuth), stream sessions and
+// live-state verification. Same honest pattern as the YouTube module.
+app.use('/api/twitch', twitch.router);
 app.get('/api/live', requireAuth, ah(async (req, res) => {
   res.set('Cache-Control', 'no-store');
-  res.json(await youtube.liveData());
+  // The LIVE feed is platform-agnostic to the client: cards from both
+  // platforms carry their own platform tag + watch URL. Each platform only
+  // reports battles Twitch/YouTube GENUINELY confirm as live.
+  const [yt, tw] = await Promise.all([youtube.liveData(), twitch.liveData()]);
+  res.json({
+    live: [...yt.live, ...tw.live],
+    upcoming: [...yt.upcoming, ...tw.upcoming],
+  });
 }));
 // v35: matchmaking (the "Battle" button) — a real persisted queue that
 // pairs queued artists into real private 1v1 rooms (./matchmaking).
@@ -1015,6 +1031,9 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
   console.log('DISCORD auth: ' + (discordAuth.isConfigured()
     ? 'configured — “Continue with Discord” is live.'
     : 'not configured — Discord button stays in “coming soon” until DISCORD_CLIENT_ID + DISCORD_CLIENT_SECRET are set in server/.env.'));
+  console.log('TWITCH live: ' + (twitch.isConfigured()
+    ? 'configured — “Go Live via Twitch” is live.'
+    : 'not configured — Twitch stays in the honest setup state until TWITCH_CLIENT_ID + TWITCH_CLIENT_SECRET (+ TWITCH_REDIRECT_URI) are set in server/.env.'));
   console.log(`MAIL provider: ${mailProvider.name}` +
     (mailProvider.name === 'dev-inbox'
       ? ' — codes go to the simulated inbox: GET /api/dev/outbox?to=<email> (never shown on forms).'
@@ -1365,6 +1384,49 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
         PRIMARY KEY (draft_id, user_id))`],
     ['v61 randomizer: Style category label → Drawing Style',
      `UPDATE randomizer_categories SET display_name = 'Drawing Style' WHERE key = 'style' AND display_name <> 'Drawing Style'`],
+      // ---------------- v62 ----------------
+    // v62: TWITCH GO LIVE — a real per-user Twitch connection (tokens stay
+    // server-side, mirror of youtube_connections) and stream sessions bound
+    // to rooms/battles. Safe on fresh AND existing V61 databases; rerunning
+    // is a no-op; nothing existing is touched.
+    ['v62 twitch_connections (server-side Twitch tokens, one per user)',
+     `CREATE TABLE IF NOT EXISTS twitch_connections (
+        user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        twitch_user_id text NOT NULL,
+        login text,
+        display_name text,
+        profile_image_url text,
+        access_token text NOT NULL,
+        refresh_token text,
+        token_expires_at timestamptz,
+        scopes text,
+        status text NOT NULL DEFAULT 'active',
+        connected_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now())`],
+    ['v62 twitch_stream_sessions (preparing → live → ended, Twitch-verified)',
+     `CREATE TABLE IF NOT EXISTS twitch_stream_sessions (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        room_id uuid NOT NULL REFERENCES battle_rooms(id) ON DELETE CASCADE,
+        host_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        battle_id uuid REFERENCES battles(id) ON DELETE SET NULL,
+        broadcaster_twitch_id text,
+        broadcaster_login text,
+        broadcaster_display_name text,
+        broadcaster_profile_image_url text,
+        title text NOT NULL,
+        status text NOT NULL DEFAULT 'preparing'
+          CHECK (status IN ('preparing','live','ended')),
+        started_at timestamptz,
+        ended_at timestamptz,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now())`],
+    ['v62 one active Twitch session per room',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_twitch_session_active_per_room
+        ON twitch_stream_sessions (room_id) WHERE status IN ('preparing','live')`],
+    ['v62 twitch session lookup indexes (sweeper + room payload + LIVE page)',
+     `CREATE INDEX IF NOT EXISTS idx_twitch_sessions_status ON twitch_stream_sessions (status);
+      CREATE INDEX IF NOT EXISTS idx_twitch_sessions_broadcaster ON twitch_stream_sessions (broadcaster_twitch_id, status);
+      CREATE INDEX IF NOT EXISTS idx_twitch_sessions_host ON twitch_stream_sessions (host_user_id, created_at DESC)`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {
@@ -1414,6 +1476,7 @@ initRealtime(httpServer, {
 rooms.startCountdownSweeper(); // v36: flip 'countdown' battles to 'active' on the server clock
 rooms.startRematchSweeper();  // v51: expire 2-minute-old rematch requests server-side
 battleEnd.startBattleEndSweeper(); // v44: complete 'active' battles when their clock runs out
+twitch.startLiveSweeper(); // v62: verify preparing/live sessions against Helix Get Streams (EventSub is the push path when configured)
 
 process.on('SIGTERM', async () => {
   closeRealtime();

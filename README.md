@@ -625,6 +625,106 @@ longer renders the removed items):
 > page byte-identical to disk local + through the public tunnel; DB row
 > verified `peniel | peniel | pencldesigner@gmail.com`.
 
+## v62 — Twitch Go Live integration (real Twitch livestreaming foundation)
+
+Client (`server/public/index.html`, v62):
+- **GO LIVE VIA TWITCH** — a second, real Go Live entry in the battle room
+  (host only, room open). Opens a dedicated modal with the same honest state
+  machine as the v50 YouTube flow: setup (deployment has no Twitch
+  credentials → developer note, NO fake connect), connect (Twitch OAuth —
+  attaches to the CURRENTLY LOGGED-IN Art Arena account; never creates or
+  switches one), prepare (connected: broadcaster chip, stream title default
+  "Art Arena Battle: @a vs @b", Prepare Stream), status (session state:
+  PREPARING → LIVE → ENDED). LIVE appears only when Twitch confirms the
+  stream is online — never from clicking a button.
+- **Room LIVE state** — the battle card shows a PREPARING chip for the host
+  and everyone, or a pulsing 🔴 **LIVE ON TWITCH** banner + the official
+  Twitch player embed (`player.twitch.tv` iframe, parent = this site's
+  hostname, mobile-responsive) + Watch on Twitch for every viewer. Updates
+  arrive in realtime over the existing WebSocket (`twitch_preparing /
+  twitch_live / twitch_ended` room events) — no refresh needed.
+- **Settings → Livestreaming** — Twitch connection card (connect/disconnect,
+  profile picture + display name + @login from server truth; tokens never
+  reach the browser). OAuth return handoff (`#aa-twitch=ok|error`) deep-links
+  back to the battle/Go Live modal or the settings page.
+- **LIVE page** now mixes platforms — Twitch cards carry a TWITCH chip,
+  broadcaster identity, and their genuine watch URL; only Twitch-confirmed
+  live battles are listed (upcoming stays YouTube-only: Twitch has no
+  scheduled-broadcast concept). Legal pages updated honestly.
+
+Server (`server/twitch.js` NEW, `server/server.js`, `server/rooms.js`):
+- **Real OAuth architecture** mirroring youtube.js: single-use state bound to
+  the logged-in Art Arena user (a Twitch account can never be attached to
+  anyone but the user who clicked Connect), server-side code exchange, Helix
+  identity via GET /helix/users, refresh-token rotation with revoked-grant
+  detection, denial/bad-state/token/network/identity failure taxonomy. One
+  scope only: `channel:manage:broadcast` (stages the stream title on the
+  broadcaster's channel via PATCH /helix/channels). **Secrets/tokens stay
+  server-side** in `twitch_connections` (one per user).
+- **Stream sessions** (`twitch_stream_sessions`, preparing/live/ended, one
+  active per room enforced by a partial unique index; linked to the battle
+  when it is minted — same seam as youtube_broadcasts). Prepare genuinely
+  stages the title on Twitch and refuses if the broadcaster is already live
+  (no mislabelling an unrelated stream as this battle).
+- **Live detection is real Twitch state**:
+  - EventSub webhooks `stream.online` / `stream.offline` (POST
+    /api/twitch/eventsub, raw body, HMAC-SHA256 signature verified over
+    message-id + timestamp + body, 10-minute replay window, duplicate-safe
+    DB-guarded transitions) — subscriptions auto-created on connect when
+    TWITCH_EVENTSECRET + a public callback URL exist;
+  - a 45 s sweeper polling Helix Get Streams with an app access token
+    (client credentials) verifies every preparing/live session — the
+    always-on fallback and the LIVE page's own verifier. Unverifiable
+    'live' rows are never advertised (same rule as v50).
+- **Realtime fan-out uses the existing hub** (rt.emitRoom on the room code)
+  — no parallel WebSocket architecture.
+
+DB (boot migrations + schema.sql, v62 steps, safe on fresh AND existing V61
+databases, idempotent): `twitch_connections`, `twitch_stream_sessions` +
+partial unique (one active session per room) + lookup indexes.
+
+Env (server/.env.example): TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET /
+TWITCH_REDIRECT_URI (https://art-arena-galt.onrender.com/api/twitch/callback)
+/ TWITCH_EVENTSECRET (optional — EventSub push detection; without it the
+sweeper still verifies live states, just not instantly).
+
+Twitch Developer Portal setup: https://dev.twitch.tv → Your Console →
+Applications → create app → set the OAuth redirect URL EXACTLY to
+TWITCH_REDIRECT_URI. Category "Other/Individual" is fine. Client ID + secret
+go in Render env vars (never in GitHub).
+
+Verified (local Postgres + stubbed Twitch API — no real Twitch account; the
+stub stands in for id.twitch.tv / api.twitch.tv so the FULL OAuth + EventSub +
+Helix round trips run for real):
+- **12-check in-process selftest battery** on the exported twitch.js internals
+  (`__selftest` seam): applyStreamOnline idempotence, offline-poll strike
+  semantics (2 consecutive polls), EventSub immediate end, 3 h preparing
+  expiry, the one-active-per-room partial unique index (raw DB conflict), and
+  broadcasterOnline against the stub — all green.
+- **89-check HTTP end-to-end across three phases** on a second dev instance:
+  OAuth connect round trip + state single-use/denial/bad_state taxonomy;
+  prepare guards (unknown room 404, empty title 400, non-host 403, double
+  prepare 409, already-live-on-Twitch 409); EventSub challenge handshake,
+  forged signature 403, stale replay 403, malformed payloads 400, revocation
+  204, duplicate message-id no-ops; stream.online → LIVE / stream.offline →
+  ENDED transitions; the 45 s Helix sweeper (restart with the stub reporting
+  the stream online) flipping preparing → LIVE; /api/live merged Twitch cards
+  (watch URL, broadcaster identity, challenge, opponents) with YouTube cards
+  unaffected; unverifiable-live hiding + strike cleanup; host end/cancel
+  semantics; disconnect cleanup incl. while live — all green.
+- **Full V61 regression pass**: 52/52 on the no-credentials deployment
+  instance (email auth, google/discord/youtube availability honesty, rooms,
+  randomizer battle flow, friends, notifications, premium gating + theme,
+  matchmaking, LIVE merge + Twitch-unconfigured honesty: 503s, available:false,
+  no EventSub processing); 46/46 on the stubbed configured instance.
+- Client: all three inline script blocks compile, markup parses balanced, v62
+  ids/meta/legal disclosures present. No browser automation ran in this
+  environment — a visual pass in both themes at desktop + mobile widths should
+  be done before the production launch.
+**Not commit-tested against a real Twitch account** — live-stream verification
+requires real Twitch credentials in the deployment environment (see Known
+Limitations).
+
 ## v56 — UI refinements: Arena tab no-op, CloudSky WebGL clouds (user-supplied), new PIXELATED theme (user's logo + reference), stitch background removed + invisible-hand fashion atelier, graffiti integration + randomized drips, glowing logo restored, fully-themed legal pages, gold medallion badge, minimal Settings, chaotic glitch takeover, theme-aware homepage icons, Add Friend in rooms
 
 Navigation (item 2):
