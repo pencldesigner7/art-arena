@@ -711,9 +711,13 @@ CREATE TABLE public.battle_votes (
     battle_id uuid NOT NULL,
     voter_id uuid NOT NULL,
     voted_for uuid NOT NULL,
+    lane smallint DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT ck_no_self_vote CHECK ((voter_id <> voted_for))
+    CONSTRAINT ck_no_self_vote CHECK ((voter_id <> voted_for)),
+    CONSTRAINT ck_battle_vote_lane CHECK (((lane >= 1) AND (lane <= 3)))
 );
+
+CREATE UNIQUE INDEX uq_battle_vote_lane_once ON public.battle_votes USING btree (battle_id, voter_id, lane);
 
 
 --

@@ -39,31 +39,6 @@
   function motionOn() {
     try { return document.documentElement.getAttribute('data-anim') !== 'off'; } catch (e) { return true; }
   }
-  // v55: draw a REALISTIC paint drip — a run that tapers under gravity and
-  // ends in a bulbous head wider than the run (not "a line and a dot").
-  function drawDrip(ctx, x, y, len, w0, color, alpha) {
-    var segs = 4, i, yy, ww;
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = color;
-    for (i = 0; i < segs; i++) {
-      yy = y + (len * i) / segs;
-      ww = w0 * (1 - 0.45 * (i / (segs - 1)));        // taper toward the head
-      ctx.fillRect(x - ww / 2, yy, ww, len / segs + 0.6);
-    }
-    // the accumulated head: a droplet BULB wider than the run
-    var hy = y + len, hr = w0 * 0.85;
-    ctx.beginPath();
-    ctx.ellipse(x, hy - hr * 0.15, hr * 0.72, hr, 0, 0, 6.283);
-    ctx.fill();
-    // wet highlight on the head
-    ctx.globalAlpha = alpha * 0.35;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.ellipse(x - hr * 0.22, hy - hr * 0.45, hr * 0.2, hr * 0.3, -0.5, 0, 6.283);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-
   // ---------------------------------------------------------------------------
 
   function ThemeScene(host, opts) {
@@ -93,7 +68,7 @@
     this.t = 0;                       // scene age (s) — drives reveals
     this.burst = 0;                   // glitch burst timer
     this.pulseAt = 0;                 // next glitch pulse (scene time)
-    this.stats = { pulses: 0, fullscreen: 0, bursts: 0, drips: 0, placed: 0 };
+    this.stats = { pulses: 0, fullscreen: 0, bursts: 0, placed: 0 };
     this.motion = motionOn();         // v55: Animations toggle (freeze ≠ hide)
     var self = this;
     this._onResize = function () { self.resize(); self.bake(); self.staticFrame(); };
@@ -207,10 +182,10 @@
     for (var s2 = 0; s2 < 4; s2++) this.spr.streaks.push({ img: streakSprite(rnd(180, 380)), x: rnd(-0.2, 1) * this.w, y: rnd(0.05, 0.3) * this.h, v: rnd(3, 6), a: rnd(0.3, 0.5) });
   };
 
-  // GRAFFITI (v55) — the user's EXACT monochrome wall image is the background
-  // (themes/graffiti-bg.png, cover-fit baked at resize). On top: realistic
-  // white/black paint drips (tapered runs + bulbous heads) and occasional
-  // monochrome spray puffs. Pure black & white — the app chrome follows.
+  // GRAFFITI (v55/v63) — the user's EXACT monochrome wall image is the
+  // background (themes/graffiti-bg.png, cover-fit baked at resize). v63: the
+  // animated paint runs / spray passes were removed — the wall is a still,
+  // living surface with feathered scrims, no moving paint.
   ThemeScene.prototype.bakeWall = function () {
     var self = this;
     this.spr.wall = null; // v55: the generated wall is gone — exact image below
@@ -253,23 +228,6 @@
     rg3.addColorStop(0, 'rgba(16,16,16,0)'); rg3.addColorStop(1, 'rgba(16,16,16,.5)');
     sx3.fillStyle = rg3; sx3.fillRect(0, 0, 512, 512);
     this.spr.scrimVig = sg3;
-    // monochrome spray puffs
-    this.sprays = [];
-    this.nextSpray = 1.6;
-    // realistic drips: anchors spread over the upper half; they run, bulge, dry
-    this.drips = [];
-    var n = 7, i;
-    for (i = 0; i < n; i++) {
-      this.drips.push({
-        x: rnd(0.04, 0.96) * (this.w || 800),
-        y: rnd(0.06, 0.42) * (this.h || 600),
-        len: 0, max: rnd(60, 210),
-        v: rnd(9, 26),
-        w: rnd(2.6, 5.2),
-        c: Math.random() < 0.72 ? '#F2F2F2' : '#0c0c0c',
-        started: rnd(0, 9),
-      });
-    }
   };
 
   // MAGAZINE — a real collage: torn-edge paper clippings with print fragments
@@ -706,26 +664,8 @@
         this.doPulse();
       }
     } else if (this.theme === 'graffiti') {
-      // drips run down under gravity, bulge at the head, then dry (stop)
-      for (i = 0; i < (this.drips || []).length; i++) {
-        var d = this.drips[i];
-        if (d.started > 0) { d.started -= dt; continue; }
-        if (d.len < d.max) { d.len += d.v * dt * (1 - 0.4 * (d.len / d.max)); if (d.len >= d.max) this.stats.drips++; }
-      }
-      // a fresh monochrome spray pass every few seconds — energy, wall stays put
-      this.nextSpray -= dt;
-      if (this.nextSpray <= 0) {
-        this.nextSpray = rnd(2.2, 5);
-        var col = Math.random() < 0.6 ? '#F2F2F2' : '#9a9a9a';
-        this.sprays.push({ x: rnd(w * 0.05, w * 0.95), y: rnd(h * 0.08, h * 0.92), r: rnd(26, 64), a: 0, rise: true, c: col });
-        if (this.sprays.length > 5) this.sprays.shift();
-      }
-      for (i = 0; i < this.sprays.length; i++) {
-        var s = this.sprays[i];
-        s.a += (s.rise ? 2.4 : -1.6) * dt;
-        if (s.a >= 0.5) s.rise = false;
-        if (s.a <= 0) s.a = 0;
-      }
+      // v63: no running paint — the wall image is a still surface (only the
+      // scene-level breathing in draw() remains); nothing to update here.
     } else if (this.theme === 'magazine') {
       var sh = this.spr.sheets || [];
       for (i = 0; i < sh.length; i++) {
@@ -861,19 +801,8 @@
       if (this.spr.scrimTop) ctx.drawImage(this.spr.scrimTop, 0, 0, w, h * 0.22);
       if (this.spr.scrimBottom) ctx.drawImage(this.spr.scrimBottom, 0, h - h * 0.22, w, h * 0.22);
       if (this.spr.scrimVig) ctx.drawImage(this.spr.scrimVig, 0, 0, w, h);
-      // fresh monochrome spray passes (breathe in, fade)
-      for (i = 0; i < (this.sprays || []).length; i++) {
-        var sp = this.sprays[i];
-        var sg = ctx.createRadialGradient(sp.x, sp.y, 0, sp.x, sp.y, sp.r);
-        sg.addColorStop(0, rgba(sp.c, 0.16 * sp.a * 2)); sg.addColorStop(0.7, rgba(sp.c, 0.07 * sp.a * 2)); sg.addColorStop(1, rgba(sp.c, 0));
-        ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r, 0, 6.283); ctx.fill();
-      }
-      // realistic drips: tapered runs ending in bulbous heads
-      for (i = 0; i < (this.drips || []).length; i++) {
-        var dr = this.drips[i];
-        if (dr.started > 0 || dr.len <= 1) continue;
-        drawDrip(ctx, dr.x, dr.y, dr.len, dr.w, dr.c, 0.85);
-      }
+      // v63: no animated spray passes or running drips — the baked wall IS
+      // the art. Kept: the imperceptible wall breathing above.
     } else if (this.theme === 'stitch') {
       // atelier base: dark linen with the weave texture
       var linen = ctx.createLinearGradient(0, 0, 0, h);

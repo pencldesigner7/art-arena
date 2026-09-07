@@ -117,7 +117,10 @@ router.post('/friends/:userId/invite', ah(async (req, res) => {
   if (!(await areFriends(req.user.id, to))) throw new HttpError(403, 'You can only invite friends.');
   const code = String((req.body || {}).room_code || '').trim().toUpperCase();
   if (!code) throw new HttpError(400, 'Choose a room to invite them to.');
-  const room = await inviteToRoom(req.user, to, code);
+  // v63f: 3v3 host-side invites can name the side — team A invitations seat
+  // the friend on the captain's side (1-3) when they join.
+  const extra = (req.body || {}).team === 'A' ? { team: 'A' } : undefined;
+  const room = await inviteToRoom(req.user, to, code, extra);
   res.status(201).json({ ok: true, room_code: room.code });
 }));
 
@@ -171,8 +174,8 @@ router.put('/teams/draft', ah(async (req, res) => {
   const b = req.body || {};
   const ids = Array.from(new Set((Array.isArray(b.member_ids) ? b.member_ids : []).map(String)))
     .filter((id) => /^[0-9a-f-]{36}$/i.test(id) && id !== req.user.id);
-  if (ids.length > TEAM_SIZE - 1) throw new HttpError(400, `A 3v3 team is you plus ${TEAM_SIZE - 1} friends.`);
-  for (const id of ids) if (!(await areFriends(req.user.id, id))) throw new HttpError(403, 'Teammates must be your friends.');
+  if (ids.length > TEAM_SIZE - 1) throw new HttpError(400, `A 3v3 team is you plus ${TEAM_SIZE - 1} players.`);
+  for (const id of ids) if (!(await areFriends(req.user.id, id))) throw new HttpError(403, 'Only your friends can be added to a team here — random players join through open rooms.');
   const name = b.name === undefined ? null : String(b.name || '').trim().slice(0, 40) || null;
   const client = await pool.connect();
   try {
@@ -194,10 +197,11 @@ router.put('/teams/draft', ah(async (req, res) => {
   res.json(await draftOf(req.user.id));
 }));
 
-/** Tell the drafted friends they've been picked (team_invitation notification). */
+/** Tell the drafted players they've been picked (team_invitation notification).
+    Not restricted to friends: a drafted player only needs to be a real user. */
 router.post('/teams/draft/invite', ah(async (req, res) => {
   const d = await draftOf(req.user.id);
-  if (!d.id || !d.members.length) throw new HttpError(400, 'Pick at least one friend for your team first.');
+  if (!d.id || !d.members.length) throw new HttpError(400, 'Pick at least one player for your team first.');
   let sent = 0;
   for (const m of d.members) {
     if (m.status === 'invited' || m.status === 'accepted') continue;
@@ -230,14 +234,21 @@ router.post('/teams/invitations/:draftId/:action', ah(async (req, res) => {
 }));
 
 /** Open a 3v3 room for the draft (through the REAL rooms API) and invite the
-    whole team into it. The caller must not already be seated elsewhere. */
+    whole team into it. The caller must not already be seated elsewhere. The
+    room respects the requested visibility — public rooms leave the remaining
+    seats open for any eligible artist; private rooms require the code (the
+    room's real join gate). */
 router.post('/teams/draft/open-room', ah(async (req, res) => {
   const d = await draftOf(req.user.id);
-  if (!d.id || !d.members.length) throw new HttpError(400, 'Pick your teammates first.');
+  if (!d.id || !d.members.length) throw new HttpError(400, 'Pick your players first.');
+  const b = req.body || {};
+  const visibility = b.visibility === undefined ? 'public' : b.visibility;
+  if (!['public', 'private'].includes(visibility)) throw new HttpError(400, 'Visibility must be "public" or "private".');
   const rooms = require('./rooms');
   const room = await rooms.createRoomForUser(req.user, {
     name: (d.name ? d.name + ' · ' : '') + '3v3 Team Battle',
-    battle_mode: '3v3', max_players: 6, visibility: 'public',
+    battle_mode: '3v3', max_players: 6, visibility,
+    code: visibility === 'private' ? String(b.code || '').trim() : undefined,
     time_limit_seconds: Number((req.body || {}).time_limit_seconds) || 900,
     battle_type: (req.body || {}).battle_type || 'voting_community',
   });
@@ -245,7 +256,7 @@ router.post('/teams/draft/open-room', ah(async (req, res) => {
   for (const m of d.members) {
     try { await inviteToRoom(req.user, m.id, room.code, { team: 'A', draft_id: d.id }); invited.push(m.username); } catch (_) {}
   }
-  res.status(201).json({ ok: true, room_code: room.code, invited });
+  res.status(201).json({ ok: true, room_code: room.code, visibility: room.visibility || visibility, invited });
 }));
 
 module.exports = { router, friendsOf };

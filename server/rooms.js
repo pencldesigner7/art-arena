@@ -49,7 +49,7 @@ const router = express.Router();
 router.use(requireAuth);
 
 const HARD_MAX_PLAYERS = 16;
-const TIME_LIMIT = { min: 60, max: 43200 }; // 1 minute .. 12 hours
+const TIME_LIMIT = { min: Number(process.env.TIME_LIMIT_MIN_S || 60), max: 43200 }; // 1 minute .. 12 hours (min env-overridable test seam; default unchanged)
 const BATTLE_TYPES = ['voting_community', 'voting_player', 'none', 'judging_official', 'host_decision'];
 // v36: the UI offers exactly three battle types — Community Vote / Players
 // Vote / None — and the value is SAVED with the room (result_method) and
@@ -175,14 +175,16 @@ async function latestBattle(roomId) {
   let result = null;
   if (['result', 'complete'].includes(battle.status)) {
     const { rows: res } = await pool.query(
-      `SELECT br.method, br.decided_at, u.username AS winner_username, u.display_name AS winner_display_name
+      `SELECT br.method, br.decided_at, br.scores,
+              u.username AS winner_username, u.display_name AS winner_display_name
          FROM battle_results br
          LEFT JOIN users u ON u.id = br.winner_id
         WHERE br.battle_id = $1 LIMIT 1`, [battle.id]);
     result = res[0]
       ? { method: res[0].method, decided_at: res[0].decided_at,
           winner_username: res[0].winner_username || null,
-          winner_display_name: res[0].winner_display_name || null }
+          winner_display_name: res[0].winner_display_name || null,
+          scores: res[0].scores || null }   // v64: lane tallies + team_winner
       : null;
   }
   return {
@@ -304,13 +306,21 @@ async function roomPayload(code, me) {
     const vs = await voteState(battle.id, me);
     const open = battle.status === 'judging' && battle.voting_ends_at && new Date(battle.voting_ends_at).getTime() > Date.now();
     const isArtist = !!(me && vs.options.some((o) => o.user_id === me));
+    // v64: a 3v3 voter may cast up to one ballot per lane (vs.my_votes is a
+    // { lane: user_id } map) — can_vote stays true while ANY lane is open
+    // for them; 1v1 has exactly one lane, so the rule is unchanged there.
+    const remaining = (vs.lanes || []).filter((l) => !vs.my_votes[l.lane]);
     voting = {
       open: !!open,
       ends_at: battle.voting_ends_at || null,
       total: vs.total,
       options: vs.options,
       my_vote: vs.my_vote,
-      can_vote: !!(open && me && !isArtist && !vs.my_vote),
+      my_votes: vs.my_votes || {},   // v64
+      lanes: vs.lanes || [],         // v64
+      team: !!vs.team,               // v64
+      can_vote: !!(open && me && !isArtist && remaining.length > 0),
+      can_vote_lanes: !!open && me && !isArtist,
       is_artist: isArtist,
     };
   }
@@ -353,6 +363,7 @@ async function roomPayload(code, me) {
     status: room.status,
     max_players: room.max_players,
     battle_mode: room.battle_mode || '1v1',          // v35
+    bracket: (room.battle_mode === 'tournament') ? (room.bracket || null) : null, // v63c
     auto_start: !!room.auto_start,                   // v35 (matchmaking rooms)
     time_limit_seconds: room.time_limit_seconds,
     battle_type: room.result_method,
@@ -439,23 +450,74 @@ async function startBattleInTx(client, room, players, actorId, opts) {
   if (mode === '1v1') {
     if (players.length !== 2)
       throw new HttpError(409, `1v1 needs exactly 2 players (currently ${players.length}).`);
+  } else if (mode === 'tournament') {
+    // v63d: a seeded tournament shrinks LEGITIMATELY (a lobby forfeit
+    // releases the seat, the bracket auto-advances) — the fullness gate
+    // applies only to the FIRST start, when the roster is drawn.
+    if (!room.bracket && players.length < room.max_players)
+      throw new HttpError(409, `Waiting for all players to join (${players.length}/${room.max_players}).`);
   } else if (players.length < room.max_players) {
     throw new HttpError(409, `Waiting for all players to join (${players.length}/${room.max_players}).`);
   }
   if (players.some((p) => !p.drawing_app_key))
     throw new HttpError(409, 'Waiting for all players to select their canvas.');
 
-  // The current battle engine is one-on-one: for team formats (3v3 /
-  // tournament — a later engine phase) the first two seated artists battle;
-  // the room's mode + capacity stay the creator's truth and are displayed.
-  const seated = players.slice(0, 2);
+  // v63c: TOURNAMENT rooms battle on the BRACKET. The first time the room
+  // starts, the full roster is seeded randomly (crypto shuffle) into a
+  // single-elimination tree with byes; every later start plays the bracket's
+  // next open two-sided match (the previous match's result already advanced
+  // its winner and returned the room to lobby). Draws keep the same pairing
+  // open for a replay.
+  let seated;
+  if (mode === 'tournament') {
+    const bracketApi = require('./bracket');
+    let bracket = room.bracket || null;
+    if (!bracket) {
+      bracket = bracketApi.seedBracket(players.map((p) => p.user_id));
+      // v63d: the rooms layer annotates the tree with display names — the
+      // engine stays id-only, but the UI can render an ENDED room (seats
+      // released) without losing who was who.
+      bracket.names = {};
+      for (const p of players)
+        bracket.names[p.user_id] = { username: p.username, display_name: p.display_name };
+      await client.query(
+        `UPDATE battle_rooms SET bracket = $2::jsonb WHERE id = $1`,
+        [room.id, JSON.stringify(bracket)]
+      );
+    }
+    const next = bracketApi.sweep(bracket);
+    if (next.state !== 'match')
+      throw new HttpError(409, 'The bracket has no open match — the tournament is over.');
+    const m = bracket.rounds[next.r].matches[next.m];
+    seated = players.filter((p) => p.user_id === m.a || p.user_id === m.b).sort((x, y) => x.seat - y.seat);
+    if (seated.length !== 2)
+      throw new HttpError(409, 'The next bracket match is not fully seated yet.');
+    await client.query(
+      `UPDATE battle_rooms SET bracket = $2::jsonb WHERE id = $1`,
+      [room.id, JSON.stringify(bracket)]
+    );
+  } else if (mode === '3v3') {
+    // v64 — FULL 3v3: every seated artist participates. Seats 1-3 are
+    // Team A (host side), 4-6 are Team B (open side); the three LANES are
+    // A1-B1 (seats 1v4), A2-B2 (2v5), A3-B3 (3v6), one shared challenge,
+    // and the room's start gate above guarantees all six seats are full.
+    seated = players.slice().sort((x, y) => x.seat - y.seat);
+  } else {
+    // The current battle engine is one-on-one: the two seated artists
+    // battle; the room's mode + capacity stay the creator's truth.
+    seated = players.slice(0, 2);
+  }
+  // v64: a 3v3 room runs ONE battle across all six artists (format 'multi',
+  // lanes derived from seats at judging time); 1v1 and tournament matches
+  // stay 'one_on_one'.
+  const battleFormat = mode === '3v3' ? 'multi' : 'one_on_one';
   const { rows: bRows } = await client.query(
     `INSERT INTO battles (room_id, competition_type, format, result_method,
                           time_limit_seconds, status)
-     VALUES ($1, $2, 'one_on_one', $3, $4, 'waiting')
+     VALUES ($1, $2, $3, $4, $5, 'waiting')
      RETURNING id`,
     [room.id, COMPETITION_BY_ROOM_TYPE[room.room_type] || 'casual',
-     room.result_method, room.time_limit_seconds]
+     battleFormat, room.result_method, room.time_limit_seconds]
   );
   const battleId = bRows[0].id;
   // v51: any YouTube broadcast the owner prepared PRE-MATCH (room-scoped,
@@ -752,6 +814,10 @@ async function createRoomImpl(req, res) {
   const battleMode = b.battle_mode === undefined ? '1v1' : b.battle_mode;
   if (!BATTLE_MODES.includes(battleMode))
     throw new HttpError(400, 'Unknown battle mode.');
+  // v63c: tournaments run single-elimination — every match must be
+  // decidable, so the community vote is the required battle type.
+  if (battleMode === 'tournament' && battleType !== 'voting_community')
+    throw new HttpError(400, 'Tournaments use Community Vote so every match can be decided.');
   let maxPlayers = b.max_players === undefined ? 2 : Number(b.max_players);
   if (!Number.isInteger(maxPlayers))
     throw new HttpError(400, `Max players must be between 2 and ${HARD_MAX_PLAYERS}.`);
@@ -839,6 +905,40 @@ router.get('/:code', ah(async (req, res) => {
 }));
 
 // ---------------------------------------------------------------------------
+// v63f: 3v3 seat policy — seats 1-3 are the HOST'S side (Team A: the creator
+// invited those teammates), seats 4-6 are the open side (Team B). A joiner
+// who carries an open team-A room invitation seats on the host's side;
+// everyone else fills the OPEN side first (their seats stay available for
+// the invited teammates until the open side is full). 1v1/tournament rooms
+// keep plain ascending first-free-seat order.
+// ---------------------------------------------------------------------------
+async function pickSeatForJoin(client, room, userId) {
+  const { rows: takenRows } = await client.query(
+    `SELECT seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`,
+    [room.id]
+  );
+  const taken = new Set(takenRows.map((s) => s.seat));
+  if (room.battle_mode !== '3v3') {
+    for (let i = 1; i <= room.max_players; i++) if (!taken.has(i)) return i;
+    return null;
+  }
+  // 3v3: does this user hold an OPEN team-A invitation to this room?
+  const inv = await client.query(
+    `SELECT 1 FROM notifications
+      WHERE user_id = $1 AND type = 'room_invitation'
+        AND payload->>'room_code' = $2 AND payload->>'team' = 'A'
+        AND (payload->>'handled' IS NULL OR payload->>'handled' = 'accepted')
+        AND created_at > now() - interval '2 hours'
+      LIMIT 1`,
+    [userId, room.code]
+  );
+  const invitedA = inv.rows.length > 0;
+  const order = invitedA ? [2, 3, 4, 5, 6] : [4, 5, 6, 2, 3];
+  for (const i of order) if (i >= 1 && i <= room.max_players && !taken.has(i)) return i;
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // JOIN as player (re-joins if you left earlier)
 // v35: a FULL room answers { room_full:true } so the client can offer the
 // spectator seat; a SPECTATOR with a free seat is promoted to a player.
@@ -865,6 +965,11 @@ router.post('/:code/join', ah(async (req, res) => {
     // truly closes the door.
     if (room.status !== 'lobby' && room.status !== 'ended')
       throw new HttpError(409, 'This room is not accepting players.');
+    // v63d: once a tournament bracket is seeded the roster is FIXED — the
+    // tree was drawn from the original seated artists, so a new seat can
+    // never join mid-event (even a re-join would strand them off-bracket).
+    if (room.battle_mode === 'tournament' && room.bracket)
+      throw new HttpError(409, 'This tournament has already been drawn — its bracket is locked.');
     // v44 (one active room per artist): blocked from holding a live seat in
     // ANY other room (rejoining THIS room stays allowed — a left seat is
     // not an active one). The partial unique index enforces the same rule
@@ -886,13 +991,8 @@ router.post('/:code/join', ah(async (req, res) => {
     if (spec[0]) {
       // v35: spectator → player when a seat is open (checked BEFORE removing
       // the spectator row, so a full room leaves them spectating).
-      const { rows: takenRows } = await client.query(
-        `SELECT seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`,
-        [room.id]
-      );
-      const taken = new Set(takenRows.map((s) => s.seat));
-      let freeSeat = null;
-      for (let i = 1; i <= room.max_players; i++) if (!taken.has(i)) { freeSeat = i; break; }
+      // v63f: 3v3 rooms honour the team side of the invitation (A = host side).
+      const freeSeat = await pickSeatForJoin(client, room, req.user.id);
       if (freeSeat === null) {
         const e = new HttpError(409, 'This room is full.');
         e.data = { room_full: true };
@@ -922,13 +1022,9 @@ router.post('/:code/join', ah(async (req, res) => {
         );
       }
     } else {
-      const { rows: seats } = await client.query(
-        `SELECT seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`,
-        [room.id]
-      );
-      const taken = new Set(seats.map((s) => s.seat));
-      let seat = null;
-      for (let i = 1; i <= room.max_players; i++) if (!taken.has(i)) { seat = i; break; }
+      // v63f: seat policy shared with the spectator-promotion branch (3v3
+      // rooms seat open-side joiners on 4-6 first; team-A invitees on 1-3).
+      const seat = await pickSeatForJoin(client, room, req.user.id);
       if (seat === null) {
         const e = new HttpError(409, 'This room is full.');
         e.data = { room_full: true };
@@ -995,6 +1091,31 @@ router.post('/:code/leave', ah(async (req, res) => {
       [room.id, req.user.id]
     );
     wasSeated = !!gone[0];
+    // v63c: a tournament player leaving in lobby forfeits their bracket
+    // path — their open slot is cleared and the sweep auto-advances (BYE /
+    // forfeit). If that crowns a champion the room ends here.
+    if (wasSeated && room.status === 'lobby' && room.battle_mode === 'tournament' && room.bracket) {
+      const bracketApi = require('./bracket');
+      const v = bracketApi.onLeave(room.bracket, req.user.id);
+      if (v.state === 'champion') {
+        room.bracket.champion = v.id;
+        await client.query(
+          `UPDATE battle_rooms SET bracket = $2::jsonb, status = 'ended', ended_at = now() WHERE id = $1`,
+          [room.id, JSON.stringify(room.bracket)]
+        );
+        room.status = 'ended'; // host-transfer/close logic below stays inert
+        await client.query(
+          `UPDATE room_participants SET state = 'left', left_at = now()
+            WHERE room_id = $1 AND state IN ('waiting','ready') AND user_id <> $2`,
+          [room.id, req.user.id]
+        );
+      } else {
+        await client.query(
+          `UPDATE battle_rooms SET bracket = $2::jsonb WHERE id = $1`,
+          [room.id, JSON.stringify(room.bracket)]
+        );
+      }
+    }
     if (!wasSeated) {
       // v44 (post-battle exit): a completed battle already released every
       // seat — leaving an ended room is IDEMPOTENT success, not an error,
@@ -1217,6 +1338,11 @@ router.patch('/:code', ah(async (req, res) => {
   }
   if ('battle_type' in b) {
     if (!BATTLE_TYPES.includes(b.battle_type)) throw new HttpError(400, 'Unknown battle type.');
+    // v63d: tournaments are single-elimination decided by the community
+    // vote — same fixed rule as create (editing it mid-event would stall
+    // every later match).
+    if (room.battle_mode === 'tournament' && b.battle_type !== 'voting_community')
+      throw new HttpError(400, 'Tournaments use Community Vote so every match can be decided.');
     params.push(b.battle_type);
     sets.push(`result_method = $${params.length}`);
   }
@@ -1470,6 +1596,13 @@ router.post('/:code/vote', ah(async (req, res) => {
   if (!room) throw new HttpError(404, 'Room not found.');
   const votedFor = String((req.body || {}).user_id || '').trim();
   if (!/^[0-9a-f-]{36}$/i.test(votedFor)) throw new HttpError(400, 'Pick an artist to vote for.');
+  // v64 — lane ballots: a 3v3 battle is three lanes and a voter may vote
+  // once per lane. 1v1 voters omit the lane (defaults to 1, the only one).
+  const rawLane = Number((req.body || {}).lane);
+  const lane = Number.isInteger(rawLane) && rawLane >= 1 && rawLane <= 3 ? rawLane : 1;
+  const isTeam = room.battle_mode === '3v3';
+  if (!isTeam && Number.isInteger(rawLane) && rawLane > 1)
+    throw new HttpError(400, 'This battle has a single lane.');
   const client = await pool.connect();
   let battleId = null;
   try {
@@ -1483,20 +1616,29 @@ router.post('/:code/vote', ah(async (req, res) => {
     if (new Date(b.voting_ends_at).getTime() <= Date.now()) throw new HttpError(409, 'Voting has closed — counting the votes now.');
     battleId = b.id;
     const { rows: parts } = await client.query(
-      `SELECT user_id FROM battle_participants WHERE battle_id = $1`, [b.id]);
+      `SELECT user_id, seat FROM battle_participants WHERE battle_id = $1`, [b.id]);
     if (parts.some((p) => p.user_id === req.user.id)) throw new HttpError(403, 'Artists cannot vote in their own battle.');
-    if (!parts.some((p) => p.user_id === votedFor)) throw new HttpError(400, 'That artist is not in this battle.');
+    // v64: in a 3v3 battle each lane is a fixed pairing — seat N (Team A)
+    // vs seat N+3 (Team B) — so the vote target must be THAT lane's artist.
+    const inLane = isTeam
+      ? parts.some((p) => p.user_id === votedFor && (p.seat === lane || p.seat === lane + 3))
+      : parts.some((p) => p.user_id === votedFor);
+    if (!inLane) throw new HttpError(400, isTeam
+      ? 'That artist is not in lane ' + lane + ' of this battle.'
+      : 'That artist is not in this battle.');
     try {
       await client.query(
-        `INSERT INTO battle_votes (battle_id, voter_id, voted_for) VALUES ($1, $2, $3)`,
-        [b.id, req.user.id, votedFor]);
+        `INSERT INTO battle_votes (battle_id, voter_id, voted_for, lane) VALUES ($1, $2, $3, $4)`,
+        [b.id, req.user.id, votedFor, lane]);
     } catch (e) {
-      if (e.code === '23505') throw new HttpError(409, 'You have already voted in this battle.');
+      if (e.code === '23505') throw new HttpError(409, isTeam
+        ? 'You have already voted in lane ' + lane + ' of this battle.'
+        : 'You have already voted in this battle.');
       throw e;
     }
     await client.query(
       `INSERT INTO battle_event_log (battle_id, event_type, actor_id, payload)
-       VALUES ($1, 'vote_cast', $2, $3)`, [b.id, req.user.id, JSON.stringify({ voted_for: votedFor })]);
+       VALUES ($1, 'vote_cast', $2, $3)`, [b.id, req.user.id, JSON.stringify({ voted_for: votedFor, lane })]);
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
@@ -1572,6 +1714,14 @@ async function battleOpponent(battleId, meId, q) {
 router.post('/:code/rematch', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
+  // v63c: tournament rooms have NO rematches — the bracket decides every
+  // later match; a draw replays the same pairing automatically at /start.
+  if (room.battle_mode === 'tournament')
+    throw new HttpError(409, 'Tournament matches are set by the bracket — no rematch requests.');
+  // v64: 3v3 team battles are single matches (six artists, no two-person
+  // rematch flow) — running it back means opening a new room.
+  if (room.battle_mode === '3v3')
+    throw new HttpError(409, '3v3 team battles are single matches — open a new room to run it back.');
   const battle = await latestBattleRow(room.id);
   if (!battle || battle.status !== 'complete')
     throw new HttpError(409, 'A rematch is only available after the battle is completed.');
@@ -1628,6 +1778,10 @@ router.post('/:code/rematch', ah(async (req, res) => {
 router.post('/:code/rematch/accept', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
+  // v64: 3v3 team battles have no rematch flow (single-match rooms).
+  if (room.battle_mode === '3v3')
+    throw new HttpError(409, '3v3 team battles are single matches — open a new room to run it back.');
+
   const battle = await latestBattleRow(room.id);
   if (!battle || battle.status !== 'complete')
     throw new HttpError(409, 'A rematch is only available after the battle is completed.');
@@ -1718,6 +1872,10 @@ router.post('/:code/rematch/accept', ah(async (req, res) => {
 router.post('/:code/rematch/decline', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
+  // v64: 3v3 team battles have no rematch flow (single-match rooms).
+  if (room.battle_mode === '3v3')
+    throw new HttpError(409, '3v3 team battles are single matches — open a new room to run it back.');
+
   const { rows } = await pool.query(
     `UPDATE rematch_requests SET status = 'declined', responded_at = now()
       WHERE room_id = $1 AND status = 'pending' AND to_user_id = $2 RETURNING id`,
@@ -1751,6 +1909,10 @@ router.post('/:code/rematch/decline', ah(async (req, res) => {
 router.post('/:code/rematch/cancel', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
+  // v64: 3v3 team battles have no rematch flow (single-match rooms).
+  if (room.battle_mode === '3v3')
+    throw new HttpError(409, '3v3 team battles are single matches — open a new room to run it back.');
+
   const { rows } = await pool.query(
     `UPDATE rematch_requests SET status = 'cancelled', responded_at = now()
       WHERE room_id = $1 AND status = 'pending' AND from_user_id = $2 RETURNING id`,

@@ -1427,6 +1427,24 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
      `CREATE INDEX IF NOT EXISTS idx_twitch_sessions_status ON twitch_stream_sessions (status);
       CREATE INDEX IF NOT EXISTS idx_twitch_sessions_broadcaster ON twitch_stream_sessions (broadcaster_twitch_id, status);
       CREATE INDEX IF NOT EXISTS idx_twitch_sessions_host ON twitch_stream_sessions (host_user_id, created_at DESC)`],
+    ['v63c tournament bracket store (battle_rooms.bracket — seeded single-elim tree)',
+     `ALTER TABLE battle_rooms ADD COLUMN IF NOT EXISTS bracket jsonb`],
+    // v64 — 3v3 TEAM LANES: one ballot per voter per LANE (a 3v3 battle is
+    // three simultaneous pairings: A1-B1, A2-B2, A3-B3). 1v1 votes simply
+    // default to lane 1, so the old one-vote-per-battle rule is exactly the
+    // new one-vote-per-lane rule with a single lane.
+    ['v64 battle_votes.lane (3v3 lane ballots; 1v1 votes land on lane 1)',
+     `ALTER TABLE battle_votes ADD COLUMN IF NOT EXISTS lane smallint NOT NULL DEFAULT 1`],
+    ['v64 per-vote uniqueness becomes per-voter-per-lane',
+     `DROP INDEX IF EXISTS uq_battle_vote_once`],
+    ['v64 lane uniqueness index (battle, voter, lane)',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_battle_vote_lane_once ON battle_votes (battle_id, voter_id, lane)`],
+    ['v64 lane range check (1-3)',
+     `DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ck_battle_vote_lane') THEN
+          ALTER TABLE battle_votes ADD CONSTRAINT ck_battle_vote_lane CHECK (lane BETWEEN 1 AND 3);
+        END IF;
+      END $$`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

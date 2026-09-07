@@ -145,7 +145,7 @@ function authUserPayload(u) {
 // future Paystack webhook writes the SAME rows with source='paystack' after
 // a verified payment — feature access, gating, badge and themes never change.
 // ---------------- v53: DESIGN THEME REGISTRY ----------------
-// The seven user-supplied design styles. Every theme is a COMPLETE visual
+// The user-supplied design styles. Every theme is a COMPLETE visual
 // system: logo (public/themes/<key>.png), accent variables, button/border
 // treatments and its own animated background (themes.js). flame/glitch/
 // glowing additionally expose manual color customization (solid or gradient
@@ -154,7 +154,7 @@ const PREMIUM_THEMES = [
   { key: 'flame',    name: 'Flame',           hint: 'Fire gradients · ember background · animated buttons', premium: true,  customizable: true, c1: '#FF5A00', c2: '#FFC300' },
   { key: 'cloud',    name: 'Cloud',           hint: 'Blue sky · drifting clouds · calm and smooth', premium: true,  customizable: false },
   { key: 'glitch',   name: 'Glitch',          hint: 'Neon RGB · occasional glitch pulses', premium: true,  customizable: true, c1: '#00F0FF', c2: '#FF2BD1' },
-  { key: 'graffiti', name: 'Graffiti',        hint: 'Black & white street art · dripping paint · raw wall', premium: true,  customizable: false },
+  { key: 'graffiti', name: 'Graffiti',        hint: 'Black & white street art · raw wall', premium: true,  customizable: false },
   { key: 'stitch',   name: 'Stitch',          hint: 'Embroidery · stitched borders · handcrafted motion', premium: true,  customizable: false },
   { key: 'glowing',  name: 'Glowing',         hint: 'Green & blue glow · gradient buttons · luminous accents', premium: true,  customizable: true, c1: '#6ED4BF', c2: '#51A8D9' },
   { key: 'magazine', name: 'Magazine Cutout', hint: 'Paper collage · cutout layers · editorial', premium: true,  customizable: false },
