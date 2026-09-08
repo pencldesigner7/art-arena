@@ -38,7 +38,7 @@
  * ============================================================================
  */
 const express = require('express');
-const { pool, HttpError, ah, requireAuth, premiumOf,
+const { pool, HttpError, ah, requireAuth, premiumOf, avatarUrlOf,
 } = require('./lib');
 const rt = require('./realtime');
 const { lockChallengeCore } = require('./challenge');
@@ -741,6 +741,22 @@ router.get('/', ah(async (req, res) => {
                             WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')
                             ORDER BY rp.seat
                             LIMIT 3) t), '[]'::json) AS player_names,
+            -- v65: the same three seated artists, now carrying their avatar
+            -- keys (aligned 1:1 with player_names by seat order) so the
+            -- homepage/rooms lists can show real profile pictures with the
+            -- initial as the honest fallback instead of always initials.
+            COALESCE((SELECT json_agg(json_build_object(
+                              'username', u.username,
+                              'display_name', u.display_name,
+                              'key', p.avatar_storage_key,
+                              'at', p.updated_at)
+                          ORDER BY rp.seat)
+                    FROM (SELECT rp.user_id, rp.seat
+                            FROM room_participants rp
+                            WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')
+                            ORDER BY rp.seat LIMIT 3) rp
+                    JOIN users u ON u.id = rp.user_id
+                    LEFT JOIN user_profiles p ON p.user_id = u.id), '[]'::json) AS player_briefs,
             (r.id IN (SELECT room_id FROM room_participants
                        WHERE user_id = $1 AND state IN ('waiting','ready'))) AS i_am_player,
             (r.id IN (SELECT room_id FROM room_spectators WHERE user_id = $1)) AS i_am_spectator
@@ -773,6 +789,11 @@ router.get('/', ah(async (req, res) => {
       created_at: r.created_at,
       host: r.host_id ? { username: r.host_username, display_name: r.host_display_name } : null,
       player_names: r.player_names || [],
+      player_briefs: (r.player_briefs || []).map((pb) => ({
+        username: pb.username,
+        display_name: pb.display_name,
+        avatar_url: avatarUrlOf ? avatarUrlOf(pb.key, pb.at) : (pb.key ? '/avatars/' + pb.key : null),
+      })),   // v65: avatars for the live-strip/dashboard avatar circles
       my_role: r.host_id === req.user.id ? 'host' : (r.i_am_player ? 'player' : (r.i_am_spectator ? 'spectator' : null)),
     })),
   });
@@ -818,6 +839,10 @@ async function createRoomImpl(req, res) {
   // decidable, so the community vote is the required battle type.
   if (battleMode === 'tournament' && battleType !== 'voting_community')
     throw new HttpError(400, 'Tournaments use Community Vote so every match can be decided.');
+  // v65: tournament creation is a PREMIUM entitlement — enforced here (the
+  // server is the gate; hiding the button client-side is never enough).
+  if (battleMode === 'tournament' && !(await premiumOf(req.user.id)).active)
+    throw new HttpError(403, 'Creating tournaments is an Art Arena Premium feature — upgrade to host a bracket.');
   let maxPlayers = b.max_players === undefined ? 2 : Number(b.max_players);
   if (!Number.isInteger(maxPlayers))
     throw new HttpError(400, `Max players must be between 2 and ${HARD_MAX_PLAYERS}.`);
@@ -1325,10 +1350,41 @@ router.patch('/:code', ah(async (req, res) => {
   // v58: the Battle button's match uses the FIXED default settings.
   if (room.auto_start)
     throw new HttpError(409, 'Matchmaking battles use the fixed default settings (1v1 · public · community votes · 1 hour · randomizer).');
+  // v65: a tournament may only be reshaped while its bracket is still open
+  // (pre-draw); once the draw has happened the roster/tree are immutable.
+  const tournamentLocked = room.battle_mode === 'tournament' && !!room.bracket;
+  if (room.battle_mode === 'tournament' && room.status === 'ended' && !room.bracket)
+    throw new HttpError(409, 'A tournament that never started cannot be edited — close or delete it and create a new one.');
 
   const b = req.body || {};
   const sets = [];
   const params = [];
+  if ('name' in b) {
+    const v = b.name === null ? null : String(b.name).trim().slice(0, 60) || null;
+    if (v !== null && v.length < 1) throw new HttpError(400, 'Room name must be 1–60 characters.');
+    params.push(v);
+    sets.push(`name = $${params.length}`);
+  }
+  if ('visibility' in b) {
+    if (!['public', 'private'].includes(b.visibility))
+      throw new HttpError(400, 'Visibility must be "public" or "private".');
+    if (b.visibility === 'private' && !ROOM_CODE_RE.test(room.code))
+      throw new HttpError(400, 'This room needs a valid 4–12 character code before it can become private.');
+    if (tournamentLocked)
+      throw new HttpError(409, 'A drawn tournament is locked — its players are committed to the bracket.');
+    params.push(b.visibility);
+    sets.push(`visibility = $${params.length}`);
+  }
+  if ('max_players' in b && room.battle_mode === 'tournament') {
+    if (tournamentLocked) throw new HttpError(409, 'A drawn tournament is locked.');
+    const v = Number(b.max_players);
+    const seated = room.player_count !== undefined ? room.player_count
+      : (await pool.query(`SELECT count(*)::int n FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`, [room.id])).rows[0].n;
+    if (!Number.isInteger(v) || v < Math.max(8, seated) || v > HARD_MAX_PLAYERS)
+      throw new HttpError(400, 'A tournament must seat between 8 and 16 players (at least the ' + seated + ' already seated).');
+    params.push(v);
+    sets.push(`max_players = $${params.length}`);
+  }
   if ('time_limit_seconds' in b) {
     const v = Number(b.time_limit_seconds);
     if (!Number.isInteger(v) || v < TIME_LIMIT.min || v > TIME_LIMIT.max)
@@ -1349,8 +1405,205 @@ router.patch('/:code', ah(async (req, res) => {
   if (!sets.length) throw new HttpError(400, 'Nothing to update.');
   params.push(room.id);
   await pool.query(`UPDATE battle_rooms SET ${sets.join(', ')} WHERE id = $${params.length}`, params);
-  rt.emitRoom(room.code, { action: 'settings', username: req.user.username });
+  rt.emitRoom(room.code, { action: 'settings', username: req.user.username, what: sets.join(', ') });
+  if ('visibility' in b && b.visibility === 'public') rt.broadcastRoomsList('visibility');
   res.json(await roomPayload(req.params.code, req.user.id));
+}));
+
+// ---------------------------------------------------------------------------
+// v65 — JOIN REQUESTS (full rooms): a lobby room at capacity can accept
+// requests to join. The HOST is notified through the standard notifications
+// engine (one notification row per request; state survives refresh/nav) and
+// answers Accept / Decline. Accept seats the requester through the same
+// rules as /join (free seat required — otherwise the host is told to free
+// one first); Decline simply closes the request. Both sides always learn the
+// outcome through a handled notification + a realtime push.
+// ---------------------------------------------------------------------------
+router.post('/:code/request-join', ah(async (req, res) => {
+  const { rows: roomRows } = await pool.query(
+    `SELECT r.*, (SELECT count(*) FROM room_participants rp
+                   WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready'))::int AS player_count
+       FROM battle_rooms r WHERE r.code = $1 AND r.deleted_at IS NULL FOR UPDATE`, [String(req.params.code).trim().toUpperCase()]
+  );
+  const room = roomRows[0];
+  if (!room) throw new HttpError(404, "We couldn't find a room with that code.");
+  if (room.host_id === req.user.id) throw new HttpError(409, 'You host this room.');
+  if (room.status !== 'lobby') throw new HttpError(409, 'This room is not open to requests right now.');
+  const seated = await pool.query(
+    `SELECT 1 FROM room_participants WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')`, [room.id, req.user.id]
+  );
+  if (seated.rows.length) throw new HttpError(409, 'You are already in this room.');
+  if (room.player_count < room.max_players)
+    throw new HttpError(409, 'This room has a free seat — join it directly.');
+  const mine = await activeRoomOf(req.user.id);
+  if (mine) throw new HttpError(409, 'You are already in a room — leave it before requesting a seat.');
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const dup = await client.query(
+      `SELECT 1 FROM notifications
+        WHERE user_id = $1 AND type = 'join_request' AND payload->>'handled' IS NULL
+          AND payload->>'room_code' = $2 AND payload->>'requester_user_id' = $3
+        LIMIT 1`, [room.host_id, room.code, req.user.id]
+    );
+    if (dup.rows.length) { await client.query('COMMIT'); throw new HttpError(409, 'You already have a pending request for this room.'); }
+    await notifyUser(room.host_id, 'join_request', {
+      room_code: room.code, room_name: room.name || null, battle_mode: room.battle_mode || '1v1',
+      requester_user_id: req.user.id, requester_username: req.user.username, requester_display_name: req.user.display_name,
+      requester_avatar_key: null,
+    });
+    await client.query('COMMIT');
+  } catch (e) { await client.query('ROLLBACK').catch(() => {}); throw e; } finally { client.release(); }
+  rt.sendToUser(room.host_id, { type: 'join_request.incoming', room_code: room.code });
+  res.status(201).json({ ok: true, room_code: room.code });
+}));
+
+// shared seat step for an ACCEPTED request (mirrors the /join seat rules)
+async function seatAcceptedRequester(client, room, requesterId) {
+  const mine = await activeRoomOf(requesterId, client);
+  if (mine && mine.code !== room.code)
+    return { ok: false, message: 'That player is now in another room — their request has lapsed.' };
+  const existing = await client.query(
+    `SELECT state, seat FROM room_participants WHERE room_id = $1 AND user_id = $2`, [room.id, requesterId]
+  );
+  if (existing.rows[0] && ['waiting', 'ready'].includes(existing.rows[0].state))
+    return { ok: true, already: true, seat: existing.rows[0].seat };
+  const { rows: cnt } = await client.query(
+    `SELECT count(*)::int AS n FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`, [room.id]
+  );
+  if (cnt[0].n >= room.max_players)
+    return { ok: false, message: 'The room filled up again — kick or wait for a seat before accepting.' };
+  const seat = await pickSeatForJoin(client, room, requesterId);
+  if (seat === null)
+    return { ok: false, message: 'No seat is free right now — free one first, then accept.' };
+  if (existing.rows[0]) {
+    // a row exists in a non-active state (left/kicked) — reactivate it
+    await client.query(
+      `UPDATE room_participants SET state = 'waiting', left_at = NULL, seat = $3
+        WHERE room_id = $1 AND user_id = $2`,
+      [room.id, requesterId, seat]
+    );
+  } else {
+    await client.query(
+      `INSERT INTO room_participants (room_id, user_id, state, seat)
+       VALUES ($1, $2, 'waiting', $3)`,
+      [room.id, requesterId, seat]
+    );
+  }
+  return { ok: true, seat };
+}
+async function answerJoinRequest(req, res, action) {
+  const requesterId = String(req.params.requesterId || '');
+  if (!/^[0-9a-f-]{36}$/i.test(requesterId)) throw new HttpError(400, 'Invalid user id.');
+  const client = await pool.connect();
+  let outcome = null; let requesterName = null; let roomCode = String(req.params.code).trim().toUpperCase();
+  try {
+    await client.query('BEGIN');
+    const { rows: roomRows } = await client.query(
+      `SELECT * FROM battle_rooms WHERE code = $1 AND deleted_at IS NULL FOR UPDATE`, [roomCode]
+    );
+    const room = roomRows[0];
+    if (!room) throw new HttpError(404, 'Room not found.');
+    requireHost(room, req.user.id);
+    if (room.status !== 'lobby') throw new HttpError(409, 'The room is no longer accepting players.');
+    const pend = await client.query(
+      `SELECT id FROM notifications
+        WHERE user_id = $1 AND type = 'join_request' AND payload->>'handled' IS NULL
+          AND payload->>'room_code' = $2 AND payload->>'requester_user_id' = $3
+        FOR UPDATE`, [room.host_id, room.code, requesterId]
+    );
+    if (!pend.rows.length) throw new HttpError(409, 'That request is no longer pending.');
+    const { rows: who } = await client.query(
+      `SELECT username, display_name FROM users WHERE id = $1`, [requesterId]
+    );
+    requesterName = who[0];
+    if (action === 'decline') {
+      await client.query(
+        `UPDATE notifications SET payload = payload || jsonb_build_object('handled', 'declined', 'answered_at', now()::text)
+          WHERE id = ANY($1::uuid[])`, [pend.rows.map((r) => r.id)]
+      );
+      outcome = { action: 'declined' };
+    } else {
+      const seat = await seatAcceptedRequester(client, room, requesterId);
+      if (!seat.ok) throw new HttpError(409, seat.message);
+      await client.query(
+        `UPDATE notifications SET payload = payload || jsonb_build_object('handled', 'accepted', 'answered_at', now()::text)
+          WHERE id = ANY($1::uuid[])`, [pend.rows.map((r) => r.id)]
+      );
+      outcome = { action: 'accepted', seat: seat.seat, already: !!seat.already };
+    }
+    await client.query('COMMIT');
+    if (outcome.action === 'accepted') {
+      await notifyUser(requesterId, 'join_request', {
+        room_code: room.code, room_name: room.name || null,
+        host_user_id: req.user.id, host_username: req.user.username, host_display_name: req.user.display_name,
+        handled: 'accepted',
+      });
+      rt.emitRoom(room.code, { action: 'joined', username: (requesterName && requesterName.username) || 'player', display_name: requesterName && requesterName.display_name, seat: outcome.seat });
+    } else {
+      await notifyUser(requesterId, 'join_request', {
+        room_code: room.code, room_name: room.name || null,
+        host_user_id: req.user.id, host_username: req.user.username, host_display_name: req.user.display_name,
+        handled: 'declined',
+      });
+    }
+    rt.sendToUser(requesterId, { type: 'join_request.answered', room_code: room.code, action: outcome.action });
+    res.json({ ok: true, action: outcome.action });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally { client.release(); }
+}
+router.post('/:code/join-requests/:requesterId/accept', ah(async (req, res) => answerJoinRequest(req, res, 'accept')));
+router.post('/:code/join-requests/:requesterId/decline', ah(async (req, res) => answerJoinRequest(req, res, 'decline')));
+
+// ---------------------------------------------------------------------------
+// v65 — HOST TEAM ORGANIZER (3v3, pre-battle): the room creator can move any
+// seated player between Team A (seats 1-3) and Team B (seats 4-6) while the
+// room is still in the lobby. Capacity is enforced here (never more than
+// three per side) and the move broadcasts to everyone — the board re-renders
+// from the server payload on all screens. Once the battle starts the room
+// leaves 'lobby' and this route refuses (server-side lock).
+// ---------------------------------------------------------------------------
+router.post('/:code/teams/move', ah(async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: roomRows } = await client.query(
+      `SELECT * FROM battle_rooms WHERE code = $1 AND deleted_at IS NULL FOR UPDATE`, [String(req.params.code).trim().toUpperCase()]
+    );
+    const room = roomRows[0];
+    if (!room) throw new HttpError(404, 'Room not found.');
+    requireHost(room, req.user.id);
+    if (room.battle_mode !== '3v3') throw new HttpError(400, 'Team sides only exist in 3v3 rooms.');
+    if (room.status !== 'lobby') throw new HttpError(409, 'Teams lock the moment the battle starts.');
+    const targetId = String((req.body || {}).user_id || '').trim();
+    if (!/^[0-9a-f-]{36}$/i.test(targetId)) throw new HttpError(400, 'Pick a seated player to move.');
+    if (targetId === req.user.id) throw new HttpError(400, 'The host side of a 3v3 room is Team A — the host cannot be moved.');
+    const side = String((req.body || {}).side || '').toUpperCase();
+    if (side !== 'A' && side !== 'B') throw new HttpError(400, 'Choose a side: A or B.');
+    const { rows: parts } = await client.query(
+      `SELECT user_id, seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`, [room.id]
+    );
+    const me = parts.find((x) => x.user_id === targetId);
+    if (!me) throw new HttpError(404, 'That player is not seated in this room.');
+    const curSide = me.seat <= 3 ? 'A' : 'B';
+    if (curSide === side) throw new HttpError(409, 'That player is already on Team ' + side + '.');
+    const onSide = (sd) => parts.filter((x) => x.user_id !== targetId && (sd === 'A' ? x.seat <= 3 : x.seat > 3)).length;
+    if (onSide(side) >= 3) throw new HttpError(409, 'Team ' + side + ' already has three players — move someone off it first.');
+    const free = side === 'A' ? [1, 2, 3] : [4, 5, 6];
+    const taken = new Set(parts.map((x) => x.seat));
+    const seat = free.find((n) => !taken.has(n));
+    await client.query(
+      `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`, [room.id, targetId, seat]
+    );
+    await client.query('COMMIT');
+    rt.emitRoom(room.code, { action: 'teams_moved', by: req.user.username, user_id: targetId, side });
+    res.json(await roomPayload(room.code, req.user.id));
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally { client.release(); }
 }));
 
 // ---------------------------------------------------------------------------

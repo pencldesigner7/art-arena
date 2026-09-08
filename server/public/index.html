@@ -522,6 +522,16 @@ try {
   body[data-ptheme="cloud"] .theme-swatch .swatch-logo, body[data-ptheme="magazine"] .theme-swatch .swatch-logo { border-color:var(--line); }
   .sw-flame { background:linear-gradient(135deg,#0e0703 55%, #FF5A00 55.1%, #FFC300); }
   .sw-graffiti { background:linear-gradient(135deg,#151009 55%, #FF4FA3 55.1%, #FFD23F); }
+  /* v65: per-preset swatch backdrops — each card sits in its theme's world */
+  .theme-swatch .swatch-logo.sl-default { background:linear-gradient(135deg,#151026,#2a1e44); }
+  .theme-swatch .swatch-logo.sl-flame { background:linear-gradient(135deg,#180b03,#3a1c08); }
+  .theme-swatch .swatch-logo.sl-cloud { background:linear-gradient(135deg,#cfe4f6,#eaf4fd); }
+  .theme-swatch .swatch-logo.sl-glitch { background:linear-gradient(135deg,#070a12,#101b30); }
+  .theme-swatch .swatch-logo.sl-graffiti { background:linear-gradient(135deg,#151009,#2a2417); }
+  .theme-swatch .swatch-logo.sl-stitch { background:linear-gradient(135deg,#241d2b,#171320); }
+  .theme-swatch .swatch-logo.sl-glowing { background:linear-gradient(135deg,#0b1220,#12263a); }
+  .theme-swatch .swatch-logo.sl-magazine { background:linear-gradient(135deg,#e9e2d4,#f7f3ea); }
+  .theme-swatch .swatch-logo.sl-pixel { background:linear-gradient(135deg,#0C1C4A,#2a1e44); }
 
   /* ---- Settings: the customization row (dots + direction + wheel) ---- */
   .pth-custom { margin-top:12px; border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--surface); }
@@ -663,6 +673,12 @@ try {
   .sw-magazine { background:#f4f1ea; position:relative; }
   .sw-default { background:linear-gradient(135deg,#09070d 50%, #FF3CAC 50.1%, #7B2CFF); }
   /* settings customization */
+  /* v65: Settings panels get their own real card frame. The per-theme rules
+     above only RE-SKIN this frame (colours/border styles); without this base
+     the sections rendered frameless on the default theme and with square,
+     border-only boxes under preset themes. */
+  .settings-appearance { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  .settings-appearance + .settings-appearance { margin-top:18px; }
   .pth-color-row { display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap; }
   .pth-color { display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); }
   .pth-color input[type="color"] { width:34px; height:26px; border:1px solid var(--line); border-radius:6px; background:var(--surface); padding:1px; cursor:pointer; }
@@ -1120,7 +1136,8 @@ try {
   .live-strip:hover { border-color:rgba(var(--pink-rgb),.5); transform:translateY(-2px); }
   .live-badge { display:inline-flex; flex-direction:column; align-items:center; gap:3px; color:var(--pink); font-size:9px; font-weight:800; letter-spacing:1.5px; flex:0 0 auto; }
   .live-avas { display:flex; align-items:center; gap:6px; min-width:0; }
-  .live-ava { width:40px; height:40px; border-radius:50%; background:var(--surface-2); border:2px solid rgba(var(--purple-rgb),.65); display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:var(--icon-strong); flex:0 0 auto; }
+  .live-ava { width:40px; height:40px; border-radius:50%; background:var(--surface-2); border:2px solid rgba(var(--purple-rgb),.65); display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:var(--icon-strong); flex:0 0 auto; overflow:hidden; }
+  .live-ava.ava-pic img { width:100%; height:100%; object-fit:cover; display:block; }
   .live-vs { font-size:9px; font-weight:800; letter-spacing:1px; color:var(--muted); }
   .live-more { width:40px; height:40px; border-radius:50%; border:1px solid rgba(var(--purple-rgb),.65); background:var(--surface); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--purple); flex:0 0 auto; }
   .live-info { margin-left:auto; text-align:right; font-size:11px; line-height:1.4; color:var(--muted); white-space:nowrap; }
@@ -1308,7 +1325,7 @@ try {
   </div>
   <div class="brand top-brand"><img id="top-logo" src="/logo.png" data-aa-logo alt="Art Arena" height="26"></div>
   <div id="nav-right">
-  <button type="button" id="btn-premium-mini" class="hidden" aria-label="Art Arena Premium" title="Art Arena Premium"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="url(#aa-grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l2.8 5.9 6.2.8-4.6 4.4 1.2 6.3L12 17.1l-5.6 3.1 1.2-6.3L3 9.5l6.2-.8z"/></svg></button>
+  <button type="button" id="btn-premium-mini" class="hidden" aria-label="Art Arena Premium" title="Art Arena Premium"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><use href="#pe-sym"/></svg></button>
   <button type="button" id="btn-notif" class="icon-btn" aria-label="Notifications"><span id="notif-badge" aria-hidden="true"></span>
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>
   </button>
@@ -2394,9 +2411,10 @@ try {
   <div id="full-modal" class="time-modal-backdrop hidden">
     <div class="time-modal" role="dialog" aria-modal="true">
       <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M14 20V4a1 1 0 0 0-1.2-1L7 5.5A1 1 0 0 0 6.2 6.4V20"/><path d="M6.5 4.8 12.8 3"/><circle cx="10.7" cy="12.5" r=".9" fill="currentColor" stroke="none"/></svg> Room Full</h3>
-      <p class="muted" style="margin:6px 0 0; font-size:14px">This room has reached its player limit. You can still enter and watch the battle live — as a spectator.</p>
+      <p class="muted" id="fm-copy" style="margin:6px 0 0; font-size:14px">This room has reached its player limit. You can still enter and watch the battle live — as a spectator.</p>
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="fm-cancel">Cancel</button>
+        <button type="button" class="secondary hidden" id="fm-request"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z"/><path d="M2.8 12h6M15.2 12h6"/></svg> Request seat</button>
         <button type="button" id="fm-spectate" style="flex:1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> Enter as a Spectator</button>
       </div>
     </div>
@@ -3317,6 +3335,29 @@ document.addEventListener('click', (e) => {
 // is the first live room: its players become the avatar circles ("vs"
 // between them); "+N" counts the other live rooms.
 let liveStripKey = null;
+// v65: one avatar chip builder for the homepage — real avatar image when the
+// room payload carries the player's brief (player_briefs), initials circle
+// otherwise. A failed image swaps back to the initials inline.
+function avaSpanOf(p, hostName) {
+  // v65: player_briefs arrive FLAT — {username, display_name, avatar_url} —
+  // so the old nested p.brief shape never matched and circles fell back to
+  // initials even when a real photo existed. Accept the flat brief directly
+  // (and keep the nested shape working for any other caller).
+  const b = p && p.brief ? p.brief : p;
+  const nm = (b && (b.display_name || b.username)) || (p && p.name) || (p && p.username) || '?';
+  const hostTag = (nm === hostName) ? '👑 ' : '@';
+  const ini = esc(String(nm).slice(0, 2).toUpperCase());
+  if (b && b.avatar_url)
+    return '<span class="live-ava ava-pic" title="' + hostTag + esc(nm) + '">' +
+      '<img src="' + esc(b.avatar_url) + '" alt="' + esc(nm) + '&#39;s avatar" loading="lazy" data-ini="' + ini + '" onerror="this.onerror=null;liveAvaImg(this)"></span>';
+  return '<span class="live-ava" title="' + hostTag + esc(nm) + '">' + ini + '</span>';
+}
+function liveAvaImg(img) {
+  try {
+    const s = img.closest('.live-ava');
+    if (s && img.dataset.ini) s.textContent = img.dataset.ini;
+  } catch (_) {}
+}
 function renderLiveStrip(rooms) {
   const key = JSON.stringify(rooms);
   if (key === liveStripKey) return; // unchanged → zero DOM work
@@ -3332,10 +3373,10 @@ function renderLiveStrip(rooms) {
   empty.classList.add('hidden');
   const feat = live[0];
   const hostName = feat.host ? feat.host.username : null;
-  const avas = (feat.player_names || []).slice(0, 3).map((n) =>
-    '<span class="live-ava" title="' + (n === hostName ? '👑 ' : '@') + esc(n) + '">' +
-    esc(String(n).slice(0, 2).toUpperCase()) + '</span>'
-  ).join('<span class="live-vs">VS</span>');
+  const briefs = (feat.player_briefs && feat.player_briefs.length)
+    ? feat.player_briefs
+    : (feat.player_names || []).map((n) => ({ name: n })); // pre-v65 fallback
+  const avas = briefs.slice(0, 3).map((p) => avaSpanOf(p, hostName)).join('<span class="live-vs">VS</span>');
   const more = live.length - 1;
   strip.innerHTML =
     '<span class="live-badge"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M8.6 8.6a4.8 4.8 0 0 0 0 6.8"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M6 6a8.5 8.5 0 0 0 0 12"/><path d="M18 6a8.5 8.5 0 0 1 0 12"/></svg><span>LIVE</span></span>' +
@@ -3378,6 +3419,7 @@ $('#home-yours').addEventListener('click', (e) => {
 const IC = {
   sword: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg>',
   users: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  userplus: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M16 11h6"/></svg>', // v65: seat request affordance
   crown: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m2 5 4 12h12l4-12-5.5 5L12 4 7.5 10 2 5z"/><path d="M6 21h12"/></svg>',
   globe: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
   lock: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
@@ -3604,16 +3646,43 @@ function updateCatDifficulty() {
 }
 // v42: the element selection commits itself too (debounced, so a batch of
 // toggles is ONE request).
+// v65 root-cause fix: the old handler re-read the checkboxes from the DOM
+// WHEN THE DEBOUNCE FIRED (900 ms later). Any room poll or server echo that
+// re-rendered the grid in between silently reset those checkboxes to the
+// last SAVED state, so the commit then sent the OLD selection — a category
+// appeared to deselect itself, and a quick second toggle could be wiped or
+// mis-sent. Now the new selection is captured at the CLICK instant and the
+// grid is never rebuilt from server state while a commit is in flight
+// (catsDirty) — the renderer defers to the response of the commit itself.
 let catsCommitT = null;
-$('#cat-grid').addEventListener('change', (e) => {
-  updateCatDifficulty();
+let catsDirty = false; // true from the first toggle until its commit lands
+function commitCats(cats) {
   if (!currentRoomCode) return;
   clearTimeout(catsCommitT);
-  catsCommitT = setTimeout(() => {
-    const cats = selectedCats();
-    if (cats.length === 0) { msg('msg-room', 'Select at least one challenge element.', false); return; }
-    applyRoomSetting('cats', cats);
-  }, 900);
+  catsDirty = true;
+  catsCommitT = setTimeout(async () => {
+    const code = currentRoomCode;
+    if (!code) { catsDirty = false; return; }
+    try {
+      const d = await api('/api/rooms/' + code + '/randomizer-config', { categories: cats });
+      if (currentRoomCode === code) { renderRoom(d); toast('Challenge elements updated.'); }
+    } catch (err) {
+      if (!handleAuthError(err)) msg('msg-room', err.message, false);
+      // the server refused — drop the dirty flag and reconcile from server truth
+      if (currentRoomCode === code) { catsDirty = false; refreshRoom(); }
+      return;
+    } finally {
+      catsDirty = false; // the echo (renderRoom above) may now rebuild freely
+    }
+  }, 250);
+}
+$('#cat-grid').addEventListener('change', (e) => {
+  // capture NOW — never read the DOM again after a render may have replaced it
+  const cats = selectedCats();
+  updateCatDifficulty();
+  if (!currentRoomCode) return;
+  if (cats.length === 0) { msg('msg-room', 'Select at least one challenge element.', false); return; }
+  commitCats(cats);
 });
 
 function roomCardHTML(r) {
@@ -3628,6 +3697,8 @@ function roomCardHTML(r) {
       (canDelete ? '<button type="button" class="mini danger" data-delete-room="' + r.code + '">Delete</button>' : '')
     : [
         canJoin ? '<button type="button" class="mini" data-join="' + r.code + '">Join</button>' : '',
+        // v65: a FULL lobby room accepts a seat request — the host decides.
+        (r.status === 'lobby' && r.player_count >= r.max_players) ? '<button type="button" class="mini" data-request-seat="' + r.code + '">' + IC.userplus + ' Request seat</button>' : '',
         canSpectate ? '<button type="button" class="mini" data-spectate="' + r.code + '">Spectate</button>' : '',
       ].join('');
   // Title = the name the host gave the room (e.g. "food"). Only UNNAMED
@@ -4196,12 +4267,17 @@ function renderRoom(d) {
     }
     // Challenge-elements grid — re-render only when the SAVED choice changes,
     // so the 2.5s poll never wipes the host's in-progress toggles.
+    // v65: while a category commit is in flight (catsDirty) the grid keeps the
+    // host's OWN clicks — the commit response renders the server truth right
+    // after, so nothing is lost and nothing stale is sent.
     const savedCats = d.randomizer_config && d.randomizer_config.categories ? d.randomizer_config.categories : null;
     const selKey = d.code + ':' + (savedCats ? savedCats.join(',') : 'default');
     if (catRenderKey !== selKey) {
       catRenderKey = selKey;
-      const sel = savedCats || ['character', 'environment', 'object', 'style'];
-      loadCategories().then(() => renderCatGrid(sel));
+      if (!catsDirty) {
+        const sel = savedCats || ['character', 'environment', 'object', 'style'];
+        loadCategories().then(() => renderCatGrid(sel));
+      }
     }
   } else {
     catRenderKey = null;
@@ -4565,6 +4641,8 @@ function openRoom(code) {
 $('#rooms-list').addEventListener('click', (e) => {
   const del = e.target.closest('[data-delete-room]');
   if (del) { e.stopPropagation(); deleteModal.open(del.dataset.deleteRoom); return; } // v42: delete ended room (host)
+  const req = e.target.closest('[data-request-seat]');
+  if (req) { e.stopPropagation(); requestSeat(req.dataset.requestSeat); return; } // v65
   const join = e.target.closest('[data-join]');
   if (join) { e.stopPropagation(); joinRoom(join.dataset.join); return; }
   const spec = e.target.closest('[data-spectate]');
@@ -4651,7 +4729,17 @@ $('#form-create-room').addEventListener('submit', async (e) => {
     resetCreateConfig();
     await refreshRoomsList();
     openRoom(d.code || d.room_code);
-  } catch (err) { if (!handleAuthError(err)) msg('msg-rooms', err.message, false); }
+  } catch (err) {
+    if (!handleAuthError(err)) {
+      // v65 (item 16): Premium-only battle modes explain themselves with the
+      // upgrade sheet — never a bare red error row.
+      if (/premium/i.test(String(err.message || ''))) {
+        openUpsell('Tournament rooms are a Premium feature', 'Premium members host tournament brackets of 8–16 artists. Upgrade to unlock tournament rooms — every other battle mode stays free.');
+        return;
+      }
+      msg('msg-rooms', err.message, false);
+    }
+  }
 });
 
 // Room detail actions
@@ -5484,7 +5572,9 @@ function joinCardHTML(r) {
     '<div class="room-actions">' +
     (canJoin
       ? '<button type="button" class="mini" data-join="' + esc(r.code) + '">Join</button>'
-      : (r.spectator_allowed ? '<button type="button" class="mini" data-join-spec="' + esc(r.code) + '">' + IC.eye + ' Spectate</button>' : '')) +
+      : (r.status === 'lobby' && r.player_count >= r.max_players
+          ? '<button type="button" class="mini" data-request-seat="' + esc(r.code) + '">' + IC.userplus + ' Request seat</button>' : '') + // v65
+        (r.spectator_allowed ? '<button type="button" class="mini" data-join-spec="' + esc(r.code) + '">' + IC.eye + ' Spectate</button>' : '')) +
     '</div></div>';
 }
 async function refreshJoinList() {
@@ -5502,6 +5592,8 @@ async function refreshJoinList() {
   } catch (err) { if (!handleAuthError(err)) { /* list stays as-is */ } }
 }
 $('#view-join').addEventListener('click', (e) => {
+  const req = e.target.closest('[data-request-seat]');
+  if (req) { e.stopPropagation(); requestSeat(req.dataset.requestSeat); return; } // v65
   const spec = e.target.closest('[data-join-spec]');
   if (spec) { e.stopPropagation(); roomAction(spec.dataset.joinSpec, '/spectate', true); return; }
   const open = e.target.closest('[data-open-room]');
@@ -5516,8 +5608,24 @@ async function joinRoom(code) {
     openRoom((d && d.code) || code);
   } catch (err) {
     if (handleAuthError(err)) return;
-    if (err.data && err.data.room_full) openFullModal(code);
+    // v65: room_full (spectator rooms) or any "full" rejection now opens the
+    // Room Full sheet — it fetches the room and offers "Request seat" for
+    // lobby rooms (and spectate where the host allows it).
+    if ((err.data && err.data.room_full) || /full|player limit/i.test(err.message)) openFullModal(code);
     else toast(err.message);
+  }
+}
+// v65: a full lobby room accepts a SEAT REQUEST — the host gets a
+// join_request notification and answers (accept seats you, decline says no).
+async function requestSeat(code) {
+  try {
+    const d = await api('/api/rooms/' + code + '/request-join', {}, 'POST');
+    toast((d && d.message) || 'Request sent to the host — you will hear back in your notifications.');
+  } catch (err) {
+    if (handleAuthError(err)) return;
+    // A seat freed up between the click and the server → just join for real.
+    if (/free seat/i.test(err.message)) { joinRoom(code); return; }
+    toast(err.message);
   }
 }
 $('#join-code-btn').addEventListener('click', () => {
@@ -5547,11 +5655,33 @@ const fullModal = (() => {
     close();
     roomAction(code, '/spectate', true);
   });
+  $('#fm-request').addEventListener('click', () => { // v65: host answers from notifications
+    const code = forCode;
+    close();
+    requestSeat(code);
+  });
   $('#fm-cancel').addEventListener('click', close);
   backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
   return { open, close };
 })();
-function openFullModal(code) { fullModal.open(code); }
+// v65: the sheet first reads the room, then only offers what is real —
+// "Request seat" for lobby rooms (the host approves from notifications),
+// spectate wherever the host allows it.
+async function openFullModal(code) {
+  let requestable = false, spectatable = true;
+  try {
+    const g = await api('/api/rooms/' + code);
+    const r = g && (g.room || g);
+    if (r) { requestable = r.status === 'lobby'; spectatable = !!r.spectator_allowed && r.status !== 'ended'; }
+  } catch (_) {}
+  $('#fm-request').classList.toggle('hidden', !requestable);
+  $('#fm-spectate').classList.toggle('hidden', !spectatable);
+  const copy = $('#fm-copy');
+  if (copy) copy.textContent = requestable
+    ? 'This room is full right now. Ask the host for the next free seat — they answer from their notifications — or watch as a spectator.'
+    : 'This room has reached its player limit. You can still enter and watch the battle live — as a spectator.';
+  fullModal.open(code);
+}
 
 // ============ v35: Delete Room (host, lobby) — hard delete ================
 // The soft "Close room" (history kept) stays; Delete removes the room for
@@ -6490,8 +6620,25 @@ const NOTIF_TEXT = {
   battle_invitation: (p) => 'Battle invitation.',
   room_invitation: (p) => (p.from_display_name || '@' + p.from_username) + ' invited you to ' + (p.room_name ? '"' + p.room_name + '"' : 'their room') + (p.battle_mode && p.battle_mode !== '1v1' ? ' (' + p.battle_mode + ')' : '') + '.',
   team_invitation: (p) => (p.from_display_name || '@' + p.from_username) + ' picked you for their 3v3 team' + (p.team_name ? ' "' + p.team_name + '"' : '') + '.',
+  // v65: join requests. Unhandled → the HOST decides; handled with host_user_id
+  // → the REQUESTER's outcome; handled with requester_user_id → the host's
+  // own row after they answered.
+  join_request: (p) => {
+    const who = p.requester_display_name || p.requester_username || p.host_display_name || p.host_username || 'A player';
+    if (!p.handled) return '@' + (p.requester_display_name || p.requester_username) + ' asked to join ' + jrRoomLabel(p) + ' — it is full, so they need your go-ahead.';
+    if (p.host_user_id) return (p.host_display_name || '@' + p.host_username) + (p.handled === 'accepted'
+      ? ' accepted your request — you now have a seat in '
+      : ' declined your request to join ') + jrRoomLabel(p) + '.';
+    return (p.requester_display_name || '@' + p.requester_username) + (p.handled === 'accepted'
+      ? ' has been seated in your room ' + p.room_code + '.'
+      : "'s request was declined — room " + p.room_code + ' stays as it was.');
+  },
   message: (p) => 'New message.', livestream_start: (p) => 'A livestream is starting.',
 };
+function jrRoomLabel(p) {
+  return (p.room_name ? '"' + p.room_name + '"' : 'room ' + p.room_code) +
+    (p.battle_mode && p.battle_mode !== '1v1' ? ' (' + p.battle_mode + ')' : '');
+}
 function notifWhen(iso) {
   const s = Math.max(0, Math.floor((serverNow() - new Date(iso).getTime()) / 1000));
   if (s < 60) return 'just now';
@@ -6515,6 +6662,8 @@ async function loadNotifications() {
     const riDone = n.type === 'room_invitation' && n.payload && n.payload.handled;
     const isTI = n.type === 'team_invitation' && n.payload && n.payload.draft_id && !n.payload.handled;    // v61
     const tiDone = n.type === 'team_invitation' && n.payload && n.payload.handled;
+    const jrIn = n.type === 'join_request' && n.payload && n.payload.requester_user_id && !n.payload.handled; // v65: host decides
+    const jrDone = n.type === 'join_request' && n.payload && n.payload.handled; // v65: answer visible to both sides
     return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '"' + (n.payload && n.payload.from_user_id ? ' data-from-uid="' + esc(n.payload.from_user_id) + '"' : '') + '>' +
       '<span class="notif-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
       (n.type.startsWith('friend') || n.type === 'team_invitation' || n.type === 'room_invitation' ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : n.type === 'premium_activated' ? '<path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.55L12 17.1l-5.9 3.15L7.25 13.7 2.5 9.3l6.6-1.04z"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
@@ -6528,6 +6677,13 @@ async function loadNotifications() {
       (tiDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ On the team</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
       (isRR ? '<div class="notif-actions"><button type="button" data-rr-accept="' + esc(n.payload.room_code) + '">Accept</button><button type="button" class="secondary" data-rr-decline="' + esc(n.payload.room_code) + '">Decline</button></div>' : '') +
       (rrDone ? '<div class="notif-when" style="color:var(--ok-tx)">' + (n.payload.handled === 'accepted' ? '✓ accepted — battle starting' : '✓ declined') + '</div>' : '') +
+      (jrIn ? '<div class="notif-actions"><button type="button" data-jr-accept="1" data-jr-room="' + esc(n.payload.room_code) + '" data-jr-uid="' + esc(n.payload.requester_user_id) + '">Accept</button><button type="button" class="secondary" data-jr-decline="1" data-jr-room="' + esc(n.payload.room_code) + '" data-jr-uid="' + esc(n.payload.requester_user_id) + '">Decline</button></div>' : '') +
+      (jrDone ? '<div class="notif-actions">' +
+        (n.payload.handled === 'accepted'
+          ? '<button type="button" class="fr-final accepted" disabled>✓ ' + (n.payload.host_user_id ? 'You have a seat' : 'Seated') + '</button>' +
+            (n.payload.host_user_id ? '<button type="button" class="mini" data-jr-open="' + esc(n.payload.room_code) + '">Open room</button>' : '')
+          : '<button type="button" class="fr-final declined" disabled>Declined</button>') +
+        '</div>' : '') +
       (frDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Accepted</button>' : n.payload.handled === 'declined' ? '<button type="button" class="fr-final declined secondary" disabled>Declined</button>' : '<span class="notif-when">request withdrawn</span>') + '</div>' : '') +
       '</div></div>';
   }).join('');
@@ -6562,6 +6718,24 @@ $('#notif-list').addEventListener('click', async (e) => {
     loadNotifications(); // item re-renders in its handled state (still listed)
     return;
   }
+  // v65: join requests (full-room seat asks) resolve straight from the panel.
+  // Accept seats the requester — the room then paints the newcomer live; if
+  // the host is looking at that room, refresh it so the seat list is exact.
+  const jra = e.target.closest('[data-jr-accept]'), jrd = e.target.closest('[data-jr-decline]');
+  if (jra || jrd) {
+    const rc = (jra || jrd).dataset.jrRoom, uid = (jra || jrd).dataset.jrUid;
+    const box = (jra || jrd).closest('.notif-actions');
+    if (box) box.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+    try {
+      await api('/api/rooms/' + rc + '/join-requests/' + uid + '/' + (jra ? 'accept' : 'decline'), {}, 'POST');
+      toast(jra ? 'Request accepted — the player has been seated.' : 'Request declined.');
+      if (jra && currentRoomCode === rc) refreshRoom();
+    } catch (err) { toast(err.message); }
+    loadNotifications(); // the row re-renders in its handled state (still listed)
+    return;
+  }
+  const jro = e.target.closest('[data-jr-open]');
+  if (jro) { openRoom(jro.dataset.jrOpen); return; } // v65: requester enters the room they were seated into
   // v61: room invitation → the REAL join flow; team invitation → draft answer
   const rij = e.target.closest('[data-ri-join]'), rid = e.target.closest('[data-ri-decline]');
   if (rij || rid) {
@@ -6870,6 +7044,17 @@ $('#view-friends').addEventListener('click', (e) => {
 let invTarget = null;
 function openInviteModal(uid, name) {
   invTarget = uid;
+  const friend = (frData && frData.friends || []).find((f) => f.id === uid);
+  // v65 (item 11): a friend who is already seated in a room cannot accept an
+  // invitation (the one-room seat rule) — say so up front instead of listing
+  // rooms that would all fail on their side.
+  if (friend && friend.room_code) {
+    $('#inv-sub').textContent = '@' + name + ' is already in room #' + friend.room_code + '.';
+    $('#inv-rooms').innerHTML = '<p class="muted" style="margin:0; font-size:13.5px">Ask them to leave that room first — an artist can only sit in one battle room at a time. Inviting them now would fail on their side.</p>';
+    $('#inv-create').classList.add('hidden');
+    modalOpen('#invite-modal');
+    return;
+  }
   $('#inv-sub').textContent = 'Choose which of your rooms @' + name + ' should join.';
   const rooms = (frData && frData.my_rooms) || [];
   $('#inv-rooms').innerHTML = rooms.length
@@ -7049,6 +7234,13 @@ async function renderSettingsThemes() {
   const grid = $('#settings-theme-grid'), customRow = $('#settings-theme-custom');
   const card = (t, active, locked, attr) =>
     '<div class="theme-swatch' + (active ? ' active' : '') + (locked ? ' locked' : '') + '" ' + attr + '>' +
+    // v65: the preset's actual artwork is back on the card — the logo file
+    // each theme is built around (THEME_LOGOS), with the card tinted in the
+    // theme's world colours behind it. Fallback to the app mark if a file
+    // ever 404s; the alt text keeps the card meaningful without the art.
+    '<span class="swatch-logo sl-' + esc(t.key) + '">' +
+      '<img class="sw-logo-img" data-swatch-logo="' + esc(t.key) + '" src="' + esc(pthLogoFor(t.key)) + '" alt="' + esc(t.name) + ' preset preview" loading="lazy" onerror="this.onerror=null;this.src=\'/logo.png\'">' +
+    '</span>' +
     '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
     '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
     (t.customizable ? '<span class="swatch-chips"><i style="background:' + esc(t.c1 || 'var(--pink)') + '"></i><i style="background:' + esc(t.c2 || 'var(--purple)') + '"></i></span>' : '') +

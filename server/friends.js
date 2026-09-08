@@ -98,6 +98,16 @@ async function inviteToRoom(fromUser, toUserId, code, extra) {
   if (room.status !== 'lobby') throw new HttpError(409, 'That room is not accepting players right now.');
   if (room.already_in) throw new HttpError(409, 'That friend is already in the room.');
   if (room.player_count >= room.max_players) throw new HttpError(409, 'That room is full.');
+  // v65 (item 11): one live seat per artist — a friend seated in ANOTHER room
+  // cannot accept this invitation (the join-time seat rule would reject it).
+  // Fail the invite now with an honest reason instead of a confusing late
+  // error on their side.
+  const { rows: frSeat } = await pool.query(
+    `SELECT u.username FROM users u JOIN room_participants rp ON rp.user_id = u.id
+      WHERE u.id = $1 AND rp.state IN ('waiting','ready') AND rp.room_id <> $2
+      LIMIT 1`, [toUserId, room.id]);
+  if (frSeat[0])
+    throw new HttpError(409, '@' + frSeat[0].username + ' is already in a room — they need to leave it before you can invite them.');
   // one live invitation per (room, friend) — re-inviting just re-pushes it
   const { rows: dup } = await pool.query(
     `SELECT id FROM notifications
@@ -175,7 +185,13 @@ router.put('/teams/draft', ah(async (req, res) => {
   const ids = Array.from(new Set((Array.isArray(b.member_ids) ? b.member_ids : []).map(String)))
     .filter((id) => /^[0-9a-f-]{36}$/i.test(id) && id !== req.user.id);
   if (ids.length > TEAM_SIZE - 1) throw new HttpError(400, `A 3v3 team is you plus ${TEAM_SIZE - 1} players.`);
-  for (const id of ids) if (!(await areFriends(req.user.id, id))) throw new HttpError(403, 'Only your friends can be added to a team here — random players join through open rooms.');
+  for (const id of ids) {
+    if (!(await areFriends(req.user.id, id))) throw new HttpError(403, 'Only your friends can be added to a team here — random players join through open rooms.');
+    // v65: Add to My Side needs the friend ONLINE — the button is only
+    // enabled then, and this server check is the real gate (an offline
+    // friend can never be drafted through a crafted request).
+    if (!rt.isUserOnline(id)) throw new HttpError(409, 'That friend is offline — invite them when they are online to add them to your side.');
+  }
   const name = b.name === undefined ? null : String(b.name || '').trim().slice(0, 40) || null;
   const client = await pool.connect();
   try {

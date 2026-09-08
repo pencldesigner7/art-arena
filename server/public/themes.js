@@ -353,6 +353,22 @@
       x.beginPath(); x.moveTo(j, 0); x.lineTo(j, 64); x.stroke();
     }
     this.spr.weave = w;
+    // v65.1: the atelier's WALL PRINT — the artist's submission (toned into
+    // the stitch world, /themes/stitch-bg.png). Loaded once; drawn cover-fit
+    // with a slow breath + the same lissajous pan as the linen, so it moves
+    // as ONE living atelier. Missing file => the plain linen stays (safe).
+    this.artCanvas = null;
+    if (!this.artImg) {
+      var selfA = this, aImg = new Image();
+      aImg.onload = function () {
+        selfA.artImg = aImg; selfA.artCanvas = aImg;
+        if (!selfA.dead) { selfA._bakeKey = null; selfA.bake(); selfA.staticFrame(); }
+      };
+      aImg.src = '/themes/stitch-bg.png';
+      this.artImg = aImg; // in-flight marker (prevents duplicate loads)
+    } else if (this.artImg.complete && this.artImg.naturalWidth > 0) {
+      this.artCanvas = this.artImg;
+    }
     // the atelier hoop — big, centered, the page of the sketchbook
     var r = Math.min(this.w, this.h) * 0.34, hc = mk(r * 2 + 26, r * 2 + 26), hx = hc.getContext('2d');
     hx.translate(hc.width / 2, hc.height / 2);
@@ -378,6 +394,23 @@
       tx.stroke();
       this.spr.threads.push({ img: tc, x: rnd(0, this.w), y: rnd(this.h * 0.06, this.h * 0.94), vx: rnd(2.5, 7) * (Math.random() < 0.5 ? -1 : 1), ph: rnd(0, 6.28) });
     }
+    // plum scrims (same integration pattern as the graffiti wall): the wall
+    // print melts into the page and the UI text keeps its contrast over art.
+    var sc1 = mk(64, 220), sx1 = sc1.getContext('2d');
+    var g1 = sx1.createLinearGradient(0, 0, 0, 220);
+    g1.addColorStop(0, 'rgba(24,19,31,.55)'); g1.addColorStop(1, 'rgba(24,19,31,0)');
+    sx1.fillStyle = g1; sx1.fillRect(0, 0, 64, 220);
+    this.spr.scrimTop = sc1;
+    var sc2 = mk(64, 220), sx2 = sc2.getContext('2d');
+    var g2 = sx2.createLinearGradient(0, 0, 0, 220);
+    g2.addColorStop(0, 'rgba(24,19,31,0)'); g2.addColorStop(1, 'rgba(24,19,31,.5)');
+    sx2.fillStyle = g2; sx2.fillRect(0, 0, 64, 220);
+    this.spr.scrimBottom = sc2;
+    var sc3 = mk(512, 512), sx3 = sc3.getContext('2d');
+    var g3 = sx3.createRadialGradient(256, 256, 120, 256, 256, 330);
+    g3.addColorStop(0, 'rgba(24,19,31,0)'); g3.addColorStop(1, 'rgba(24,19,31,.42)');
+    sx3.fillStyle = g3; sx3.fillRect(0, 0, 512, 512);
+    this.spr.scrimVig = sc3;
     // the sketchbook: three designs, one live at a time
     this.sketch = { idx: 0, u: 0, phase: 'draw', hold: 0 };
     this.designs = this.makeDesigns();
@@ -703,6 +736,10 @@
       }
       var th = this.spr.threads || [];
       for (i = 0; i < th.length; i++) { th[i].x += th[i].vx * dt; th[i].ph += dt * 0.6; if (th[i].x > this.w + 20) th[i].x = -100; if (th[i].x < -100) th[i].x = this.w + 20; }
+      // v65: the atelier drift — weave pans along a slow lissajous curve;
+      // static frames (reduced motion / Animations OFF) fall at ≈0 offset.
+      this.dx = Math.sin(this.t * 0.13) * 6;
+      this.dy = Math.cos(this.t * 0.09) * 4;
     } else if (this.theme === 'pixel') {
       var pcx = this.pxClouds || [];
       for (i = 0; i < pcx.length; i++) { pcx[i].x += pcx[i].v * dt; if (pcx[i].x - 45 > this.spr.px.width) pcx[i].x = -45; }
@@ -809,13 +846,40 @@
       linen.addColorStop(0, '#2c2531'); linen.addColorStop(1, '#241e29');
       ctx.fillStyle = linen; ctx.fillRect(0, 0, w, h);
       var weave = this.spr.weave;
-      if (weave) for (var yy = 0; yy < h; yy += weave.height) for (var xx = 0; xx < w; xx += weave.width) ctx.drawImage(weave, xx, yy);
+      // v65: the linen drifts — a very slow pan (≤6px, sub-tile) so the
+      // weave never reads as a static print; still under Animations OFF.
+      if (weave) {
+        var oyW = Math.round(this.dy || 0), oxW = Math.round(this.dx || 0);
+        for (var yy = oyW - weave.height; yy < h + weave.height; yy += weave.height)
+          for (var xx = oxW - weave.width; xx < w + weave.width; xx += weave.width)
+            ctx.drawImage(weave, xx, yy);
+      }
+      // v65.1: the wall print — cover-fit over the linen, breathing gently
+      // and panning with the atelier drift; a static frame (reduced motion /
+      // Animations OFF) freezes it centred at ~1x (t is pinned there).
+      var art = this.artCanvas;
+      if (art) {
+        var brArt = 1 + 0.005 * Math.sin(this.t * 0.45);
+        var scArt = Math.max((w + 40) / art.width, (h + 40) / art.height) * brArt;
+        var awArt = art.width * scArt, ahArt = art.height * scArt;
+        ctx.drawImage(art, Math.round(w / 2 - awArt / 2 + (this.dx || 0)),
+                          Math.round(h / 2 - ahArt / 2 + (this.dy || 0)), awArt, ahArt);
+        var sT = this.spr.scrimTop; if (sT) ctx.drawImage(sT, 0, 0, w, Math.round(h * 0.22));
+        var sB = this.spr.scrimBottom; if (sB) ctx.drawImage(sB, 0, h - Math.round(h * 0.22), w, Math.round(h * 0.22));
+        var sV = this.spr.scrimVig; if (sV) ctx.drawImage(sV, 0, 0, w, h);
+      }
       // drifting thread curls
       var ths = this.spr.threads || [];
       for (i = 0; i < ths.length; i++) ctx.drawImage(ths[i].img, Math.round(ths[i].x), Math.round(ths[i].y + Math.sin(ths[i].ph) * 5));
-      // the hoop (design box lives inside it)
+      // the hoop (design box lives inside it) — v65: a slow 1% breath keeps
+      // the atelier alive; the amplitude is small enough that the sketch
+      // inside (drawn at design scale) never visibly detaches from the ring.
       var hoop = this.spr.hoop;
-      if (hoop) ctx.drawImage(hoop, Math.round(w * 0.5 - hoop.width / 2), Math.round(h * 0.52 - hoop.height / 2));
+      if (hoop) {
+        var br = 1 + 0.011 * Math.sin(this.t * 0.55);
+        var hw = Math.round(hoop.width * br), hh = Math.round(hoop.height * br);
+        ctx.drawImage(hoop, Math.round(w * 0.5 - hw / 2), Math.round(h * 0.52 - hh / 2), hw, hh);
+      }
       // the living sketch: one garment, progressively stitched
       var self = this, sk = this.sketch, D = this.designPx();
       if (sk && D) {

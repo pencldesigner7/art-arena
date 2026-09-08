@@ -815,6 +815,7 @@ app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Invalid user id.');
   const { rows } = await pool.query(
     `SELECT u.id, u.username, u.display_name, u.created_at AS joined_at,
+            u.ui_theme, u.ui_theme_custom,
             p.bio, p.avatar_storage_key, p.updated_at AS profile_updated_at,
             s.battles, s.wins, s.losses, s.draws
        FROM users u
@@ -826,12 +827,19 @@ app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
   if (!rows[0]) throw new HttpError(404, 'That artist does not exist.');
   const r = rows[0];
   const prem = await premiumOf(r.id); // v52: badge = REAL entitlement, never a client flag
+  // v65 (profile theme): the profile OWNER's active design theme is exposed
+  // (sanitized against their OWN entitlement — a revoked account reads NULL),
+  // so a viewer can render that profile in the owner's look without ever
+  // changing the viewer's global theme.
+  const ui_theme = await sanitizeTheme(r.id, r.ui_theme);
   res.json({
     user: {
       id: r.id, username: r.username, display_name: r.display_name, joined_at: r.joined_at,
       bio: r.bio || null,
       avatar_url: avatarUrlOf(r.avatar_storage_key, r.profile_updated_at), // v61: versioned like every other payload
       premium: prem.active, // v52: Premium badge on View Profile
+      ui_theme,             // v65: owner's live theme (their entitlement decides)
+      ui_custom: ui_theme ? sanitizeThemeCustom(ui_theme, r.ui_theme_custom) : null,
     },
     statistics: {
       battles_played: r.battles || 0, wins: r.wins || 0,
@@ -955,23 +963,42 @@ app.post('/api/friends/requests/:id/decline', requireAuth, ah(async (req, res) =
   res.json({ ok: true });
 }));
 app.delete('/api/friends/:userId', requireAuth, ah(async (req, res) => {
-  const other = String(req.params.userId);
-  // remove the friendship if any…
-  await pool.query(
-    `DELETE FROM friendships WHERE (user_a = LEAST($1::uuid,$2::uuid) AND user_b = GREATEST($1::uuid,$2::uuid))`,
-    [req.user.id, other]
+  const other = String(req.params.userId || '');
+  if (!/^[0-9a-f-]{36}$/i.test(other) || other === req.user.id)
+    throw new HttpError(400, 'Invalid user id.');
+  // v65 — a TRUE two-sided removal: the friendships row is ONE ordered pair,
+  // so deleting it removes the friendship from BOTH lists at once. Pending
+  // requests between the pair are closed too (in either direction), and BOTH
+  // users get a realtime push — open Friends pages refresh live.
+  const { rows: fw } = await pool.query(
+    `DELETE FROM friendships
+      WHERE user_a = LEAST($1::uuid, $2::uuid) AND user_b = GREATEST($1::uuid, $2::uuid)
+      RETURNING user_a`, [req.user.id, other]
   );
-  // …and/or cancel MY outgoing pending request (both are "remove" from the
-  // user's point of view; the other side is untouched).
+  // my outgoing pending request cancels as before…
   const { rows: cancelled } = await pool.query(
     `UPDATE friend_requests SET status='cancelled', responded_at=now()
       WHERE from_user = $1 AND to_user = $2 AND status = 'pending' RETURNING id`,
     [req.user.id, other]
   );
   for (const r of cancelled) await markFriendRequestHandled(r.id, 'cancelled');
-  // v61: the other side's Accept/Decline (or "Friends · Remove") must update live.
-  rtHub.sendToUser(other, { type: 'friends.changed', reason: cancelled.length ? 'cancelled' : 'removed', user_id: req.user.id });
-  res.json({ ok: true });
+  if (!fw.length && !cancelled.length)
+    throw new HttpError(404, 'You are not friends with that user.');
+  // …and the other side's pending request to ME closes as well.
+  await pool.query(
+    `UPDATE friend_requests SET status='cancelled', responded_at=now()
+      WHERE from_user = $2 AND to_user = $1 AND status = 'pending'`,
+    [req.user.id, other]
+  );
+  const { rows: who } = await pool.query('SELECT username, display_name FROM users WHERE id = $1', [other]);
+  // v61 + v65: both sides refresh live (the removed friend learns who removed them).
+  rtHub.sendToUser(other, {
+    type: 'friends.changed', reason: cancelled.length ? 'cancelled' : 'removed_by',
+    user_id: req.user.id,
+    by: { username: req.user.username, display_name: req.user.display_name },
+  });
+  rtHub.sendToUser(req.user.id, { type: 'friends.changed', reason: 'removed', user_id: other });
+  res.json({ ok: true, removed: who[0] ? (who[0].display_name || '@' + who[0].username) : null });
 }));
 
 app.use('/api/rooms', rooms.router);
@@ -1445,6 +1472,9 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
           ALTER TABLE battle_votes ADD CONSTRAINT ck_battle_vote_lane CHECK (lane BETWEEN 1 AND 3);
         END IF;
       END $$`],
+    // v65 — join requests ride the one notification system (host decides).
+    ['v65 notification types: join_request',
+     `ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'join_request'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {
