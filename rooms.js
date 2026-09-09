@@ -41,7 +41,7 @@ const express = require('express');
 const { pool, HttpError, ah, requireAuth, premiumOf, avatarUrlOf,
 } = require('./lib');
 const rt = require('./realtime');
-const { lockChallengeCore } = require('./challenge');
+const { lockChallengeCore, varyPalette } = require('./challenge');
 const { notifyUser } = require('./notify'); // v52: the ONE notifier (rematch requests)
 const { finishBattleIfDue, decideBattleIfDue, voteState, announce } = require('./battle-end');
 
@@ -1692,7 +1692,11 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
         el = res.rows;
       }
       if (!el[0]) throw new HttpError(500, `No elements available for "${cat}".`);
-      picks.push({ category: cat, element_id: el[0].id, value: el[0].name });
+      let val = el[0].name;
+      if (cat === 'color') {
+        val = varyPalette(val).variedString;
+      }
+      picks.push({ category: cat, element_id: el[0].id, value: val });
     }
     await client.query(
       `DELETE FROM battle_challenge_elements WHERE challenge_id IN
