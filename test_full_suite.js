@@ -116,20 +116,98 @@ async function run() {
   console.log('  ✓ Created Free user, Friend user, and entitled Premium user (Flame theme)');
 
   // 3. Test Profile API endpoints & Perspective logic payloads
-  console.log('\nTest 3: Profile API perspectives');
+  console.log('\nTest 3: Profile API perspectives (All combinations)');
+  
+  // Create another Premium user with Glowing theme
+  const regPrem2 = await req('POST', '/api/auth/register', {
+    email: `glowing_${rand}@example.com`,
+    username: `glowuser_${rand}`,
+    display_name: 'Glow User',
+    password: 'Password123!',
+  });
+  assert.strictEqual(regPrem2.status, 201);
+  const glowUserId = regPrem2.data.user.id;
+  const loginGlow = await req('POST', '/api/auth/login', {
+    login: `glowuser_${rand}`,
+    password: 'Password123!',
+  });
+  const glowToken = loginGlow.data.session_token;
+
+  await pool.query(
+    `INSERT INTO premium_subscriptions (user_id, status, plan, source)
+     VALUES ($1, 'active', 'premium', 'test')
+     ON CONFLICT (user_id) WHERE status = 'active' DO NOTHING`,
+    [glowUserId]
+  );
+  await pool.query(
+    `UPDATE users SET ui_theme = 'glowing', ui_theme_custom = $1 WHERE id = $2`,
+    [JSON.stringify({ c1: '#6ed4bf', c2: '#51a8d9' }), glowUserId]
+  );
+
+  // Case 1: Free viewer viewing Premium user (Flame)
   const viewPremAsFree = await req('GET', `/api/users/${premUserId}/profile`, null, freeToken);
   assert.strictEqual(viewPremAsFree.status, 200);
   assert.strictEqual(viewPremAsFree.data.user.premium, true);
   assert.strictEqual(viewPremAsFree.data.user.ui_theme, 'flame');
   assert.strictEqual(viewPremAsFree.data.user.ui_custom.c1.toLowerCase(), '#ff5a00');
   assert.strictEqual(viewPremAsFree.data.user.ui_custom.c2.toLowerCase(), '#ffc300');
-  console.log('  ✓ Free viewing Premium returns owner theme (Flame) and premium=true');
+  console.log('  ✓ Case 1: Free viewer viewing Premium user returns owner theme (Flame) and premium=true');
 
-  const viewFreeAsPrem = await req('GET', `/api/users/${freeUserId}/profile`, null, premToken);
-  assert.strictEqual(viewFreeAsPrem.status, 200);
-  assert.strictEqual(viewFreeAsPrem.data.user.premium, false);
-  assert.strictEqual(viewFreeAsPrem.data.user.ui_theme, null);
-  console.log('  ✓ Premium viewing Free returns premium=false and ui_theme=null (Free/Default)');
+  // Case 2: Premium viewer (Glowing) viewing Free user
+  const viewFreeAsGlow = await req('GET', `/api/users/${freeUserId}/profile`, null, glowToken);
+  assert.strictEqual(viewFreeAsGlow.status, 200);
+  assert.strictEqual(viewFreeAsGlow.data.user.premium, false);
+  assert.strictEqual(viewFreeAsGlow.data.user.ui_theme, null);
+  console.log('  ✓ Case 2: Premium viewer (Glowing) viewing Free user returns premium=false and ui_theme=null');
+
+  // Case 3: Premium viewer (Glowing) viewing Premium user (Flame)
+  const viewFlameAsGlow = await req('GET', `/api/users/${premUserId}/profile`, null, glowToken);
+  assert.strictEqual(viewFlameAsGlow.status, 200);
+  assert.strictEqual(viewFlameAsGlow.data.user.premium, true);
+  assert.strictEqual(viewFlameAsGlow.data.user.ui_theme, 'flame');
+  console.log('  ✓ Case 3: Premium viewer (Glowing) viewing Premium user (Flame) returns owner theme (Flame)');
+
+  // Case 4: Own profile view as Free user
+  const ownFree = await req('GET', `/api/users/${freeUserId}/profile`, null, freeToken);
+  assert.strictEqual(ownFree.status, 200);
+  assert.strictEqual(ownFree.data.user.premium, false);
+  assert.strictEqual(ownFree.data.user.ui_theme, null);
+  console.log('  ✓ Case 4: Own profile view as Free user returns premium=false and ui_theme=null');
+
+  // Case 5: Own profile view as Premium user (Glowing)
+  const ownGlow = await req('GET', `/api/users/${glowUserId}/profile`, null, glowToken);
+  assert.strictEqual(ownGlow.status, 200);
+  assert.strictEqual(ownGlow.data.user.premium, true);
+  assert.strictEqual(ownGlow.data.user.ui_theme, 'glowing');
+  console.log('  ✓ Case 5: Own profile view as Premium user returns owner theme (Glowing)');
+
+  // Case 6: Dynamic theme switch (Flame -> Cloud -> Graffiti -> Pixel -> Magazine -> Glitch)
+  const allThemesToTest = ['cloud', 'graffiti', 'pixel', 'magazine', 'glitch'];
+  for (const th of allThemesToTest) {
+    const putTh = await req('PUT', '/api/premium/theme', { theme: th }, premToken);
+    assert.strictEqual(putTh.status, 200);
+    const viewUpdated = await req('GET', `/api/users/${premUserId}/profile`, null, freeToken);
+    assert.strictEqual(viewUpdated.data.user.ui_theme, th);
+    assert.strictEqual(viewUpdated.data.user.premium, true);
+  }
+  console.log('  ✓ Case 6: Dynamic theme changes on owner immediately reflect to viewers across all themes');
+
+  // Case 7: Revoked Premium account fallback to null theme
+  const revokeRes = await req('POST', '/api/premium/test-revoke', {}, premToken);
+  assert.strictEqual(revokeRes.status, 200);
+  const viewRevoked = await req('GET', `/api/users/${premUserId}/profile`, null, freeToken);
+  assert.strictEqual(viewRevoked.data.user.premium, false);
+  assert.strictEqual(viewRevoked.data.user.ui_theme, null);
+  console.log('  ✓ Case 7: Revoked subscription immediately sanitizes ui_theme to null');
+
+  // Re-activate Premium for test 4-7
+  await pool.query(
+    `INSERT INTO premium_subscriptions (user_id, status, plan, source)
+     VALUES ($1, 'active', 'premium', 'test')
+     ON CONFLICT (user_id) WHERE status = 'active' DO NOTHING`,
+    [premUserId]
+  );
+  await pool.query(`UPDATE users SET ui_theme = 'flame' WHERE id = $1`, [premUserId]);
 
   // 4. Test Randomizer Challenge generation and Host-Only Re-roll Permissions
   console.log('\nTest 4: Randomizer generation & Host-Only re-roll permissions');

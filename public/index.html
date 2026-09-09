@@ -841,76 +841,96 @@ try {
 
   /* Free / Default Profile Theme */
   .prof-modal-card[data-prof-theme="default"], .prof-modal-card:not([data-prof-theme]) {
-    background-color:var(--panel, #16121e) !important;
+    background-color:#161022 !important;
     background-image:none !important;
-    border:1px solid var(--line, #382d49) !important;
+    border:1px solid #2c2142 !important;
     border-radius:14px !important;
     box-shadow:0 24px 70px rgba(0,0,0,.55) !important;
     transform:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] #pm-title, .prof-modal-card:not([data-prof-theme]) #pm-title {
-    color:var(--text, #f0edf6) !important;
+    color:#f4f0fa !important;
     text-shadow:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-modal-ava, .prof-modal-card:not([data-prof-theme]) .prof-modal-ava {
-    border:2px solid var(--pink, #ff3cac) !important;
+    border:2px solid #ff3cac !important;
     box-shadow:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-modal-ava-fallback, .prof-modal-card:not([data-prof-theme]) .prof-modal-ava-fallback {
-    background:linear-gradient(135deg, var(--pink, #ff3cac), var(--purple, #7b2cff)) !important;
+    background:linear-gradient(135deg, #ff3cac, #7b2cff) !important;
     border:none !important;
     box-shadow:none !important;
     color:#ffffff !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-modal-display-name, .prof-modal-card:not([data-prof-theme]) .prof-modal-display-name {
-    color:var(--text, #f0edf6) !important;
+    color:#f4f0fa !important;
     text-shadow:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-modal-handle, .prof-modal-card:not([data-prof-theme]) .prof-modal-handle {
-    color:var(--muted, #a29ba8) !important;
+    color:#9b8fb5 !important;
     text-shadow:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-modal-bio, .prof-modal-card:not([data-prof-theme]) .prof-modal-bio {
-    color:var(--muted, #a29ba8) !important;
+    color:#9b8fb5 !important;
     text-shadow:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-stats-row .prof-stat-cell, .prof-modal-card:not([data-prof-theme]) .prof-stats-row .prof-stat-cell {
-    background:var(--surface, #1e1929) !important;
-    border:1px solid var(--line, #382d49) !important;
+    background:#0d0917 !important;
+    border:1px solid #2c2142 !important;
     border-radius:10px !important;
     box-shadow:none !important;
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-stats-row .prof-stat-cell b, .prof-modal-card:not([data-prof-theme]) .prof-stats-row .prof-stat-cell b {
-    color:var(--text, #f0edf6) !important;
+    color:#f4f0fa !important;
     text-shadow:none !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-stats-row .prof-stat-cell span, .prof-modal-card:not([data-prof-theme]) .prof-stats-row .prof-stat-cell span {
-    color:var(--muted, #a29ba8) !important;
+    color:#9b8fb5 !important;
   }
   .prof-modal-card[data-prof-theme="default"] .prof-modal-joined, .prof-modal-card:not([data-prof-theme]) .prof-modal-joined {
-    color:var(--muted, #a29ba8) !important;
+    color:#9b8fb5 !important;
     text-shadow:none !important;
   }
-  .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-close, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-close {
-    border:1px solid var(--btn-line, #382d49) !important;
-    color:var(--text, #f0edf6) !important;
-    background:var(--surface, #1e1929) !important;
+  .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-close, .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-friend-decline, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-close, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-friend-decline {
+    border:1px solid #2c2142 !important;
+    color:#f4f0fa !important;
+    background:#0d0917 !important;
     box-shadow:none !important;
     border-radius:10px !important;
   }
   .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-friend, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-friend {
     border:none !important;
     color:#fff !important;
-    background:linear-gradient(135deg, var(--pink, #ff3cac), var(--purple, #7b2cff)) !important;
+    background:linear-gradient(135deg, #ff3cac, #7b2cff) !important;
     box-shadow:none !important;
     border-radius:10px !important;
   }
   .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-friend.is-remove, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-friend.is-remove {
-    border:1px solid var(--pink, #ff3cac) !important;
-    color:var(--pink, #ff3cac) !important;
+    border:1px solid #ff3cac !important;
+    color:#ff3cac !important;
     background:transparent !important;
+  }
+  .prof-modal-card .prem-chip {
+    background:linear-gradient(90deg, var(--pm-c1, #ff3cac), var(--pm-c2, #7b2cff)) !important;
+    border:1px solid var(--pm-c1, #ff3cac) !important;
+    color:#ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prem-chip {
+    background:#000000 !important;
+    border:1px solid #000000 !important;
+    color:#ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prem-chip {
+    background:#23211d !important;
+    border:1px solid #23211d !important;
+    color:#ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prem-chip {
+    background:linear-gradient(90deg, #3e8ee0, #6fb6f2) !important;
+    border:1px solid #3e8ee0 !important;
+    color:#ffffff !important;
   }
 
   /* 1. FLAME THEME (Document.jpg reference - untouched exact styling) */
@@ -7644,7 +7664,12 @@ async function openProfile(userId) {
     pmCard.setAttribute('data-prof-theme', activeTheme);
     if (isTargetPremium && u.ui_custom) {
       if (u.ui_custom.c1) pmCard.style.setProperty('--pm-c1', u.ui_custom.c1);
+      else pmCard.style.removeProperty('--pm-c1');
       if (u.ui_custom.c2) pmCard.style.setProperty('--pm-c2', u.ui_custom.c2);
+      else pmCard.style.removeProperty('--pm-c2');
+    } else {
+      pmCard.style.removeProperty('--pm-c1');
+      pmCard.style.removeProperty('--pm-c2');
     }
   }
   if (premBadge) {
