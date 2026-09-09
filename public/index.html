@@ -8127,11 +8127,13 @@ async function openProfile(userId) {
   // active theme and premium entitlement (never the viewer's).
   const isTargetPremium = !!(u && u.premium);
   let activeTheme = 'default';
-  if (isTargetPremium && u.ui_theme) {
-    const rawTh = String(u.ui_theme).toLowerCase();
+  if (isTargetPremium) {
+    const rawTh = String(u.ui_theme || 'flame').toLowerCase();
     const VALID_THEMES = ['flame', 'cloud', 'glowing', 'glitch', 'graffiti', 'magazine', 'pixel'];
     if (VALID_THEMES.includes(rawTh)) {
       activeTheme = rawTh;
+    } else {
+      activeTheme = 'flame';
     }
   }
   if (pmCard) {
@@ -8235,21 +8237,24 @@ function roomMenuFor(seat) {
   closeRoomMenu();
   const uid = seat.dataset.uid, uname = seat.dataset.username;
   if (!uid || !me || !lastRoomData) return;
-  if (!lastRoomData.host || lastRoomData.host.user_id !== me.id) return;   // owner only
-  if (uid === me.id || seat.dataset.ishost === '1') return;                // not self / not the owner
+  const isHost = !!(lastRoomData.host && lastRoomData.host.user_id === me.id);
+  const isSelf = (uid === me.id);
+  const isTargetHost = seat.dataset.ishost === '1';
+  const canKick = isHost && !isSelf && !isTargetHost;
+
   const m = document.createElement('div');
   m.className = 'room-ctxmenu';
   m.style.left = Math.min(window.innerWidth - 210, Math.max(18, seat.getBoundingClientRect().left)) + 'px';
   m.style.top = Math.max(12, seat.getBoundingClientRect().top - 8) + 'px';
   m.innerHTML =
     '<button type="button" class="util-btn" data-act="profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.5-3.6 3.7-5.6 7.5-5.6s7 2 7.5 5.6"/></svg> View Profile</button>' +
-    '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Remove Player</button>';
+    (canKick ? '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Remove Player</button>' : '');
   m.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-act]');
     if (!b) return;
     closeRoomMenu();
     if (b.dataset.act === 'profile') openProfile(uid);
-    else {
+    else if (b.dataset.act === 'kick') {
       promptKickPlayer(uid, uname);
     }
   });
@@ -8274,7 +8279,10 @@ function attachSeatModeration(container) {
     if (ctxLongFired) { e.preventDefault(); e.stopPropagation(); ctxLongFired = false; return; }
     if (e.target.closest('.friend-add, .friend-chip, .friend-slot, button, a')) return;
     const s = e.target.closest('.seat[data-uid], .tt-seat[data-uid]');
-    if (s) handleSeatSelect(s);
+    if (s) {
+      handleSeatSelect(s);
+      roomMenuFor(s);
+    }
   });
   container.addEventListener('dblclick', (e) => {
     if (e.target.closest('.friend-add, .friend-chip, .friend-slot, button, a')) return;
@@ -8563,6 +8571,11 @@ $('#view-friends').addEventListener('click', async (e) => {
     return;
   }
   const inv = e.target.closest('[data-fr-invite]'); if (inv) { openInviteModal(inv.dataset.frInvite, inv.dataset.name); return; }
+  const row = e.target.closest('.fr-row[data-uid]');
+  if (row && !e.target.closest('button, a')) {
+    openProfile(row.dataset.uid);
+    return;
+  }
 });
 
 // invite modal — choose one of my rooms (host, lobby, free seat)
