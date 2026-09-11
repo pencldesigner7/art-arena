@@ -26,7 +26,7 @@
 const express = require('express');
 const { pool, HttpError, ah, requireAuth, avatarUrlOf } = require('./lib');
 const rt = require('./realtime');
-const { createMatchRoom, activeRoomOf } = require('./rooms'); // v44: shared one-active-seat rule
+const { createMatchRoom, activeRoomOf, pickSeatForJoin, newRoomCode } = require('./rooms'); // v44: shared one-active-seat rule
 
 const router = express.Router();
 router.use(requireAuth);
@@ -145,11 +145,14 @@ function claimable(userId) {
 // ---------------------------------------------------------------------------
 // POST /enter — join the queue; if a partner exists, the match is made
 // inside this request (response: { matched:true, room, opponent }).
+// Supports mode: '1v1' (default) or '3v3' (team battle).
 // ---------------------------------------------------------------------------
 router.post('/enter', ah(async (req, res) => {
   const u = req.user;
   const inRoom = await activeRoomOf(u.id);
   if (inRoom) throw new HttpError(409, 'You are already in a room — leave it before matchmaking.');
+
+  const mode = (req.body && req.body.mode === '3v3') ? '3v3' : '1v1';
 
   // Already matched (missed the WS event / refreshed the page)? Re-claim.
   // v48 fix: the reclaim is only valid while the room still exists — /status
@@ -164,7 +167,7 @@ router.post('/enter', ah(async (req, res) => {
       `SELECT status FROM battle_rooms WHERE code = $1`, [prev.room_code]);
     if (!rows[0] || rows[0].status === 'ended') { recent.delete(u.id); prev = null; }
   }
-  if (prev) return res.json({ matched: true, room: prev.room_code, opponent: prev.opponent, reclaimed: true });
+  if (prev) return res.json({ matched: true, room: prev.room_code, opponent: prev.opponent, reclaimed: true, mode });
 
   if (await queuedRow(u.id))
     throw new HttpError(409, 'You are already searching for an opponent.');
@@ -174,10 +177,118 @@ router.post('/enter', ah(async (req, res) => {
   let queuedAt = null; // v42: the queue instant — the deadline anchor
   try {
     await client.query('BEGIN');
+
+    if (mode === '3v3') {
+      // 3v3 Matchmaking:
+      // 1. First, look for an existing open public 3v3 room with free seats in lobby
+      const { rows: open3v3 } = await client.query(
+        `SELECT r.id, r.code, r.battle_mode, r.max_players,
+                (SELECT count(*)::int FROM room_participants rp WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')) AS player_count
+           FROM battle_rooms r
+          WHERE r.battle_mode = '3v3' AND r.visibility = 'public' AND r.status = 'lobby'
+            AND r.deleted_at IS NULL
+          ORDER BY r.created_at ASC
+          FOR UPDATE SKIP LOCKED`
+      );
+      const candidate = open3v3.find((r) => r.player_count < 6);
+      if (candidate) {
+        const seat = await pickSeatForJoin(client, candidate, u.id);
+        if (seat !== null) {
+          const { rows: ex } = await client.query(
+            `SELECT state FROM room_participants WHERE room_id = $1 AND user_id = $2`,
+            [candidate.id, u.id]
+          );
+          if (ex[0]) {
+            await client.query(
+              `UPDATE room_participants SET state = 'waiting', left_at = NULL, seat = $3
+                WHERE room_id = $1 AND user_id = $2`,
+              [candidate.id, u.id, seat]
+            );
+          } else {
+            await client.query(
+              `INSERT INTO room_participants (room_id, user_id, state, seat)
+               VALUES ($1, $2, 'waiting', $3)`,
+              [candidate.id, u.id, seat]
+            );
+          }
+          rt.emitRoom(candidate.code, { action: 'joined', user_id: u.id, username: u.username, display_name: u.display_name, seat });
+          rt.broadcastRoomsList('joined');
+          await client.query('COMMIT');
+          return res.json({ matched: true, room: candidate.code, mode: '3v3' });
+        }
+      }
+
+      // 2. If no open room, look for other 3v3 searchers in queue or create a new public 3v3 room
+      const { rows: queued3v3 } = await client.query(
+        `SELECT user_id FROM matchmaking_queue
+          WHERE status = 'queued' AND user_id <> $1 AND (prefs->>'battle_mode') = '3v3'
+          ORDER BY queued_at, id
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED`, [u.id]
+      );
+      const other3v3Id = queued3v3[0] && queued3v3[0].user_id;
+      let other3v3User = null;
+      if (other3v3Id) {
+        const otherRoom = await activeRoomOf(other3v3Id, client);
+        if (otherRoom) {
+          await client.query(
+            `UPDATE matchmaking_queue SET status = 'cancelled' WHERE user_id = $1 AND status = 'queued'`,
+            [other3v3Id]
+          );
+        } else {
+          other3v3User = await userBrief(other3v3Id);
+        }
+      }
+
+      let code3v3, room3v3Id;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        try {
+          code3v3 = newRoomCode();
+          const { rows } = await client.query(
+            `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
+                                       time_limit_seconds, result_method, battle_mode, auto_start,
+                                       randomizer_config)
+             VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
+                     '{"categories":["character","environment","object","style"]}'::jsonb)
+             RETURNING id`,
+            [code3v3, u.id]
+          );
+          room3v3Id = rows[0].id;
+          break;
+        } catch (e) {
+          if (e.code !== '23505') throw e;
+        }
+      }
+
+      await client.query(
+        `INSERT INTO room_participants (room_id, user_id, state, seat)
+         VALUES ($1, $2, 'waiting', 1)`,
+        [room3v3Id, u.id]
+      );
+
+      if (other3v3User) {
+        await client.query(
+          `INSERT INTO room_participants (room_id, user_id, state, seat)
+           VALUES ($1, $2, 'waiting', 4)`,
+          [room3v3Id, other3v3User.id]
+        );
+        await client.query(
+          `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
+            WHERE user_id = $1 AND status = 'queued'`, [other3v3User.id, room3v3Id]
+        );
+        rt.sendToUser(other3v3User.id, { type: 'matchmaking', action: 'found', room: code3v3, mode: '3v3' });
+      }
+
+      rt.broadcastRoomsList('created');
+      await client.query('COMMIT');
+      return res.json({ matched: true, room: code3v3, mode: '3v3' });
+    }
+
+    // 1v1 Matchmaking (default)
     await client.query(
       `INSERT INTO matchmaking_queue (user_id, prefs)
        VALUES ($1, $2::jsonb)`,
-      [u.id, JSON.stringify({ competition_type: 'casual', format: 'one_on_one', time_limit_seconds: 1200 })]
+      [u.id, JSON.stringify({ competition_type: 'casual', format: 'one_on_one', battle_mode: '1v1', time_limit_seconds: 1200 })]
     );
     // v42: the deadline anchor — the client countdown and the server expiry
     // are BOTH derived from this exact queued_at instant (+ 180 s).
@@ -196,14 +307,15 @@ router.post('/enter', ah(async (req, res) => {
   if (m) {
     remember(m.a, m.b, m.code);
     // Live notification over the same real-time hub the rooms use.
-    rt.sendToUser(m.a.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.b });
-    rt.sendToUser(m.b.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.a });
+    rt.sendToUser(m.a.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.b, mode: '1v1' });
+    rt.sendToUser(m.b.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.a, mode: '1v1' });
     const opponent = m.a.id === u.id ? m.b : m.a;
-    return res.json({ matched: true, room: m.code, opponent });
+    return res.json({ matched: true, room: m.code, opponent, mode: '1v1' });
   }
   res.json({
     matched: false,
     in_queue: true,
+    mode: '1v1',
     position: await queuePosition(u.id),
     queued_at: queuedAt ? queuedAt.toISOString() : null,          // v42: anchor
     deadline_at: queuedAt

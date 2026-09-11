@@ -769,6 +769,8 @@ app.post('/api/premium/test-activate', requireAuth, ah(async (req, res) => {
     await c.query(
       `INSERT INTO premium_subscriptions (user_id, plan, status, source)
        VALUES ($1, 'premium', 'active', 'test')`, [req.user.id]);
+    await c.query(
+      `UPDATE users SET ui_theme = COALESCE(ui_theme, 'flame') WHERE id = $1`, [req.user.id]);
     await c.query('COMMIT');
   } catch (e) { await c.query('ROLLBACK').catch(() => {}); throw e; } finally { c.release(); }
   if (!wasActive) {

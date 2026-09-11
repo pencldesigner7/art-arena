@@ -191,10 +191,11 @@ async function premiumOf(userId) {
 // safely falls back to the free Light/Dark system (server truth, never a
 // client-side check).
 async function sanitizeTheme(userId, theme) {
-  if (!theme || theme === 'default') return null;
-  if (!PREMIUM_THEMES.some((t) => t.key === theme)) return null; // unknown key → fallback
   const p = await premiumOf(userId);
-  return p.active ? theme : null;
+  if (!p.active) return null;
+  if (!theme || theme === 'default') return 'flame';
+  if (!PREMIUM_THEMES.some((t) => t.key === theme)) return 'flame';
+  return theme;
 }
 
 // v61: THE ONE avatar URL builder. Every payload (me, public profile,
@@ -231,7 +232,9 @@ async function fullUser(u) {
   // v52: entitlement + sanitized theme travel with the session user — the
   // badge, theme application and re-roll gating all read THIS (server truth).
   const premium = { active: !!p.premium_plan, plan: p.premium_plan || null, source: p.premium_source || null, started_at: p.premium_started_at || null };
-  const ui_theme = (p.ui_theme && p.ui_theme !== 'default' && PREMIUM_THEMES.some((t) => t.key === p.ui_theme) && premium.active) ? p.ui_theme : null;
+  const ui_theme = premium.active
+    ? ((p.ui_theme && p.ui_theme !== 'default' && PREMIUM_THEMES.some((t) => t.key === p.ui_theme)) ? p.ui_theme : 'flame')
+    : null;
   const ui_custom = ui_theme ? sanitizeThemeCustom(ui_theme, p.ui_theme_custom) : null;
   return {
     user: authUserPayload(u),

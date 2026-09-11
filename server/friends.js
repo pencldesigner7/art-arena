@@ -121,6 +121,51 @@ async function inviteToRoom(fromUser, toUserId, code, extra) {
   return room;
 }
 
+router.get('/friends/:userId/availability', ah(async (req, res) => {
+  const to = String(req.params.userId || '');
+  if (!/^[0-9a-f-]{36}$/i.test(to)) throw new HttpError(400, 'Invalid user id.');
+  if (!(await areFriends(req.user.id, to))) throw new HttpError(403, 'You can only check availability for friends.');
+
+  const { rows: uRows } = await pool.query(
+    `SELECT u.id, u.username, u.display_name,
+            (SELECT r.code FROM battle_rooms r
+              WHERE r.deleted_at IS NULL AND r.status IN ('lobby','starting','in_battle')
+                AND r.id IN (SELECT room_id FROM room_participants
+                              WHERE user_id = u.id AND state IN ('waiting','ready'))
+              ORDER BY r.created_at DESC LIMIT 1) AS room_code,
+            (SELECT r.visibility FROM battle_rooms r
+              WHERE r.deleted_at IS NULL AND r.status IN ('lobby','starting','in_battle')
+                AND r.id IN (SELECT room_id FROM room_participants
+                              WHERE user_id = u.id AND state IN ('waiting','ready'))
+              ORDER BY r.created_at DESC LIMIT 1) AS room_visibility,
+            (SELECT r.spectator_allowed FROM battle_rooms r
+              WHERE r.deleted_at IS NULL AND r.status IN ('lobby','starting','in_battle')
+                AND r.id IN (SELECT room_id FROM room_participants
+                              WHERE user_id = u.id AND state IN ('waiting','ready'))
+              ORDER BY r.created_at DESC LIMIT 1) AS spectator_allowed
+       FROM users u WHERE u.id = $1 AND u.account_status = 'active'`,
+    [to]
+  );
+  const u = uRows[0];
+  if (!u) throw new HttpError(404, 'User not found.');
+
+  const isOnline = rt.isUserOnline(to);
+  const inRoom = !!u.room_code;
+  const available = isOnline && !inRoom;
+
+  res.json({
+    id: u.id,
+    username: u.username,
+    display_name: u.display_name,
+    online: isOnline,
+    in_room: inRoom,
+    room_code: u.room_code || null,
+    room_visibility: u.room_visibility || null,
+    spectator_allowed: u.spectator_allowed !== false,
+    available,
+  });
+}));
+
 router.post('/friends/:userId/invite', ah(async (req, res) => {
   const to = String(req.params.userId || '');
   if (!/^[0-9a-f-]{36}$/i.test(to)) throw new HttpError(400, 'Invalid user id.');
@@ -187,10 +232,20 @@ router.put('/teams/draft', ah(async (req, res) => {
   if (ids.length > TEAM_SIZE - 1) throw new HttpError(400, `A 3v3 team is you plus ${TEAM_SIZE - 1} players.`);
   for (const id of ids) {
     if (!(await areFriends(req.user.id, id))) throw new HttpError(403, 'Only your friends can be added to a team here — random players join through open rooms.');
-    // v65: Add to My Side needs the friend ONLINE — the button is only
-    // enabled then, and this server check is the real gate (an offline
-    // friend can never be drafted through a crafted request).
-    if (!rt.isUserOnline(id)) throw new HttpError(409, 'That friend is offline — invite them when they are online to add them to your side.');
+    // v65: Add to My Side needs the friend ONLINE and not already in another room
+    if (!rt.isUserOnline(id)) {
+      const u = (await pool.query('SELECT username FROM users WHERE id = $1', [id])).rows[0];
+      throw new HttpError(409, `@${u ? u.username : 'Friend'} is offline — invite them when they are online to add them to your side.`);
+    }
+    const { rows: frSeat } = await pool.query(
+      `SELECT u.username, r.code FROM users u
+         JOIN room_participants rp ON rp.user_id = u.id
+         JOIN battle_rooms r ON r.id = rp.room_id
+        WHERE u.id = $1 AND rp.state IN ('waiting','ready') AND r.deleted_at IS NULL AND r.status IN ('lobby','starting','in_battle')
+        LIMIT 1`, [id]);
+    if (frSeat[0]) {
+      throw new HttpError(409, `@${frSeat[0].username} is already in room #${frSeat[0].code} — they need to leave it before you can add them to your side.`);
+    }
   }
   const name = b.name === undefined ? null : String(b.name || '').trim().slice(0, 40) || null;
   const client = await pool.connect();

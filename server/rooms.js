@@ -41,7 +41,7 @@ const express = require('express');
 const { pool, HttpError, ah, requireAuth, premiumOf, avatarUrlOf,
 } = require('./lib');
 const rt = require('./realtime');
-const { lockChallengeCore } = require('./challenge');
+const { lockChallengeCore, varyPalette } = require('./challenge');
 const { notifyUser } = require('./notify'); // v52: the ONE notifier (rematch requests)
 const { finishBattleIfDue, decideBattleIfDue, voteState, announce } = require('./battle-end');
 
@@ -347,9 +347,10 @@ async function roomPayload(code, me) {
   // client hides the button entirely for EVERYONE (spec).
   let reroll = null;
   if (battle && (battle.status === 'challenge_locked' || battle.status === 'countdown' || battle.status === 'active')) {
+    const isRoomHost = room.host_id === me;
     const prem = me ? await premiumOf(me) : { active: false };
     const reveal = battle.status === 'challenge_locked';
-    reroll = { phase: reveal ? 'reveal' : 'live', allowed: !!(reveal && prem.active) };
+    reroll = { phase: reveal ? 'reveal' : 'live', allowed: !!(reveal && prem.active && isRoomHost) };
   }
   return {
     code: room.code,
@@ -1652,6 +1653,7 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
   // refuses — free and premium alike draw with the locked challenge.
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
+  requireHost(room, req.user.id);
   const prem = await premiumOf(req.user.id);
   if (!prem.active)
     throw new HttpError(403, 'Re-roll is an Art Arena Premium feature — upgrade to re-roll the challenge.');
@@ -1659,10 +1661,6 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
   if (!battle) throw new HttpError(409, 'There is no challenge to re-roll.');
   if (battle.status !== 'challenge_locked')
     throw new HttpError(409, 'The match has started — the challenge is locked for this battle.');
-  const { rows: part } = await pool.query(
-    `SELECT 1 FROM battle_participants WHERE battle_id = $1 AND user_id = $2`,
-    [battle.id, req.user.id]);
-  if (!part[0]) throw new HttpError(403, 'Only the artists of this battle can re-roll it.');
 
   const client = await pool.connect();
   try {
@@ -1674,16 +1672,31 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
          FROM battle_challenge_elements bce
          JOIN battle_challenges bc ON bc.id = bce.challenge_id
         WHERE bc.battle_id = $1`, [battle.id]);
-    if (!prev.length) throw new HttpError(409, 'No challenge to re-roll.');
+    const cfg = room.randomizer_config || {};
+    const configuredCats = Array.isArray(cfg.categories) && cfg.categories.length
+      ? cfg.categories
+      : ['character', 'environment', 'object', 'style'];
+    const catsToUse = prev.length ? prev.map((r) => r.category) : configuredCats;
     const prevIds = prev.map((r) => r.element_id);
     const picks = [];
-    for (const cat of prev.map((r) => r.category)) {
-      const { rows: el } = await client.query(
+    for (const cat of catsToUse) {
+      let { rows: el } = await client.query(
         `SELECT id, name FROM randomizer_elements
           WHERE category = $1 AND status = 'active' AND id <> ALL($2::uuid[])
           ORDER BY random() LIMIT 1`, [cat, prevIds]);
+      if (!el[0]) {
+        const res = await client.query(
+          `SELECT id, name FROM randomizer_elements
+            WHERE category = $1 AND status = 'active'
+            ORDER BY random() LIMIT 1`, [cat]);
+        el = res.rows;
+      }
       if (!el[0]) throw new HttpError(500, `No elements available for "${cat}".`);
-      picks.push({ category: cat, element_id: el[0].id, value: el[0].name });
+      let val = el[0].name;
+      if (cat === 'color') {
+        val = varyPalette(val).variedString;
+      }
+      picks.push({ category: cat, element_id: el[0].id, value: val });
     }
     await client.query(
       `DELETE FROM battle_challenge_elements WHERE challenge_id IN
@@ -1711,6 +1724,81 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
     client.release();
   }
   res.json(await roomPayload(req.params.code, req.user.id));
+}));
+
+// ---------------------------------------------------------------------------
+// v65: MOVE / REARRANGE PLAYER SLOTS — host only (lobby phase).
+// Moves or swaps a seated player between team slots (1..max_players).
+// ---------------------------------------------------------------------------
+router.post('/:code/move-player', ah(async (req, res) => {
+  const room = await roomByCode(req.params.code);
+  if (!room) throw new HttpError(404, 'Room not found.');
+  requireHost(room, req.user.id);
+  if (room.status !== 'lobby') throw new HttpError(409, 'Cannot rearrange players once the battle has started.');
+
+  const b = req.body || {};
+  const targetUid = b.user_id ? String(b.user_id).trim() : null;
+  const fromSeat = Number(b.from_seat);
+  const toSeat = Number(b.to_seat);
+
+  if (!Number.isInteger(toSeat) || toSeat < 1 || toSeat > room.max_players) {
+    throw new HttpError(400, `Target slot must be between 1 and ${room.max_players}.`);
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: parts } = await client.query(
+      `SELECT user_id, seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready') FOR UPDATE`,
+      [room.id]
+    );
+
+    let pFrom = null;
+    if (targetUid) {
+      pFrom = parts.find((p) => p.user_id === targetUid);
+    } else if (Number.isInteger(fromSeat)) {
+      pFrom = parts.find((p) => p.seat === fromSeat);
+    }
+    if (!pFrom) throw new HttpError(404, 'Player not found in this room.');
+    if (pFrom.seat === toSeat) {
+      await client.query('COMMIT');
+      return res.json(await roomPayload(room.code, req.user.id));
+    }
+
+    const pTo = parts.find((p) => p.seat === toSeat);
+
+    if (pTo) {
+      // Swap seats using temporary negative seat to avoid conflict
+      await client.query(
+        `UPDATE room_participants SET seat = -1 WHERE room_id = $1 AND user_id = $2`,
+        [room.id, pFrom.user_id]
+      );
+      await client.query(
+        `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`,
+        [room.id, pTo.user_id, pFrom.seat]
+      );
+      await client.query(
+        `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`,
+        [room.id, pFrom.user_id, toSeat]
+      );
+    } else {
+      // Direct move into empty slot
+      await client.query(
+        `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`,
+        [room.id, pFrom.user_id, toSeat]
+      );
+    }
+
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+
+  rt.emitRoom(room.code, { action: 'slots_rearranged', by: req.user.username });
+  res.json(await roomPayload(room.code, req.user.id));
 }));
 
 
@@ -2236,4 +2324,4 @@ async function canViewRoom(code, user) {
     : { ok: false, reason: 'You do not have access to that room.' };
 }
 
-module.exports = { router, canViewRoom, roomByCode, roomPayload, battleChallengePayload, createMatchRoom, createRoomForUser, startCountdownSweeper, startRematchSweeper, activeRoomOf };
+module.exports = { router, canViewRoom, roomByCode, roomPayload, battleChallengePayload, createMatchRoom, createRoomForUser, startCountdownSweeper, startRematchSweeper, activeRoomOf, pickSeatForJoin, newRoomCode };
