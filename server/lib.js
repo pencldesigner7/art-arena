@@ -155,7 +155,6 @@ const PREMIUM_THEMES = [
   { key: 'cloud',    name: 'Cloud',           hint: 'Blue sky · drifting clouds · calm and smooth', premium: true,  customizable: false },
   { key: 'glitch',   name: 'Glitch',          hint: 'Neon RGB · occasional glitch pulses', premium: true,  customizable: true, c1: '#00F0FF', c2: '#FF2BD1' },
   { key: 'graffiti', name: 'Graffiti',        hint: 'Black & white street art · raw wall', premium: true,  customizable: false },
-  { key: 'stitch',   name: 'Stitch',          hint: 'Embroidery · stitched borders · handcrafted motion', premium: true,  customizable: false },
   { key: 'glowing',  name: 'Glowing',         hint: 'Green & blue glow · gradient buttons · luminous accents', premium: true,  customizable: true, c1: '#6ED4BF', c2: '#51A8D9' },
   { key: 'magazine', name: 'Magazine Cutout', hint: 'Paper collage · cutout layers · editorial', premium: true,  customizable: false },
   { key: 'pixel',    name: 'Pixelated',        hint: 'Retro pixel art · dithered sky · chunky arcade UI', premium: true, customizable: false, c1: '#E337C4', c2: '#77D5DF' },
@@ -190,12 +189,46 @@ async function premiumOf(userId) {
 // A stored theme is only honored while entitled — a revoked Premium account
 // safely falls back to the free Light/Dark system (server truth, never a
 // client-side check).
+// v67 (theme-state safety): Premium is an ACCOUNT STATE, never an implicit
+// theme. An unset, invalid or retired selection (e.g. the removed 'stitch'
+// theme) resolves to null → the artist's own Light/Dark choice applies.
+// Nothing ever falls back to 'flame' automatically — Flame is applied only
+// when the artist explicitly chose it.
 async function sanitizeTheme(userId, theme) {
   const p = await premiumOf(userId);
   if (!p.active) return null;
-  if (!theme || theme === 'default') return 'flame';
-  if (!PREMIUM_THEMES.some((t) => t.key === theme)) return 'flame';
+  if (!theme || theme === 'default') return null;
+  if (!PREMIUM_THEMES.some((t) => t.key === theme)) return null;
   return theme;
+}
+
+// v67 (per-theme customization persistence): users.ui_theme_custom holds a
+// MAP { themeKey: {c1,c2,dir} } so every theme keeps its own saved colours
+// across theme switches, navigation, reloads and profile opens. Legacy rows
+// stored ONE flat {c1,c2,dir} object for whatever theme was active at the
+// time — such a row is read as belonging to the user's current ui_theme.
+// Unknown keys and invalid values never survive the read (sanitize is the
+// single gate), so a removed theme's leftovers simply disappear.
+function themeCustomMap(row) {
+  const raw = row && row.ui_theme_custom;
+  if (!raw || typeof raw !== 'object') return {};
+  let map = raw;
+  if (Object.prototype.hasOwnProperty.call(raw, 'c1') ||
+      Object.prototype.hasOwnProperty.call(raw, 'c2') ||
+      Object.prototype.hasOwnProperty.call(raw, 'dir')) {
+    map = {};
+    map[(row && row.ui_theme) || 'flame'] = raw; // legacy flat object
+  }
+  const out = {};
+  for (const [key, val] of Object.entries(map)) {
+    const clean = sanitizeThemeCustom(key, val);
+    if (clean) out[key] = clean;
+  }
+  return out;
+}
+function customForTheme(row, themeKey) {
+  if (!themeKey) return null;
+  return themeCustomMap(row)[themeKey] || null;
 }
 
 // v61: THE ONE avatar URL builder. Every payload (me, public profile,
@@ -232,10 +265,13 @@ async function fullUser(u) {
   // v52: entitlement + sanitized theme travel with the session user — the
   // badge, theme application and re-roll gating all read THIS (server truth).
   const premium = { active: !!p.premium_plan, plan: p.premium_plan || null, source: p.premium_source || null, started_at: p.premium_started_at || null };
+  // v67: an EXPLICIT, valid, entitled selection only — never an automatic
+  // 'flame' (Premium is an account state, not a theme). Custom colours are
+  // read per-theme from the stored map.
   const ui_theme = premium.active
-    ? ((p.ui_theme && p.ui_theme !== 'default' && PREMIUM_THEMES.some((t) => t.key === p.ui_theme)) ? p.ui_theme : 'flame')
+    ? ((p.ui_theme && p.ui_theme !== 'default' && PREMIUM_THEMES.some((t) => t.key === p.ui_theme)) ? p.ui_theme : null)
     : null;
-  const ui_custom = ui_theme ? sanitizeThemeCustom(ui_theme, p.ui_theme_custom) : null;
+  const ui_custom = ui_theme ? customForTheme(p, ui_theme) : null;
   return {
     user: authUserPayload(u),
     premium,
@@ -298,6 +334,8 @@ module.exports = {
   PREMIUM_THEMES,
   themeCatalog,
   sanitizeThemeCustom,
+  themeCustomMap,
+  customForTheme,
   premiumOf,
   sanitizeTheme,
   cookieOpts,

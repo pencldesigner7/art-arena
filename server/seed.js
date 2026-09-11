@@ -16,19 +16,21 @@ const { pool, DEV } = require('./lib');
 
 const CHUNK = 1000;
 
+// v67: the removed modifier categories (mood, lighting, composition, weather,
+// texture) are NO LONGER synced here — the v67 boot migration keeps them
+// permanently inactive and their element pools retired, so nothing in the UI
+// or the generation logic can select them. Renames per spec: style is
+// "Art Style", color is "Color Combination".
 const CATEGORIES_DEF = [
   { key: 'character', display_name: 'Character', sort_order: 1 },
   { key: 'environment', display_name: 'Environment', sort_order: 2 },
   { key: 'object', display_name: 'Object', sort_order: 3 },
-  { key: 'style', display_name: 'Drawing Style', sort_order: 4 },
-  { key: 'color', display_name: 'Colour Palette', sort_order: 5 },
-  { key: 'mood', display_name: 'Atmosphere / Mood', sort_order: 6 },
-  { key: 'lighting', display_name: 'Lighting', sort_order: 7 },
-  { key: 'composition', display_name: 'Composition', sort_order: 8 },
-  { key: 'weather', display_name: 'Weather / Time', sort_order: 9 },
-  { key: 'texture', display_name: 'Visual Finish', sort_order: 10 },
-  { key: 'wildcard', display_name: 'Wildcard', sort_order: 11 },
+  { key: 'style', display_name: 'Art Style', sort_order: 4 },
+  { key: 'color', display_name: 'Color Combination', sort_order: 5 },
+  { key: 'wildcard', display_name: 'Wildcard', sort_order: 6 },
 ];
+// v67: element pools of removed categories are never (re-)seeded.
+const REMOVED_CATEGORIES = new Set(['mood', 'lighting', 'composition', 'weather', 'texture']);
 
 async function ensureRandomizerSeed(forceV2Reload = false) {
   // 1. Synchronize randomizer_categories
@@ -65,8 +67,10 @@ async function ensureRandomizerSeed(forceV2Reload = false) {
   const needsV2Sync = forceV2Reload || styleRows[0].n !== 30 || colorRows[0].n !== 300;
   if (needsV2Sync) {
     console.log('[seed] Synchronizing Randomizer V2 element pool (30 styles, 300 4-colour palettes)...');
+    // v67: only the two V2-curated pools are wiped + refilled; removed
+    // categories keep their (retired) historical rows untouched.
     await pool.query(
-      `DELETE FROM randomizer_elements WHERE category IN ('style', 'color', 'composition', 'weather', 'texture')`
+      `DELETE FROM randomizer_elements WHERE category IN ('style', 'color')`
     );
   }
 
@@ -77,6 +81,7 @@ async function ensureRandomizerSeed(forceV2Reload = false) {
 
   const rowsToInsert = [];
   for (const [category, entries] of Object.entries(data)) {
+    if (REMOVED_CATEGORIES.has(category)) continue; // v67: never seed removed pools
     if (present.get(category) > 0 && !needsV2Sync) continue;
     for (const e of entries) {
       rowsToInsert.push({ category, name: e.name, tags: e.tags || [] });

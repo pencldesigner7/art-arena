@@ -158,51 +158,21 @@ function recordChallenge(challengeRecord) {
 }
 
 /**
- * Decides which categories to select for a V2 generation.
- * If userConfigured is provided (and is not default 4), respects the user's list.
- * Otherwise, builds an unpredictable combination of Core (5) + variable Modifiers.
+ * v67: Decides which categories to select for a generation.
+ * The five modifier categories (mood, lighting, composition, weather,
+ * texture) were REMOVED from the product — they can never be selected,
+ * whatever an old room config still contains. The host's configured list is
+ * respected after filtering to the allowed set; with no (valid) config the
+ * default core five are used.
  */
+const ALLOWED_CATEGORIES = ['character', 'environment', 'object', 'style', 'color', 'wildcard'];
+
 function selectCategoriesForGeneration(userConfigured) {
-  const isDefaultOrEmpty =
-    !userConfigured ||
-    !Array.isArray(userConfigured) ||
-    userConfigured.length === 0 ||
-    (userConfigured.length === 4 &&
-      userConfigured.includes('character') &&
-      userConfigured.includes('environment') &&
-      userConfigured.includes('object') &&
-      userConfigured.includes('style'));
-
-  if (!isDefaultOrEmpty) {
-    return userConfigured;
+  if (Array.isArray(userConfigured) && userConfigured.length > 0) {
+    const filtered = [...new Set(userConfigured)].filter((c) => ALLOWED_CATEGORIES.includes(c));
+    if (filtered.length > 0) return filtered;
   }
-
-  // Core 5 categories
-  const core = ['character', 'environment', 'object', 'style', 'color'];
-
-  // Randomize optional visual modifiers
-  const roll = Math.random();
-  const optionalModifiers = ['lighting', 'mood', 'composition', 'weather', 'texture'];
-
-  if (roll < 0.25) {
-    // Profile 1: Minimalist / Pure Core
-    return core;
-  } else if (roll < 0.50) {
-    // Profile 2: Atmospheric (Mood + Lighting)
-    return [...core, 'mood', 'lighting'];
-  } else if (roll < 0.70) {
-    // Profile 3: Cinematic Direction (Composition + Lighting or Weather)
-    const secondary = Math.random() < 0.5 ? 'lighting' : 'weather';
-    return [...core, 'composition', secondary];
-  } else if (roll < 0.85) {
-    // Profile 4: Visual Texture Focus (Texture + Mood)
-    return [...core, 'texture', 'mood'];
-  } else {
-    // Profile 5: Complex Visual Expedition (Pick 2-3 unique random modifiers)
-    const shuffled = [...optionalModifiers].sort(() => Math.random() - 0.5);
-    const count = 2 + Math.floor(Math.random() * 2); // 2 or 3
-    return [...core, ...shuffled.slice(0, count)];
-  }
+  return DEFAULT_CATEGORIES.slice();
 }
 
 const DEFAULT_CATEGORIES = ['character', 'environment', 'object', 'style', 'color'];

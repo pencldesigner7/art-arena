@@ -3022,7 +3022,7 @@ try {
         <span class="mode-chips" id="create-mode-chips">
           <button type="button" class="mode-chip on" data-mode="1v1">1v1<small>Duel · 2 artists</small></button>
           <button type="button" class="mode-chip" data-mode="3v3">3v3<small>Teams of three · fixed 6</small></button>
-          <button type="button" class="mode-chip" data-mode="tournament"><span style="display:inline-flex; align-items:center; gap:4px">Tournament <span class="prem-chip" style="padding:1px 6px; font-size:9px"><span class="prem-emblem" style="width:12px; height:12px" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span></span><small>Bracket event · 8–16</small></button>
+          <button type="button" class="mode-chip" data-mode="tournament">Tournament<small>Bracket event · 8–16</small><span class="prem-chip" style="padding:1px 6px; font-size:9px; margin-top:6px"><span class="prem-emblem" style="width:12px; height:12px" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span></button>
         </span>
       </div>
       <div class="row2">
@@ -3044,46 +3044,10 @@ try {
           <span class="muted" style="font-size:12px; display:block; margin-top:4px">4–12 letters or numbers — share it with your artists. A private room cannot be created without a code.</span>
         </label>
       </div>
-      <!-- v63: 3v3 team building lives IN the Create Room flow (moved from the
-           Friends page). The captain picks up to two friends for their side;
-           every other seat is an OPEN slot — public rooms let any eligible
-           artist join and fill it, private rooms only artists who get the
-           code / an invitation. The server enforces both. -->
-      <div id="create-team-box" class="hidden" style="margin-top:12px; border:1px dashed var(--line); border-radius:12px; padding:12px">
-        <div class="big" style="font-size:14px">YOUR 3v3 SIDE</div>
-        <p class="muted" style="margin:4px 0 10px; font-size:12.5px">Pick up to two friends to invite onto your side. Leftover slots stay open — anyone eligible can join a public room, while private rooms fill through the code and invitations you share.</p>
-        <!-- v63b: team naming — the CAPTAIN names their side here; the name is
-             saved on the team draft (server: /api/teams/draft name) and shows
-             on the room when it opens. Only the captain can edit the draft —
-             invited players get no such control anywhere (server-owned). -->
-        <label style="margin:0 0 10px">Team name <span class="muted" style="font-weight:500">(optional · captain only)</span>
-          <input id="team-name-input" maxlength="40" placeholder="e.g. Neon Ninjas" autocomplete="off" spellcheck="false">
-          <span class="muted" style="font-size:12px; display:block; margin-top:4px">Your side's name — shown on the room when it opens. Invited players can't change it.</span>
-        </label>
-        <div class="team-board">
-          <div class="team-col">
-            <div class="team-col-title">TEAM A <span class="muted">· your side</span></div>
-            <div id="create-team-a-slots" class="team-slots"></div>
-          </div>
-          <div class="team-vs">VS</div>
-          <div class="team-col">
-            <div class="team-col-title">TEAM B <span class="muted">· opponents</span></div>
-            <div class="team-slots">
-              <div class="team-slot empty">Player 1<small>open slot</small></div>
-              <div class="team-slot empty">Player 2<small>open slot</small></div>
-              <div class="team-slot empty">Player 3<small>open slot</small></div>
-            </div>
-          </div>
-        </div>
-        <label style="margin:10px 0 8px">Invite by friend
-          <div id="create-team-pick" class="fr-list" style="margin-top:6px"></div>
-        </label>
-        <div class="team-actions" style="margin-top:10px">
-          <button type="button" id="team-save" class="secondary" style="margin:0">Save team</button>
-          <button type="button" id="team-invite" style="margin:0">Invite Players</button>
-        </div>
-        <div class="msg" id="msg-team"></div>
-      </div>
+      <!-- v67: the pre-creation 3v3 "Add to my side" team draft was REMOVED
+           from the create flow. Team building happens IN the room: the host
+           invites friends from the 3v3 team board ("Invite friends to this
+           side") and moves players between team slots there. -->
       <label>Battle type<select name="battle_type">
         <option value="voting_community">Community Vote</option>
         <option value="voting_player">Players Vote</option>
@@ -3375,6 +3339,9 @@ try {
           <span class="pth-dir-wrap"><input type="range" id="pth-dir" min="0" max="360" step="15"><span class="pth-dir-deg" id="pth-dir-deg">135°</span></span>
           <button type="button" class="mini" id="pth-save">Apply</button>
         </div>
+        <!-- v67: Reset Theme — clears the SAVED custom colours of the
+             selected theme only (never the theme selection itself). -->
+        <button type="button" id="pth-reset" class="secondary" style="width:100%; margin-top:10px">Reset Theme</button>
       </div>
       <button type="button" id="pth-deactivate" class="secondary hidden" style="width:100%; margin-top:12px">⏻ Deactivate UI</button>
     </div>
@@ -3603,14 +3570,14 @@ try {
       <p class="muted" style="margin:0 0 16px; font-size:13.5px">Choose how you want to match in the Arena</p>
       <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
         <button type="button" class="util-btn bm-choice-btn" data-bm-mode="1v1" style="display:flex; align-items:center; gap:14px; padding:14px 16px; text-align:left; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; width:100%; transition:all .15s ease;">
-          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--pink-rgb),.15), rgba(var(--purple-rgb),.2)); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;">⚔️</div>
+          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--pink-rgb),.15), rgba(var(--purple-rgb),.2)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--pink);"><!-- v67: the app's own sword icon (IC.sword) — no generic emoji --><svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg></div>
           <div style="flex:1; min-width:0;">
             <div style="font-weight:800; font-size:15px; color:var(--text)">1v1 Duel</div>
             <div style="color:var(--muted); font-size:12px; margin-top:2px">Classic 1-on-1 duel. Matched against another artist.</div>
           </div>
         </button>
         <button type="button" class="util-btn bm-choice-btn" data-bm-mode="3v3" style="display:flex; align-items:center; gap:14px; padding:14px 16px; text-align:left; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; width:100%; transition:all .15s ease;">
-          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--purple-rgb),.2), rgba(var(--pink-rgb),.15)); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;">🛡️</div>
+          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--purple-rgb),.2), rgba(var(--pink-rgb),.15)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--purple);"><!-- v67: the app's own team icon (IC.users) — no generic emoji --><svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <div style="flex:1; min-width:0;">
             <div style="font-weight:800; font-size:15px; color:var(--text)">3v3 Team Battle</div>
             <div style="color:var(--muted); font-size:12px; margin-top:2px">Join or match into a 3v3 team room with 3 active lanes.</div>
@@ -3844,7 +3811,7 @@ const THEME_LOGOS = {
   magazine: '/themes/magazine.png', // v55: the supplied cutout logo (bg removed, art exact)
   pixel: '/themes/pixel.png',        // v56: the supplied pixel-art logo (as-is, NEAREST-scaled)
 };
-function applyThemeLogo(key) {
+function applyThemeLogo(key, custom) {
   document.querySelectorAll('img[data-aa-logo]').forEach((img) => {
     const target = key && THEME_LOGOS[key] ? THEME_LOGOS[key] : '/logo.png';
     img.classList.remove('pth-logo-graffiti', 'pth-logo-tagged');
@@ -3855,6 +3822,22 @@ function applyThemeLogo(key) {
       img.src = target;
     }
   });
+  // v67: custom colours recolour the APP LOGO too — logo, accents and the
+  // theme animation now change together (and persist together, server-side).
+  // The tinted wordmark is cached per colour signature; the async result is
+  // applied only while the SAME theme + colours are still active.
+  if (key && custom && custom.c1 && THEME_LOGOS[key]) {
+    const sig = key + '|' + custom.c1 + '|' + (custom.c2 || '') + '|' + (custom.dir || 135);
+    pthTintedLogo(key, custom).then((url) => {
+      if (!url || activeThemeKey !== key) return;
+      const cur = activeThemeCustom;
+      const curSig = cur ? key + '|' + cur.c1 + '|' + (cur.c2 || '') + '|' + (cur.dir || 135) : null;
+      if (curSig !== sig) return; // a newer edit already landed
+      document.querySelectorAll('img[data-aa-logo]').forEach((img) => {
+        if (img.getAttribute('src') !== url) img.src = url;
+      });
+    }).catch(() => {});
+  }
   pthIdleTagSchedule();
 }
 // v54: while graffiti is active the wordmark gets quick, unpredictable marker
@@ -3914,7 +3897,7 @@ function applyPremiumTheme(key, custom) {
     ['--pth-c1', '--pth-c2', '--pth-dir', '--pth-c1-rgb', '--pth-c2-rgb'].forEach((p) => b.style.removeProperty(p));
     try { localStorage.removeItem('aa-ptheme'); } catch (_) {}
   }
-  applyThemeLogo(activeThemeKey);
+  applyThemeLogo(activeThemeKey, activeThemeCustom);
   try { updateModeRow(); } catch (_) {}
   try { pthRefreshCustomUI(); } catch (_) {}
   // the background scene follows the theme (exactly one animation, ever)
@@ -4743,7 +4726,11 @@ const fmtTime = (s) => {
 };
 
 const CAT_ICONS = { character: IC.user, environment: IC.globe, object: IC.box, style: IC.brush, mood: IC.smile, lighting: IC.bulb, color: IC.droplet, composition: IC.globe, weather: IC.cloud || IC.globe, texture: IC.brush, wildcard: IC.dice };
-const CAT_NAMES = { character: 'Character', environment: 'Environment', object: 'Object', style: 'Drawing Style', mood: 'Mood', lighting: 'Lighting', color: 'Colour Combination', composition: 'Composition', weather: 'Weather / Time', texture: 'Visual Finish', wildcard: 'Wildcard' };
+// v67: style → "Art Style", color → "Color Combination" (renamed per spec).
+// The removed modifier categories (mood, lighting, composition, weather,
+// texture) keep their entries for HISTORICAL challenge display only — they
+// are inactive server-side and can never be selected for a new battle.
+const CAT_NAMES = { character: 'Character', environment: 'Environment', object: 'Object', style: 'Art Style', mood: 'Mood', lighting: 'Lighting', color: 'Color Combination', composition: 'Composition', weather: 'Weather / Time', texture: 'Visual Finish', wildcard: 'Wildcard' };
 // ------------------- time limit: presets + custom (v13) ---------------------
 // Presets 20 min / 30 min / 1 hour + Custom. Custom opens a floating modal
 // with Hours + Minutes fields (total 1 minute .. 12 hours); "Set time"
@@ -5965,42 +5952,21 @@ $('#form-create-room').addEventListener('submit', async (e) => {
   }
   try {
     let d;
-    // v63: a 3v3 with friends picked on the captain's side goes through the
-    // team-draft room path (real room, invitations to the picked players);
-    // every other seat stays open per the chosen visibility. Without picks,
-    // or for 1v1/tournament, the plain room creation path is used.
-    const wantTeamRoom = createMode === '3v3' && teamPicks.length > 0;
-    if (wantTeamRoom) {
-      if (!teamLoaded) await createTeamLoad(); // ensure draft is fresh
-      // v63b: the captain's team name (typed in the 3v3 box) wins; when it is
-      // empty the old behaviour is kept — the room-name field labels the room.
-      const teamName = teamNameVal.trim() || (f.get('name') || '').trim() || undefined;
-      await api('/api/teams/draft', {
-        member_ids: teamPicks,
-        name: teamName,
-      }, 'PUT');
-      teamNameVal = teamName || ''; // keep the box in sync after form reset
-      d = await api('/api/teams/draft/open-room', {
-        visibility,
-        code: visibility === 'private' ? codeRaw.trim().toUpperCase() : undefined,
-        time_limit_seconds: t,
-        battle_type: f.get('battle_type'),
-      }, 'POST');
-      msg('msg-rooms', '3v3 room #' + d.room_code + ' created — ' + (d.invited && d.invited.length ? 'invitations sent to @' + d.invited.join(', @') + '.' : 'your side is open — share the code with players!'), true);
-    } else {
-      d = await api('/api/rooms', {
-        name: (f.get('name') || '').trim() || undefined,
-        visibility,
-        time_limit_seconds: t,
-        battle_type: f.get('battle_type'),
-        battle_mode: createMode,                                        // v35
-        // v36: 1v1 → 2, 3v3 → 6 (the server enforces both); tournament → the
-        // creator's choice (8–16, max 16).
-        max_players: createMode === '1v1' ? 2 : (createMode === '3v3' ? 6 : Number($('#create-max').value)),
-        code: visibility === 'private' ? codeRaw.trim().toUpperCase() : undefined, // v36
-      });
-      msg('msg-rooms', (d.name ? 'Room "' + d.name + '" ' : 'Room #' + d.code + ' ') + 'created — share the code with an artist!', true);
-    }
+    // v67: every mode creates the room directly — the 3v3 team-draft branch
+    // ("Add to my side") was removed; teammates join through the room's own
+    // invite flow and the open slots.
+    d = await api('/api/rooms', {
+      name: (f.get('name') || '').trim() || undefined,
+      visibility,
+      time_limit_seconds: t,
+      battle_type: f.get('battle_type'),
+      battle_mode: createMode,                                        // v35
+      // v36: 1v1 → 2, 3v3 → 6 (the server enforces both); tournament → the
+      // creator's choice (8–16, max 16).
+      max_players: createMode === '1v1' ? 2 : (createMode === '3v3' ? 6 : Number($('#create-max').value)),
+      code: visibility === 'private' ? codeRaw.trim().toUpperCase() : undefined, // v36
+    });
+    msg('msg-rooms', (d.name ? 'Room "' + d.name + '" ' : 'Room #' + d.code + ' ') + 'created — share the code with an artist!', true);
     $('#create-panel').classList.add('hidden');
     $('#btn-toggle-create').textContent = '+ Create room';
     e.target.reset();
@@ -6215,6 +6181,7 @@ function rtToastText(ev) {
     case 'settings':         return ev.what === 'challenge elements' ? '⚙️ Challenge elements updated' : '⚙️ Room settings updated';
     case 'challenge_locked': return null; // v51: the countdown overlay is the message
     case 'host_transferred': return '👑 ' + who + ' is now the host';
+    case 'slots_rearranged': return '🔀 ' + who + ' rearranged the team slots'; // v67: host seat moves announce themselves
     // v51 (clean countdown): the start sequence is visual ONLY — the
     // countdown overlay IS the notification. No decorative toasts compete
     // with 3-2-1-GO (errors and safety messages are unaffected).
@@ -6271,7 +6238,7 @@ function rtHandle(msg) {
   // v61: silent relation change (declined / cancelled / removed by the other
   // side) — no notification row, but every friend control must follow live.
   if (msg.type === 'friends.changed') { onFriendRelationChanged(); if (currentView === 'friends') friendsPageLoad(); return; }
-  if (msg.type === 'team.changed') { if (typeof createTeamSoftRefresh === 'function') createTeamSoftRefresh(); return; } // v63: draft status changes refresh the Create Room team builder
+  if (msg.type === 'team.changed') { return; } // v67: the Create Room team builder was removed — nothing to refresh
   // v51: kicked from a room (server-side removal) — leave instantly with a
   // gentle explanation, never a dead room view.
   if (msg.type === 'room.kicked') {
@@ -6715,15 +6682,13 @@ let createTournamentSize = 8; // v36: the creator's tournament size (8–16)
 function paintCreateMode() {
   $('#create-mode-chips').querySelectorAll('.mode-chip').forEach((b) =>
     b.classList.toggle('on', b.dataset.mode === createMode));
-  // v63: the 3v3 team builder lives under this mode — show it only for 3v3.
-  createTeamToggle(createMode === '3v3');
   // v36: the max-players picker is a TOURNAMENT control. 1v1 is fixed at 2
   // and 3v3 is fixed at 6 (the 3v3 requirement) — the UI hides the stepper
   // and the server enforces the same rule; only a tournament (8–16, cap 16)
   // exposes the choice. The switch is instant (no save step in between).
   const isTournament = createMode === 'tournament';
   const timeLbl = $('#create-time-label');
-  if (timeLbl) timeLbl.textContent = isTournament ? 'Time per round' : 'Time limit';
+  if (timeLbl) timeLbl.textContent = isTournament ? 'Set time per round' : 'Time limit';
   $('#create-max').value = isTournament
     ? String(createTournamentSize)
     : String(MODE_DEFAULT_MAX[createMode]);
@@ -6768,128 +6733,6 @@ function syncCreateCodeRow() {
 }
 $('#form-create-room select[name=visibility]').addEventListener('change', syncCreateCodeRow);
 resetCreateConfig();
-
-// ============ v63: 3v3 team builder (lives in the CREATE ROOM flow) ==========
-// The captain's side = the persisted 3v3 draft (/api/teams/draft). Friends
-// are picked here; remaining seats stay OPEN — public rooms let any eligible
-// artist join them, private rooms fill via the code / invitations. The
-// server is the final gate for every rule (friend-only picks, private codes,
-// seat limits). Invitations are real team_invitation notifications.
-let teamDraft = null, teamPicks = [], teamLoaded = false, teamNameVal = ''; // v63b: captain-only team name (draft.name)
-async function createTeamLoad() {
-  try {
-    const [fl, dr] = await Promise.all([api('/api/friends/list'), api('/api/teams/draft')]);
-    frData = fl;
-    teamDraft = dr;
-    teamPicks = (dr && dr.members) ? dr.members.map((m) => m.id) : [];
-    teamNameVal = (dr && dr.name) || '';
-    teamLoaded = true;
-    createTeamRender();
-  } catch (err) { if (!handleAuthError(err)) toast(err.message); }
-}
-// A drafted player answered (team.changed) — refresh statuses when open.
-function createTeamSoftRefresh() {
-  if (!teamLoaded || $('#create-team-box').classList.contains('hidden')) return;
-  api('/api/teams/draft').then((dr) => { teamDraft = dr; createTeamRender(); }).catch(() => {});
-}
-function createTeamRender() {
-  const box = $('#create-team-box');
-  if (!box || box.classList.contains('hidden')) return;
-  const fs = (frData && frData.friends) || [];
-  // v63b: keep the name field honest (prefill/refresh) without clobbering an
-  // in-progress keystroke.
-  const ni = $('#team-name-input');
-  if (ni && document.activeElement !== ni && (ni.value || '') !== teamNameVal) ni.value = teamNameVal;
-  const meRow = '<div class="team-slot me">' + esc((me && (me.display_name || me.username)) || 'You') + '<small>captain · you</small></div>';
-  const slots = [meRow];
-  for (let i = 0; i < 2; i++) {
-    const uid = teamPicks[i]; const f = uid && fs.find((x) => x.id === uid);
-    const st = teamDraft && teamDraft.members ? (teamDraft.members.find((m) => m.id === uid) || {}).status : null;
-    slots.push(f
-      ? '<div class="team-slot">' + esc(f.display_name || f.username) + '<small>@' + esc(f.username) + (f.online ? ' · online' : '') + '</small>' + (st && st !== 'drafted' ? '<span class="team-status ' + esc(st) + '">' + esc(st) + '</span>' : '') + '<button type="button" class="mini util-btn team-x" data-create-team-remove="' + esc(f.id) + '">✕</button></div>'
-      : '<div class="team-slot empty">Player ' + (i + 2) + '<small>open slot · pick a friend or leave it open</small></div>');
-  }
-  $('#create-team-a-slots').innerHTML = slots.join('');
-  $('#create-team-pick').innerHTML = fs.length ? fs.map((f) => '<div class="fr-row' + (f.online ? ' online' : '') + (teamPicks.includes(f.id) ? ' picked' : '') + '">' + frAvatar(f) +
-    '<div class="fr-info"><div class="fr-name">' + esc(f.display_name || f.username) + '</div><div class="fr-sub">@' + esc(f.username) + (f.online ? ' · online' : '') + '</div></div>' +
-    '<div class="fr-actions"><button type="button" class="' + (teamPicks.includes(f.id) ? 'secondary' : '') + '" data-create-team-pick="' + esc(f.id) + '">' + (teamPicks.includes(f.id) ? 'Remove' : 'Add to my side') + '</button></div></div>').join('')
-    : '<p class="muted" style="margin:0; font-size:12.5px">You have no friends to invite yet — that is fine. Create the room and eligible artists can join your open slots (public rooms) or enter with your code (private rooms).</p>';
-  const saved = teamDraft && teamDraft.members ? teamDraft.members.map((m) => m.id) : [];
-  const savedName = (teamDraft && teamDraft.name) || '';
-  const dirty = JSON.stringify(saved) !== JSON.stringify(teamPicks) || teamNameVal.trim() !== savedName;
-  const sb = $('#team-save'); if (sb) sb.disabled = !dirty;
-  const ib = $('#team-invite'); if (ib) ib.disabled = !saved.length;
-}
-// v63b: team name input — captain types their side's name; committed with
-// Save / Invite / Create so the server draft (and the room title) carries it.
-$('#team-name-input').addEventListener('input', () => {
-  teamNameVal = $('#team-name-input').value;
-  createTeamRender();
-});
-function createTeamToggle(show3v3) {
-  const box = $('#create-team-box');
-  if (!box) return;
-  box.classList.toggle('hidden', !show3v3);
-  if (show3v3 && !teamLoaded) createTeamLoad(); else if (show3v3) createTeamRender();
-}
-$('#create-team-box').addEventListener('click', async (e) => {
-  const pick = e.target.closest('[data-create-team-pick]');
-  if (pick) {
-    const id = pick.dataset.createTeamPick;
-    if (teamPicks.includes(id)) {
-      teamPicks = teamPicks.filter((x) => x !== id);
-      createTeamRender();
-      return;
-    }
-    if (teamPicks.length >= 2) {
-      toast('A 3v3 side is you plus two players.');
-      return;
-    }
-    pick.disabled = true;
-    try {
-      const avail = await checkFriendAvailability(id);
-      if (!avail.online) {
-        showFriendOfflineModal(avail.username || 'Friend');
-        return;
-      }
-      if (avail.in_room) {
-        showFriendInRoomModal(avail.username || 'Friend', avail.room_code, avail.spectator_allowed);
-        return;
-      }
-      teamPicks.push(id);
-      createTeamRender();
-    } finally {
-      pick.disabled = false;
-    }
-    return;
-  }
-  const rm = e.target.closest('[data-create-team-remove]');
-  if (rm) {
-    teamPicks = teamPicks.filter((x) => x !== rm.dataset.createTeamRemove);
-    createTeamRender();
-  }
-});
-$('#team-save').addEventListener('click', async () => {
-  try {
-    teamDraft = await api('/api/teams/draft', { member_ids: teamPicks, name: teamNameVal.trim() || undefined }, 'PUT');
-    teamNameVal = (teamDraft && teamDraft.name) || '';
-    msg('msg-team', teamPicks.length ? 'Team saved — ' + teamPicks.length + ' player' + (teamPicks.length === 1 ? '' : 's') + ' on your side.' : 'Team cleared — all your seats are open slots.', true);
-  } catch (err) { msg('msg-team', err.message, false); }
-  createTeamRender();
-});
-$('#team-invite').addEventListener('click', async () => {
-  const btn = $('#team-invite');
-  if (!teamPicks.length) { msg('msg-team', 'Pick friends for your side first — or create the room and let players join the open slots.', false); return; }
-  btn.disabled = true;
-  try {
-    teamDraft = await api('/api/teams/draft', { member_ids: teamPicks, name: teamNameVal.trim() || undefined }, 'PUT');
-    teamNameVal = (teamDraft && teamDraft.name) || '';
-    const r = await api('/api/teams/draft/invite', {}, 'POST');
-    teamDraft = r;
-    msg('msg-team', r.sent ? 'Invitations sent to ' + r.sent + ' player' + (r.sent === 1 ? '' : 's') + '.' : 'Everyone on your side has already been invited.', true);
-  } catch (err) { msg('msg-team', err.message, false); }
-  createTeamRender();
-});
 
 // One entry point for EVERY join (code box, public list, room card, room
 // page). A FULL room does not dead-end: the server answers
@@ -8128,12 +7971,14 @@ async function openProfile(userId) {
   const isTargetPremium = !!(u && u.premium);
   let activeTheme = 'default';
   if (isTargetPremium) {
-    const rawTh = String(u.ui_theme || 'flame').toLowerCase();
+    // v67 (theme-state safety): a Premium member with no explicit theme
+    // choice keeps the STANDARD look — never an automatic Flame.
+    const rawTh = String(u.ui_theme || 'default').toLowerCase();
     const VALID_THEMES = ['flame', 'cloud', 'glowing', 'glitch', 'graffiti', 'magazine', 'pixel'];
     if (VALID_THEMES.includes(rawTh)) {
       activeTheme = rawTh;
     } else {
-      activeTheme = 'flame';
+      activeTheme = 'default';
     }
   }
   if (pmCard) {
@@ -8377,15 +8222,16 @@ async function renderPremiumPage() {
   $('#prem-activate-wrap').classList.toggle('hidden', d.premium);
   $('#prem-revoke-wrap').classList.toggle('hidden', !d.premium);
   $('#prem-confirm').classList.add('hidden');
-  // v63b: the theme LOGO showcase on the Premium page is Premium-only — free
+  // v63b: the theme showcase on the Premium page is Premium-only — free
   // members see the UI Customization explanation (and the upgrade path) with
-  // no theme logos at all; Premium members see the logo row here and
-  // customize in Settings (pointer in the status line above). The cards stay
-  // informational: nothing here picks, previews or unlocks a theme — real
-  // customization lives in Settings and the server stays the gate.
+  // no theme cards at all; Premium members see the (text-only) theme row here
+  // and customize in Settings (pointer in the status line above). The cards
+  // stay informational: nothing here picks, previews or unlocks a theme —
+  // real customization lives in Settings and the server stays the gate.
+  // v67: the theme LOGO images were removed from this page (the logos belong
+  // to the app chrome and Settings — the Premium page shows names only).
   const premLogoCards = d.themes.map((t) =>
     '<div class="prem-swatch">' +
-    '<img class="prem-swatch-logo" src="' + esc(THEME_LOGOS[t.key] || '/logo.png') + '" alt="' + esc(t.name) + '" loading="lazy">' +
     '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
     '</div>').join('');
   $('#prem-themes').innerHTML = d.premium ? premLogoCards : '';
@@ -8623,7 +8469,7 @@ function paletteMini(cols) {
     cols.map((c) => '<i style="background:' + esc(c) + '"></i>').join('') + '</span>';
 }
 const REVEAL_ORDER = ['character', 'environment', 'object', 'style', 'color', 'lighting', 'mood', 'composition', 'weather', 'texture', 'wildcard'];
-const REVEAL_LABELS = { style: 'Drawing Style', color: 'Colour Combination' };
+const REVEAL_LABELS = { style: 'Art Style', color: 'Color Combination' };
 let revealShownFor = null;   // challenge id currently on screen
 let revealDismissed = null;  // challenge id the user closed (don't re-open on every poll)
 // v61: entrance-animation state. A challenge id animates its entrance ONCE
@@ -8975,6 +8821,20 @@ $('#pth-save').addEventListener('click', async () => {
     const r = await api('/api/premium/theme', { theme: activeThemeKey, custom }, 'PUT');
     applyPremiumTheme(r.ui_theme, r.ui_custom);
     toast('Colors saved to your account.');
+    renderSettingsThemes();
+  } catch (err) { toast(err.message); }
+});
+// v67: Reset Theme — clears the saved custom colours of the SELECTED theme
+// only (the theme itself stays selected; other themes keep their colours).
+// The clear is persisted server-side (the per-theme map entry is removed),
+// so it survives reloads and navigation.
+$('#pth-reset').addEventListener('click', async () => {
+  if (!mePremium) { openUpsell('Manual colours are Premium', 'Upgrade to Art Arena Premium to customise your theme colours.'); return; }
+  if (!activeThemeKey) return;
+  try {
+    const r = await api('/api/premium/theme', { theme: activeThemeKey, custom: null }, 'PUT');
+    applyPremiumTheme(r.ui_theme, r.ui_custom || null);
+    toast('Theme colors reset to the theme defaults.');
     renderSettingsThemes();
   } catch (err) { toast(err.message); }
 });

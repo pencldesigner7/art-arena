@@ -44,6 +44,8 @@ const {
   themeCatalog,
   sanitizeTheme,
   sanitizeThemeCustom,
+  themeCustomMap,
+  customForTheme,
 } = require('./lib');
 const rooms = require('./rooms');
 const matchmaking = require('./matchmaking');
@@ -769,8 +771,10 @@ app.post('/api/premium/test-activate', requireAuth, ah(async (req, res) => {
     await c.query(
       `INSERT INTO premium_subscriptions (user_id, plan, status, source)
        VALUES ($1, 'premium', 'active', 'test')`, [req.user.id]);
-    await c.query(
-      `UPDATE users SET ui_theme = COALESCE(ui_theme, 'flame') WHERE id = $1`, [req.user.id]);
+    // v67 (theme-state safety): activating Premium MUST NOT touch the theme —
+    // Premium is an account state, never an implicit UI theme. The old
+    // COALESCE(ui_theme,'flame') force-applied Flame to every new Premium
+    // member who had simply never picked a theme.
     await c.query('COMMIT');
   } catch (e) { await c.query('ROLLBACK').catch(() => {}); throw e; } finally { c.release(); }
   if (!wasActive) {
@@ -794,7 +798,9 @@ app.get('/api/premium/themes', requireAuth, ah(async (req, res) => {
     themes: themeCatalog(),
     premium: (await premiumOf(req.user.id)).active,
     ui_theme,
-    ui_custom: ui_theme ? sanitizeThemeCustom(ui_theme, rows[0] ? rows[0].ui_theme_custom : null) : null,
+    // v67: the saved colours of the ACTIVE theme, from the per-theme map —
+    // every theme keeps its own customization across switches and reloads.
+    ui_custom: customForTheme(rows[0], ui_theme),
   });
 }));
 app.put('/api/premium/theme', requireAuth, ah(async (req, res) => {
@@ -805,11 +811,32 @@ app.put('/api/premium/theme', requireAuth, ah(async (req, res) => {
     const p = await premiumOf(req.user.id);
     if (!p.active) throw new HttpError(403, 'Art Arena Premium is required for that theme.');
   }
-  // v53: manual colors travel with the theme (validated + entitlement-bound)
-  const custom = (key !== 'default' && (req.body || {}).custom) ? sanitizeThemeCustom(key, req.body.custom) : null;
+  // v67 (per-theme persistence): ui_theme_custom is a MAP { themeKey:
+  // {c1,c2,dir} }. Switching themes no longer wipes saved colours — each
+  // theme's customization survives independently:
+  //   body.custom = {…}  → validate + save for THIS theme
+  //   body.custom = null → RESET THIS THEME's saved colours (only)
+  //   body.custom absent → keep whatever is already saved for this theme
+  const { rows } = await pool.query('SELECT ui_theme, ui_theme_custom FROM users WHERE id = $1', [req.user.id]);
+  const map = themeCustomMap(rows[0]);
+  const body = req.body || {};
+  if (key !== 'default' && Object.prototype.hasOwnProperty.call(body, 'custom')) {
+    if (body.custom === null) delete map[key];
+    else {
+      const clean = sanitizeThemeCustom(key, body.custom);
+      if (clean) map[key] = clean; else delete map[key];
+    }
+  }
+  const nextTheme = key === 'default' ? null : key;
+  const nextMap = Object.keys(map).length ? map : null;
   await pool.query('UPDATE users SET ui_theme = $1, ui_theme_custom = $2 WHERE id = $3',
-    [key === 'default' ? null : key, JSON.stringify(custom), req.user.id]);
-  res.json({ ok: true, ui_theme: key === 'default' ? null : key, ui_custom: custom, premium: (await premiumOf(req.user.id)).active });
+    [nextTheme, nextMap ? JSON.stringify(nextMap) : null, req.user.id]);
+  res.json({
+    ok: true,
+    ui_theme: nextTheme,
+    ui_custom: nextTheme ? (map[nextTheme] || null) : null,
+    premium: (await premiumOf(req.user.id)).active,
+  });
 }));
 
 app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
@@ -841,7 +868,7 @@ app.get('/api/users/:id/profile', requireAuth, ah(async (req, res) => {
       avatar_url: avatarUrlOf(r.avatar_storage_key, r.profile_updated_at), // v61: versioned like every other payload
       premium: prem.active, // v52: Premium badge on View Profile
       ui_theme,             // v65: owner's live theme (their entitlement decides)
-      ui_custom: ui_theme ? sanitizeThemeCustom(ui_theme, r.ui_theme_custom) : null,
+      ui_custom: customForTheme(r, ui_theme), // v67: the owner's saved colours for THAT theme
     },
     statistics: {
       battles_played: r.battles || 0, wins: r.wins || 0,
@@ -1380,8 +1407,8 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // seed.js re-fills any empty category from randomizer_seed.json at boot.
     ['v60 randomizer: colour combinations replace single colour names (re-seed color)',
      `DELETE FROM randomizer_elements WHERE category = 'color' AND name NOT LIKE '#%'`],
-    ['v60 randomizer: category label → Colour Combination',
-     `UPDATE randomizer_categories SET display_name = 'Colour Combination' WHERE key = 'color' AND display_name <> 'Colour Combination'`],
+    ['v60 randomizer: category label → Color Combination',
+     `UPDATE randomizer_categories SET display_name = 'Color Combination' WHERE key = 'color' AND display_name <> 'Color Combination'`],
       // ---------------- v61 ----------------
     // v61 randomizer NORMALIZATION: atomic, neutral concepts only (no
     // modifiers), Drawing Style = exactly the 30 canonical styles, wildcards
@@ -1411,8 +1438,8 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
         status text NOT NULL DEFAULT 'drafted' CHECK (status IN ('drafted','invited','accepted','declined')),
         invited_at timestamptz, responded_at timestamptz,
         PRIMARY KEY (draft_id, user_id))`],
-    ['v61 randomizer: Style category label → Drawing Style',
-     `UPDATE randomizer_categories SET display_name = 'Drawing Style' WHERE key = 'style' AND display_name <> 'Drawing Style'`],
+    ['v61 randomizer: Style category label → Art Style',
+     `UPDATE randomizer_categories SET display_name = 'Art Style' WHERE key = 'style' AND display_name <> 'Art Style'`],
       // ---------------- v62 ----------------
     // v62: TWITCH GO LIVE — a real per-user Twitch connection (tokens stay
     // server-side, mirror of youtube_connections) and stream sessions bound
@@ -1477,6 +1504,31 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // v65 — join requests ride the one notification system (host decides).
     ['v65 notification types: join_request',
      `ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'join_request'`],
+      // ---------------- v67 ----------------
+    // v67 randomizer cleanup: the five modifier categories are REMOVED from
+    // the product — the UI list and the config validation both filter on
+    // is_active, and challenge generation allowlists the remaining keys.
+    // The rows stay (historical locked challenges reference their values)
+    // but are permanently inactive; seed.js no longer re-activates them.
+    ['v67 randomizer: deactivate removed modifier categories',
+     `UPDATE randomizer_categories SET is_active = false
+       WHERE key IN ('mood','lighting','composition','weather','texture') AND is_active`],
+    ['v67 randomizer: retire the removed categories\' element pools',
+     `UPDATE randomizer_elements SET status = 'retired'
+       WHERE category IN ('mood','lighting','composition','weather','texture') AND status = 'active'`],
+    // v67 theme-state safety: the 'stitch' theme is removed completely.
+    // Saved selections migrate to NULL → the artist's own Light/Dark choice
+    // applies (graceful migration — never an automatic Flame).
+    ['v67 themes: retired stitch selection → NULL (falls back to Light/Dark)',
+     `UPDATE users SET ui_theme = NULL WHERE ui_theme = 'stitch'`],
+    // v67 per-theme customization: legacy FLAT {c1,c2,dir} rows become the
+    // per-theme map, keyed by the theme that was active when they were saved.
+    ['v67 themes: ui_theme_custom → per-theme map',
+     `UPDATE users SET ui_theme_custom = jsonb_build_object(COALESCE(ui_theme, 'flame'), ui_theme_custom)
+       WHERE ui_theme_custom IS NOT NULL AND ui_theme_custom ? 'c1'`],
+    ['v67 themes: drop retired stitch customs from the map',
+     `UPDATE users SET ui_theme_custom = ui_theme_custom - 'stitch'
+       WHERE ui_theme_custom IS NOT NULL AND ui_theme_custom ? 'stitch'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

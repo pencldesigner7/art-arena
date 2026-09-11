@@ -80,9 +80,13 @@ async function queuePosition(userId) {
 // is locked (FOR UPDATE SKIP LOCKED) so two concurrent enters can never
 // double-pair; room insert + row updates commit as ONE transaction.
 async function tryMatch(client, initiator) {
+  // v67: mode-aware pairing — 3v3 searchers now live in the SAME queue, so a
+  // 1v1 enter must never pull a 3v3 row (and vice-versa: the 3v3 branch below
+  // filters FOR '3v3'). Legacy rows without a battle_mode are treated as 1v1.
   const { rows } = await client.query(
     `SELECT user_id FROM matchmaking_queue
       WHERE status = 'queued' AND user_id <> $1
+        AND COALESCE(prefs->>'battle_mode', '1v1') <> '3v3'
       ORDER BY queued_at, id
       LIMIT 1
       FOR UPDATE SKIP LOCKED`, [initiator.id]);
@@ -121,18 +125,26 @@ async function tryMatch(client, initiator) {
   return { code, a, b };
 }
 
-function remember(a, b, code) {
+// v67: the claimable-match record carries the battle_mode (the client's
+// /status poll reads match.battle_mode) and `b` may be null for 3v3 — a team
+// match has no single opponent, the ROOM is the connection.
+function remember(a, b, code, mode) {
   const now = Date.now();
+  const pub = (x) => (x ? { id: x.id, username: x.username, display_name: x.display_name, avatar_url: x.avatar_url } : null);
   recent.set(a.id, {
     room_code: code,
-    opponent: { id: b.id, username: b.username, display_name: b.display_name, avatar_url: b.avatar_url },
+    opponent: pub(b),
+    battle_mode: mode || '1v1',
     at: now,
   });
-  recent.set(b.id, {
-    room_code: code,
-    opponent: { id: a.id, username: a.username, display_name: a.display_name, avatar_url: a.avatar_url },
-    at: now,
-  });
+  if (b) {
+    recent.set(b.id, {
+      room_code: code,
+      opponent: pub(a),
+      battle_mode: mode || '1v1',
+      at: now,
+    });
+  }
 }
 
 function claimable(userId) {
@@ -167,20 +179,32 @@ router.post('/enter', ah(async (req, res) => {
       `SELECT status FROM battle_rooms WHERE code = $1`, [prev.room_code]);
     if (!rows[0] || rows[0].status === 'ended') { recent.delete(u.id); prev = null; }
   }
-  if (prev) return res.json({ matched: true, room: prev.room_code, opponent: prev.opponent, reclaimed: true, mode });
+  // v67: the reclaim reports the MATCH's own mode — a claimable 3v3 room
+  // stays 3v3 even if the artist re-enters from the 1v1 button.
+  if (prev) {
+    const prevMode = prev.battle_mode || mode;
+    return res.json({ matched: true, room: prev.room_code, opponent: prev.opponent, reclaimed: true, mode: prevMode, battle_mode: prevMode });
+  }
 
   if (await queuedRow(u.id))
     throw new HttpError(409, 'You are already searching for an opponent.');
 
   const client = await pool.connect();
   let m = null;
+  // v67: 3v3 outcomes — exactly one of these is set when the mode is 3v3.
+  // joined3 = seated into an existing open public room (a REAL connection);
+  // m3      = paired with another queued 3v3 searcher into a NEW shared room;
+  // search3 = nobody to connect to → honestly queued (matched:false).
+  let joined3 = null, m3 = null, search3 = null;
   let queuedAt = null; // v42: the queue instant — the deadline anchor
   try {
     await client.query('BEGIN');
 
     if (mode === '3v3') {
-      // 3v3 Matchmaking:
-      // 1. First, look for an existing open public 3v3 room with free seats in lobby
+      // 3v3 Matchmaking (v67 — REAL connections only):
+      // 1. First, look for an existing open public 3v3 room with free seats in
+      //    lobby — joining it IS a real connection (there is already at least
+      //    one seated artist inside).
       const { rows: open3v3 } = await client.query(
         `SELECT r.id, r.code, r.battle_mode, r.max_players,
                 (SELECT count(*)::int FROM room_participants rp WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')) AS player_count
@@ -190,7 +214,7 @@ router.post('/enter', ah(async (req, res) => {
           ORDER BY r.created_at ASC
           FOR UPDATE SKIP LOCKED`
       );
-      const candidate = open3v3.find((r) => r.player_count < 6);
+      const candidate = open3v3.find((r) => r.player_count < 6 && r.player_count > 0);
       if (candidate) {
         const seat = await pickSeatForJoin(client, candidate, u.id);
         if (seat !== null) {
@@ -211,92 +235,119 @@ router.post('/enter', ah(async (req, res) => {
               [candidate.id, u.id, seat]
             );
           }
-          rt.emitRoom(candidate.code, { action: 'joined', user_id: u.id, username: u.username, display_name: u.display_name, seat });
-          rt.broadcastRoomsList('joined');
+          joined3 = { code: candidate.code, seat };
           await client.query('COMMIT');
-          return res.json({ matched: true, room: candidate.code, mode: '3v3' });
         }
       }
 
-      // 2. If no open room, look for other 3v3 searchers in queue or create a new public 3v3 room
-      const { rows: queued3v3 } = await client.query(
-        `SELECT user_id FROM matchmaking_queue
-          WHERE status = 'queued' AND user_id <> $1 AND (prefs->>'battle_mode') = '3v3'
-          ORDER BY queued_at, id
-          LIMIT 1
-          FOR UPDATE SKIP LOCKED`, [u.id]
-      );
-      const other3v3Id = queued3v3[0] && queued3v3[0].user_id;
-      let other3v3User = null;
-      if (other3v3Id) {
-        const otherRoom = await activeRoomOf(other3v3Id, client);
-        if (otherRoom) {
+      if (!joined3) {
+        // 2. No room to join → the REAL queue (same table, deadline anchor and
+        //    sweeper as 1v1). A solo 3v3 searcher is NEVER placed in a room of
+        //    their own and NEVER told "matched" — that was the old bug that
+        //    reported "Connected" for a single player.
+        await client.query(
+          `INSERT INTO matchmaking_queue (user_id, prefs)
+           VALUES ($1, $2::jsonb)`,
+          [u.id, JSON.stringify({ competition_type: 'casual', format: 'three_on_three', battle_mode: '3v3', time_limit_seconds: 3600 })]
+        );
+        const { rows: q3 } = await client.query(
+          `SELECT queued_at FROM matchmaking_queue WHERE user_id = $1 AND status = 'queued'`, [u.id]);
+        queuedAt = q3[0] ? q3[0].queued_at : null;
+
+        // 3. Pair with the oldest OTHER queued 3v3 searcher (locked row — two
+        //    concurrent enters can never double-pair).
+        const { rows: queued3v3 } = await client.query(
+          `SELECT user_id FROM matchmaking_queue
+            WHERE status = 'queued' AND user_id <> $1 AND (prefs->>'battle_mode') = '3v3'
+            ORDER BY queued_at, id
+            LIMIT 1
+            FOR UPDATE SKIP LOCKED`, [u.id]
+        );
+        const other3v3Id = queued3v3[0] && queued3v3[0].user_id;
+        let other3v3User = null;
+        if (other3v3Id) {
+          const otherRoom = await activeRoomOf(other3v3Id, client);
+          if (otherRoom) {
+            // ghost row — that artist joined a room elsewhere since queueing
+            await client.query(
+              `UPDATE matchmaking_queue SET status = 'cancelled' WHERE user_id = $1 AND status = 'queued'`,
+              [other3v3Id]
+            );
+          } else {
+            other3v3User = await userBrief(other3v3Id);
+          }
+        }
+
+        if (other3v3User) {
+          // REAL MATCH: ONE shared public 3v3 room seats BOTH searchers
+          // (seat 1 = team A side, seat 4 = team B side). The remaining four
+          // seats stay open — the next 3v3 searcher joins this room via
+          // step 1, so the teams genuinely fill up.
+          let code3v3 = null, room3v3Id = null;
+          for (let attempt = 0; attempt < 10; attempt++) {
+            try {
+              code3v3 = newRoomCode();
+              const { rows } = await client.query(
+                `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
+                                           time_limit_seconds, result_method, battle_mode, auto_start,
+                                           randomizer_config)
+                 VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
+                         '{"categories":["character","environment","object","style"]}'::jsonb)
+                 RETURNING id`,
+                [code3v3, u.id]
+              );
+              room3v3Id = rows[0].id;
+              break;
+            } catch (e) {
+              if (e.code !== '23505') throw e;
+            }
+          }
           await client.query(
-            `UPDATE matchmaking_queue SET status = 'cancelled' WHERE user_id = $1 AND status = 'queued'`,
-            [other3v3Id]
+            `INSERT INTO room_participants (room_id, user_id, state, seat)
+             VALUES ($1, $2, 'waiting', 1), ($1, $3, 'waiting', 4)`,
+            [room3v3Id, u.id, other3v3User.id]
           );
+          await client.query(
+            `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
+              WHERE user_id IN ($1, $3) AND status = 'queued'`, [u.id, room3v3Id, other3v3User.id]
+          );
+          m3 = { code: code3v3, other: other3v3User };
+          await client.query('COMMIT');
         } else {
-          other3v3User = await userBrief(other3v3Id);
+          // Nobody to pair with — stay queued. The 180 s deadline sweeper
+          // expires the row and pushes the timed-out state; GET /status keeps
+          // reporting in_queue + deadline for the client's own countdown.
+          await client.query('COMMIT');
+          search3 = {
+            matched: false,
+            in_queue: true,
+            mode: '3v3',
+            battle_mode: '3v3',
+            position: await queuePosition(u.id),
+            queued_at: queuedAt ? queuedAt.toISOString() : null,
+            deadline_at: queuedAt
+              ? new Date(queuedAt.getTime() + MM_TIMEOUT_S * 1000).toISOString()
+              : null,
+          };
         }
       }
-
-      let code3v3, room3v3Id;
-      for (let attempt = 0; attempt < 10; attempt++) {
-        try {
-          code3v3 = newRoomCode();
-          const { rows } = await client.query(
-            `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
-                                       time_limit_seconds, result_method, battle_mode, auto_start,
-                                       randomizer_config)
-             VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
-                     '{"categories":["character","environment","object","style"]}'::jsonb)
-             RETURNING id`,
-            [code3v3, u.id]
-          );
-          room3v3Id = rows[0].id;
-          break;
-        } catch (e) {
-          if (e.code !== '23505') throw e;
-        }
-      }
-
-      await client.query(
-        `INSERT INTO room_participants (room_id, user_id, state, seat)
-         VALUES ($1, $2, 'waiting', 1)`,
-        [room3v3Id, u.id]
-      );
-
-      if (other3v3User) {
-        await client.query(
-          `INSERT INTO room_participants (room_id, user_id, state, seat)
-           VALUES ($1, $2, 'waiting', 4)`,
-          [room3v3Id, other3v3User.id]
-        );
-        await client.query(
-          `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
-            WHERE user_id = $1 AND status = 'queued'`, [other3v3User.id, room3v3Id]
-        );
-        rt.sendToUser(other3v3User.id, { type: 'matchmaking', action: 'found', room: code3v3, mode: '3v3' });
-      }
-
-      rt.broadcastRoomsList('created');
-      await client.query('COMMIT');
-      return res.json({ matched: true, room: code3v3, mode: '3v3' });
     }
 
-    // 1v1 Matchmaking (default)
-    await client.query(
-      `INSERT INTO matchmaking_queue (user_id, prefs)
-       VALUES ($1, $2::jsonb)`,
-      [u.id, JSON.stringify({ competition_type: 'casual', format: 'one_on_one', battle_mode: '1v1', time_limit_seconds: 1200 })]
-    );
-    // v42: the deadline anchor — the client countdown and the server expiry
-    // are BOTH derived from this exact queued_at instant (+ 180 s).
-    const { rows: qRows } = await client.query(
-      `SELECT queued_at FROM matchmaking_queue WHERE user_id = $1 AND status = 'queued'`, [u.id]);
-    queuedAt = qRows[0] ? qRows[0].queued_at : null;
-    m = await tryMatch(client, u);
-    await client.query('COMMIT');
+    else {
+      // 1v1 Matchmaking (default)
+      await client.query(
+        `INSERT INTO matchmaking_queue (user_id, prefs)
+         VALUES ($1, $2::jsonb)`,
+        [u.id, JSON.stringify({ competition_type: 'casual', format: 'one_on_one', battle_mode: '1v1', time_limit_seconds: 1200 })]
+      );
+      // v42: the deadline anchor — the client countdown and the server expiry
+      // are BOTH derived from this exact queued_at instant (+ 180 s).
+      const { rows: qRows } = await client.query(
+        `SELECT queued_at FROM matchmaking_queue WHERE user_id = $1 AND status = 'queued'`, [u.id]);
+      queuedAt = qRows[0] ? qRows[0].queued_at : null;
+      m = await tryMatch(client, u);
+      await client.query('COMMIT');
+    }
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
     throw e;
@@ -304,18 +355,34 @@ router.post('/enter', ah(async (req, res) => {
     client.release();
   }
 
+  // v67: 3v3 outcomes — side effects run AFTER the commit so a notified
+  // client can never race the room row into existence.
+  if (joined3) {
+    rt.emitRoom(joined3.code, { action: 'joined', user_id: u.id, username: u.username, display_name: u.display_name, seat: joined3.seat });
+    rt.broadcastRoomsList('joined');
+    return res.json({ matched: true, room: joined3.code, mode: '3v3', battle_mode: '3v3' });
+  }
+  if (m3) {
+    remember(u, m3.other, m3.code, '3v3');
+    rt.sendToUser(m3.other.id, { type: 'matchmaking', action: 'found', room: m3.code, mode: '3v3', battle_mode: '3v3' });
+    rt.broadcastRoomsList('created');
+    return res.json({ matched: true, room: m3.code, mode: '3v3', battle_mode: '3v3' });
+  }
+  if (search3) return res.json(search3);
+
   if (m) {
-    remember(m.a, m.b, m.code);
+    remember(m.a, m.b, m.code, '1v1');
     // Live notification over the same real-time hub the rooms use.
-    rt.sendToUser(m.a.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.b, mode: '1v1' });
-    rt.sendToUser(m.b.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.a, mode: '1v1' });
+    rt.sendToUser(m.a.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.b, mode: '1v1', battle_mode: '1v1' });
+    rt.sendToUser(m.b.id, { type: 'matchmaking', action: 'found', room: m.code, opponent: m.a, mode: '1v1', battle_mode: '1v1' });
     const opponent = m.a.id === u.id ? m.b : m.a;
-    return res.json({ matched: true, room: m.code, opponent, mode: '1v1' });
+    return res.json({ matched: true, room: m.code, opponent, mode: '1v1', battle_mode: '1v1' });
   }
   res.json({
     matched: false,
     in_queue: true,
     mode: '1v1',
+    battle_mode: '1v1',
     position: await queuePosition(u.id),
     queued_at: queuedAt ? queuedAt.toISOString() : null,          // v42: anchor
     deadline_at: queuedAt
@@ -367,9 +434,13 @@ router.post('/cancel', ah(async (req, res) => {
           AND user_id = $2 AND state IN ('waiting','ready')`, [m.room_code, u.id]);
     recent.delete(u.id);
     // Tell the partner (their client may not be in the room channel yet).
-    rt.sendToUser(m.opponent.id, {
-      type: 'matchmaking', action: 'opponent_left', room: m.room_code, username: u.username,
-    });
+    // v67: 3v3 matches have no single opponent (opponent: null) — the room
+    // channel itself carries the leave event to any teammates inside.
+    if (m.opponent) {
+      rt.sendToUser(m.opponent.id, {
+        type: 'matchmaking', action: 'opponent_left', room: m.room_code, username: u.username,
+      });
+    }
     // If nobody is left, the room ends itself.
     const { rows } = await pool.query(
       `SELECT count(*)::int AS n FROM room_participants

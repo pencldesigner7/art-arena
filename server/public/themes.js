@@ -113,7 +113,6 @@
     if (this.theme === 'cloud') { if (!this.cloudSky) this.bakeClouds(); }
     else if (this.theme === 'graffiti') this.bakeWall();
     else if (this.theme === 'magazine') this.bakePaper();
-    else if (this.theme === 'stitch') this.bakeWeave();
     else if (this.theme === 'glowing') this.bakeGlow();
     else if (this.theme === 'pixel') this.bakePixel();
   };
@@ -336,169 +335,6 @@
     this.nextPlace = 2.5;
   };
 
-  // STITCH (v56) — a fashion atelier: an invisible hand sketches ONE outfit
-  // at a time inside the embroidery hoop — gown → jacket → sneakers — with
-  // running-stitch strokes and a floating needle tip. The sketch completes,
-  // holds, then unpicks itself and the next design begins. Textile world:
-  // dark linen, weave texture, drifting thread curls. Nothing static.
-  ThemeScene.prototype.bakeWeave = function () {
-    var w = mk(64, 64), x = w.getContext('2d');
-    x.strokeStyle = 'rgba(255,255,255,.028)'; x.lineWidth = 1;
-    for (var i = 0; i <= 64; i += 8) {
-      x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 64); x.stroke();
-      x.beginPath(); x.moveTo(0, i); x.lineTo(64, i); x.stroke();
-    }
-    x.strokeStyle = 'rgba(0,0,0,.05)';
-    for (var j = 4; j < 64; j += 8) {
-      x.beginPath(); x.moveTo(j, 0); x.lineTo(j, 64); x.stroke();
-    }
-    this.spr.weave = w;
-    // v65.1: the atelier's WALL PRINT — the artist's submission (toned into
-    // the stitch world, /themes/stitch-bg.png). Loaded once; drawn cover-fit
-    // with a slow breath + the same lissajous pan as the linen, so it moves
-    // as ONE living atelier. Missing file => the plain linen stays (safe).
-    this.artCanvas = null;
-    if (!this.artImg) {
-      var selfA = this, aImg = new Image();
-      aImg.onload = function () {
-        selfA.artImg = aImg; selfA.artCanvas = aImg;
-        if (!selfA.dead) { selfA._bakeKey = null; selfA.bake(); selfA.staticFrame(); }
-      };
-      aImg.src = '/themes/stitch-bg.png';
-      this.artImg = aImg; // in-flight marker (prevents duplicate loads)
-    } else if (this.artImg.complete && this.artImg.naturalWidth > 0) {
-      this.artCanvas = this.artImg;
-    }
-    // the atelier hoop — big, centered, the page of the sketchbook
-    var r = Math.min(this.w, this.h) * 0.34, hc = mk(r * 2 + 26, r * 2 + 26), hx = hc.getContext('2d');
-    hx.translate(hc.width / 2, hc.height / 2);
-    hx.fillStyle = 'rgba(232,216,196,.07)';
-    hx.beginPath(); hx.arc(0, 0, r - 7, 0, 6.283); hx.fill();
-    hx.strokeStyle = 'rgba(196,148,96,.55)'; hx.lineWidth = 7;
-    hx.beginPath(); hx.arc(0, 0, r, 0, 6.283); hx.stroke();
-    hx.strokeStyle = 'rgba(148,104,62,.45)'; hx.lineWidth = 3;
-    hx.beginPath(); hx.arc(0, 0, r + 6, 0, 6.283); hx.stroke();
-    hx.beginPath(); hx.arc(0, 0, r - 6, 0, 6.283); hx.stroke();
-    // hoop clamp at the top
-    hx.strokeStyle = 'rgba(148,104,62,.6)'; hx.lineWidth = 5;
-    hx.beginPath(); hx.moveTo(0, -r - 11); hx.lineTo(0, -r + 9); hx.stroke();
-    this.spr.hoop = hc;
-    // drifting thread curls (ambient textile life)
-    this.spr.threads = [];
-    for (var t = 0; t < 4; t++) {
-      var tc = mk(90, 26), tx = tc.getContext('2d');
-      tx.strokeStyle = 'rgba(196,148,96,.34)'; tx.lineWidth = 2.2; tx.lineCap = 'round';
-      tx.beginPath(); tx.moveTo(6, 16);
-      tx.bezierCurveTo(26, 2, 40, 26, 58, 12);
-      tx.bezierCurveTo(70, 2, 80, 20, 88, 10);
-      tx.stroke();
-      this.spr.threads.push({ img: tc, x: rnd(0, this.w), y: rnd(this.h * 0.06, this.h * 0.94), vx: rnd(2.5, 7) * (Math.random() < 0.5 ? -1 : 1), ph: rnd(0, 6.28) });
-    }
-    // plum scrims (same integration pattern as the graffiti wall): the wall
-    // print melts into the page and the UI text keeps its contrast over art.
-    var sc1 = mk(64, 220), sx1 = sc1.getContext('2d');
-    var g1 = sx1.createLinearGradient(0, 0, 0, 220);
-    g1.addColorStop(0, 'rgba(24,19,31,.55)'); g1.addColorStop(1, 'rgba(24,19,31,0)');
-    sx1.fillStyle = g1; sx1.fillRect(0, 0, 64, 220);
-    this.spr.scrimTop = sc1;
-    var sc2 = mk(64, 220), sx2 = sc2.getContext('2d');
-    var g2 = sx2.createLinearGradient(0, 0, 0, 220);
-    g2.addColorStop(0, 'rgba(24,19,31,0)'); g2.addColorStop(1, 'rgba(24,19,31,.5)');
-    sx2.fillStyle = g2; sx2.fillRect(0, 0, 64, 220);
-    this.spr.scrimBottom = sc2;
-    var sc3 = mk(512, 512), sx3 = sc3.getContext('2d');
-    var g3 = sx3.createRadialGradient(256, 256, 120, 256, 256, 330);
-    g3.addColorStop(0, 'rgba(24,19,31,0)'); g3.addColorStop(1, 'rgba(24,19,31,.42)');
-    sx3.fillStyle = g3; sx3.fillRect(0, 0, 512, 512);
-    this.spr.scrimVig = sc3;
-    // the sketchbook: three designs, one live at a time
-    this.sketch = { idx: 0, u: 0, phase: 'draw', hold: 0 };
-    this.designs = this.makeDesigns();
-    this._designPx = null; // baked to pixel space per resize
-  };
-
-  // garment designs as normalized stroke lists (0..1 design space, y down).
-  // Silhouettes wear the theme's c2 thread; construction lines the c1 linen;
-  // laces/accents take gold + sage. Drawn as running-stitch dashed lines.
-  ThemeScene.prototype.makeDesigns = function () {
-    var self = this;
-    var C = function (k) { return function () { return self['_' + k] || k; }; };
-    function st(pts, cKey, lw, dash) { return { pts: pts, c: cKey, lw: lw || 2.6, dash: dash || [11, 8] }; }
-    function dot(x, y, r) { return { dot: 1, x: x, y: y, r: r || 2.6 }; }
-    return [
-      { name: 'gown', strokes: [
-        st([[.42,.14],[.36,.15],[.33,.22],[.34,.30],[.36,.34]], 'c2', 2.8),
-        st([[.58,.14],[.64,.15],[.67,.22],[.66,.30],[.64,.34]], 'c2', 2.8),
-        st([[.42,.14],[.46,.19],[.50,.20],[.54,.19],[.58,.14]], 'c2'),
-        st([[.42,.14],[.44,.09],[.47,.075]], 'c1'),
-        st([[.58,.14],[.56,.09],[.53,.075]], 'c1'),
-        st([[.36,.34],[.28,.52],[.20,.72],[.14,.92]], 'c2', 2.8),
-        st([[.64,.34],[.74,.52],[.84,.72],[.90,.94]], 'c2', 2.8),
-        st([[.14,.92],[.30,.97],[.52,.985],[.72,.97],[.90,.94]], 'c2', 2.8),
-        st([[.36,.34],[.50,.37],[.64,.34]], 'c1'),
-        st([[.44,.42],[.42,.62],[.40,.86]], 'gold'),
-        st([[.50,.42],[.50,.68],[.49,.90]], 'gold'),
-        st([[.56,.42],[.58,.62],[.61,.88]], 'gold')
-      ] },
-      { name: 'jacket', strokes: [
-        st([[.50,.10],[.42,.12],[.38,.20]], 'c2', 2.8),
-        st([[.38,.20],[.44,.30],[.43,.38]], 'c2', 2.8),
-        st([[.50,.10],[.58,.12],[.62,.20]], 'c2', 2.8),
-        st([[.62,.20],[.56,.30],[.57,.38]], 'c2', 2.8),
-        st([[.38,.13],[.26,.16]], 'c2'),
-        st([[.62,.13],[.74,.16]], 'c2'),
-        st([[.26,.16],[.22,.34],[.20,.52]], 'c2'),
-        st([[.20,.52],[.25,.53]], 'c1'),
-        st([[.74,.16],[.78,.34],[.80,.52]], 'c2'),
-        st([[.80,.52],[.75,.53]], 'c1'),
-        st([[.40,.20],[.37,.50],[.36,.74]], 'c2'),
-        st([[.60,.20],[.63,.50],[.64,.74]], 'c2'),
-        st([[.36,.74],[.50,.77],[.64,.74]], 'c2'),
-        st([[.50,.16],[.50,.74]], 'c1'),
-        st([[.41,.52],[.46,.53]], 'sage'),
-        st([[.41,.52],[.41,.57],[.46,.58],[.46,.53]], 'sage'),
-        dot(.50,.28), dot(.50,.42), dot(.50,.56), dot(.50,.68)
-      ] },
-      { name: 'sneakers', strokes: [
-        st([[.12,.74],[.16,.82],[.30,.86],[.55,.87],[.72,.85],[.84,.80],[.88,.72],[.84,.70],[.70,.75],[.50,.77],[.30,.76],[.16,.71],[.12,.74]], 'c2', 2.8),
-        st([[.14,.72],[.30,.77],[.50,.78],[.70,.76],[.86,.70]], 'c1'),
-        st([[.88,.72],[.90,.62],[.86,.52],[.78,.47]], 'c2'),
-        st([[.78,.47],[.62,.44],[.50,.46]], 'c2'),
-        st([[.50,.46],[.44,.40],[.42,.32]], 'c2'),
-        st([[.42,.32],[.32,.30],[.24,.34],[.20,.44]], 'c2'),
-        st([[.20,.44],[.17,.58],[.14,.68]], 'c2'),
-        st([[.22,.34],[.19,.28]], 'c1'),
-        st([[.46,.42],[.52,.46]], 'gold'), st([[.52,.42],[.46,.46]], 'gold'),
-        st([[.44,.37],[.50,.41]], 'gold'), st([[.50,.37],[.44,.41]], 'gold'),
-        st([[.43,.33],[.48,.36]], 'gold'), st([[.48,.33],[.43,.36]], 'gold'),
-        st([[.26,.58],[.40,.60],[.54,.57],[.62,.52]], 'sage')
-      ] }
-    ];
-  };
-
-  // pixel-space design (recomputed on resize) + cumulative lengths for the
-  // progressive reveal. The design box lives inside the hoop.
-  ThemeScene.prototype.designPx = function () {
-    if (this._designPx && this._designPx.w === this.w && this._designPx.h === this.h) return this._designPx;
-    var cx = this.w * 0.5, cy = this.h * 0.52, r = Math.min(this.w, this.h) * 0.34 - 26;
-    var dw = r * 1.55, dh = r * 1.9; // fashion-plate proportions
-    var out = { w: this.w, h: this.h, cx: cx, cy: cy, dw: dw, dh: dh, items: [] };
-    (this.designs || []).forEach(function (g) {
-      var strokes = [], total = 0;
-      g.strokes.forEach(function (s0) {
-        if (s0.dot) { strokes.push({ dot: 1, x: cx - dw / 2 + s0.x * dw, y: cy - dh / 2 + s0.y * dh, r: s0.r, c: s0.c || 'c2', at: total }); return; }
-        var pts = s0.pts.map(function (p) { return [cx - dw / 2 + p[0] * dw, cy - dh / 2 + p[1] * dh]; });
-        var len = 0;
-        for (var k = 1; k < pts.length; k++) len += Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]);
-        total += len;
-        strokes.push({ pts: pts, len: len, at: total - len, c: s0.c, lw: s0.lw, dash: s0.dash });
-      });
-      out.items.push({ name: g.name, strokes: strokes, total: total });
-    });
-    this._designPx = out;
-    return out;
-  };
-
   // PIXEL (v57) — a pop-art PIXEL world in the pixel logo's own palette
   // (magenta / cyan / gold / violet on deep navy), built from the supplied
   // comic reference: a radial halftone dot field, a sunburst of chunky rays,
@@ -719,27 +555,6 @@
         old.settle = 0; old.x = rnd(-10, w - 80); old.y = rnd(-10, h - 80); old.rot = rnd(-0.34, 0.34);
         this.stats.placed++;
       }
-    } else if (this.theme === 'stitch') {
-      // the invisible hand: draw → hold → unpick → next design (one at a time)
-      var sk = this.sketch;
-      if (sk) {
-        if (sk.phase === 'draw') {
-          sk.u += dt * 0.22;                          // ~4.5s per garment
-          if (sk.u >= 1) { sk.u = 1; sk.phase = 'hold'; sk.hold = 1.9; }
-        } else if (sk.phase === 'hold') {
-          sk.hold -= dt;
-          if (sk.hold <= 0) sk.phase = 'unpick';
-        } else {
-          sk.u -= dt * 0.5;                           // stitches unpick quickly
-          if (sk.u <= 0) { sk.u = 0; sk.phase = 'draw'; sk.idx = (sk.idx + 1) % 3; }
-        }
-      }
-      var th = this.spr.threads || [];
-      for (i = 0; i < th.length; i++) { th[i].x += th[i].vx * dt; th[i].ph += dt * 0.6; if (th[i].x > this.w + 20) th[i].x = -100; if (th[i].x < -100) th[i].x = this.w + 20; }
-      // v65: the atelier drift — weave pans along a slow lissajous curve;
-      // static frames (reduced motion / Animations OFF) fall at ≈0 offset.
-      this.dx = Math.sin(this.t * 0.13) * 6;
-      this.dy = Math.cos(this.t * 0.09) * 4;
     } else if (this.theme === 'pixel') {
       var pcx = this.pxClouds || [];
       for (i = 0; i < pcx.length; i++) { pcx[i].x += pcx[i].v * dt; if (pcx[i].x - 45 > this.spr.px.width) pcx[i].x = -45; }
@@ -840,100 +655,6 @@
       if (this.spr.scrimVig) ctx.drawImage(this.spr.scrimVig, 0, 0, w, h);
       // v63: no animated spray passes or running drips — the baked wall IS
       // the art. Kept: the imperceptible wall breathing above.
-    } else if (this.theme === 'stitch') {
-      // atelier base: dark linen with the weave texture
-      var linen = ctx.createLinearGradient(0, 0, 0, h);
-      linen.addColorStop(0, '#2c2531'); linen.addColorStop(1, '#241e29');
-      ctx.fillStyle = linen; ctx.fillRect(0, 0, w, h);
-      var weave = this.spr.weave;
-      // v65: the linen drifts — a very slow pan (≤6px, sub-tile) so the
-      // weave never reads as a static print; still under Animations OFF.
-      if (weave) {
-        var oyW = Math.round(this.dy || 0), oxW = Math.round(this.dx || 0);
-        for (var yy = oyW - weave.height; yy < h + weave.height; yy += weave.height)
-          for (var xx = oxW - weave.width; xx < w + weave.width; xx += weave.width)
-            ctx.drawImage(weave, xx, yy);
-      }
-      // v65.1: the wall print — cover-fit over the linen, breathing gently
-      // and panning with the atelier drift; a static frame (reduced motion /
-      // Animations OFF) freezes it centred at ~1x (t is pinned there).
-      var art = this.artCanvas;
-      if (art) {
-        var brArt = 1 + 0.005 * Math.sin(this.t * 0.45);
-        var scArt = Math.max((w + 40) / art.width, (h + 40) / art.height) * brArt;
-        var awArt = art.width * scArt, ahArt = art.height * scArt;
-        ctx.drawImage(art, Math.round(w / 2 - awArt / 2 + (this.dx || 0)),
-                          Math.round(h / 2 - ahArt / 2 + (this.dy || 0)), awArt, ahArt);
-        var sT = this.spr.scrimTop; if (sT) ctx.drawImage(sT, 0, 0, w, Math.round(h * 0.22));
-        var sB = this.spr.scrimBottom; if (sB) ctx.drawImage(sB, 0, h - Math.round(h * 0.22), w, Math.round(h * 0.22));
-        var sV = this.spr.scrimVig; if (sV) ctx.drawImage(sV, 0, 0, w, h);
-      }
-      // drifting thread curls
-      var ths = this.spr.threads || [];
-      for (i = 0; i < ths.length; i++) ctx.drawImage(ths[i].img, Math.round(ths[i].x), Math.round(ths[i].y + Math.sin(ths[i].ph) * 5));
-      // the hoop (design box lives inside it) — v65: a slow 1% breath keeps
-      // the atelier alive; the amplitude is small enough that the sketch
-      // inside (drawn at design scale) never visibly detaches from the ring.
-      var hoop = this.spr.hoop;
-      if (hoop) {
-        var br = 1 + 0.011 * Math.sin(this.t * 0.55);
-        var hw = Math.round(hoop.width * br), hh = Math.round(hoop.height * br);
-        ctx.drawImage(hoop, Math.round(w * 0.5 - hw / 2), Math.round(h * 0.52 - hh / 2), hw, hh);
-      }
-      // the living sketch: one garment, progressively stitched
-      var self = this, sk = this.sketch, D = this.designPx();
-      if (sk && D) {
-        var garment = D.items[sk.idx % D.items.length];
-        var target = garment.total * sk.u;
-        var colFor = function (k) { return k === 'c1' ? self.c1() : k === 'c2' ? self.c2() : k === 'gold' ? '#E8B84B' : k === 'sage' ? '#7FBF9E' : k; };
-        var fade = sk.phase === 'unpick' ? 0.5 : (sk.phase === 'hold' ? 0.62 + 0.06 * Math.sin(this.t * 2.2) : 0.58);
-        var tip = null, tipDir = [1, 0];
-        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-        for (var s2 = 0; s2 < garment.strokes.length; s2++) {
-          var st2 = garment.strokes[s2];
-          if (st2.dot) {
-            if (st2.at <= target) {
-              ctx.fillStyle = rgba(colFor(st2.c), 0.75);
-              ctx.beginPath(); ctx.arc(st2.x, st2.y, st2.r, 0, 6.283); ctx.fill();
-            }
-            continue;
-          }
-          if (st2.at >= target) { if (!tip && st2.pts.length) { tip = st2.pts[0]; tipDir = st2.pts.length > 1 ? [st2.pts[1][0] - st2.pts[0][0], st2.pts[1][1] - st2.pts[0][1]] : tipDir; } continue; }
-          var reach = target - st2.at;              // how far into this stroke
-          ctx.strokeStyle = rgba(colFor(st2.c), fade);
-          ctx.lineWidth = st2.lw; ctx.setLineDash(st2.dash);
-          ctx.beginPath(); ctx.moveTo(st2.pts[0][0], st2.pts[0][1]);
-          var acc = 0, endPt = st2.pts[st2.pts.length - 1], done = true;
-          for (var k2 = 1; k2 < st2.pts.length; k2++) {
-            var a2 = st2.pts[k2 - 1], b2 = st2.pts[k2];
-            var segLen = Math.hypot(b2[0] - a2[0], b2[1] - a2[1]);
-            if (acc + segLen <= reach) { ctx.lineTo(b2[0], b2[1]); acc += segLen; }
-            else {
-              var f2 = Math.max(0, (reach - acc) / (segLen || 1));
-              var px2 = a2[0] + (b2[0] - a2[0]) * f2, py2 = a2[1] + (b2[1] - a2[1]) * f2;
-              ctx.lineTo(px2, py2);
-              endPt = [px2, py2]; tipDir = [b2[0] - a2[0], b2[1] - a2[1]]; done = false;
-              break;
-            }
-          }
-          ctx.stroke(); ctx.setLineDash([]);
-          if (!done) tip = endPt; else if (s2 === garment.strokes.length - 1 || garment.strokes[s2 + 1].at >= target) tip = endPt;
-        }
-        // the only visible part of the "hand": a floating needle at the tip.
-        // Parked (hidden) while the finished design is held for admiration.
-        if (sk.phase !== 'hold' && tip) {
-          var dl = Math.hypot(tipDir[0], tipDir[1]) || 1;
-          var dx2 = tipDir[0] / dl, dy2 = tipDir[1] / dl;
-          ctx.strokeStyle = 'rgba(226,230,238,.85)'; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(tip[0] + dx2 * 3, tip[1] + dy2 * 3);
-          ctx.lineTo(tip[0] - dx2 * 15, tip[1] - dy2 * 15); ctx.stroke();
-          ctx.strokeStyle = rgba(self.c2(), 0.6); ctx.lineWidth = 1.2;
-          ctx.beginPath(); ctx.moveTo(tip[0] - dx2 * 15, tip[1] - dy2 * 15);
-          ctx.quadraticCurveTo(tip[0] - dx2 * 26, tip[1] - dy2 * 8 + 7, tip[0] - dx2 * 20, tip[1] + 14); ctx.stroke();
-          ctx.fillStyle = 'rgba(255,255,255,.95)';
-          ctx.beginPath(); ctx.arc(tip[0] + dx2 * 2, tip[1] + dy2 * 2, 1.8, 0, 6.283); ctx.fill();
-        }
-      }
     } else if (this.theme === 'pixel') {
       var px = this.spr.px, S = this.pxScale || 5, PX = ThemeScene.PIXEL;
       if (px) {
@@ -1035,7 +756,6 @@
     glowing: { c1: '#6ED4BF', c2: '#51A8D9' },   // v55: green+blue derived from the supplied logo
     pixel: { c1: '#E337C4', c2: '#77D5DF' },      // v56: arcade magenta+cyan from the supplied pixel logo
     graffiti: { c1: '#F2F2F2', c2: '#BFBFBF' },  // v55: pure black & white world
-    stitch: { c1: '#E8D8C4', c2: '#FF6A5A' },
     cloud: { c1: '#4A9FE8', c2: '#8EC9F5' },
     magazine: { c1: '#FF5A5A', c2: '#222228' }
   };
