@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="62">
+<meta name="aa-ui-version" content="67">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>
@@ -166,8 +166,10 @@ try {
   #bk-champ .bk-cup { font-size:21px; line-height:1; }
   #bk-champ .bk-sub { font-weight:600; font-size:11.5px; color:var(--muted); }
   #bk-await { border:1px dashed var(--line); border-radius:10px; padding:11px 13px; color:var(--muted); font-size:12.5px; }
-  .seat { background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:14px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-  .seat.empty { color:var(--muted); border-style:dashed; }
+  .seat { background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:14px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; }
+  .seat.empty { color:var(--muted); border-style:dashed; cursor:default; }
+  .seat.seat-selected, .tt-seat.seat-selected { outline:2px solid var(--pink); outline-offset:1px; background:rgba(var(--pink-rgb),.08); }
+  .bm-choice-btn:hover { border-color:var(--pink) !important; background:var(--surface-hover) !important; transform:translateY(-1px); }
   .room-host { font-size:16px; font-weight:700; margin:4px 0 6px; }
   .room-hint { font-size:13px; color:var(--muted); margin:10px 0 0; }
   .battle-card { margin-top:16px; background:linear-gradient(135deg, rgba(var(--purple-rgb),.14), rgba(var(--pink-rgb),.10)); border-color:rgba(var(--purple-rgb),.5); }
@@ -337,9 +339,6 @@ try {
   body[data-ptheme="graffiti"] .card, body[data-ptheme="graffiti"] .home-card, body[data-ptheme="graffiti"] .settings-appearance { background-color:rgba(13,13,13,.92); border-color:#4a4a4a; }
   body[data-ptheme="graffiti"] .badge.next, body[data-ptheme="graffiti"] .state-chip { transform:rotate(-1.4deg); }
   body[data-ptheme="graffiti"] .card::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.5; background:radial-gradient(circle at 88% 8%, rgba(var(--purple-rgb),.16) 0 2px, transparent 3px), radial-gradient(circle at 92% 14%, rgba(var(--pink-rgb),.2) 0 2.5px, transparent 4px), radial-gradient(circle at 85% 16%, rgba(var(--purple-rgb),.14) 0 1.6px, transparent 3px); }
-  body[data-ptheme="stitch"] { --pink:#FF6A5A; --purple:#D8A25C; --pink-rgb:255,106,90; --purple-rgb:216,162,92; --surface:#1f1a24; --surface-hover:#251f2b; --surface-2:#2e2735; --bg:#171320; --panel:#1e1926; --line:#4a3f56; --muted:#b3a3c0; --btn-line:#4a3f56; --auth-card:rgba(26,21,30,.88); --auth-page-bg:#171320; }
-  body[data-ptheme="stitch"] .card, body[data-ptheme="stitch"] .time-modal, body[data-ptheme="stitch"] .settings-appearance { border:1.5px dashed #6b5a7a; border-radius:14px; background-image:repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 2px, transparent 2px 5px); }
-  body[data-ptheme="stitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { border:1.5px dashed #b392cb; border-radius:12px; }
   body[data-ptheme="glowing"] { --pink:var(--pth-c1,#6ED4BF); --purple:var(--pth-c2,#51A8D9); --pink-rgb:var(--pth-c1-rgb,110,212,191); --purple-rgb:var(--pth-c2-rgb,81,168,217); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
   body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 18px -4px var(--pth-c1,#6ED4BF); }
   /* v61: GLOWING containers use SOLID theme-coloured borders — no halo
@@ -528,7 +527,6 @@ try {
   .theme-swatch .swatch-logo.sl-cloud { background:linear-gradient(135deg,#cfe4f6,#eaf4fd); }
   .theme-swatch .swatch-logo.sl-glitch { background:linear-gradient(135deg,#070a12,#101b30); }
   .theme-swatch .swatch-logo.sl-graffiti { background:linear-gradient(135deg,#151009,#2a2417); }
-  .theme-swatch .swatch-logo.sl-stitch { background:linear-gradient(135deg,#241d2b,#171320); }
   .theme-swatch .swatch-logo.sl-glowing { background:linear-gradient(135deg,#0b1220,#12263a); }
   .theme-swatch .swatch-logo.sl-magazine { background:linear-gradient(135deg,#e9e2d4,#f7f3ea); }
   .theme-swatch .swatch-logo.sl-pixel { background:linear-gradient(135deg,#0C1C4A,#2a1e44); }
@@ -612,7 +610,6 @@ try {
   body[data-ptheme="cloud"] .dest-ico svg { background:radial-gradient(circle, rgba(255,255,255,.92) 0 60%, transparent 61%); border-radius:50%; }
   body[data-ptheme="glitch"] .dest-ico { filter:drop-shadow(1.6px 0 0 rgba(var(--pink-rgb),.85)) drop-shadow(-1.6px 0 0 rgba(var(--purple-rgb),.85)); }
   body[data-ptheme="graffiti"] .dest-ico svg { border:2px solid var(--pink); border-radius:48% 52% 46% 54%; padding:4px; }
-  body[data-ptheme="stitch"] .dest-ico svg { border:2px dashed var(--pink); border-radius:50%; padding:4px; }
   body[data-ptheme="glowing"] .dest-ico { filter:drop-shadow(0 0 12px rgba(var(--pink-rgb),.65)); }
   body[data-ptheme="magazine"] .dest-ico svg { background:var(--surface); border:1.5px solid var(--text); box-shadow:2px 2px 0 rgba(35,33,29,.28); padding:5px; transform:rotate(-2deg); }
 
@@ -625,7 +622,9 @@ try {
   body[data-ptheme="cloud"] .hc-ico > svg { background:radial-gradient(circle, rgba(255,255,255,.92) 0 60%, transparent 61%); border-radius:50%; }
   body[data-ptheme="glitch"] .hc-ico { filter:drop-shadow(1.6px 0 0 rgba(var(--pink-rgb),.85)) drop-shadow(-1.6px 0 0 rgba(var(--purple-rgb),.85)); }
   body[data-ptheme="graffiti"] .hc-ico > svg { border:2px solid var(--pink); border-radius:48% 52% 46% 54%; padding:4px; }
-  body[data-ptheme="stitch"] .hc-ico > svg { border:2px dashed var(--pink); border-radius:50%; padding:4px; }
+  body[data-ptheme="graffiti"] .home-card .hc-ico > svg { stroke: #000000 !important; color: #000000 !important; border-color: #000000 !important; }
+  body[data-ptheme="graffiti"] .home-card .hc-ico > svg * { stroke: #000000 !important; }
+  body[data-ptheme="graffiti"] .home-card .hc-chev svg { stroke: #000000 !important; color: #000000 !important; }
   body[data-ptheme="glowing"] .hc-ico { filter:drop-shadow(0 0 12px rgba(var(--pink-rgb),.65)); }
   body[data-ptheme="magazine"] .hc-ico > svg { background:var(--surface); border:1.5px solid var(--text); box-shadow:2px 2px 0 rgba(35,33,29,.28); padding:5px; transform:rotate(-2deg); }
 
@@ -668,7 +667,6 @@ try {
   .sw-cloud { background:linear-gradient(180deg,#8ec9f5 0%, #c9e6fb 60%, #eef7ff); }
   .sw-glitch { background:linear-gradient(135deg,#060810 50%, #00F0FF 50.1%, #FF2BD1); }
   .sw-graffiti { background:linear-gradient(135deg,#100d1c 55%, #FF4FA3 55.1%, #25C4A9); }
-  .sw-stitch { background:repeating-linear-gradient(45deg,#171320 0 7px,#2e2735 7px 14px); border:1.5px dashed #b392cb; }
   .sw-glowing { background:radial-gradient(circle at 30% 45%, #6ED4BF 0%, #101024 62%), radial-gradient(circle at 75% 70%, #51A8D9 0%, transparent 45%); background-color:#0a0a18; }
   .sw-magazine { background:#f4f1ea; position:relative; }
   .sw-default { background:linear-gradient(135deg,#09070d 50%, #FF3CAC 50.1%, #7B2CFF); }
@@ -716,6 +714,7 @@ try {
   .friend-add:hover { border-color:var(--pink); color:var(--pink); }
   .friend-add.accept { border-color:var(--pink); color:var(--pink); }
   .friend-chip { font-size:11px; color:var(--muted); border:1px dashed var(--line); border-radius:8px; padding:3px 8px; white-space:nowrap; }
+  .friend-chip.is-friend { border-color:rgba(var(--pink-rgb),.45); color:var(--pink); font-weight:700; background:rgba(var(--pink-rgb),.06); }
   /* v59: every relation state is an actionable control */
   .friend-add.pending { border-style:dashed; color:var(--muted); }
   .friend-add.pending:hover { border-color:var(--danger-tx); color:var(--danger-tx); }
@@ -827,12 +826,1188 @@ try {
   .room-ctxmenu button { display:flex; width:100%; margin:0; border-radius:0; padding:11px 14px; font-size:14px; font-weight:600; text-align:left; background:none; color:var(--text); }
   .room-ctxmenu button:hover { filter:none; background:var(--surface-hover); }
   .room-ctxmenu button.danger { color:var(--danger-tx); }
+  /* ================== v65: themed profile modal cards ==================
+     Perspective Logic: A profile modal always represents the profile OWNER's
+     active theme and premium status. Overrides viewer's global theme variables. */
+  .prof-modal-card { position:relative; overflow:hidden; transition:background .25s ease, border-color .25s ease, box-shadow .25s ease; }
+  .prof-modal-prem { position:absolute; top:12px; right:14px; z-index:10; width:38px; height:38px; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  .prof-modal-prem .prem-emblem { width:38px; height:38px; filter:drop-shadow(0 0 8px rgba(var(--pink-rgb,255,60,172),.5)) drop-shadow(0 4px 6px rgba(0,0,0,.45)); animation:pe-halo 4s ease-in-out infinite; }
   .prof-modal-ava { width:64px; height:64px; border-radius:50%; object-fit:cover; border:2px solid var(--pink); background:var(--surface-2); }
   .prof-modal-ava-fallback { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:24px; color:#fff; background:linear-gradient(135deg,var(--pink),var(--purple)); }
   .prof-stats-row { display:flex; gap:8px; margin-top:12px; }
   .prof-stat-cell { flex:1; text-align:center; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 4px; }
   .prof-stat-cell b { display:block; font-size:17px; }
   .prof-stat-cell span { font-size:10.5px; color:var(--muted); letter-spacing:.5px; }
+
+  /* Free / Default Profile Theme */
+  .prof-modal-card[data-prof-theme="default"], .prof-modal-card:not([data-prof-theme]) {
+    background-color:#161022 !important;
+    background-image:none !important;
+    border:1px solid #2c2142 !important;
+    border-radius:14px !important;
+    box-shadow:0 24px 70px rgba(0,0,0,.55) !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] #pm-title, .prof-modal-card:not([data-prof-theme]) #pm-title {
+    color:#f4f0fa !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-modal-ava, .prof-modal-card:not([data-prof-theme]) .prof-modal-ava {
+    border:2px solid #ff3cac !important;
+    box-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-modal-ava-fallback, .prof-modal-card:not([data-prof-theme]) .prof-modal-ava-fallback {
+    background:linear-gradient(135deg, #ff3cac, #7b2cff) !important;
+    border:none !important;
+    box-shadow:none !important;
+    color:#ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-modal-display-name, .prof-modal-card:not([data-prof-theme]) .prof-modal-display-name {
+    color:#f4f0fa !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-modal-handle, .prof-modal-card:not([data-prof-theme]) .prof-modal-handle {
+    color:#9b8fb5 !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-modal-bio, .prof-modal-card:not([data-prof-theme]) .prof-modal-bio {
+    color:#9b8fb5 !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-stats-row .prof-stat-cell, .prof-modal-card:not([data-prof-theme]) .prof-stats-row .prof-stat-cell {
+    background:#0d0917 !important;
+    border:1px solid #2c2142 !important;
+    border-radius:10px !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-stats-row .prof-stat-cell b, .prof-modal-card:not([data-prof-theme]) .prof-stats-row .prof-stat-cell b {
+    color:#f4f0fa !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-stats-row .prof-stat-cell span, .prof-modal-card:not([data-prof-theme]) .prof-stats-row .prof-stat-cell span {
+    color:#9b8fb5 !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .prof-modal-joined, .prof-modal-card:not([data-prof-theme]) .prof-modal-joined {
+    color:#9b8fb5 !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-close, .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-friend-decline, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-close, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-friend-decline {
+    border:1px solid #2c2142 !important;
+    color:#f4f0fa !important;
+    background:#0d0917 !important;
+    box-shadow:none !important;
+    border-radius:10px !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-friend, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-friend {
+    border:none !important;
+    color:#fff !important;
+    background:linear-gradient(135deg, #ff3cac, #7b2cff) !important;
+    box-shadow:none !important;
+    border-radius:10px !important;
+  }
+  .prof-modal-card[data-prof-theme="default"] .time-modal-actions #pm-friend.is-remove, .prof-modal-card:not([data-prof-theme]) .time-modal-actions #pm-friend.is-remove {
+    border:1px solid #ff3cac !important;
+    color:#ff3cac !important;
+    background:transparent !important;
+  }
+  .prof-modal-card .prem-chip {
+    background:linear-gradient(90deg, var(--pm-c1, #ff3cac), var(--pm-c2, #7b2cff)) !important;
+    border:1px solid var(--pm-c1, #ff3cac) !important;
+    color:#ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prem-chip {
+    background:#000000 !important;
+    border:1px solid #000000 !important;
+    color:#ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prem-chip {
+    background:#23211d !important;
+    border:1px solid #23211d !important;
+    color:#ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prem-chip {
+    background:linear-gradient(90deg, #3e8ee0, #6fb6f2) !important;
+    border:1px solid #3e8ee0 !important;
+    color:#ffffff !important;
+  }
+
+  /* 1. FLAME THEME (Document.jpg authoritative reference) */
+  .prof-modal-card[data-prof-theme="flame"] {
+    background-color:#000000 !important;
+    background-image:url("/themes/profile-flame.png") !important;
+    background-size:cover !important;
+    background-position:bottom center !important;
+    background-repeat:no-repeat !important;
+    border:none !important;
+    border-radius:44px !important;
+    padding:30px 24px 26px !important;
+    width:min(420px,100%) !important;
+    box-shadow:0 0 40px rgba(255,90,0,.4), 0 25px 60px rgba(0,0,0,.95) !important;
+    overflow:hidden !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] #pm-prem-badge {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prem-chip {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] #pm-title {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    margin:0 0 16px 0 !important;
+    text-shadow:0 2px 4px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-modal-ava {
+    width:60px !important;
+    height:60px !important;
+    border:2px solid var(--pm-c1, #ff7a00) !important;
+    box-shadow:0 0 12px rgba(255,120,0,.6) !important;
+    border-radius:50% !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-modal-ava-fallback {
+    width:60px !important;
+    height:60px !important;
+    background:radial-gradient(circle, #ff9500 0%, #e65100 100%) !important;
+    border:2px solid var(--pm-c1, #ff7a00) !important;
+    box-shadow:0 0 12px rgba(255,120,0,.6) !important;
+    color:#ffffff !important;
+    font-size:28px !important;
+    font-weight:900 !important;
+    border-radius:50% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-modal-display-name {
+    color:#ffffff !important;
+    font-size:21px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    text-shadow:0 2px 4px rgba(0,0,0,.9) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-modal-handle {
+    color:#ffffff !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin-top:2px !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.9) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-modal-bio {
+    color:#ffffff !important;
+    font-size:13.5px !important;
+    font-weight:600 !important;
+    opacity:0.92 !important;
+    margin:10px 0 4px !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.9) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-stats-row {
+    display:grid !important;
+    grid-template-columns:repeat(4, 1fr) !important;
+    gap:10px !important;
+    margin:18px 0 14px !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-stats-row .prof-stat-cell {
+    background:transparent !important;
+    border:1.5px solid var(--pm-c1, #ff5a00) !important;
+    border-radius:14px !important;
+    padding:12px 4px !important;
+    text-align:center !important;
+    box-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-stats-row .prof-stat-cell b {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    display:block !important;
+    line-height:1.1 !important;
+    text-shadow:0 2px 4px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-stats-row .prof-stat-cell span {
+    color:#ffffff !important;
+    font-size:10px !important;
+    font-weight:800 !important;
+    letter-spacing:0.6px !important;
+    text-transform:uppercase !important;
+    display:block !important;
+    margin-top:4px !important;
+    opacity:0.95 !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .prof-modal-joined {
+    color:#ffffff !important;
+    font-size:13px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin:12px 0 16px 2px !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.9) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions {
+    display:flex !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions button,
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions #pm-close,
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions #pm-friend,
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions #pm-friend-decline {
+    border:1.5px solid var(--pm-c1, #ff5a00) !important;
+    border-radius:14px !important;
+    color:#ffffff !important;
+    background:transparent !important;
+    font-weight:800 !important;
+    font-size:16px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions #pm-friend.is-remove {
+    border:1.5px solid var(--pm-c1, #ff5a00) !important;
+    color:#ff6a00 !important;
+    background:transparent !important;
+    font-weight:800 !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions button:hover,
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions #pm-close:hover,
+  .prof-modal-card[data-prof-theme="flame"] .time-modal-actions #pm-friend:hover {
+    background:rgba(255,90,0,.15) !important;
+    border-color:#ff7a00 !important;
+    box-shadow:0 0 14px rgba(255,100,0,.35) !important;
+  }
+
+  /* 2. CLOUD THEME (Document 2.jpg authoritative reference) */
+  .prof-modal-card[data-prof-theme="cloud"] {
+    background-color:#e8f4fd !important;
+    background-image:url("/themes/profile-cloud.jpg") !important;
+    background-size:cover !important;
+    background-position:center center !important;
+    background-repeat:no-repeat !important;
+    border:none !important;
+    border-radius:44px !important;
+    padding:30px 24px 26px !important;
+    width:min(420px,100%) !important;
+    box-shadow:0 0 40px rgba(62,142,224,.35), 0 25px 60px rgba(0,40,80,.15) !important;
+    overflow:hidden !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] #pm-prem-badge {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prem-chip {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] #pm-title {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    margin:0 0 16px 0 !important;
+    text-shadow:0 2px 4px rgba(30,90,170,.5) !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-modal-ava {
+    width:60px !important;
+    height:60px !important;
+    border:2px solid #ffffff !important;
+    box-shadow:0 0 10px rgba(62,142,224,.5) !important;
+    border-radius:50% !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-modal-ava-fallback {
+    width:60px !important;
+    height:60px !important;
+    background:linear-gradient(135deg, #3e8ee0, #2b7cd3) !important;
+    border:2px solid #ffffff !important;
+    box-shadow:0 0 10px rgba(62,142,224,.5) !important;
+    color:#ffffff !important;
+    font-size:28px !important;
+    font-weight:900 !important;
+    border-radius:50% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-modal-display-name {
+    color:#3b82f6 !important;
+    font-size:21px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    text-shadow:0 0 4px #ffffff, 0 1px 2px #ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-modal-handle {
+    color:#3b82f6 !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin-top:2px !important;
+    text-shadow:0 0 3px #ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-modal-bio {
+    color:#1b4573 !important;
+    font-size:13.5px !important;
+    font-weight:600 !important;
+    opacity:0.92 !important;
+    margin:10px 0 4px !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-stats-row {
+    display:grid !important;
+    grid-template-columns:repeat(4, 1fr) !important;
+    gap:10px !important;
+    margin:18px 0 14px !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-stats-row .prof-stat-cell {
+    background:rgba(255,255,255,.55) !important;
+    backdrop-filter:blur(2px) !important;
+    -webkit-backdrop-filter:blur(2px) !important;
+    border:1.5px solid #4a9ff5 !important;
+    border-radius:14px !important;
+    padding:12px 4px !important;
+    text-align:center !important;
+    box-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-stats-row .prof-stat-cell b {
+    color:#2b7cd3 !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    display:block !important;
+    line-height:1.1 !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-stats-row .prof-stat-cell span {
+    color:#2b7cd3 !important;
+    font-size:10px !important;
+    font-weight:800 !important;
+    letter-spacing:0.6px !important;
+    text-transform:uppercase !important;
+    display:block !important;
+    margin-top:4px !important;
+    opacity:0.95 !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .prof-modal-joined {
+    color:#2b7cd3 !important;
+    font-size:13px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin:12px 0 16px 2px !important;
+    text-shadow:0 1px 2px rgba(255,255,255,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions {
+    display:flex !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions button,
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions #pm-close,
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions #pm-friend,
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions #pm-friend-decline {
+    border:1.5px solid #4a9ff5 !important;
+    border-radius:14px !important;
+    color:#2b7cd3 !important;
+    background:rgba(255,255,255,.6) !important;
+    font-weight:800 !important;
+    font-size:16px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions #pm-friend.is-remove {
+    border:1.5px solid #4a9ff5 !important;
+    color:#2b7cd3 !important;
+    background:rgba(255,255,255,.6) !important;
+    font-weight:800 !important;
+  }
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions button:hover,
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions #pm-close:hover,
+  .prof-modal-card[data-prof-theme="cloud"] .time-modal-actions #pm-friend:hover {
+    background:rgba(255,255,255,.9) !important;
+    border-color:#2b7cd3 !important;
+    box-shadow:0 0 14px rgba(62,142,224,.4) !important;
+  }
+
+  /* 3. GLOWING THEME (Document 3.jpg authoritative reference) */
+  .prof-modal-card[data-prof-theme="glowing"] {
+    background-color:#02060f !important;
+    background-image:url("/themes/profile-glowing.jpg") !important;
+    background-size:cover !important;
+    background-position:center center !important;
+    background-repeat:no-repeat !important;
+    border:none !important;
+    border-radius:44px !important;
+    padding:30px 24px 26px !important;
+    width:min(420px,100%) !important;
+    box-shadow:0 0 45px rgba(0,210,255,.45), 0 25px 60px rgba(0,0,0,.95) !important;
+    overflow:hidden !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] #pm-prem-badge {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prem-chip {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] #pm-title {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    margin:0 0 16px 0 !important;
+    text-shadow:0 0 10px #00d2ff, 0 0 20px #0077ff !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-modal-ava {
+    width:60px !important;
+    height:60px !important;
+    border:2px solid #00f0ff !important;
+    box-shadow:0 0 15px rgba(0,240,255,.8), inset 0 0 8px rgba(255,255,255,.4) !important;
+    border-radius:50% !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-modal-ava-fallback {
+    width:60px !important;
+    height:60px !important;
+    background:linear-gradient(135deg, #00e5ff 0%, #0072ff 100%) !important;
+    border:2px solid #00f0ff !important;
+    box-shadow:0 0 15px rgba(0,240,255,.8), inset 0 0 8px rgba(255,255,255,.4) !important;
+    color:#ffffff !important;
+    font-size:28px !important;
+    font-weight:900 !important;
+    border-radius:50% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-shadow:0 0 8px rgba(255,255,255,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-modal-display-name {
+    color:#ffffff !important;
+    font-size:21px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    text-shadow:0 0 10px #00d2ff, 0 0 20px #0066ff, 0 2px 4px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-modal-handle {
+    color:#e0f8ff !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin-top:2px !important;
+    text-shadow:0 0 8px #00d2ff !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-modal-bio {
+    color:#b5ece2 !important;
+    font-size:13.5px !important;
+    font-weight:600 !important;
+    opacity:0.92 !important;
+    margin:10px 0 4px !important;
+    text-shadow:0 1px 4px rgba(0,0,0,.9) !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-stats-row {
+    display:grid !important;
+    grid-template-columns:repeat(4, 1fr) !important;
+    gap:10px !important;
+    margin:18px 0 14px !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-stats-row .prof-stat-cell {
+    background:rgba(0,20,45,.45) !important;
+    backdrop-filter:blur(2px) !important;
+    -webkit-backdrop-filter:blur(2px) !important;
+    border:1.5px solid #00d2ff !important;
+    border-radius:14px !important;
+    padding:12px 4px !important;
+    text-align:center !important;
+    box-shadow:0 0 12px rgba(0,210,255,.5), inset 0 0 8px rgba(0,210,255,.25) !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-stats-row .prof-stat-cell b {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    display:block !important;
+    line-height:1.1 !important;
+    text-shadow:0 0 8px #00d2ff, 0 0 15px #0077ff !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-stats-row .prof-stat-cell span {
+    color:#ffffff !important;
+    font-size:10px !important;
+    font-weight:800 !important;
+    letter-spacing:0.6px !important;
+    text-transform:uppercase !important;
+    display:block !important;
+    margin-top:4px !important;
+    opacity:0.95 !important;
+    text-shadow:0 0 6px #00d2ff !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .prof-modal-joined {
+    color:#ffffff !important;
+    font-size:13px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin:12px 0 16px 2px !important;
+    text-shadow:0 0 8px #00d2ff, 0 0 15px #0066ff !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions {
+    display:flex !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions button,
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions #pm-close,
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions #pm-friend,
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions #pm-friend-decline {
+    border:1.5px solid #00d2ff !important;
+    border-radius:14px !important;
+    color:#ffffff !important;
+    background:rgba(0,20,45,.45) !important;
+    font-weight:800 !important;
+    font-size:16px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:0 0 12px rgba(0,210,255,.5), inset 0 0 8px rgba(0,210,255,.25) !important;
+    text-shadow:0 0 8px #00d2ff, 0 0 15px #0077ff !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions #pm-friend.is-remove {
+    border:1.5px solid #00d2ff !important;
+    color:#00f0ff !important;
+    background:rgba(0,20,45,.45) !important;
+    font-weight:800 !important;
+    text-shadow:0 0 8px #00d2ff, 0 0 15px #0077ff !important;
+  }
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions button:hover,
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions #pm-close:hover,
+  .prof-modal-card[data-prof-theme="glowing"] .time-modal-actions #pm-friend:hover {
+    background:rgba(0,40,90,.6) !important;
+    border-color:#00f0ff !important;
+    box-shadow:0 0 20px rgba(0,240,255,.8), inset 0 0 12px rgba(0,240,255,.4) !important;
+  }
+
+  /* 4. GLITCH THEME (Document 4.jpg authoritative reference) */
+  .prof-modal-card[data-prof-theme="glitch"] {
+    background-color:#000000 !important;
+    background-image:url("/themes/profile-glitch.jpg") !important;
+    background-size:cover !important;
+    background-position:center center !important;
+    background-repeat:no-repeat !important;
+    border:none !important;
+    border-radius:44px !important;
+    padding:30px 24px 26px !important;
+    width:min(420px,100%) !important;
+    box-shadow:0 0 35px rgba(255,43,209,.4), 0 0 35px rgba(0,240,255,.4), 0 25px 60px rgba(0,0,0,.95) !important;
+    overflow:hidden !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] #pm-prem-badge {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prem-chip {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] #pm-title {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    margin:0 0 16px 0 !important;
+    text-shadow:-2px 0 #00f0ff, 2px 0 #ff2bd1, 0 2px 4px rgba(0,0,0,.9) !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-modal-ava {
+    width:60px !important;
+    height:60px !important;
+    border:2px solid #ffffff !important;
+    box-shadow:-2px 0 0 #00f0ff, 2px 0 0 #ff2bd1, 0 0 14px rgba(0,240,255,.6) !important;
+    border-radius:50% !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-modal-ava-fallback {
+    width:60px !important;
+    height:60px !important;
+    background:linear-gradient(135deg, #00b4d8 0%, #7209b7 50%, #f72585 100%) !important;
+    border:2px solid #ffffff !important;
+    box-shadow:-2px 0 0 #00f0ff, 2px 0 0 #ff2bd1, 0 0 14px rgba(0,240,255,.6) !important;
+    color:#ffffff !important;
+    font-size:28px !important;
+    font-weight:900 !important;
+    border-radius:50% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-shadow:-1px 0 #00f0ff, 1px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-modal-display-name {
+    color:#ffffff !important;
+    font-size:21px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    text-shadow:-2px 0 #00f0ff, 2px 0 #ff2bd1, 0 2px 4px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-modal-handle {
+    color:#ffffff !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin-top:2px !important;
+    text-shadow:-1px 0 #00f0ff, 1px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-modal-bio {
+    color:#ffffff !important;
+    font-size:13.5px !important;
+    font-weight:600 !important;
+    opacity:0.92 !important;
+    margin:10px 0 4px !important;
+    text-shadow:-1px 0 #00f0ff, 1px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-stats-row {
+    display:grid !important;
+    grid-template-columns:repeat(4, 1fr) !important;
+    gap:10px !important;
+    margin:18px 0 14px !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-stats-row .prof-stat-cell {
+    background:rgba(0,0,0,.25) !important;
+    border:1.5px solid #00f0ff !important;
+    border-radius:14px !important;
+    padding:12px 4px !important;
+    text-align:center !important;
+    box-shadow:-1.5px 0 0 #00f0ff, 1.5px 0 0 #ff2bd1, 0 0 10px rgba(0,240,255,.4) !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-stats-row .prof-stat-cell b {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    display:block !important;
+    line-height:1.1 !important;
+    text-shadow:-1.5px 0 #00f0ff, 1.5px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-stats-row .prof-stat-cell span {
+    color:#ffffff !important;
+    font-size:10px !important;
+    font-weight:800 !important;
+    letter-spacing:0.6px !important;
+    text-transform:uppercase !important;
+    display:block !important;
+    margin-top:4px !important;
+    opacity:0.95 !important;
+    text-shadow:-1px 0 #00f0ff, 1px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .prof-modal-joined {
+    color:#ffffff !important;
+    font-size:13px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin:12px 0 16px 2px !important;
+    text-shadow:-1px 0 #00f0ff, 1px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions {
+    display:flex !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions button,
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions #pm-close,
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions #pm-friend,
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions #pm-friend-decline {
+    border:1.5px solid #00f0ff !important;
+    border-radius:14px !important;
+    color:#ffffff !important;
+    background:rgba(0,0,0,.3) !important;
+    font-weight:800 !important;
+    font-size:16px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:-1.5px 0 0 #00f0ff, 1.5px 0 0 #ff2bd1, 0 0 10px rgba(0,240,255,.4) !important;
+    text-shadow:-1px 0 #00f0ff, 1px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions #pm-friend.is-remove {
+    border:1.5px solid #00f0ff !important;
+    color:#00f0ff !important;
+    background:rgba(0,0,0,.3) !important;
+    font-weight:800 !important;
+    text-shadow:-1px 0 #00f0ff, 1px 0 #ff2bd1 !important;
+  }
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions button:hover,
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions #pm-close:hover,
+  .prof-modal-card[data-prof-theme="glitch"] .time-modal-actions #pm-friend:hover {
+    background:rgba(0,0,0,.5) !important;
+    box-shadow:-2.5px 0 0 #00f0ff, 2.5px 0 0 #ff2bd1, 0 0 16px rgba(0,240,255,.7) !important;
+  }
+
+  /* 5. GRAFFITI THEME (Document 5.jpg authoritative reference) */
+  .prof-modal-card[data-prof-theme="graffiti"] {
+    background-color:#ffffff !important;
+    background-image:url("/themes/profile-graffiti.jpg") !important;
+    background-size:cover !important;
+    background-position:center center !important;
+    background-repeat:no-repeat !important;
+    border:none !important;
+    border-radius:44px !important;
+    padding:30px 24px 26px !important;
+    width:min(420px,100%) !important;
+    box-shadow:0 0 35px rgba(0,0,0,.15), 0 25px 60px rgba(0,0,0,.25) !important;
+    overflow:hidden !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] #pm-prem-badge {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prem-chip {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] #pm-title {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    margin:0 0 16px 0 !important;
+    text-shadow:-1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000, 0 2px 5px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-modal-ava {
+    width:60px !important;
+    height:60px !important;
+    border:2px solid #222222 !important;
+    box-shadow:0 0 10px rgba(0,0,0,.25) !important;
+    border-radius:50% !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-modal-ava-fallback {
+    width:60px !important;
+    height:60px !important;
+    background:linear-gradient(135deg, #e8e8e8 0%, #cccccc 100%) !important;
+    border:2px solid #222222 !important;
+    box-shadow:0 0 10px rgba(0,0,0,.25) !important;
+    color:#ffffff !important;
+    font-size:28px !important;
+    font-weight:900 !important;
+    border-radius:50% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-shadow:-1px 0 0 #000, 1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000 !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-modal-display-name {
+    color:#ffffff !important;
+    font-size:21px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    text-shadow:-1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000, 0 2px 4px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-modal-handle {
+    color:#ffffff !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin-top:2px !important;
+    text-shadow:-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 1px 3px rgba(0,0,0,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-modal-bio {
+    color:#111111 !important;
+    font-size:13.5px !important;
+    font-weight:600 !important;
+    opacity:0.92 !important;
+    margin:10px 0 4px !important;
+    text-shadow:0 0 4px #ffffff !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-stats-row {
+    display:grid !important;
+    grid-template-columns:repeat(4, 1fr) !important;
+    gap:10px !important;
+    margin:18px 0 14px !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-stats-row .prof-stat-cell {
+    background:rgba(255,255,255,.75) !important;
+    backdrop-filter:blur(2px) !important;
+    -webkit-backdrop-filter:blur(2px) !important;
+    border:1.5px solid #111111 !important;
+    border-radius:14px !important;
+    padding:12px 4px !important;
+    text-align:center !important;
+    box-shadow:0 2px 8px rgba(0,0,0,.15) !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-stats-row .prof-stat-cell b {
+    color:#111111 !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    display:block !important;
+    line-height:1.1 !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-stats-row .prof-stat-cell span {
+    color:#111111 !important;
+    font-size:10px !important;
+    font-weight:800 !important;
+    letter-spacing:0.6px !important;
+    text-transform:uppercase !important;
+    display:block !important;
+    margin-top:4px !important;
+    opacity:0.95 !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .prof-modal-joined {
+    color:#111111 !important;
+    font-size:13px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin:12px 0 16px 2px !important;
+    text-shadow:0 0 4px rgba(255,255,255,.9) !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions {
+    display:flex !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions button,
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions #pm-close,
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions #pm-friend,
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions #pm-friend-decline {
+    border:1.5px solid #111111 !important;
+    border-radius:14px !important;
+    color:#111111 !important;
+    background:rgba(255,255,255,.7) !important;
+    font-weight:800 !important;
+    font-size:16px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions #pm-friend.is-remove {
+    border:1.5px solid #111111 !important;
+    color:#111111 !important;
+    background:rgba(255,255,255,.7) !important;
+    font-weight:800 !important;
+  }
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions button:hover,
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions #pm-close:hover,
+  .prof-modal-card[data-prof-theme="graffiti"] .time-modal-actions #pm-friend:hover {
+    background:#ffffff !important;
+    box-shadow:0 4px 14px rgba(0,0,0,.25) !important;
+  }
+
+  /* 6. MAGAZINE CUTOUT THEME (Document 6.jpg authoritative reference) */
+  .prof-modal-card[data-prof-theme="magazine"] {
+    background-color:#f5efe6 !important;
+    background-image:url("/themes/profile-magazine.png") !important;
+    background-size:100% 100% !important;
+    background-position:center center !important;
+    background-repeat:no-repeat !important;
+    border:none !important;
+    border-radius:44px !important;
+    padding:30px 24px 26px !important;
+    width:min(420px,100%) !important;
+    box-shadow:0 0 35px rgba(180,150,130,.25), 0 25px 60px rgba(80,50,30,.15) !important;
+    overflow:hidden !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] #pm-prem-badge {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prem-chip {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] #pm-title {
+    color:#1a1815 !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    margin:0 0 16px 0 !important;
+    text-shadow:0 1px 2px rgba(255,255,255,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-modal-ava {
+    width:60px !important;
+    height:60px !important;
+    border:2px solid #ffffff !important;
+    box-shadow:0 2px 10px rgba(100,20,20,.25) !important;
+    border-radius:50% !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-modal-ava-fallback {
+    width:60px !important;
+    height:60px !important;
+    background:linear-gradient(180deg, #b83333 0%, #4a1518 100%) !important;
+    border:2px solid #ffffff !important;
+    box-shadow:0 2px 10px rgba(100,20,20,.25) !important;
+    color:#ffffff !important;
+    font-size:28px !important;
+    font-weight:900 !important;
+    border-radius:50% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-modal-display-name {
+    color:#1a1815 !important;
+    font-size:21px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    text-shadow:0 1px 2px rgba(255,255,255,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-modal-handle {
+    color:#6d645a !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin-top:2px !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-modal-bio {
+    color:#2e2822 !important;
+    font-size:13.5px !important;
+    font-weight:600 !important;
+    opacity:0.92 !important;
+    margin:10px 0 4px !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-stats-row {
+    display:grid !important;
+    grid-template-columns:repeat(4, 1fr) !important;
+    gap:10px !important;
+    margin:18px 0 14px !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-stats-row .prof-stat-cell {
+    background:rgba(255,255,255,.45) !important;
+    backdrop-filter:blur(2px) !important;
+    -webkit-backdrop-filter:blur(2px) !important;
+    border:1.2px solid rgba(168, 159, 145, 0.75) !important;
+    border-radius:14px !important;
+    padding:12px 4px !important;
+    text-align:center !important;
+    box-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-stats-row .prof-stat-cell b {
+    color:#1a1815 !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    display:block !important;
+    line-height:1.1 !important;
+    text-shadow:none !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-stats-row .prof-stat-cell span {
+    color:#7a7065 !important;
+    font-size:10px !important;
+    font-weight:800 !important;
+    letter-spacing:0.6px !important;
+    text-transform:uppercase !important;
+    display:block !important;
+    margin-top:4px !important;
+    opacity:0.95 !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .prof-modal-joined {
+    color:#6d645a !important;
+    font-size:13px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin:12px 0 16px 2px !important;
+    text-shadow:0 1px 2px rgba(255,255,255,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions {
+    display:flex !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions button,
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions #pm-close,
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions #pm-friend,
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions #pm-friend-decline {
+    border:1.5px solid #e74c3c !important;
+    border-radius:14px !important;
+    color:#1a1815 !important;
+    background:rgba(255,255,255,.55) !important;
+    font-weight:800 !important;
+    font-size:16px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:none !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions #pm-friend.is-remove {
+    border:1.5px solid #e74c3c !important;
+    color:#e74c3c !important;
+    background:rgba(255,255,255,.55) !important;
+    font-weight:800 !important;
+    box-shadow:1.5px 1.5px 0 #e74c3c !important;
+  }
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions button:hover,
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions #pm-close:hover,
+  .prof-modal-card[data-prof-theme="magazine"] .time-modal-actions #pm-friend:hover {
+    background:#ffffff !important;
+    box-shadow:0 4px 14px rgba(231,76,60,.2) !important;
+  }
+
+  /* 7. PIXEL THEME (Document 7.jpg authoritative reference) */
+  .prof-modal-card[data-prof-theme="pixel"] {
+    background-color:#1a102a !important;
+    background-image:url("/themes/profile-pixel.jpg") !important;
+    background-size:cover !important;
+    background-position:center center !important;
+    background-repeat:no-repeat !important;
+    border:none !important;
+    border-radius:44px !important;
+    padding:30px 24px 26px !important;
+    width:min(420px, 100%) !important;
+    box-shadow:0 0 35px rgba(255,60,172,.35), 0 25px 60px rgba(10,5,30,.7) !important;
+    overflow:hidden !important;
+    transform:none !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] #pm-prem-badge {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prem-chip {
+    display:none !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] #pm-title {
+    color:#ffffff !important;
+    font-size:22px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    margin:0 0 16px 0 !important;
+    text-shadow:-4px 0 10px #0088ff, -2px 0 14px #00f0ff, 4px 0 10px #ff00ea, 2px 0 14px #ff2bd1, 0 0 20px #00d2ff !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-modal-ava {
+    width:60px !important;
+    height:60px !important;
+    border:2px solid #00f0ff !important;
+    box-shadow:0 0 14px #ff00ff, 0 0 24px #00f0ff !important;
+    border-radius:50% !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-modal-ava-fallback {
+    width:60px !important;
+    height:60px !important;
+    background:linear-gradient(135deg, #ff2bd1 0%, #a24bfe 50%, #00d2ff 100%) !important;
+    border:2px solid #00f0ff !important;
+    box-shadow:0 0 14px #ff00ff, 0 0 24px #00f0ff !important;
+    color:#ffffff !important;
+    font-size:28px !important;
+    font-weight:900 !important;
+    border-radius:50% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-shadow:0 0 6px rgba(255,255,255,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-modal-display-name {
+    color:#ffffff !important;
+    font-size:21px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    text-shadow:-2px 0 8px #0088ff, 0 0 14px #00d2ff, 4px 0 10px #ff00ea !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-modal-handle {
+    color:#ffffff !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    opacity:0.95 !important;
+    margin-top:2px !important;
+    text-shadow:0 0 8px #0088ff, 0 0 16px #00d2ff !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-modal-bio {
+    color:#ffffff !important;
+    font-size:13.5px !important;
+    font-weight:600 !important;
+    opacity:0.95 !important;
+    margin:10px 0 4px !important;
+    text-shadow:0 0 8px rgba(0,210,255,.8) !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-stats-row {
+    display:grid !important;
+    grid-template-columns:repeat(4, 1fr) !important;
+    gap:10px !important;
+    margin:18px 0 14px !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-stats-row .prof-stat-cell {
+    background:rgba(40,10,60,.15) !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    border-radius:14px !important;
+    padding:12px 4px !important;
+    text-align:center !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-stats-row .prof-stat-cell:nth-child(odd) {
+    border:2px solid #00d2ff !important;
+    box-shadow:0 0 10px #00d2ff, inset 0 0 8px rgba(0,210,255,.3) !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-stats-row .prof-stat-cell:nth-child(even) {
+    border:2px solid #ff2bd1 !important;
+    box-shadow:0 0 10px #ff2bd1, inset 0 0 8px rgba(255,43,209,.3) !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-stats-row .prof-stat-cell b {
+    color:#ffffff !important;
+    font-size:24px !important;
+    font-weight:900 !important;
+    display:block !important;
+    line-height:1.1 !important;
+    text-shadow:0 0 8px #0088ff, 0 0 14px #0055ff, 0 0 20px #00d2ff !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-stats-row .prof-stat-cell span {
+    color:#ffffff !important;
+    font-size:11px !important;
+    font-weight:900 !important;
+    letter-spacing:0.5px !important;
+    text-transform:uppercase !important;
+    display:block !important;
+    margin-top:4px !important;
+    opacity:0.95 !important;
+    text-shadow:0 0 6px #0088ff, 0 0 10px #00d2ff !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .prof-modal-joined {
+    color:#ffffff !important;
+    font-size:13px !important;
+    font-weight:800 !important;
+    opacity:0.95 !important;
+    margin:12px 0 16px 2px !important;
+    text-shadow:0 0 8px #0088ff, 0 0 14px #00d2ff !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions {
+    display:flex !important;
+    gap:12px !important;
+    margin-top:0 !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions button,
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions #pm-close {
+    border:2px solid #00d2ff !important;
+    border-radius:14px !important;
+    color:#ffffff !important;
+    background:rgba(40,10,60,.15) !important;
+    font-weight:900 !important;
+    font-size:17px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:0 0 12px #00f0ff, inset 0 0 8px rgba(0,240,255,.3) !important;
+    text-shadow:0 0 8px #0066ff, 0 0 16px #0033ff, 0 0 24px #00f0ff !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions #pm-friend,
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions #pm-friend-decline {
+    border:2px solid #ff2bd1 !important;
+    border-radius:14px !important;
+    color:#ff80f6 !important;
+    background:rgba(40,10,60,.15) !important;
+    font-weight:900 !important;
+    font-size:17px !important;
+    padding:12px 18px !important;
+    min-height:46px !important;
+    box-shadow:0 0 12px #ff2bd1, inset 0 0 8px rgba(255,43,209,.3) !important;
+    text-shadow:-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 0 10px #7b2cff, 0 0 18px #4d00ff !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions #pm-friend.is-remove {
+    border:2px solid #ff2bd1 !important;
+    color:#ff80f6 !important;
+    background:rgba(40,10,60,.15) !important;
+    font-weight:900 !important;
+    font-size:17px !important;
+    box-shadow:0 0 12px #ff2bd1, inset 0 0 8px rgba(255,43,209,.3) !important;
+    text-shadow:-1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff, 0 0 10px #7b2cff, 0 0 18px #4d00ff !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions button:hover,
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions #pm-close:hover {
+    background:rgba(0,210,255,.25) !important;
+    box-shadow:0 0 20px #00f0ff, inset 0 0 12px rgba(0,210,255,.5) !important;
+  }
+  .prof-modal-card[data-prof-theme="pixel"] .time-modal-actions #pm-friend:hover {
+    background:rgba(255,43,209,.25) !important;
+    box-shadow:0 0 20px #ff2bd1, inset 0 0 12px rgba(255,43,209,.5) !important;
+  }
   #countdown-num.go { font-size:clamp(64px, 20vw, 150px); }
   .rm-expiry { font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--muted); margin-top:3px; }
   .field { position:relative; border-radius:12px; border:1px solid transparent; background:linear-gradient(var(--surface),var(--surface)) padding-box, linear-gradient(90deg, rgba(var(--pink-rgb),.75), rgba(var(--purple-rgb),.75)) border-box; transition:box-shadow .45s ease, transform .25s ease; }
@@ -1274,8 +2449,11 @@ try {
   try {
     var t = JSON.parse(localStorage.getItem('aa-ptheme') || 'null');
     if (!t || !t.key) return;
-    var KEYS = ['flame', 'cloud', 'glitch', 'graffiti', 'stitch', 'glowing', 'magazine', 'pixel'];
-    if (KEYS.indexOf(t.key) < 0) return;
+    var KEYS = ['flame', 'cloud', 'glitch', 'graffiti', 'glowing', 'magazine', 'pixel'];
+    if (KEYS.indexOf(t.key) < 0) {
+      localStorage.removeItem('aa-ptheme');
+      return;
+    }
     var b = document.body, r = document.documentElement;
     b.setAttribute('data-ptheme', t.key);
     r.setAttribute('data-visual', 'premium');
@@ -1668,6 +2846,15 @@ try {
        with presence, room invitations through the real rooms API, and
        profiles. 3v3 team building lives in the CREATE ROOM flow (v63). -->
   <section id="view-friends" class="view hidden">
+    <div id="fr-invite-banner" class="card hidden" style="margin-bottom:14px; border-color:var(--pink); background:linear-gradient(135deg, rgba(var(--pink-rgb),.12), rgba(var(--purple-rgb),.08));">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div>
+          <div style="font-weight:800; font-size:14px;" id="fr-invite-banner-title">INVITE TO ROOM</div>
+          <div class="muted" style="font-size:12px;" id="fr-invite-banner-sub">Select friends to invite to this room</div>
+        </div>
+        <button type="button" class="mini secondary" id="fr-invite-banner-back">← Back to Room</button>
+      </div>
+    </div>
     <div class="fr-head"><h1>FRIENDS</h1><span class="muted" id="fr-count"></span></div>
     <div id="fr-pane-list">
       <div id="fr-list" class="fr-list"></div>
@@ -1684,6 +2871,46 @@ try {
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="inv-close">Close</button>
         <button type="button" id="inv-create" class="secondary" style="flex:1">Create a room first</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offline Friend Modal -->
+  <div id="friend-offline-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="fom-title" style="width:min(400px,100%); text-align:center">
+      <div style="display:flex; justify-content:center; margin:8px 0 12px">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="1" y1="1" x2="23" y2="23" stroke="#ff3366" stroke-width="2.5"/>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+          <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <circle cx="12" cy="20" r="1" fill="#ff3366"/>
+        </svg>
+      </div>
+      <h3 id="fom-title" style="font-size:18px; margin-bottom:6px">User is Offline</h3>
+      <p class="muted" id="fom-sub" style="margin:0 0 16px; font-size:13.5px"></p>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="fom-back" style="width:100%">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In Another Room Modal -->
+  <div id="friend-in-room-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="firm-title" style="width:min(420px,100%); text-align:center">
+      <div style="display:flex; justify-content:center; margin:8px 0 12px">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--pink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <h3 id="firm-title" style="font-size:18px; margin-bottom:6px">User is in Another Room</h3>
+      <p class="muted" id="firm-sub" style="margin:0 0 16px; font-size:13.5px"></p>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="firm-back" style="flex:1">Back</button>
+        <button type="button" id="firm-spectate" style="flex:1">Spectate</button>
       </div>
     </div>
   </div>
@@ -1795,7 +3022,7 @@ try {
         <span class="mode-chips" id="create-mode-chips">
           <button type="button" class="mode-chip on" data-mode="1v1">1v1<small>Duel · 2 artists</small></button>
           <button type="button" class="mode-chip" data-mode="3v3">3v3<small>Teams of three · fixed 6</small></button>
-          <button type="button" class="mode-chip" data-mode="tournament">Tournament<small>Bracket event · 8–16</small></button>
+          <button type="button" class="mode-chip" data-mode="tournament"><span style="display:inline-flex; align-items:center; gap:4px">Tournament <span class="prem-chip" style="padding:1px 6px; font-size:9px"><span class="prem-emblem" style="width:12px; height:12px" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span></span><small>Bracket event · 8–16</small></button>
         </span>
       </div>
       <div class="row2">
@@ -1863,7 +3090,7 @@ try {
         <option value="none">None — no voting system is selected</option>
       </select></label>
         <div class="time-block">
-          <span>Time limit</span>
+          <span id="create-time-label">Time limit</span>
           <span class="time-chips" id="create-time-chips">
             <button type="button" class="time-chip" data-secs="1200">20 min</button>
             <button type="button" class="time-chip" data-secs="1800">30 min</button>
@@ -1921,7 +3148,7 @@ try {
         <option value="none">None — no voting system is selected</option>
       </select></label>
       <div class="time-block">
-        <span>Time limit</span>
+        <span id="setting-time-label">Time limit</span>
         <span class="time-chips" id="setting-time-chips">
           <button type="button" class="time-chip" data-secs="1200">20 min</button>
           <button type="button" class="time-chip" data-secs="1800">30 min</button>
@@ -1996,6 +3223,7 @@ try {
     <div class="room-actions" id="room-actions">
       <button type="button" id="btn-start" class="hidden" style="width:100%"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg> <span id="btn-start-label">Start Battle</span></button>
       <button type="button" id="btn-lock-challenge" class="hidden" style="width:100%"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg> Lock Challenge</button>
+      <button type="button" id="btn-room-invite" class="secondary hidden" style="width:100%"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Invite Player</button>
       <button type="button" id="btn-join" class="secondary hidden" style="width:100%">Join as Player</button>
       <button type="button" id="btn-spectate" class="secondary hidden" style="width:100%">Spectate</button>
       <button type="button" id="btn-leave-spec" class="secondary hidden" style="width:100%">Stop spectating</button>
@@ -2321,9 +3549,11 @@ try {
     </div>
   </div>
   <!-- ============ v51: user profile modal (room menu → View Profile) ======
-       LIVE data from /api/users/:id/profile — never a snapshot. -->
+       LIVE data from /api/users/:id/profile — never a snapshot.
+       v65: themed card with owner perspective + top-right Premium diamond badge. -->
   <div id="profile-modal" class="time-modal-backdrop hidden">
-    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="pm-title" style="width:min(400px,100%)">
+    <div class="time-modal prof-modal-card" id="pm-card" role="dialog" aria-modal="true" aria-labelledby="pm-title" style="width:min(400px,100%)">
+      <span id="pm-prem-badge" class="prof-modal-prem hidden" title="Art Arena Premium"><span class="prem-emblem" role="img" aria-label="Art Arena Premium"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>
       <h3 id="pm-title">ARTIST</h3>
       <div id="pm-body"></div>
       <div class="time-modal-actions">
@@ -2347,11 +3577,11 @@ try {
   <!-- v51: kick confirmation (owner moderation — never accidental) -->
   <div id="kick-confirm-modal" class="time-modal-backdrop hidden">
     <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="kc-title">
-      <h3 id="kc-title">Kick artist?</h3>
+      <h3 id="kc-title">Remove Player</h3>
       <p class="muted" id="kc-text" style="margin:6px 0 0; font-size:14px"></p>
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="kc-cancel">Cancel</button>
-        <button type="button" id="kc-confirm" class="danger" style="flex:1">Kick</button>
+        <button type="button" id="kc-confirm" class="danger" style="flex:1">Remove</button>
       </div>
     </div>
   </div>
@@ -2363,6 +3593,32 @@ try {
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="uf-cancel">Cancel</button>
         <button type="button" id="uf-confirm" class="danger" style="flex:1">Remove Friend</button>
+      </div>
+    </div>
+  </div>
+  <!-- Battle Mode Selection Modal (1v1 vs 3v3) -->
+  <div id="battle-mode-modal" class="time-modal-backdrop hidden">
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="bm-title" style="width:min(440px,100%)">
+      <h3 id="bm-title" style="margin-bottom:4px">SELECT BATTLE TYPE</h3>
+      <p class="muted" style="margin:0 0 16px; font-size:13.5px">Choose how you want to match in the Arena</p>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+        <button type="button" class="util-btn bm-choice-btn" data-bm-mode="1v1" style="display:flex; align-items:center; gap:14px; padding:14px 16px; text-align:left; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; width:100%; transition:all .15s ease;">
+          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--pink-rgb),.15), rgba(var(--purple-rgb),.2)); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;">⚔️</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:800; font-size:15px; color:var(--text)">1v1 Duel</div>
+            <div style="color:var(--muted); font-size:12px; margin-top:2px">Classic 1-on-1 duel. Matched against another artist.</div>
+          </div>
+        </button>
+        <button type="button" class="util-btn bm-choice-btn" data-bm-mode="3v3" style="display:flex; align-items:center; gap:14px; padding:14px 16px; text-align:left; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; width:100%; transition:all .15s ease;">
+          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--purple-rgb),.2), rgba(var(--pink-rgb),.15)); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;">🛡️</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:800; font-size:15px; color:var(--text)">3v3 Team Battle</div>
+            <div style="color:var(--muted); font-size:12px; margin-top:2px">Join or match into a 3v3 team room with 3 active lanes.</div>
+          </div>
+        </button>
+      </div>
+      <div class="time-modal-actions">
+        <button type="button" class="secondary" id="bm-cancel" style="width:100%">Cancel</button>
       </div>
     </div>
   </div>
@@ -2430,7 +3686,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v53</span>
+  <span id="ui-version-badge">v67</span>
 
 <script>
 'use strict';
@@ -2583,7 +3839,7 @@ let mePremium = false;
 let activeThemeKey = null, activeThemeCustom = null;
 const THEME_LOGOS = {
   flame: '/themes/flame.png', cloud: '/themes/cloud.png', glitch: '/themes/glitch.png',
-  graffiti: '/themes/graffiti.png', stitch: '/themes/stitch.png',
+  graffiti: '/themes/graffiti.png',
   glowing: '/themes/glowing.png?v=57', // v57: FILLED wordmark (bg removed, green→blue fill, baked glow) — versioned so no page keeps the old hollow file
   magazine: '/themes/magazine.png', // v55: the supplied cutout logo (bg removed, art exact)
   pixel: '/themes/pixel.png',        // v56: the supplied pixel-art logo (as-is, NEAREST-scaled)
@@ -3486,8 +4742,8 @@ const fmtTime = (s) => {
   return h + ' h' + (m ? ' ' + m + ' min' : '');
 };
 
-const CAT_ICONS = { character: IC.user, environment: IC.globe, object: IC.box, style: IC.brush, mood: IC.smile, lighting: IC.bulb, color: IC.droplet, wildcard: IC.dice };
-const CAT_NAMES = { character: 'Character', environment: 'Environment', object: 'Object', style: 'Drawing Style', mood: 'Mood', lighting: 'Lighting', color: 'Colour Combination', wildcard: 'Wildcard' };
+const CAT_ICONS = { character: IC.user, environment: IC.globe, object: IC.box, style: IC.brush, mood: IC.smile, lighting: IC.bulb, color: IC.droplet, composition: IC.globe, weather: IC.cloud || IC.globe, texture: IC.brush, wildcard: IC.dice };
+const CAT_NAMES = { character: 'Character', environment: 'Environment', object: 'Object', style: 'Drawing Style', mood: 'Mood', lighting: 'Lighting', color: 'Colour Combination', composition: 'Composition', weather: 'Weather / Time', texture: 'Visual Finish', wildcard: 'Wildcard' };
 // ------------------- time limit: presets + custom (v13) ---------------------
 // Presets 20 min / 30 min / 1 hour + Custom. Custom opens a floating modal
 // with Hours + Minutes fields (total 1 minute .. 12 hours); "Set time"
@@ -3805,13 +5061,12 @@ function paintFriendChips() {
   document.querySelectorAll('#room-players .friend-slot').forEach((slot) => {
     const uid = slot.dataset.uid, name = slot.dataset.name;
     let html;
-    // v59: all four relation states are ACTIONABLE (backend state is the truth,
-    // refreshFriendState(true) re-reads it after every action):
+    // v59: actionable relationship controls inside rooms:
     //   none → Add Friend · sent → Pending (click = cancel) ·
-    //   received → Accept / Decline · friends → Remove Friend (confirmed)
+    //   received → Accept / Decline · friends → static ✓ Friends chip (no remove in room)
     // v61: a request I just answered shows its FINAL state (✓ Accepted / Declined).
     if (friendOutcomeHtml(uid)) html = friendOutcomeHtml(uid);
-    else if (friendState.friends.has(uid)) html = '<button type="button" class="friend-add remove" data-fr-remove="' + esc(uid) + '" data-name="' + esc(name) + '" title="Remove friend">✓ Friends · Remove</button>';
+    else if (friendState.friends.has(uid)) html = '<span class="friend-chip is-friend">✓ Friends</span>';
     else if (friendState.incoming[uid]) html = '<span class="friend-pair"><button type="button" class="friend-add accept" data-fr-accept="' + esc(uid) + '" data-fr-req="' + esc(friendState.incoming[uid]) + '" data-name="' + esc(name) + '">✓ Accept</button><button type="button" class="friend-add decline" data-fr-decline="' + esc(uid) + '" data-fr-req="' + esc(friendState.incoming[uid]) + '" data-name="' + esc(name) + '">✕ Decline</button></span>';
     else if (friendState.out.has(uid)) html = '<button type="button" class="friend-add pending" data-fr-cancel="' + esc(uid) + '" data-name="' + esc(name) + '" title="Cancel request">⏳ Pending · Cancel</button>';
     else html = '<button type="button" class="friend-add" data-fr-add="' + esc(uid) + '" data-name="' + esc(name) + '">＋ Add Friend</button>';
@@ -3838,11 +5093,10 @@ $('#uf-confirm').addEventListener('click', async () => {
   if (t.onDone) t.onDone();
 });
 $('#room-players').addEventListener('click', async (e) => {
-  const btn = e.target.closest('[data-fr-add],[data-fr-accept],[data-fr-decline],[data-fr-cancel],[data-fr-remove]');
+  const btn = e.target.closest('[data-fr-add],[data-fr-accept],[data-fr-decline],[data-fr-cancel]');
   if (!btn) return;
   e.stopPropagation();
   const name = btn.dataset.name;
-  if (btn.dataset.frRemove) { confirmUnfriend(btn.dataset.frRemove, name); return; }
   btn.disabled = true;
   try {
     if (btn.dataset.frAdd) {
@@ -4146,12 +5400,27 @@ document.addEventListener('click', async (e) => {
     e.preventDefault();
     const code = (typeof currentRoomCode === 'string' && currentRoomCode) || '';
     if (!code) { toast('You are not in a room right now.'); return; }
+    const uid = fr.dataset.ttFr;
+    const uname = fr.dataset.name;
     fr.disabled = true;
     try {
-      await api('/api/friends/' + fr.dataset.ttFr + '/invite', { room_code: code, team: 'A' }, 'POST');
-      toast('Invitation sent to @' + fr.dataset.name + ' — they seat on your side.');
+      const avail = await checkFriendAvailability(uid);
+      if (!avail.online) {
+        showFriendOfflineModal(avail.username || uname);
+        return;
+      }
+      if (avail.in_room) {
+        showFriendInRoomModal(avail.username || uname, avail.room_code, avail.spectator_allowed);
+        return;
+      }
+      await api('/api/friends/' + uid + '/invite', { room_code: code, team: 'A' }, 'POST');
+      toast('Invitation sent to @' + (avail.username || uname) + ' — they seat on your side.');
       fr.textContent = 'Invited ✓';
-    } catch (err) { toast(err.message); fr.disabled = false; }
+    } catch (err) {
+      toast(err.message);
+    } finally {
+      fr.disabled = false;
+    }
   }
 });
 
@@ -4198,9 +5467,15 @@ function renderRoom(d) {
       const rows = seatsList.map((i) => {
         const p = d.players.find((x) => x.seat === i);
         if (!p) return '<div class="tt-seat empty"><span class="tt-num">' + i + '</span><span class="muted">' + label + '</span></div>';
-        return '<div class="tt-seat" data-uid="' + esc(p.user_id) + '" data-username="' + esc(p.username) + '"><span style="min-width:0"><span class="tt-num">' + i + '</span> @' + esc(p.username) +
+        const moveCtrl = (youHost && d.status === 'lobby')
+          ? '<select class="mini tt-slot-select" data-from-seat="' + i + '" title="Move player to slot" style="padding:2px 4px; font-size:11px; max-width:82px; margin:0; background:var(--surface-2); border:1px solid var(--line); border-radius:6px; color:var(--text);">' +
+            [1, 2, 3, 4, 5, 6].map((s) => '<option value="' + s + '"' + (s === i ? ' selected' : '') + '>' + (s <= 3 ? 'Slot A' + s : 'Slot B' + (s - 3)) + (s === i ? ' (here)' : '') + '</option>').join('') +
+            '</select>'
+          : '';
+        return '<div class="tt-seat" data-uid="' + esc(p.user_id) + '" data-username="' + esc(p.username) + '" data-ishost="' + (p.is_host ? '1' : '') + '"><span style="min-width:0"><span class="tt-num">' + i + '</span> @' + esc(p.username) +
           (p.is_you ? ' <span class="muted">(you)</span>' : '') + '</span>' +
           '<span style="display:flex; gap:6px; align-items:center;">' +
+          moveCtrl +
           (p.drawing_app_key
             ? '<span class="state-chip canvas" title="Canvas">' + IC.brush + ' ' + esc(canvasAppName(p.drawing_app_key) || p.drawing_app_key) + '</span>'
             : '') +
@@ -4288,13 +5563,13 @@ function renderRoom(d) {
       '<span>' + IC.sword + ' ' + esc(MODE_LABELS[d.battle_mode] || '1v1') + '</span>' +
       '<span>' + IC.users + ' ' + d.player_count + '/' + d.max_players + ' players</span>' +
       '<span>' + (d.visibility === 'private' ? IC.lock + ' private' : IC.globe + ' public') + '</span>' +
-      '<span>' + IC.clock + ' ' + fmtTime(d.time_limit_seconds) + '</span>' +
+      '<span>' + IC.clock + ' ' + fmtTime(d.time_limit_seconds) + (isTourney ? ' per round' : '') + '</span>' +
       '<span>' + (BATTLE_TYPE_LABELS[d.battle_type] || d.battle_type) + '</span>' +
       (d.randomizer_config && d.randomizer_config.categories && d.randomizer_config.categories.length
         ? '<span>' + IC.dice + ' ' + d.randomizer_config.categories.map((c) => (CAT_ICONS[c] || IC.dice) + ' ' + esc(CAT_NAMES[c] || c)).join(' · ') + '</span>'
         : '') +
       (d.auto_start && isInLobby ? '<span class="muted" style="flex-basis:100%; font-size:12px">' + IC.lock + ' Matchmaking battle — fixed default settings</span>' : '') +
-      (isTourney && isInLobby ? '<span class="muted" style="flex-basis:100%; font-size:12px">' + IC.trophy + ' Tournament — the bracket fixes every pairing; matches run back-to-back from the lobby.</span>' : '');
+      (isTourney && isInLobby ? '<span class="muted" style="flex-basis:100%; font-size:12px">' + IC.trophy + ' Tournament — the bracket fixes every pairing; matches run back-to-back from the lobby (' + fmtTime(d.time_limit_seconds) + ' per round).</span>' : '');
   }
 
   currentBattleId = d.battle ? d.battle.id : null;
@@ -4312,7 +5587,7 @@ function renderRoom(d) {
     } else {
       $('#battle-players').textContent = bpList.map((p) => '@' + p.username).join('  vs  ');
     }
-    $('#battle-meta').textContent = fmtTime(d.battle.time_limit_seconds) + ' · ' + (BATTLE_TYPE_LABELS[d.battle.result_method] || d.battle.result_method);
+    $('#battle-meta').textContent = fmtTime(d.battle.time_limit_seconds) + (isTourney ? ' per round' : '') + ' · ' + (BATTLE_TYPE_LABELS[d.battle.result_method] || d.battle.result_method);
     // v33: canvas line — the drawing app each artist picked for THIS battle
     // (chosen in the Choose Your Canvas step). Art Arena keeps managing the
     // session (timer, challenge, submissions); the app is just their workspace.
@@ -4581,6 +5856,9 @@ function renderRoom(d) {
   $('#btn-spectate').classList.toggle('hidden', !(!isPlayer && !isSpectator && d.status !== 'ended' && d.spectator_allowed));
   $('#btn-leave-spec').classList.toggle('hidden', !isSpectator);
   $('#spec-banner').classList.toggle('hidden', !isSpectator);
+  const canInvite = isInLobby && (isHost || isPlayer) && d.player_count < d.max_players && !d.auto_start;
+  const inviteBtn = $('#btn-room-invite');
+  if (inviteBtn) inviteBtn.classList.toggle('hidden', !canInvite);
   // READY (Phase 5): any seated player in the lobby can toggle ready; the
   // server broadcasts the state change to everyone in the room live.
   const amReady = !!(meInRoom && meInRoom.state === 'ready');
@@ -4756,6 +6034,32 @@ $('#btn-start').addEventListener('click', () => {
   window.__cmStartClick = { hasCode: !!currentRoomCode, code: currentRoomCode };
   if (!currentRoomCode) return;
   canvasModal.open('start', currentRoomCode, myCanvasApp());
+});
+$('#btn-room-invite').addEventListener('click', () => {
+  if (!currentRoomCode) return;
+  roomInviteContext = {
+    code: currentRoomCode,
+    name: lastRoomData ? lastRoomData.name : null,
+    mode: lastRoomData ? lastRoomData.battle_mode : '1v1',
+  };
+  show('friends');
+});
+$('#tt-board').addEventListener('change', async (e) => {
+  const sel = e.target.closest('.tt-slot-select');
+  if (!sel || !currentRoomCode) return;
+  const fromSeat = Number(sel.dataset.fromSeat);
+  const toSeat = Number(sel.value);
+  if (fromSeat === toSeat) return;
+  sel.disabled = true;
+  try {
+    const res = await api('/api/rooms/' + currentRoomCode + '/move-player', { from_seat: fromSeat, to_seat: toSeat }, 'POST');
+    renderRoom(res);
+    toast('Player moved to slot ' + (toSeat <= 3 ? 'A' + toSeat : 'B' + (toSeat - 3)) + '.');
+  } catch (err) {
+    toast(err.message);
+    sel.disabled = false;
+    if (lastRoomData) renderRoom(lastRoomData);
+  }
 });
 $('#btn-join').addEventListener('click', () => currentRoomCode && joinRoom(currentRoomCode));
 $('#btn-spectate').addEventListener('click', () => currentRoomCode && roomAction(currentRoomCode, '/spectate'));
@@ -4974,7 +6278,7 @@ function rtHandle(msg) {
     if (currentRoomCode === msg.code || !currentRoomCode) {
       currentRoomCode = null;
       stopPolling();
-      show('arena');
+      show('rooms');
     }
     toast('You were removed from the room by the host.');
     return;
@@ -4989,7 +6293,7 @@ function rtHandle(msg) {
   if (ev.action === 'kicked' && me && ev.user_id === me.id) {
     currentRoomCode = null;
     stopPolling();
-    show('arena');
+    show('rooms');
     toast('You were removed from the room by the host.');
     return;
   }
@@ -5382,7 +6686,7 @@ document.addEventListener('click', (e) => {
   if (!h) return;
   e.preventDefault();
   const which = h.dataset.home;
-  if (which === 'battle') show('matchmaking');           // v35: real matchmaking
+  if (which === 'battle') modalOpen('#battle-mode-modal');
   else if (which === 'rooms') show('rooms');
   else if (which === 'create') { show('rooms'); openCreatePanel(); }
   // v63e-r: the JOIN card opens the standalone JOIN ROOM view again
@@ -5418,6 +6722,8 @@ function paintCreateMode() {
   // and the server enforces the same rule; only a tournament (8–16, cap 16)
   // exposes the choice. The switch is instant (no save step in between).
   const isTournament = createMode === 'tournament';
+  const timeLbl = $('#create-time-label');
+  if (timeLbl) timeLbl.textContent = isTournament ? 'Time per round' : 'Time limit';
   $('#create-max').value = isTournament
     ? String(createTournamentSize)
     : String(MODE_DEFAULT_MAX[createMode]);
@@ -5434,6 +6740,13 @@ function resetCreateConfig() {
 }
 for (const b of document.querySelectorAll('#create-mode-chips .mode-chip')) {
   b.addEventListener('click', () => {
+    if (b.dataset.mode === 'tournament') {
+      const isPrem = !!(mePremium || (meProfile && meProfile.premium) || (me && me.premium && me.premium.active));
+      if (!isPrem) {
+        openUpsell('Tournament rooms are a Premium feature', 'Premium members host tournament brackets of 8–16 artists. Upgrade to unlock tournament rooms — every other battle mode stays free.');
+        return;
+      }
+    }
     createMode = b.dataset.mode;
     paintCreateMode();
   });
@@ -5519,17 +6832,42 @@ function createTeamToggle(show3v3) {
   box.classList.toggle('hidden', !show3v3);
   if (show3v3 && !teamLoaded) createTeamLoad(); else if (show3v3) createTeamRender();
 }
-$('#create-team-box').addEventListener('click', (e) => {
+$('#create-team-box').addEventListener('click', async (e) => {
   const pick = e.target.closest('[data-create-team-pick]');
   if (pick) {
     const id = pick.dataset.createTeamPick;
-    if (teamPicks.includes(id)) teamPicks = teamPicks.filter((x) => x !== id);
-    else if (teamPicks.length >= 2) { toast('A 3v3 side is you plus two players.'); return; }
-    else teamPicks.push(id);
-    createTeamRender(); return;
+    if (teamPicks.includes(id)) {
+      teamPicks = teamPicks.filter((x) => x !== id);
+      createTeamRender();
+      return;
+    }
+    if (teamPicks.length >= 2) {
+      toast('A 3v3 side is you plus two players.');
+      return;
+    }
+    pick.disabled = true;
+    try {
+      const avail = await checkFriendAvailability(id);
+      if (!avail.online) {
+        showFriendOfflineModal(avail.username || 'Friend');
+        return;
+      }
+      if (avail.in_room) {
+        showFriendInRoomModal(avail.username || 'Friend', avail.room_code, avail.spectator_allowed);
+        return;
+      }
+      teamPicks.push(id);
+      createTeamRender();
+    } finally {
+      pick.disabled = false;
+    }
+    return;
   }
   const rm = e.target.closest('[data-create-team-remove]');
-  if (rm) { teamPicks = teamPicks.filter((x) => x !== rm.dataset.createTeamRemove); createTeamRender(); }
+  if (rm) {
+    teamPicks = teamPicks.filter((x) => x !== rm.dataset.createTeamRemove);
+    createTeamRender();
+  }
 });
 $('#team-save').addEventListener('click', async () => {
   try {
@@ -5753,6 +7091,7 @@ $('#btn-delete').addEventListener('click', () => { if (currentRoomCode) deleteMo
 const mm = (() => {
   const TIMEOUT_MS = 180000; // spec: 3 minutes — exact, deadline-based
   let state = 'idle'; // idle | searching | found | failed | cancelling
+  let searchMode = '1v1';
   let tickT = null, pollT = null, proceedT = null;
   let enterStartT = 0; // v47: local t0 — the timer runs from the FIRST frame, before the API answers
   let opponent = null;
@@ -5761,19 +7100,15 @@ const mm = (() => {
   // v46: the matchmaking search clock counts UP from zero.
   const fmtSearchClock = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 
+  function setMode(m) { searchMode = m || '1v1'; }
+
   function clearTimers() {
     for (const t of [tickT, pollT]) { if (t) clearInterval(t); }
     tickT = pollT = null;
   }
   // v48 ROOT-CAUSE FIX: the display clock is purely LOCAL and monotonic —
   // one anchor (enterStartT, set the instant the search begins), never
-  // rewritten by API responses or re-renders. The old designs derived the
-  // display from the server's queued_at deadline once /enter answered, so
-  // server <-> client clock skew (or a reused queue row from a previous,
-  // incompletely cancelled session) made the visible timer JUMP — and any
-  // re-anchor reset the perceived start. The server stays authoritative
-  // for the SESSION'S END (match via WS/poll, expiry via the server
-  // 'timeout' event); the local cap below is only the WS-down fallback.
+  // rewritten by API responses or re-renders.
   function tickClock() {
     if (state !== 'searching') return;
     const elapsed = Math.floor((Date.now() - enterStartT) / 1000);
@@ -5809,8 +7144,8 @@ const mm = (() => {
     const ava = $('#mm-op-ava');
     ava.classList.remove('mm-ava-pop');
     ava.classList.add('mm-ava-empty');
-    ava.innerHTML = '<span class="mm-pulse"></span><span class="mm-pulse mm-pulse2"></span><span class="mm-op-q">?</span>';
-    $('#mm-op-name').textContent = 'Searching\u2026';
+    ava.innerHTML = '<span class="mm-pulse"></span><span class="mm-pulse mm-pulse2"></span><span class="mm-op-q">' + (searchMode === '3v3' ? '3v3' : '?') + '</span>';
+    $('#mm-op-name').textContent = searchMode === '3v3' ? 'Searching 3v3\u2026' : 'Searching\u2026';
     $('#mm-op-name').classList.add('mm-name-empty');
   }
   function paintSearching() {
@@ -5818,7 +7153,7 @@ const mm = (() => {
     $('#mm-status').classList.remove('found', 'failed', 'cancelled');
     $('#mm-cancel-actions').classList.add('hidden');
     $('#mm-status-main').innerHTML = 'Connecting<span class="mm-dots"><span>.</span><span>.</span><span>.</span></span>';
-    $('#mm-status-sub').textContent = 'Art Arena is searching for an artist';
+    $('#mm-status-sub').textContent = searchMode === '3v3' ? 'Searching for a 3v3 team battle...' : 'Art Arena is searching for an artist';
     $('#mm-status-sub').classList.remove('ok');
     $('#mm-timer').classList.remove('hidden');
     $('#mm-timer').textContent = '00:00'; // v46: counts UP from zero
@@ -5829,7 +7164,7 @@ const mm = (() => {
     $('#mm-stage').classList.add('found');
     $('#mm-status').classList.add('found');
     $('#mm-cancel-actions').classList.add('hidden');
-    $('#mm-status-main').textContent = 'Found Player';
+    $('#mm-status-main').textContent = searchMode === '3v3' ? 'Found 3v3 Match' : 'Found Player';
     $('#mm-status-sub').textContent = 'Connected \u2713';
     $('#mm-status-sub').classList.add('ok');
     $('#mm-timer').classList.remove('hidden');
@@ -5841,18 +7176,12 @@ const mm = (() => {
     $('#mm-stage').classList.remove('found', 'cancelled');
     $('#mm-status').classList.add('failed');
     $('#mm-cancel-actions').classList.add('hidden');
-    // v43: an honest headline. "Could Not Find Player" is ONLY the truth
-    // for a real 3-minute timeout — when the search never started (the
-    // artist is still seated in a room), saying "Could Not Find Player"
-    // reads as a connection failure and hides the actual state.
     $('#mm-status-main').textContent = title || 'Could Not Find Player';
     $('#mm-status-sub').textContent = why || 'No available artists in the last 3 minutes.';
     $('#mm-status-sub').classList.remove('ok');
     $('#mm-actions').classList.add('hidden');
     $('#mm-fail-actions').classList.remove('hidden');
   }
-  // v37: the post-cancel screen. Timers + animation are already stopped;
-  // the user is provably out of the queue (the backend cancel committed).
   function paintCancelled() {
     $('#mm-stage').classList.add('cancelled');
     $('#mm-status').classList.remove('found', 'failed');
@@ -5869,15 +7198,13 @@ const mm = (() => {
     if (state !== 'searching') return;
     try {
       const d = await api('/api/matchmaking/status');
-      if (d.match) { found(d.match.room_code, d.match.opponent); return; }
+      if (d.match) { found(d.match.room_code, d.match.opponent, d.match.battle_mode || searchMode); return; }
       if (state === 'searching' && d.position > 1)
         $('#mm-status-sub').textContent = 'You are #' + d.position + ' in line';
     } catch (_) { /* WS is primary; the next poll retries */ }
   }
-  function found(code, opp) {
+  function found(code, opp, mode) {
     if (state === 'cancelling' || state === 'idle') {
-      // The server matched us in a race with the cancel — back out of the
-      // room so a cancelled user can NEVER be seated after leaving.
       api('/api/matchmaking/cancel', {}).catch(() => {});
       return;
     }
@@ -5885,25 +7212,23 @@ const mm = (() => {
     state = 'found';
     opponent = opp;
     clearTimers();
-    // v46: leave the timer showing the ELAPSED search time (it counts UP
-    // now); ticking is already stopped, so the value simply freezes here.
     mmLinkSet('connected'); // v45: the line locks solid green
     paintFound();
-    // A brief, intentional "Connected" beat \u2192 straight into the room,
-    // then the Choose Your Canvas step for my role (host = start, player =
-    // ready). Both players must select before the Randomizer runs.
+    const is3v3 = (mode === '3v3' || searchMode === '3v3');
     proceedT = setTimeout(() => {
       openRoom(code);
-      const t = setInterval(() => {
-        if (lastRoomData && lastRoomData.code === code && currentView === 'room') {
-          clearInterval(t);
-          const meP = lastRoomData.players.find((p) => p.is_you);
-          canvasModal.open((meP && meP.is_host) ? 'start' : 'ready', code,
-            (meP && meP.drawing_app_key) || null, true); // v42: auto-flow — no extra popup
-        }
-      }, 150);
-      setTimeout(() => clearInterval(t), 12000);
-    }, 2600);
+      if (!is3v3) {
+        const t = setInterval(() => {
+          if (lastRoomData && lastRoomData.code === code && currentView === 'room') {
+            clearInterval(t);
+            const meP = lastRoomData.players.find((p) => p.is_you);
+            canvasModal.open((meP && meP.is_host) ? 'start' : 'ready', code,
+              (meP && meP.drawing_app_key) || null, true); // v42: auto-flow — no extra popup
+          }
+        }, 150);
+        setTimeout(() => clearInterval(t), 12000);
+      }
+    }, is3v3 ? 1800 : 2600);
   }
   function fail(why, title) {
     if (state === 'idle') return;
@@ -5914,7 +7239,8 @@ const mm = (() => {
     api('/api/matchmaking/cancel', {}).catch(() => {}); // never leave a ghost queue row
     paintFailed(why, title);
   }
-  async function enter() {
+  async function enter(m) {
+    if (m) searchMode = m;
     if (state === 'searching' || state === 'found' || state === 'cancelling') return;
     clearTimers(); // v48: a previous session can never leave a tick behind
     state = 'searching';
@@ -5924,31 +7250,17 @@ const mm = (() => {
     paintMySlot();
     paintSearching();
     mmLinkSet('search'); // v45: the dashes start flowing
-    // v42: no more 1 s decrement — one 250 ms display tick that always
-    // re-derives the remaining time from the server deadline (no drift).
     tickT = setInterval(tickClock, 250);
     pollT = setInterval(pollStatus, 3000);
     try {
-      const d = await api('/api/matchmaking/enter', {});
-      // v48: the server response NEVER touches the display clock. It can
-      // only (a) match immediately, or (b) leave us searching — the local
-      // tick keeps counting from enterStartT regardless. The old code
-      // re-anchored the display to the server's queued_at deadline here,
-      // which made the timer JUMP whenever the server clock skewed or the
-      // server reused a queue row from an incompletely cancelled session.
-
-      if (d.matched) found(d.room, d.opponent);
+      const d = await api('/api/matchmaking/enter', { mode: searchMode });
+      if (d.matched) found(d.room, d.opponent, d.battle_mode || searchMode);
     } catch (err) {
       if (handleAuthError(err)) return;
-      // v43: if the search never started (still seated in a room), say
-      // THAT in the headline — the timer never ran, so "Could Not Find
-      // Player" would be false and reads like a connection failure.
       const inRoom = /already in a room/i.test(err.message || '');
       fail(err.message, inRoom ? 'Already In A Room' : null);
     }
   }
-  // v37: REAL cancel — the backend removes the queue row before the screen
-  // changes, so a cancelled user can never be matched after leaving.
   async function cancel() {
     if (state !== 'searching') return;
     state = 'cancelling'; // blocks enter()/found()/poll for the whole call
@@ -5969,16 +7281,12 @@ const mm = (() => {
     }
   }
   function onWs(message) {
-    // 'cancelling' included: a found-event racing the cancel must be
-    // handled by found()'s back-out guard, never silently dropped.
-    if (message.action === 'found' && (state === 'searching' || state === 'cancelling')) found(message.room, message.opponent);
-    // v42: the SERVER expired the queue row at exactly queued_at + 180 s —
-    // the authoritative end of the window (the client's own deadline check
-    // is the fallback when the WS is down).
+    if (message.action === 'found' && (state === 'searching' || state === 'cancelling'))
+      found(message.room, message.opponent, message.battle_mode || searchMode);
     if (message.action === 'timeout' && (state === 'searching' || state === 'cancelling'))
       fail('No available artists in the last 3 minutes \u2014 give it another try.');
   }
-  function onEnter() { if (state === 'idle') enter(); }
+  function onEnter() { if (state === 'idle') enter(searchMode); }
   function onLogout() {
     if (state === 'searching' || state === 'failed' || state === 'cancelling') api('/api/matchmaking/cancel', {}).catch(() => {});
     state = 'idle';
@@ -5987,14 +7295,25 @@ const mm = (() => {
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
   }
   $('#mm-cancel').addEventListener('click', cancel);
-  $('#mm-retry').addEventListener('click', () => enter());
+  $('#mm-retry').addEventListener('click', () => enter(searchMode));
   $('#mm-exit').addEventListener('click', exit);
-  // v37: post-cancel screen — Back = main battle screen (out of the queue),
-  // Try Again = a completely fresh search (queue re-enter, timer from 0:00).
   $('#mm-cancel-back').addEventListener('click', () => show('arena'));
-  $('#mm-cancel-retry').addEventListener('click', () => enter());
-  return { onWs, onEnter, onLogout };
+  $('#mm-cancel-retry').addEventListener('click', () => enter(searchMode));
+  return { onWs, onEnter, onLogout, setMode, enter };
 })();
+
+document.querySelectorAll('#battle-mode-modal [data-bm-mode]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.bmMode || '1v1';
+    modalClose('#battle-mode-modal');
+    mm.setMode(mode);
+    show('matchmaking');
+  });
+});
+$('#bm-cancel').addEventListener('click', () => modalClose('#battle-mode-modal'));
+$('#battle-mode-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'battle-mode-modal') modalClose('#battle-mode-modal');
+});
 // Thin named wrappers (show()/rtHandle() call these by name).
 function mmOnEnter() { mm.onEnter(); }
 function mmOnWs(m) { mm.onWs(m); }
@@ -6783,7 +8102,16 @@ $('#pm-close').addEventListener('click', () => modalClose('#profile-modal'));
 $('#profile-modal').addEventListener('click', (e) => { if (e.target.id === 'profile-modal') modalClose('#profile-modal'); });
 
 async function openProfile(userId) {
+  window.openProfile = openProfile;
   pmUserId = userId;
+  const pmCard = $('#pm-card');
+  if (pmCard) {
+    pmCard.setAttribute('data-prof-theme', 'default');
+    pmCard.style.removeProperty('--pm-c1');
+    pmCard.style.removeProperty('--pm-c2');
+  }
+  const premBadge = $('#pm-prem-badge');
+  if (premBadge) premBadge.classList.add('hidden');
   $('#pm-body').innerHTML = '<p class="muted" style="margin:10px 0 0">Loading profile…</p>';
   $('#pm-friend').textContent = '';
   $('#pm-friend').dataset.mode = '';
@@ -6794,6 +8122,40 @@ async function openProfile(userId) {
   } catch (err) { $('#pm-body').innerHTML = '<p class="muted" style="margin:10px 0 0">' + esc(err.message) + '</p>'; return; }
   if (pmUserId !== userId) return; // switched target mid-load
   const u = d.user, st = d.statistics;
+
+  // Perspective Logic: Profile appearance ALWAYS represents the profile owner's
+  // active theme and premium entitlement (never the viewer's).
+  const isTargetPremium = !!(u && u.premium);
+  let activeTheme = 'default';
+  if (isTargetPremium) {
+    const rawTh = String(u.ui_theme || 'flame').toLowerCase();
+    const VALID_THEMES = ['flame', 'cloud', 'glowing', 'glitch', 'graffiti', 'magazine', 'pixel'];
+    if (VALID_THEMES.includes(rawTh)) {
+      activeTheme = rawTh;
+    } else {
+      activeTheme = 'flame';
+    }
+  }
+  if (pmCard) {
+    pmCard.setAttribute('data-prof-theme', activeTheme);
+    if (isTargetPremium && u.ui_custom) {
+      if (u.ui_custom.c1) pmCard.style.setProperty('--pm-c1', u.ui_custom.c1);
+      else pmCard.style.removeProperty('--pm-c1');
+      if (u.ui_custom.c2) pmCard.style.setProperty('--pm-c2', u.ui_custom.c2);
+      else pmCard.style.removeProperty('--pm-c2');
+    } else {
+      pmCard.style.removeProperty('--pm-c1');
+      pmCard.style.removeProperty('--pm-c2');
+    }
+  }
+  if (premBadge) {
+    if (isTargetPremium) {
+      premBadge.classList.remove('hidden');
+    } else {
+      premBadge.classList.add('hidden');
+    }
+  }
+
   const isMe = me && me.id === userId;
   const isFriend = (fr.friends || []).some((f) => f.id === userId);
   const iSent = (fr.outgoing || []).some((r) => r.user_id === userId);
@@ -6801,15 +8163,15 @@ async function openProfile(userId) {
   $('#pm-body').innerHTML =
     '<div style="display:flex; align-items:center; gap:12px; margin:8px 0 2px">' +
     (u.avatar_url ? '<img class="prof-modal-ava" src="' + esc(u.avatar_url) + '" alt="">' : '<span class="prof-modal-ava-fallback">' + esc((u.display_name || u.username || '?').charAt(0).toUpperCase()) + '</span>') +
-    '<div><div style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + (u.premium ? ' <span class="prem-chip"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>' : '') + '</div>' +
-    '<div class="muted" style="font-size:13px">@' + esc(u.username) + '</div></div></div>' +
-    (u.bio ? '<p class="muted" style="margin:10px 0 0; font-size:13.5px">' + esc(u.bio) + '</p>' : '') +
+    '<div><div class="prof-modal-display-name" style="font-weight:800; font-size:16px">' + esc(u.display_name || u.username) + (u.premium ? ' <span class="prem-chip"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>' : '') + '</div>' +
+    '<div class="muted prof-modal-handle" style="font-size:13px">@' + esc(u.username) + '</div></div></div>' +
+    (u.bio ? '<p class="muted prof-modal-bio" style="margin:10px 0 0; font-size:13.5px">' + esc(u.bio) + '</p>' : '') +
     '<div class="prof-stats-row">' +
     '<div class="prof-stat-cell"><b>' + st.battles_played + '</b><span>BATTLES</span></div>' +
     '<div class="prof-stat-cell"><b>' + st.wins + '</b><span>WINS</span></div>' +
     '<div class="prof-stat-cell"><b>' + st.losses + '</b><span>LOSSES</span></div>' +
     '<div class="prof-stat-cell"><b>' + st.draws + '</b><span>DRAWS</span></div></div>' +
-    (u.joined_at ? '<p class="muted" style="font-size:11.5px; margin:10px 0 0">Joined ' + new Date(u.joined_at).toLocaleDateString() + '</p>' : '');
+    (u.joined_at ? '<p class="muted prof-modal-joined" style="font-size:11.5px; margin:10px 0 0">Joined ' + new Date(u.joined_at).toLocaleDateString() + '</p>' : '');
   const btn = $('#pm-friend'), dec = $('#pm-friend-decline');
   btn.classList.remove('is-remove', 'secondary'); dec.classList.add('hidden');
   // v59: the button says what it DOES in every state (never a dead label)
@@ -6854,33 +8216,46 @@ $('#pm-friend-decline').addEventListener('click', async () => {
   openProfile(id);
 });
 
-// ------------------------ room owner context menu ----------------------------
-// Owner only; never on yourself; never on the owner. Desktop = double-click,
-// touch = long-press (~500 ms). A plain click/tap never triggers it.
+// ------------------------ room owner moderation & player removal (kick) -------
+// Host/owner only moderation; desktop 'K' key targeting; mobile long-press (~500ms);
+// room context menu & kick confirmation modal.
+let selectedSeatUid = null, selectedSeatUname = null;
 let ctxTimer = null, ctxLongFired = false;
 function closeRoomMenu() { const m = document.querySelector('.room-ctxmenu'); if (m) m.remove(); }
+
+function promptKickPlayer(uid, uname) {
+  if (!uid || !me || !lastRoomData) return;
+  if (!lastRoomData.host || lastRoomData.host.user_id !== me.id) return;
+  if (uid === me.id) return;
+  $('#kc-title').textContent = 'Remove Player';
+  $('#kc-text').textContent = 'Are you sure you want to remove @' + uname + ' from this room?';
+  $('#kc-confirm').dataset.uid = uid;
+  modalOpen('#kick-confirm-modal');
+}
+
 function roomMenuFor(seat) {
   closeRoomMenu();
   const uid = seat.dataset.uid, uname = seat.dataset.username;
   if (!uid || !me || !lastRoomData) return;
-  if (!lastRoomData.host || lastRoomData.host.user_id !== me.id) return;   // owner only
-  if (uid === me.id || seat.dataset.ishost === '1') return;                // not self / not the owner
+  const isHost = !!(lastRoomData.host && lastRoomData.host.user_id === me.id);
+  const isSelf = (uid === me.id);
+  const isTargetHost = seat.dataset.ishost === '1';
+  const canKick = isHost && !isSelf && !isTargetHost;
+
   const m = document.createElement('div');
   m.className = 'room-ctxmenu';
-  m.style.left = Math.min(window.innerWidth - 210, 18) + 'px';
+  m.style.left = Math.min(window.innerWidth - 210, Math.max(18, seat.getBoundingClientRect().left)) + 'px';
   m.style.top = Math.max(12, seat.getBoundingClientRect().top - 8) + 'px';
   m.innerHTML =
     '<button type="button" class="util-btn" data-act="profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.5-3.6 3.7-5.6 7.5-5.6s7 2 7.5 5.6"/></svg> View Profile</button>' +
-    '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Kick User</button>';
+    (canKick ? '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Remove Player</button>' : '');
   m.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-act]');
     if (!b) return;
     closeRoomMenu();
     if (b.dataset.act === 'profile') openProfile(uid);
-    else {
-      $('#kc-text').textContent = 'Kick @' + uname + ' from this room?';
-      $('#kc-confirm').dataset.uid = uid;
-      modalOpen('#kick-confirm-modal');
+    else if (b.dataset.act === 'kick') {
+      promptKickPlayer(uid, uname);
     }
   });
   document.body.appendChild(m);
@@ -6889,11 +8264,67 @@ function roomMenuFor(seat) {
     document.addEventListener('click', closer, true);
   }, 0);
 }
-$('#room-players').addEventListener('dblclick', (e) => { if (e.target.closest('.friend-add, .friend-chip, .friend-slot')) return; const s = e.target.closest('.seat[data-uid]'); if (s) roomMenuFor(s); });
-$('#room-players').addEventListener('touchstart', (e) => { if (e.target.closest('.friend-add, .friend-chip, .friend-slot')) return; const s = e.target.closest('.seat[data-uid]'); if (!s) return; ctxLongFired = false; ctxTimer = setTimeout(() => { ctxLongFired = true; roomMenuFor(s); if (navigator.vibrate) navigator.vibrate(12); }, 500); }, { passive: true });
-$('#room-players').addEventListener('touchend', () => { clearTimeout(ctxTimer); }, { passive: true });
-$('#room-players').addEventListener('touchmove', () => { clearTimeout(ctxTimer); }, { passive: true });
-$('#room-players').addEventListener('click', (e) => { if (ctxLongFired) { e.preventDefault(); e.stopPropagation(); ctxLongFired = false; } }, true);
+
+function handleSeatSelect(seat) {
+  if (!seat || !seat.dataset.uid) return;
+  document.querySelectorAll('.seat-selected').forEach((el) => el.classList.remove('seat-selected'));
+  seat.classList.add('seat-selected');
+  selectedSeatUid = seat.dataset.uid;
+  selectedSeatUname = seat.dataset.username;
+}
+
+function attachSeatModeration(container) {
+  if (!container) return;
+  container.addEventListener('click', (e) => {
+    if (ctxLongFired) { e.preventDefault(); e.stopPropagation(); ctxLongFired = false; return; }
+    if (e.target.closest('.friend-add, .friend-chip, .friend-slot, button, a')) return;
+    const s = e.target.closest('.seat[data-uid], .tt-seat[data-uid]');
+    if (s) {
+      handleSeatSelect(s);
+      roomMenuFor(s);
+    }
+  });
+  container.addEventListener('dblclick', (e) => {
+    if (e.target.closest('.friend-add, .friend-chip, .friend-slot, button, a')) return;
+    const s = e.target.closest('.seat[data-uid], .tt-seat[data-uid]');
+    if (s) roomMenuFor(s);
+  });
+  container.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.friend-add, .friend-chip, .friend-slot, button, a')) return;
+    const s = e.target.closest('.seat[data-uid], .tt-seat[data-uid]');
+    if (!s || !s.dataset.uid) return;
+    handleSeatSelect(s);
+    ctxLongFired = false;
+    ctxTimer = setTimeout(() => {
+      ctxLongFired = true;
+      if (lastRoomData && lastRoomData.host && me && lastRoomData.host.user_id === me.id && s.dataset.uid !== me.id && s.dataset.ishost !== '1') {
+        promptKickPlayer(s.dataset.uid, s.dataset.username);
+      } else {
+        roomMenuFor(s);
+      }
+      if (navigator.vibrate) navigator.vibrate(12);
+    }, 500);
+  }, { passive: true });
+  container.addEventListener('touchend', () => { clearTimeout(ctxTimer); }, { passive: true });
+  container.addEventListener('touchmove', () => { clearTimeout(ctxTimer); }, { passive: true });
+}
+
+attachSeatModeration($('#room-players'));
+attachSeatModeration($('#tt-board'));
+
+// Desktop 'K' shortcut: pressing 'K' with a player targeted/selected opens Remove Player dialog
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'k' || e.key === 'K') {
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target && e.target.isContentEditable)) return;
+    if (currentView !== 'room' || !currentRoomCode || !lastRoomData) return;
+    if (!lastRoomData.host || !me || lastRoomData.host.user_id !== me.id) return; // host only
+    if (!selectedSeatUid || selectedSeatUid === me.id) return; // not self or unselected
+    const p = lastRoomData.players && lastRoomData.players.find((x) => x.user_id === selectedSeatUid);
+    if (!p || p.is_host) return;
+    promptKickPlayer(p.user_id, p.username || selectedSeatUname);
+  }
+});
 
 $('#kc-cancel').addEventListener('click', () => modalClose('#kick-confirm-modal'));
 $('#kick-confirm-modal').addEventListener('click', (e) => { if (e.target.id === 'kick-confirm-modal') modalClose('#kick-confirm-modal'); });
@@ -6901,8 +8332,12 @@ $('#kc-confirm').addEventListener('click', async () => {
   const uid = $('#kc-confirm').dataset.uid, code = currentRoomCode;
   modalClose('#kick-confirm-modal');
   if (!uid || !code) return;
-  try { await api('/api/rooms/' + code + '/kick', { user_id: uid }, 'POST'); toast('Kicked from the room.'); }
-  catch (err) { toast(err.message); }
+  try {
+    await api('/api/rooms/' + code + '/kick', { user_id: uid }, 'POST');
+    toast('Player removed from the room.');
+  } catch (err) {
+    toast(err.message);
+  }
 });
 
 // Edit Room (owner, post-battle): reopen the host settings editor — changes
@@ -7011,6 +8446,64 @@ $('#btn-launch').addEventListener('click', async () => {
 // notification pipeline; joining uses the normal join route. 3v3 team
 // building moved to the CREATE ROOM flow (v63) — this page is friends only.
 let frData = null;
+let roomInviteContext = null;
+
+async function checkFriendAvailability(uid) {
+  try {
+    const res = await api('/api/friends/' + uid + '/availability');
+    return res;
+  } catch (err) {
+    const f = (frData && frData.friends || []).find((x) => x.id === uid);
+    return {
+      id: uid,
+      username: f ? f.username : 'User',
+      display_name: f ? f.display_name : null,
+      online: f ? !!f.online : false,
+      in_room: f ? !!f.room_code : false,
+      room_code: f ? f.room_code : null,
+      room_visibility: f ? f.room_visibility : null,
+      spectator_allowed: true,
+      available: f ? (f.online && !f.room_code) : false,
+    };
+  }
+}
+
+let spectateTargetCode = null;
+function showFriendOfflineModal(username) {
+  $('#fom-sub').textContent = '@' + username + ' is currently offline. You can only invite or add artists to your side when they are online.';
+  modalOpen('#friend-offline-modal');
+}
+
+function showFriendInRoomModal(username, roomCode, spectatorAllowed) {
+  spectateTargetCode = roomCode;
+  $('#firm-sub').textContent = '@' + username + ' is currently in room #' + roomCode + '. They must leave that room before joining another.';
+  $('#firm-spectate').classList.toggle('hidden', !spectatorAllowed);
+  modalOpen('#friend-in-room-modal');
+}
+
+$('#fom-back').addEventListener('click', () => modalClose('#friend-offline-modal'));
+$('#friend-offline-modal').addEventListener('click', (e) => { if (e.target.id === 'friend-offline-modal') modalClose('#friend-offline-modal'); });
+
+$('#firm-back').addEventListener('click', () => modalClose('#friend-in-room-modal'));
+$('#friend-in-room-modal').addEventListener('click', (e) => { if (e.target.id === 'friend-in-room-modal') modalClose('#friend-in-room-modal'); });
+$('#firm-spectate').addEventListener('click', () => {
+  const code = spectateTargetCode;
+  modalClose('#friend-in-room-modal');
+  if (code) {
+    joinRoom(code, 'spectator');
+  }
+});
+
+$('#fr-invite-banner-back').addEventListener('click', () => {
+  if (roomInviteContext && roomInviteContext.code) {
+    const code = roomInviteContext.code;
+    roomInviteContext = null;
+    showRoom(code);
+  } else {
+    show('rooms');
+  }
+});
+
 function frAvatar(f) {
   const ini = String((f.display_name || f.username || '?').charAt(0)).toUpperCase();
   return '<span class="fr-ava">' + (f.avatar_url ? '<img src="' + esc(f.avatar_url) + '" alt="" data-initial="' + esc(ini) + '" onerror="this.onerror=null;avatarImgFailed(this)">' : esc(ini)) + '<i class="dot" title="' + (f.online ? 'Online' : 'Offline') + '"></i></span>';
@@ -7024,38 +8517,81 @@ async function friendsPageLoad() {
 function friendsPageRender() {
   if (!frData) return;
   const fs = frData.friends || [];
+  const banner = $('#fr-invite-banner');
+  if (banner) {
+    if (roomInviteContext && roomInviteContext.code) {
+      banner.classList.remove('hidden');
+      $('#fr-invite-banner-title').textContent = 'INVITING TO ROOM #' + roomInviteContext.code;
+      $('#fr-invite-banner-sub').textContent = (roomInviteContext.name ? roomInviteContext.name + ' · ' : '') + (MODE_LABELS[roomInviteContext.mode] || roomInviteContext.mode || '1v1');
+    } else {
+      banner.classList.add('hidden');
+    }
+  }
   $('#fr-count').textContent = fs.length ? fs.length + ' friend' + (fs.length === 1 ? '' : 's') + ' · ' + frData.online_count + ' online' : '';
   $('#fr-list').innerHTML = fs.map((f) => {
     const sub = f.online ? (f.room_code ? 'Online · in room #' + esc(f.room_code) : 'Online') : 'Offline';
+    const actionBtn = roomInviteContext
+      ? '<button type="button" data-fr-room-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">' + IC.userplus + ' Invite</button>'
+      : '<button type="button" data-fr-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">Invite to room</button>';
     return '<div class="fr-row' + (f.online ? ' online' : '') + '" data-uid="' + esc(f.id) + '">' + frAvatar(f) +
       '<div class="fr-info"><div class="fr-name">' + esc(f.display_name || f.username) + ' <span class="muted" style="font-weight:500">@' + esc(f.username) + '</span></div><div class="fr-sub">' + sub + '</div></div>' +
       '<div class="fr-actions">' +
-      '<button type="button" data-fr-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">Invite to room</button>' +
+      actionBtn +
       '<button type="button" class="mini util-btn" data-fr-profile="' + esc(f.id) + '">Profile</button>' +
       '</div></div>';
   }).join('');
   $('#fr-empty').classList.toggle('hidden', fs.length > 0);
 }
-$('#view-friends').addEventListener('click', (e) => {
+
+$('#view-friends').addEventListener('click', async (e) => {
   const prof = e.target.closest('[data-fr-profile]'); if (prof) { openProfile(prof.dataset.frProfile); return; }
-  const inv = e.target.closest('[data-fr-invite]'); if (inv) { openInviteModal(inv.dataset.frInvite, inv.dataset.name); return; }
-});
-// invite modal — choose one of my rooms (host, lobby, free seat)
-let invTarget = null;
-function openInviteModal(uid, name) {
-  invTarget = uid;
-  const friend = (frData && frData.friends || []).find((f) => f.id === uid);
-  // v65 (item 11): a friend who is already seated in a room cannot accept an
-  // invitation (the one-room seat rule) — say so up front instead of listing
-  // rooms that would all fail on their side.
-  if (friend && friend.room_code) {
-    $('#inv-sub').textContent = '@' + name + ' is already in room #' + friend.room_code + '.';
-    $('#inv-rooms').innerHTML = '<p class="muted" style="margin:0; font-size:13.5px">Ask them to leave that room first — an artist can only sit in one battle room at a time. Inviting them now would fail on their side.</p>';
-    $('#inv-create').classList.add('hidden');
-    modalOpen('#invite-modal');
+  const rInv = e.target.closest('[data-fr-room-invite]');
+  if (rInv && roomInviteContext && roomInviteContext.code) {
+    const uid = rInv.dataset.frRoomInvite;
+    const name = rInv.dataset.name;
+    rInv.disabled = true;
+    try {
+      const avail = await checkFriendAvailability(uid);
+      if (!avail.online) {
+        showFriendOfflineModal(avail.username || name);
+        return;
+      }
+      if (avail.in_room) {
+        showFriendInRoomModal(avail.username || name, avail.room_code, avail.spectator_allowed);
+        return;
+      }
+      await api('/api/friends/' + uid + '/invite', { room_code: roomInviteContext.code }, 'POST');
+      toast('Invitation sent to @' + (avail.username || name) + '!');
+      rInv.textContent = 'Invited ✓';
+    } catch (err) {
+      toast(err.message);
+    } finally {
+      rInv.disabled = false;
+    }
     return;
   }
-  $('#inv-sub').textContent = 'Choose which of your rooms @' + name + ' should join.';
+  const inv = e.target.closest('[data-fr-invite]'); if (inv) { openInviteModal(inv.dataset.frInvite, inv.dataset.name); return; }
+  const row = e.target.closest('.fr-row[data-uid]');
+  if (row && !e.target.closest('button, a')) {
+    openProfile(row.dataset.uid);
+    return;
+  }
+});
+
+// invite modal — choose one of my rooms (host, lobby, free seat)
+let invTarget = null;
+async function openInviteModal(uid, name) {
+  invTarget = uid;
+  const avail = await checkFriendAvailability(uid);
+  if (!avail.online) {
+    showFriendOfflineModal(avail.username || name);
+    return;
+  }
+  if (avail.in_room) {
+    showFriendInRoomModal(avail.username || name, avail.room_code, avail.spectator_allowed);
+    return;
+  }
+  $('#inv-sub').textContent = 'Choose which of your rooms @' + (avail.username || name) + ' should join.';
   const rooms = (frData && frData.my_rooms) || [];
   $('#inv-rooms').innerHTML = rooms.length
     ? rooms.map((r) => '<button type="button" class="inv-room util-btn" data-inv-room="' + esc(r.code) + '"><span>' + esc(r.name || 'Room #' + r.code) + '<br><small>' + esc(MODE_LABELS[r.battle_mode] || r.battle_mode) + ' · ' + r.player_count + '/' + r.max_players + ' seated · ' + esc(r.visibility) + '</small></span><span class="muted">#' + esc(r.code) + '</span></button>').join('')
@@ -7086,7 +8622,7 @@ function paletteMini(cols) {
   return '<span class="challenge-palette" title="' + esc(cols.join(', ')) + '">' +
     cols.map((c) => '<i style="background:' + esc(c) + '"></i>').join('') + '</span>';
 }
-const REVEAL_ORDER = ['character', 'environment', 'object', 'style', 'color', 'wildcard', 'mood', 'lighting'];
+const REVEAL_ORDER = ['character', 'environment', 'object', 'style', 'color', 'lighting', 'mood', 'composition', 'weather', 'texture', 'wildcard'];
 const REVEAL_LABELS = { style: 'Drawing Style', color: 'Colour Combination' };
 let revealShownFor = null;   // challenge id currently on screen
 let revealDismissed = null;  // challenge id the user closed (don't re-open on every poll)
@@ -7155,37 +8691,45 @@ function revealRender(d) {
   $('#rv-back').textContent = inReveal ? 'Back to room' : 'Close';
 }
 function revealOpen(d) {
+  if (!d || !d.battle || !d.battle.challenge) return;
   revealRender(d);
   revealShownFor = d.battle.challenge.id;
+  revealDismissed = null;
   revealArmEntrance(d.battle.challenge.id);
   $('#reveal-view').classList.remove('hidden');
   $('#reveal-view').scrollTop = 0;
 }
 function revealClose() {
   if ($('#reveal-view').classList.contains('hidden')) return;
-  revealDismissed = revealShownFor;
+  if (revealShownFor) revealDismissed = revealShownFor;
   revealShownFor = null;
   $('#reveal-view').classList.add('hidden');
 }
 // called from renderRoom whenever a challenge exists — opens ONCE per
-// challenge id (lock or re-roll); later polls only refresh the open screen.
+// challenge id (lock or re-roll); later polls only refresh the open screen without closing it.
 function revealSync(d) {
+  if (!d || !d.battle || !d.battle.challenge) return;
   const ch = d.battle.challenge;
-  const st = d.battle.status;
-  if (st !== 'challenge_locked') { // countdown/active/… → the reveal is over
-    // v64 fix: once the battle is over the reveal stays open for anyone who
-    // opens it (View challenge reveal) — only live phases force it shut.
-    if (st === 'complete' || st === 'cancelled' || st === 'forfeited' || st === 'disqualified') {
-      if (revealShownFor === ch.id && !$('#reveal-view').classList.contains('rv-entering')) revealRender(d);
-      return;
+  const isRevealVisible = !$('#reveal-view').classList.contains('hidden');
+
+  // If the reveal overlay is already open, simply update its contents without closing or restarting animation
+  if (isRevealVisible) {
+    revealShownFor = ch.id;
+    if (!$('#reveal-view').classList.contains('rv-entering')) {
+      revealRender(d);
     }
-    if (revealShownFor) { revealShownFor = null; $('#reveal-view').classList.add('hidden'); }
     return;
   }
-  if (revealShownFor === ch.id) { if (!$('#reveal-view').classList.contains('rv-entering')) revealRender(d); return; } // never re-render mid-entrance (would restart it)
-  if (revealDismissed === ch.id) return;
-  revealOpen(d); // new challenge id (lock or re-roll) → fresh entrance
+
+  // Auto-open only during challenge_locked phase if not dismissed
+  if (d.battle.status === 'challenge_locked' && revealDismissed !== ch.id && revealShownFor !== ch.id) {
+    revealOpen(d);
+  }
 }
+$('#rv-back').addEventListener('click', revealClose);
+$('#reveal-view').addEventListener('click', (e) => { if (e.target.id === 'reveal-view') revealClose(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#reveal-view').classList.contains('hidden')) revealClose(); });
+$('#rv-launch').addEventListener('click', () => $('#btn-launch').click());
 $('#rv-back').addEventListener('click', revealClose);
 $('#reveal-view').addEventListener('click', (e) => { if (e.target.id === 'reveal-view') revealClose(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#reveal-view').classList.contains('hidden')) revealClose(); });
@@ -7201,7 +8745,7 @@ $('#challenge-box').addEventListener('click', (e) => {
 // from the SERVER catalog + entitlement — never a client-side unlock.
 function pthLogoFor(key) { return (key && THEME_LOGOS[key]) ? THEME_LOGOS[key] : '/logo.png'; }
 // recolor a customizable theme's logo to the chosen colors (gradient along the
-// chosen direction, silhouette preserved). Cloud/Magazine/Stitch/Graffiti are
+// chosen direction, silhouette preserved). Cloud/Magazine/Graffiti are
 // never tinted — their supplied art is the identity.
 const pthTintCache = {};
 function pthTintedLogo(key, custom) {
@@ -7287,7 +8831,7 @@ $('#settings-theme-grid').addEventListener('click', async (e) => {
   if (e.target.closest('#pth-upgrade')) { show('premium'); return; }
   if (!mePremium) { openUpsell('Design themes are Premium', 'UI Customization is part of Art Arena Premium. Upgrade to unlock the Preset Themes and manual colours.'); return; } // v61: the whole grid is inert for free members
   const up = e.target.closest('[data-upsell]');
-  if (up) { openUpsell('Design themes are Premium', 'Preset Themes — Flame, Cloud, Glitch, Graffiti, Stitch, Glowing, Magazine Cutout and Pixelated — each restyling the entire app.'); return; }
+  if (up) { openUpsell('Design themes are Premium', 'Preset Themes — Flame, Cloud, Glitch, Graffiti, Glowing, Magazine Cutout and Pixelated — each restyling the entire app.'); return; }
   const sw = e.target.closest('[data-settings-theme]');
   if (!sw) return;
   try {
@@ -7985,8 +9529,11 @@ window.__aaTwitchHandoff = null;
     // classic logo. Server truth still wins the moment a session resolves.
     try {
       const t = JSON.parse(localStorage.getItem('aa-ptheme') || 'null');
-      if (t && t.key && ['flame', 'cloud', 'glitch', 'graffiti', 'stitch', 'glowing', 'magazine', 'pixel'].indexOf(t.key) >= 0) {
+      if (t && t.key && ['flame', 'cloud', 'glitch', 'graffiti', 'glowing', 'magazine', 'pixel'].indexOf(t.key) >= 0) {
         applyPremiumTheme(t.key, t.custom || null);
+      } else if (t) {
+        localStorage.removeItem('aa-ptheme');
+        applyPremiumTheme(null, null);
       }
     } catch (_) {}
     if (legalView) {
