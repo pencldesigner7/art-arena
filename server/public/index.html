@@ -100,7 +100,7 @@ try {
   .check input { width:auto; margin:0; }
   .banner { background:var(--warn-bg); border:1px solid var(--warn-bd); color:var(--warn-tx); padding:10px 12px; border-radius:8px; margin-bottom:12px; font-size:14px; }
 #nav-right { display:flex; align-items:center; justify-self:end; gap:8px; }
-  #nav-right .icon-btn, #nav-right #btn-premium-mini, .nav-left .icon-btn { width:36px; height:36px; flex:0 0 auto; margin:0; padding:0; min-width:0; display:inline-flex; align-items:center; justify-content:center; }
+  #nav-right .icon-btn, .nav-left .icon-btn { width:36px; height:36px; flex:0 0 auto; margin:0; padding:0; min-width:0; display:inline-flex; align-items:center; justify-content:center; }
 
   /* ------------------------- arena home (main screen) ------------------- */
   .welcome { font-size:24px; letter-spacing:1px; margin-bottom:4px; }
@@ -510,13 +510,18 @@ try {
   }
 
   /* ---- Glowing: hierarchy — primary actions + logo glow; everything else
-       stays calm. One glow scale, applied with intent. ---- */
-  body[data-ptheme="glowing"] #top-brand img { filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.9)) drop-shadow(0 0 16px rgba(var(--pink-rgb),.55)) drop-shadow(0 0 34px rgba(var(--purple-rgb),.35)); } /* v68 (item 7): neon — bright core + wide bloom */
-  /* v57: the glowing wordmark GLOWS wherever it appears (home, auth, legal,
-     about, drawer, theme cards) — a live NEON halo on top of the baked glow */
-  body[data-ptheme="glowing"] img[data-aa-logo] { filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.85)) drop-shadow(0 0 18px rgba(var(--pink-rgb),.5)) drop-shadow(0 0 40px rgba(var(--purple-rgb),.32)); animation:pth-glow-breathe 3.8s ease-in-out infinite; }
-  body[data-ptheme="glowing"] .swatch-logo img[data-swatch-logo="glowing"], .swatch-logo img[src*="glowing"] { filter:drop-shadow(0 0 8px rgba(110,212,191,.55)); }
-  @keyframes pth-glow-breathe { 0%,100% { filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.8)) drop-shadow(0 0 18px rgba(var(--pink-rgb),.45)) drop-shadow(0 0 40px rgba(var(--purple-rgb),.3)); } 50% { filter:drop-shadow(0 0 9px rgba(var(--pink-rgb),1)) drop-shadow(0 0 28px rgba(var(--pink-rgb),.7)) drop-shadow(0 0 60px rgba(var(--purple-rgb),.45)); } }
+     stays calm. One glow scale, applied with intent. ---- */
+  /* v69 (item 2): the NEON NEVER TOUCHES THE LOGO'S PIXELS. The old rules put
+     layered drop-shadow() filters (plus a filter-animating breathe) directly
+     on the wordmark <img>s — the halo bled through the transparent margins,
+     re-rasterised the art every frame and washed the logo out. Outer
+     box-shadow is clipped OUTSIDE the element's border box, so the artwork
+     renders exactly as shipped while the surface around it burns neon.
+     Glitch stays 100% as-is (its art is canonical; this ring is theme-scoped
+     to glowing only and touches no pixels either way). */
+  body[data-ptheme="glowing"] img[data-aa-logo] { border-radius:12px; box-shadow:0 0 8px rgba(var(--pink-rgb),.55), 0 0 22px rgba(var(--pink-rgb),.3), 0 0 44px rgba(var(--purple-rgb),.22); animation:pth-glow-breathe 3.8s ease-in-out infinite; }
+  body[data-ptheme="glowing"] .swatch-logo { box-shadow:0 0 8px rgba(110,212,191,.45), 0 0 20px rgba(110,212,191,.22); }
+  @keyframes pth-glow-breathe { 0%,100% { box-shadow:0 0 8px rgba(var(--pink-rgb),.5), 0 0 22px rgba(var(--pink-rgb),.28), 0 0 44px rgba(var(--purple-rgb),.2); } 50% { box-shadow:0 0 12px rgba(var(--pink-rgb),.75), 0 0 32px rgba(var(--pink-rgb),.45), 0 0 64px rgba(var(--purple-rgb),.32); } }
   /* v54 hierarchy: home destination cards are <button>s — under Glowing they
      must NOT wear the primary CTA gradient+glow. They stay calm surfaces with
      a faint halo; only primary actions burn bright. */
@@ -703,8 +708,7 @@ try {
   .pth-color-row { display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap; }
   .pth-color { display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); }
   .pth-color input[type="color"] { width:34px; height:26px; border:1px solid var(--line); border-radius:6px; background:var(--surface); padding:1px; cursor:pointer; }
-  #btn-premium-mini { position:relative; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--btn-line); background:linear-gradient(135deg, rgba(var(--pink-rgb),.16), rgba(var(--purple-rgb),.16)); cursor:pointer; }
-  #btn-premium-mini:hover { border-color:var(--pink); }
+
   #btn-launch { width:100%; margin-top:10px; }
   #btn-reroll { width:100%; margin-top:10px; }
   #btn-reroll.locked { opacity:.75; }
@@ -2424,6 +2428,34 @@ try {
   .mm-pos { display:flex; flex-direction:column; align-items:center; gap:10px; width:110px; }
   .mm-pos .mm-slot { width:110px; margin-top:0; }
   .mm-slot-tag { font-size:9.5px; letter-spacing:2px; color:var(--muted); font-weight:800; text-transform:uppercase; }
+  /* v69 (item 1): honest stage captions — YOUR PROFILE / OPPOSING TEAM.
+     No placeholder seat labels anywhere: empty seats are the searching pulse. */
+  .mm-teamcap { font-size:10.5px; letter-spacing:2.5px; color:var(--muted); font-weight:800; text-transform:uppercase; margin:0 0 7px; }
+  /* v69 (items 8+9): HELP accordion — native <details> in .card housings so
+     every theme + the custom-colour wash reach it through the existing token
+     system (no separate Help theme, no hard-coded colours). */
+  .help-wrap { width:min(780px, 100%); margin:0 auto; padding:10px 14px 96px; }
+  .help-acc { margin-top:18px; text-align:left; display:flex; flex-direction:column; gap:10px; }
+  .help-cat { margin:0; }
+  .help-cat > summary { cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 16px; font-weight:800; font-size:14px; letter-spacing:.5px; color:var(--text); border-radius:inherit; }
+  .help-cat > summary::-webkit-details-marker { display:none; }
+  .help-cat > summary::after { content:"＋"; color:var(--pink); font-weight:900; font-size:15px; line-height:1; transition:transform .18s ease; }
+  .help-cat[open] > summary::after { content:"－"; }
+  .help-cat > summary:hover { background:var(--surface-hover); }
+  .help-cat > summary:focus-visible { outline:2px solid var(--pink); outline-offset:-2px; border-radius:inherit; }
+  .help-cat-n { font-size:11px; font-weight:800; color:var(--muted); letter-spacing:1px; flex:0 0 auto; }
+  .help-body { border-top:1px solid var(--line); padding:2px 6px 8px; }
+  .help-qa { border-bottom:1px solid var(--line); }
+  .help-qa:last-child { border-bottom:none; }
+  .help-qa > summary { cursor:pointer; list-style:none; display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:10px 10px; font-weight:700; font-size:13.5px; color:var(--text); }
+  .help-qa > summary::-webkit-details-marker { display:none; }
+  .help-qa > summary::after { content:""; width:7px; height:7px; flex:0 0 auto; border-right:2px solid var(--purple); border-bottom:2px solid var(--purple); transform:rotate(45deg) translate(-1px,-2px); transition:transform .16s ease; }
+  .help-qa[open] > summary::after { transform:rotate(-135deg) translate(-1px,-2px); }
+  .help-qa > summary:hover { color:var(--pink); }
+  .help-qa > summary:focus-visible { outline:2px solid var(--pink); outline-offset:-2px; }
+  .help-qa > p { margin:0; padding:0 10px 12px; color:var(--muted); font-size:13px; line-height:1.55; }
+  .help-qa > p b { color:var(--text); }
+  .help-qa > p a { color:var(--pink); }
   .mm-addslot { width:96px; height:96px; border-radius:50%; border:2px dashed var(--line); background:transparent; color:var(--muted); font-size:36px; font-weight:600; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; margin:0; padding:0; transition:border-color .15s ease, color .15s ease, transform .15s ease; }
   .mm-addslot:hover { border-color:var(--pink); color:var(--pink); transform:translateY(-1px); }
   .mm-addslot.invited { border-style:solid; border-color:var(--purple); color:var(--purple); font-size:10.5px; font-weight:800; letter-spacing:1px; cursor:default; }
@@ -2554,7 +2586,11 @@ try {
   </div>
   <div class="brand top-brand"><img id="top-logo" src="/logo.png" data-aa-logo alt="Art Arena" height="26"></div>
   <div id="nav-right">
-  <button type="button" id="btn-premium-mini" class="hidden" aria-label="Art Arena Premium" title="Art Arena Premium"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><use href="#pe-sym"/></svg></button>
+  <!-- v69 (item 10): the free-mode ⭐ header badge is GONE — a Premium emblem
+       on a non-Premium account was an inappropriate badge. Free members reach
+       Premium from Settings → UI Customization (locked preview + CTA) and the
+       upsell modal; Premium members keep their real indicators (drawer chip,
+       profile diamond, section chip). -->
   <button type="button" id="btn-notif" class="icon-btn" aria-label="Notifications"><span id="notif-badge" aria-hidden="true"></span>
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>
   </button>
@@ -2968,10 +3004,140 @@ try {
 
   <!-- ============================= HELP ============================= -->
   <section id="view-help" class="view dest hidden">
-    <div class="dest-ico"><svg class="ic ic-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.3 9.2a2.9 2.9 0 0 1 5.5 1c0 1.9-2.7 2.3-2.7 3.9"/><line x1="12" y1="17.3" x2="12.01" y2="17.4"/></svg></div>
-    <h1>Help</h1>
-    <p class="muted dest-desc">Guides for rooms, battles, and the Arena — answers to the common questions.</p>
-    <span class="badge next">COMING SOON</span>
+    <!-- v69 (items 8+9): the COMPLETE Art Arena help system — twelve
+         expandable category cards, every question a tidy accordion row (no
+         wall of text). Surfaces are .card housings + theme tokens, so Light/
+         Dark, every preset theme and custom colours restyle Help exactly like
+         the rest of the app. Answers describe the app AS BUILT. -->
+    <div class="help-wrap">
+      <div class="dest-ico"><svg class="ic ic-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.3 9.2a2.9 2.9 0 0 1 5.5 1c0 1.9-2.7 2.3-2.7 3.9"/><line x1="12" y1="17.3" x2="12.01" y2="17.4"/></svg></div>
+      <h1>Help</h1>
+      <p class="muted dest-desc">Guides for rooms, battles, and the Arena — answers to the common questions.</p>
+      <div class="help-acc">
+
+        <details class="card help-cat" open>
+          <summary>Getting Started <span class="help-cat-n">4</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>What is Art Arena?</summary><p>Art Arena is a competitive drawing platform: artists face off in timed art battles where the Randomizer sets the challenge, the clock sets the pressure, and the community votes on the winner. Wins, losses, draws and streaks feed your live rating on the Arena home screen.</p></details>
+            <details class="help-qa"><summary>How do I create my account?</summary><p>Choose <b>Sign Up</b>, pick a username, add your email and a password, then verify your email with the code we send you. Once verified you land on the Arena home screen — your rating, record and streak are live from your very first battle.</p></details>
+            <details class="help-qa"><summary>What is on the Arena home screen?</summary><p>Your welcome banner and live stats strip (RATING / W / L / D / STREAK), three doors into the action — <b>BATTLE</b> (quick matchmaking), <b>JOIN ROOM</b> (enter a room code) and <b>CREATE ROOM</b> (host your own) — plus the <b>LIVE BATTLES</b> list where you can spectate rooms in progress.</p></details>
+            <details class="help-qa"><summary>Where are my profile and settings?</summary><p>The <b>PROFILE</b> tab holds your avatar, verified badge, stats, Battle History and Saved Artworks, plus <b>Edit Profile</b>. Settings live on the same page: Appearance (Light/Dark), Animations, Livestreaming connections and — for Premium members — UI Customization.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Battles &amp; Matchmaking <span class="help-cat-n">7</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>How does quick matchmaking work?</summary><p>Press <b>BATTLE</b>, choose <b>1v1</b> or <b>3v3</b>, and Art Arena starts searching immediately. You see your own profile, a live <b>Connecting…</b> status and a counting timer; the moment an opponent (or a full 3v3 field) is assembled the match is found and your battle room opens by itself.</p></details>
+            <details class="help-qa"><summary>How does 3v3 matchmaking fill teams?</summary><p>Your row shows <b>YOUR PROFILE</b> with two optional <b>[+]</b> invite slots; below the connection line the <b>OPPOSING TEAM</b> row fills as artists are found. Random matchmaking fills every seat — teammates and opponents alike — so a search never waits on friends: invite nobody and the queue still completes your team.</p></details>
+            <details class="help-qa"><summary>How do I invite a friend to my 3v3 team?</summary><p>Tap a <b>[+]</b> slot during the search and pick a friend from the picker — only friends who are online and not already in a room are listed. The slot shows <b>Sent ✓</b> until they answer; accepting seats them on your team, declining (or the invite expiring) reopens the slot for random matchmaking. One person can only ever hold one slot.</p></details>
+            <details class="help-qa"><summary>How long does a search run?</summary><p>Up to <b>3 minutes</b>. The timer under the connection line counts up from zero; if no match is assembled in time you get an honest <b>Could Not Find</b> state with <b>Try Again</b> and <b>Exit</b> — and any pending team invites expire cleanly with the search.</p></details>
+            <details class="help-qa"><summary>What happens when a match is found?</summary><p>The connection line locks solid green (<b>Found Player</b> / <b>Found 3v3 Match</b>), then your battle room opens automatically. In 1v1 the canvas chooser appears right away; in 3v3 and tournaments the room lobby assembles the full field first.</p></details>
+            <details class="help-qa"><summary>What are the phases of a battle?</summary><p><b>Lobby</b> (seats, canvas picks, challenge categories) → <b>challenge locked</b> (the Randomizer reveal) → the host's <b>3-2-1 countdown</b> → <b>active</b> drawing time on the clock → <b>judging</b> (community voting) → <b>complete</b>, when ratings, records and streaks update. A rematch can then re-arm the same room.</p></details>
+            <details class="help-qa"><summary>Can I cancel a search?</summary><p>Yes — <b>Cancel Search</b> removes you from the queue immediately and provably (the server confirms), reopens the stage, and expires any team invites you had sent. Cancelling never counts as a loss and leaves no ghost queue entry behind.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Rooms <span class="help-cat-n">7</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>How do I create a room?</summary><p><b>CREATE ROOM</b> lets you set visibility (public or private), battle mode (1v1 or 3v3), maximum players and auto-start. You become the host and get a room code to share; public rooms also appear in the live-rooms list for anyone to join or spectate.</p></details>
+            <details class="help-qa"><summary>How do I join a room?</summary><p>Use <b>JOIN ROOM</b> with the room code, or pick a public room from the live list. Every artist holds exactly one active seat platform-wide — if you are already seated somewhere, leave that room first before joining another.</p></details>
+            <details class="help-qa"><summary>What can the host do?</summary><p>The host chooses the Randomizer categories in the lobby, manages seats (move/swap), removes players, locks the challenge, arms the countdown and launches each battle, starts tournament rounds, and offers the rematch when a battle completes. Host identity follows the room creator, never a seat.</p></details>
+            <details class="help-qa"><summary>How does removing a player work?</summary><p>Host only: select a seat and press <b>K</b> (or long-press the seat on touch devices) while the room is open. Before a battle launches, removing a player cancels the pending battle and returns the room to the lobby; during a countdown or live battle players cannot be removed until it finishes; in a tournament the removed artist forfeits their bracket path.</p></details>
+            <details class="help-qa"><summary>How do Ready and Start work?</summary><p>Every seated artist picks a drawing app and presses <b>READY</b>; the host's <b>START</b> then locks a fresh Randomizer challenge for the room in one step. In auto-start (matchmaking) rooms the battle arms itself once the field is complete.</p></details>
+            <details class="help-qa"><summary>Can people watch without playing?</summary><p>Yes. Public rooms welcome spectators — they see the battle, the reveal and the live vote tally without occupying a seat, and community voting is open to everyone except the artists in the battle.</p></details>
+            <details class="help-qa"><summary>What happens when a room closes?</summary><p>When the host ends or leaves an open room, everyone inside is notified, seats are released and the room archives. Battles that already completed keep their results, ratings and artwork history; an in-flight battle cannot be deleted out from under its artists.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Tournaments &amp; Grand Arena <span class="help-cat-n">4</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>What is the Grand Arena format?</summary><p>A single-elimination tournament of <b>32 artists</b> across five rounds: <b>32 → 16 → 8 → 4 → 2 → Champion</b>. Every round is a full Art Arena battle; win your bracket match and you advance, lose and your run ends.</p></details>
+            <details class="help-qa"><summary>How do I join a tournament?</summary><p>Choose the tournament search mode in <b>BATTLE</b>. The search shows only your own profile while it looks for an open tournament; when one is found you are seated into its bracket through the same room and battle systems as every other match — no separate tournament client.</p></details>
+            <details class="help-qa"><summary>How does the bracket progress?</summary><p>The bracket is seeded when the tournament fills and advances automatically as results land. The host launches each round's battles; if an artist leaves or is removed before their match plays, their bracket slot forfeits and the opponent advances — and when the final completes, the room crowns the <b>Champion</b> and closes.</p></details>
+            <details class="help-qa"><summary>How is a tournament battle decided?</summary><p>Exactly like any other battle: the Randomizer sets the challenge, the clock runs, then the community votes during judging. The vote winner takes the bracket match; ratings and records update per battle as the run progresses.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Challenges &amp; Randomizer <span class="help-cat-n">5</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>What is a challenge?</summary><p>A challenge is the Randomizer's composition for the battle — elements drawn from the active pool (by default <b>Character · Environment · Object · Style</b>). Every artist in the battle receives the identical challenge, locked in the same transaction that starts the match.</p></details>
+            <details class="help-qa"><summary>Can the host choose the categories?</summary><p>In manual rooms, yes: while the room is in the lobby the host selects which Randomizer categories the draw may use. Matchmaking and auto-start battles always use the fixed default categories so every queued artist faces the same rules.</p></details>
+            <details class="help-qa"><summary>What is View Challenge Reveal?</summary><p>Once the challenge locks, <b>View challenge reveal</b> opens the full element list as an overlay you can study while you work. It stays open until you close it, can be reopened at any time, and never disturbs the battle clock or room state.</p></details>
+            <details class="help-qa"><summary>What is a challenge re-roll?</summary><p>A <b>Premium</b> ability: while the challenge is still in reveal (before the countdown launches), a Premium host may re-roll the draw once for a fresh set of elements. Free members see the re-roll control in its locked state with the upgrade route.</p></details>
+            <details class="help-qa"><summary>Why does my opponent's challenge match mine?</summary><p>Because it must: one battle, one challenge. The draw is stored against the battle itself, so both sides (or all six artists in a 3v3) paint the same elements — the vote compares execution, not luck of the draw.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Voting <span class="help-cat-n">5</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>How is the winner decided?</summary><p>When the drawing clock ends, the battle enters <b>judging</b>: a timed community vote (the room shows the window and a live tally). When voting closes, the votes are counted and the result — winner, or draw — is final and feeds ratings immediately.</p></details>
+            <details class="help-qa"><summary>Who is allowed to vote?</summary><p>Everyone in the room except the artists battling — participants cannot vote in their own battle. Spectators and other seated artists vote, and the tally updates live for the whole room.</p></details>
+            <details class="help-qa"><summary>How does voting work in 3v3?</summary><p>A 3v3 battle is three lanes (seat 1 vs seat 4, 2 vs 5, 3 vs 6). You cast one ballot per lane, picking that lane's artist — so a full ballot card is three votes, one per pairing.</p></details>
+            <details class="help-qa"><summary>Can I change my vote?</summary><p>No — one ballot per voter per lane, enforced server-side. Vote deliberately: once cast, your ballot stands until the window closes and the result is counted.</p></details>
+            <details class="help-qa"><summary>What are no-vote battles?</summary><p>A room can be configured with no community vote as its result method; those battles complete without a judging window and record no winner from votes. Matchmaking battles always use community voting.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Friends &amp; Profiles <span class="help-cat-n">4</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>How do I add friends?</summary><p>On the <b>FRIENDS</b> page, search by username and send a request. The other artist sees it in their notifications and can accept or decline; once accepted they appear in your friends list with their live online status.</p></details>
+            <details class="help-qa"><summary>What can friends do together?</summary><p>Friends can invite each other into 3v3 teams straight from the matchmaking stage (the <b>[+]</b> slots draw from your friends list), see who is online or in a room, and unfriend at any time — declines and unfriends never block future matchmaking between you.</p></details>
+            <details class="help-qa"><summary>How do I edit my profile?</summary><p><b>Edit Profile</b> on your PROFILE page changes your display name and bio, and lets you upload an avatar from your device or capture one with your camera. Your username, rating and battle record are earned in battle and cannot be edited.</p></details>
+            <details class="help-qa"><summary>What does the verified badge mean?</summary><p>It confirms your email address: verify with the code sent to your inbox and the badge appears on your profile card. Unverified accounts keep a clear reminder banner until verification completes.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Premium <span class="help-cat-n">2</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>What does Art Arena Premium include?</summary><p>Exclusive UI customization — the preset design themes plus manual colours and gradient direction — and challenge re-rolls in battle. Your Premium status is checked server-side on every session and renders its indicators (profile diamond, drawer chip) only while active.</p></details>
+            <details class="help-qa"><summary>How do I upgrade to Premium?</summary><p>Open <b>Settings → UI Customization</b> and press <b>Upgrade to Premium</b>, or follow any locked-theme card or upsell prompt — they all lead to the Go Premium page, where the plan and the test activation flow are explained in plain language.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Going Live <span class="help-cat-n">3</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>How do I go live on YouTube?</summary><p>As a room host, <b>GO LIVE VIA YOUTUBE</b> appears in the room before the battle starts. It walks you through connecting your YouTube account and prepares a broadcast tied to the upcoming battle; once your stream is genuinely live on YouTube, the room shows it.</p></details>
+            <details class="help-qa"><summary>How do I go live on Twitch?</summary><p>Connect your Twitch account in <b>Settings → Livestreaming</b>, then use <b>GO LIVE VIA TWITCH</b> in your room before the battle. The room shows a <b>PREPARING</b> chip while Art Arena sets the stream up, and flips to a <b>LIVE ON TWITCH</b> badge with an in-room watch player only when Twitch itself confirms the stream is online.</p></details>
+            <details class="help-qa"><summary>When can I start a stream?</summary><p>Before the battle only — while the room is open in its lobby or pre-launch state. Once a countdown or battle is live there is no new-livestream control; an already-running session keeps showing its preparing/live state and watch embed for everyone in the room.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Settings &amp; Customization <span class="help-cat-n">1</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>What can I customize in Settings?</summary><p>Appearance (Light/Dark), Animations (On/Off) and your Livestreaming connections are available to everyone. Premium adds UI Customization: preset themes, manual colours and gradient direction — changes apply across the whole app, save to your account automatically, and a <b>Reset Theme</b> button appears whenever your colours differ from the theme's defaults (and disappears again after a reset).</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Troubleshooting <span class="help-cat-n">6</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>Matchmaking cannot find me a match</summary><p>Searches time out honestly after 3 minutes — use <b>Try Again</b> to re-queue instantly. Quiet periods simply have fewer artists searching; the timer and queue position on the search screen are live, so you always know the search is working.</p></details>
+            <details class="help-qa"><summary>A friend never received my team invite</summary><p>Invites only reach friends who are online and not already seated in a room — the picker hides everyone else. Declined or expired invites reopen the slot automatically, and random matchmaking keeps filling your team in the meantime.</p></details>
+            <details class="help-qa"><summary>My theme or colours changed unexpectedly</summary><p>Custom colours autosave to your account a moment after you adjust them, so they survive reloads and device changes. <b>Deactivate UI</b> returns you to your saved Light/Dark mode without losing your Premium entitlement, and <b>Reset Theme</b> restores the active theme's factory colours.</p></details>
+            <details class="help-qa"><summary>Twitch or YouTube shows "setup needed"</summary><p>That message is honest, not an error in your account: livestreaming needs platform credentials on the server. Until the deployment configures them, Art Arena keeps the GO LIVE flows in their setup state instead of pretending a stream exists.</p></details>
+            <details class="help-qa"><summary>I can't join a room — "already in a room"</summary><p>Every artist holds exactly one active seat at a time. Leave your current room (or wait for its battle to complete and the seat to release) and the join will succeed; stale seats are also swept automatically by the server.</p></details>
+            <details class="help-qa"><summary>A countdown or battle looks stuck</summary><p>Refresh safely — rooms, battles and votes are server-authoritative, so the room rebuilds its true state on reload. Pending battles that lost their field are cancelled back to the lobby, and stale rematch offers expire on their own.</p></details>
+          </div>
+        </details>
+
+        <details class="card help-cat">
+          <summary>Still Need Help? <span class="help-cat-n">1</span></summary>
+          <div class="help-body">
+            <details class="help-qa"><summary>How do I contact Art Arena™ Support?</summary><p>If the guides above don't answer it, reach Art Arena™ Support directly by email at <a href="mailto:pencldesigner@gmail.com">pencldesigner@gmail.com</a> — the same address behind our Privacy and Terms contact points. Include your username and what you were doing when it happened, and we'll take it from there.</p></details>
+          </div>
+        </details>
+
+      </div>
+    </div>
   </section>
 
   <!-- ============================= ABOUT ============================= -->
@@ -3018,6 +3184,11 @@ try {
          room invite uses); an accepted invite fills the slot with the
          friend's profile — no duplicate slots, no 1v1×3 look. -->
     <div class="mm-stage3 hidden" id="mm-stage-3v3">
+      <!-- v69 (item 1): the stage reads top-to-bottom — YOUR PROFILE row
+           (you + two OPTIONAL friend-invite [+] slots), the connecting line /
+           timer, then the OPPOSING TEAM row that RANDOM matchmaking fills.
+           Invites never block the search; the pulse seats ARE the search. -->
+      <div class="mm-teamcap">Your Profile</div>
       <div class="mm-teamrow" id="mm-team-a">
         <div class="mm-pos">
           <div class="mm-slot">
@@ -3038,10 +3209,11 @@ try {
       <div class="mm-invite-pop hidden" id="mm-invite-pop"></div>
       <div class="mm-vsline" id="mm3-link" data-mode="off"><i class="mm-link-track"></i><span>VS</span></div>
       <div class="mm-teamrow">
-        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse"></span><span class="mm-op-q">?</span></div><div class="mm-name mm-name-empty">Open slot</div></div></div>
-        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse mm-pulse2"></span><span class="mm-op-q">?</span></div><div class="mm-name mm-name-empty">Open slot</div></div></div>
-        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse"></span><span class="mm-op-q">?</span></div><div class="mm-name mm-name-empty">Open slot</div></div></div>
+        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse"></span><span class="mm-op-q">?</span></div></div></div>
+        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse mm-pulse2"></span><span class="mm-op-q">?</span></div></div></div>
+        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse"></span><span class="mm-op-q">?</span></div></div></div>
       </div>
+      <div class="mm-teamcap" style="margin:7px 0 0">Opposing Team</div>
     </div>
 
     <!-- v68: PUBLIC TOURNAMENT SEARCH — the user's OWN profile only (no
@@ -3229,8 +3401,11 @@ try {
       <div id="battle-canvas" class="hidden" style="margin-top:10px"></div>
       <div id="challenge-box" class="hidden">
         <div class="challenge-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> CHALLENGE LOCKED</div>
-        <div id="challenge-elements"></div>
-        <div class="muted" id="challenge-summary" style="margin-top:6px; font-size:12px"></div>
+        <!-- v69 (item 6): the battle card no longer re-tells the challenge
+             elements/summary — the reveal overlay is the ONE place the
+             challenge is presented. The card keeps only the compact action
+             row (open the reveal, premium re-roll, host launch). -->
+        <button type="button" class="secondary" id="btn-reveal-open" style="width:100%; margin-top:8px"></button>
         <!-- v52: PREMIUM re-roll — server-gated (battle.reroll); free users see
              the locked state that routes to the upgrade prompt. -->
         <button type="button" id="btn-reroll" class="secondary hidden"></button>
@@ -3243,15 +3418,19 @@ try {
            votes (POST /api/rooms/:code/vote), one per user, server-enforced. -->
       <div id="vote-box" class="vote-box hidden"></div>
       <p class="muted" id="battle-note" style="margin-top:8px">The host locks the challenge — the 3-2-1 countdown starts the battle.</p>
-      <!-- v44 (Go Live): honest coming-soon entry point. It lives in the
-           battle UI where a livestream would start — but it is a
-           placeholder, NOT streaming: no LIVE tab, no video infra yet. -->
+    </div>
+
+    <!-- v69 (item 5): GO LIVE belongs to the room's PRE-BATTLE experience —
+         it used to sit INSIDE #battle-card, which is hidden until a battle
+         exists, so the YouTube/Twitch start flows were unreachable in a
+         plain lobby (that is why the YouTube button "disappeared"). Moved
+         out to room level: the host sees both start controls while the room
+         is open and no match is live; session states (PREPARING / LIVE /
+         watch embed) keep rendering for everyone in every phase. -->
+    <div id="golive-box">
       <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="#FF0000" d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.54 12 3.54 12 3.54s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg> GO LIVE VIA YOUTUBE</button>
-      <!-- v62: GO LIVE VIA TWITCH — the real Twitch flow. The box is filled
-           by renderRoom from the server-truth room payload (d.twitch): a
-           host with no session gets the GO LIVE button; everyone sees the
-           PREPARING chip or the 🔴 LIVE badge + watch embed when Twitch has
-           genuinely confirmed the stream. -->
+      <!-- v62: GO LIVE VIA TWITCH — the real Twitch flow, filled by
+           renderTwitchRoomBox from the server-truth room payload (d.twitch). -->
       <div id="twitch-room-box" style="margin-top:10px"></div>
     </div>
 
@@ -3411,19 +3590,20 @@ try {
         <div id="tw-settings"></div>
       </label>
     </div>
-    <!-- v61: Free plan — the only extra control is the upgrade route. -->
-    <div class="settings-appearance hidden" id="settings-upgrade" style="margin-top:18px">
-      <label>Premium
-        <p class="muted" style="margin:6px 0 10px; font-size:13px">Exclusive UI customization — Preset Themes + manual colours — and challenge re-rolls.</p>
-        <button type="button" id="settings-upgrade-btn" style="width:100%; margin:0">Upgrade to Premium</button>
-      </label>
-    </div>
-    <!-- v53: UI Customization lives HERE for Premium members (no standalone
-         nav slot). v61: hidden entirely for free members (see renderSettingsThemes). -->
-    <div class="settings-appearance hidden" id="settings-themes" style="margin-top:18px">
-      <label>UI Customization <span class="prem-chip"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>
+    <!-- v69 (item 10): ONE UI Customization housing for BOTH account states —
+         structurally identical (.settings-appearance + label + theme grid).
+         FREE: every preset card renders LOCKED (🔒 → upsell) and the honest
+         Upgrade CTA sits under the grid; no Premium emblem anywhere.
+         PREMIUM: the same cards, unlocked, plus the PREMIUM chip on the label
+         and the manual-colour editor. No separate free-only "Premium" box. -->
+    <div class="settings-appearance" id="settings-themes" style="margin-top:18px">
+      <label>UI Customization <span class="prem-chip hidden" id="pth-label-chip"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span> PREMIUM</span>
         <div id="settings-theme-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-top:10px"></div>
       </label>
+      <div id="settings-upgrade" class="hidden">
+        <p class="muted" style="margin:6px 0 10px; font-size:13px">Exclusive UI customization — Preset Themes + manual colours — and challenge re-rolls.</p>
+        <button type="button" id="settings-upgrade-btn" style="width:100%; margin:0">Upgrade to Premium</button>
+      </div>
       <div id="settings-theme-custom" class="pth-custom hidden">
         <div class="pth-custom-row">
           <button type="button" class="pth-dot" id="pth-c1-dot" title="Color 1"></button><input type="color" id="pth-c1" class="pth-hidden-color" tabindex="-1" aria-hidden="true">
@@ -3433,8 +3613,11 @@ try {
           <button type="button" class="mini" id="pth-save">Apply</button>
         </div>
         <!-- v67: Reset Theme — clears the SAVED custom colours of the
-             selected theme only (never the theme selection itself). -->
-        <button type="button" id="pth-reset" class="secondary" style="width:100%; margin-top:10px">Reset Theme</button>
+             selected theme only (never the theme selection itself).
+             v69 (item 3): shown ONLY while the saved/live colours actually
+             differ from the theme defaults (state diff — see
+             pthSyncResetVisibility); hidden by default and after any reset. -->
+        <button type="button" id="pth-reset" class="secondary hidden" style="width:100%; margin-top:10px">Reset Theme</button>
       </div>
       <button type="button" id="pth-deactivate" class="secondary hidden" style="width:100%; margin-top:12px">⏻ Deactivate UI</button>
     </div>
@@ -3970,6 +4153,24 @@ function pthHexToRgb(h) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(',');
 }
 // v54: refresh the Settings customization widgets after any theme change
+// v69 (item 3): the active customizable theme's factory defaults, hydrated by
+// renderSettingsThemes from the server theme list — the diff baseline that
+// decides whether Reset Theme is visible.
+let pthActiveDefaults = null;
+function pthCustomIsModified() {
+  if (!activeThemeKey || !pthActiveDefaults) return false;
+  const cu = activeThemeCustom;
+  if (!cu || !cu.c1) return false; // no custom colours saved/live → defaults
+  const n = (x) => String(x || '').toLowerCase();
+  const dir = (o, fb) => (o && typeof o.dir === 'number' ? o.dir : fb);
+  return n(cu.c1) !== n(pthActiveDefaults.c1) ||
+         n(cu.c2) !== n(pthActiveDefaults.c2) ||
+         dir(cu, 135) !== dir(pthActiveDefaults, 135);
+}
+function pthSyncResetVisibility() {
+  const btn = document.getElementById('pth-reset');
+  if (btn) btn.classList.toggle('hidden', !pthCustomIsModified());
+}
 function pthRefreshCustomUI() {
   const deact = document.getElementById('pth-deactivate');
   if (deact) deact.classList.toggle('hidden', !activeThemeKey);
@@ -3978,6 +4179,7 @@ function pthRefreshCustomUI() {
     if (d1 && activeThemeCustom.c1) d1.style.setProperty('--dot', activeThemeCustom.c1);
     if (d2 && activeThemeCustom.c2) d2.style.setProperty('--dot', activeThemeCustom.c2);
   }
+  pthSyncResetVisibility(); // v69 (item 3): every theme application re-checks the diff
 }
 function applyPremiumTheme(key, custom) {
   activeThemeKey = key && key !== 'default' ? key : null;
@@ -4545,7 +4747,7 @@ function show(name) {
   else if (name === 'room') startPolling(refreshRoom);
   else if (name === 'join') refreshJoinList();   // v35: live public list
   else if (name === 'premium') renderPremiumPage(); // v52: entitlement + catalog, server truth
-  else if (name === 'settings') { $('#settings-themes').classList.toggle('hidden', !mePremium); $('#settings-upgrade').classList.toggle('hidden', mePremium); renderSettingsThemes(); renderTwitchSettings(); } // v53/v61: entitlement-gated section + v62: Twitch connection, server re-checked on every visit
+  else if (name === 'settings') { $('#settings-upgrade').classList.toggle('hidden', mePremium); renderSettingsThemes(); renderTwitchSettings(); } // v69 (item 10): the UI Customization housing renders for BOTH plans (locked for free); v62: Twitch connection, server re-checked on every visit
   else if (name === 'friends') { friendsPageLoad(); startPolling(friendsPageLoad); } // v61: presence + rooms stay live
   else if (name === 'matchmaking') { mmOnEnter(); } // v35: real search (v45: the searching LINE carries the visual)
   else if (name === 'battlehistory') loadBattleHistory();
@@ -5742,12 +5944,9 @@ function renderRoom(d) {
     // The OFFICIAL, LOCKED challenge (Phase 6) — identical for both players.
     if (d.battle.challenge) {
       $('#challenge-box').classList.remove('hidden');
-      $('#challenge-elements').innerHTML = d.battle.challenge.elements.map((el) =>
-        '<div class="challenge-row"><span class="challenge-cat">' + (CAT_ICONS[el.category] || IC.dice) + ' ' + esc(el.display_name) + '</span>' +
-        '<span class="challenge-val">' + (paletteOf(el.value) ? paletteMini(paletteOf(el.value)) : esc(el.value)) + '</span></div>'
-      ).join('') +
-      '<button type="button" class="secondary" id="btn-reveal-open" style="width:100%; margin-top:8px">' + IC.dice + ' View challenge reveal</button>';
-      $('#challenge-summary').textContent = d.battle.challenge.summary_text;
+      // v69 (item 6): the card is compact — just the reveal opener (the
+      // overlay is the ONE presentation of the challenge elements/summary).
+      $('#btn-reveal-open').innerHTML = IC.dice + ' View challenge reveal';
       revealSync(d); // v60: the dedicated results screen (opens once per lock/re-roll)
       // v53: the REVEAL phase — the challenge is shown BEFORE the match.
       // Premium re-rolls it here (unlimited); the host LAUNCHES (which arms
@@ -6408,6 +6607,10 @@ function rtHandle(msg) {
     return;
   }
   if (ev.action === 'rematch_expired') { refreshRoom(); toast('The rematch request expired.'); return; }
+  // v69 (item 7): a pre-launch battle was invalidated (a member was removed) —
+  // stop any countdown overlay, re-render from the fresh payload (the room is
+  // back in the lobby with the CURRENT members) and say why.
+  if (ev.action === 'battle_cancelled') { stopCountdownOverlay(); refreshRoom(); toast('The pending battle was cancelled — the room is back in the lobby.'); return; }
   if (ev.action === 'challenge_rerolled') { refreshRoom(); return; } // v52: new challenge renders; the toast above explains
   // v51 quiet mode: while the countdown overlay is up (or the battle is in
   // countdown), decorative room toasts are suppressed — errors still pass.
@@ -6570,9 +6773,9 @@ async function renderAccount(d) {
   applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
   $('#drawer-prem').classList.toggle('hidden', !mePremium);
   $('#card-prem').classList.toggle('hidden', !mePremium);
-  // v53 (spec 9): Free users get the small ⭐ upgrade button by the bell;
-  // Premium users customize in Settings instead.
-  $('#btn-premium-mini').classList.toggle('hidden', mePremium);
+  // v69 (item 10): the free-mode ⭐ header badge was removed entirely — see
+  // the nav-right comment. Upgrade routes: Settings → UI Customization CTA,
+  // upsell modal, locked theme cards.
   // v26: the signed-in user is shown in the hamburger drawer.
   const who = d.user.display_name || d.user.username;
   $('#drawer-name').textContent = who;
@@ -7183,6 +7386,36 @@ const mm = (() => {
       }
     }
   }
+  function slotFilled(pos) {
+    const s = $('#mm3-slot-' + pos);
+    return !!(s && !s.classList.contains('hidden'));
+  }
+  // v69 (item 1): server truth for the [+] slots. /status returns MY pending
+  // team invites (send order → slot 1, slot 2); this reconciles the local
+  // state with them so invites survive a refresh/re-enter and invites that
+  // died server-side (expired/declined/accepted while our WS was down) reopen
+  // their slot honestly. SILENT — no toasts here; WS events own the messaging.
+  function syncPendingInvites(list) {
+    if (state !== 'searching' || searchMode !== '3v3') return;
+    const invites = (Array.isArray(list) ? list : []).slice(0, 2);
+    const serverIds = invites.map((x) => String(x.to_user_id));
+    for (const pos of [1, 2]) {
+      if (invited[pos] && !serverIds.includes(String(invited[pos]))) resetInvitedPos(invited[pos]);
+    }
+    for (const inv of invites) {
+      const uid = String(inv.to_user_id);
+      if (String(invited[1]) === uid || String(invited[2]) === uid) continue; // already reflected
+      if (seatedIds.includes(uid)) continue;                                  // already a teammate
+      for (const pos of [1, 2]) {
+        if (!invited[pos] && !slotFilled(pos)) {
+          invited[pos] = uid;
+          const btn = $('#mm3-add-' + pos);
+          if (btn) { btn.classList.add('invited'); btn.textContent = 'Sent \u2713'; btn.dataset.invitedTo = uid; }
+          break;
+        }
+      }
+    }
+  }
   async function openInvitePop(pos) {
     const pop = $('#mm-invite-pop');
     if (!pop) return;
@@ -7285,6 +7518,7 @@ const mm = (() => {
     try {
       const d = await api('/api/matchmaking/status');
       if (d.match) { found(d.match.room_code, d.match.opponent, d.match.battle_mode || searchMode); return; }
+      syncPendingInvites(d.pending_team_invites); // v69 (item 1): restore/reconcile the [+] slots
       if (state === 'searching' && d.position > 1)
         $('#mm-status-sub').textContent = 'You are #' + d.position + ' in line';
     } catch (_) { /* WS is primary; the next poll retries */ }
@@ -7331,6 +7565,29 @@ const mm = (() => {
     if (m) searchMode = m;
     if (state === 'searching' || state === 'found' || state === 'cancelling') return;
     clearTimers(); // v48: a previous session can never leave a tick behind
+    // v69 (item 1): ADOPT a live search. After a refresh or a nav round-trip
+    // the local module is idle while the server queue row (and its pending
+    // team invites) is still alive; POST /enter would 409 "already searching"
+    // and paint a failure over a healthy search. /status is the server truth:
+    // same mode queued → resume it (original timer anchor + invite slots).
+    try {
+      const s0 = await api('/api/matchmaking/status');
+      if (s0.in_queue && (!s0.mode || s0.mode === searchMode)) {
+        state = 'searching';
+        opponent = null;
+        enterStartT = s0.queued_at ? new Date(s0.queued_at).getTime() : Date.now();
+        resetOppSlot();
+        resetTeamSlots();
+        paintMySlot();
+        paintSearching();
+        mmLinkSet('search');
+        tickT = setInterval(tickClock, 250);
+        pollT = setInterval(pollStatus, 3000);
+        syncPendingInvites(s0.pending_team_invites); // the [+] slots come back as Sent ✓
+        if (s0.match) found(s0.match.room_code, s0.match.opponent, s0.match.battle_mode || searchMode);
+        return;
+      }
+    } catch (_) { /* transient — the enter call below reports honestly */ }
     state = 'searching';
     opponent = null;
     enterStartT = Date.now(); // the ONE display anchor — set the instant the search begins
@@ -7344,6 +7601,7 @@ const mm = (() => {
     try {
       const d = await api('/api/matchmaking/enter', { mode: searchMode });
       if (d.matched) found(d.room, d.opponent, d.battle_mode || searchMode);
+      else if (searchMode === '3v3') pollStatus(); // v69: pull the server truth (pending invites) immediately, not at +3 s
     } catch (err) {
       if (handleAuthError(err)) return;
       const inRoom = /already in a room/i.test(err.message || '');
@@ -9017,7 +9275,9 @@ async function renderSettingsThemes() {
     '<span class="swatch-logo sl-' + esc(t.key) + '">' +
       '<img class="sw-logo-img" data-swatch-logo="' + esc(t.key) + '" src="' + esc(pthLogoFor(t.key)) + '" alt="' + esc(t.name) + ' preset preview" loading="lazy" onerror="this.onerror=null;this.src=\'/logo.png\'">' +
     '</span>' +
-    '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
+    // v69 (item 10): locked (free-mode) cards carry the 🔒 only — no Premium
+    // emblems sprinkled over the free housing; premium members keep them.
+    '<span class="swatch-name">' + esc(t.name) + (t.premium && !locked ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
     '<span class="swatch-hint">' + esc(t.hint || '') + '</span>' +
     (t.customizable ? '<span class="swatch-chips"><i style="background:' + esc(t.c1 || 'var(--pink)') + '"></i><i style="background:' + esc(t.c2 || 'var(--purple)') + '"></i></span>' : '') +
     (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
@@ -9029,18 +9289,20 @@ async function renderSettingsThemes() {
   // the live-preview + Apply gates and lets the wheels repaint over unsaved
   // edits. applyPremiumTheme is idempotent, so this is safe on every render.
   applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
-  $('#btn-premium-mini').classList.toggle('hidden', mePremium); // header ⭐ follows the same truth
-  // v61: FREE plan = a simplified Settings page — Appearance (Light/Dark),
-  // Animations (On/Off) and ONE "Upgrade to Premium" button. The whole
-  // UI Customization section is not rendered at all for free members (the
-  // server rejects every theme write with 403 regardless). PREMIUM = the
-  // customization section, and NO upgrade button anywhere.
-  $('#settings-themes').classList.toggle('hidden', !d.premium);
-  $('#settings-upgrade').classList.toggle('hidden', d.premium);
+  // v69 (item 10): ONE housing for both account states. FREE members see the
+  // SAME UI Customization card with every preset LOCKED (🔒 cards open the
+  // upsell) plus the honest Upgrade CTA under the grid — no Premium emblem,
+  // no separate free-only box. PREMIUM members see the same cards unlocked,
+  // the label chip and the manual-colour editor. The server still rejects
+  // every theme write from a free account with 403 regardless.
+  $('#settings-upgrade').classList.toggle('hidden', !!d.premium);
+  $('#pth-label-chip').classList.toggle('hidden', !d.premium);
+  $('#settings-themes').classList.toggle('is-locked', !d.premium); // v61 locked styling, now actually used
   if (!d.premium) {
-    grid.innerHTML = '';
+    grid.innerHTML = d.themes.map((t) => card(t, false, true, 'data-upsell="1"')).join('');
     customRow.classList.add('hidden');
     $('#pth-deactivate').classList.add('hidden');
+    pthActiveDefaults = null; // v69: nothing editable → Reset stays hidden
     return;
   }
   const activeKey = d.ui_theme || 'default';
@@ -9055,12 +9317,15 @@ async function renderSettingsThemes() {
   const activeTheme = d.themes.find((t) => t.key === activeKey);
   if (activeTheme && activeTheme.customizable) {
     customRow.classList.remove('hidden');
+    // v69 (item 3): the diff baseline — the theme's factory colours/dir.
+    pthActiveDefaults = { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
     const cu = d.ui_custom || { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
     $('#pth-c1').value = cu.c1; $('#pth-c2').value = cu.c2; $('#pth-dir').value = cu.dir;
     $('#pth-c1-dot').style.setProperty('--dot', cu.c1); $('#pth-c2-dot').style.setProperty('--dot', cu.c2);
     pthDirPaint();
   } else {
     customRow.classList.add('hidden');
+    pthActiveDefaults = null; // v69: no editable colours → no Reset button
   }
   pthRefreshCustomUI();
 }
@@ -9281,7 +9546,6 @@ function openUpsell(title, body) {
   $('#ups-text').textContent = body || 'Upgrade to unlock exclusive 2D UI themes and challenge re-rolls.';
   modalOpen('#premium-upsell');
 }
-$('#btn-premium-mini').addEventListener('click', () => show('premium')); // v53: ⭐ → upgrade page
 // v58 (Premium navigation fix): EVERY Premium badge is a route to the Premium
 // page — the drawer chip, the profile-card diamond, the Settings label chip
 // and any PREMIUM chip in rendered content. Premium members have no ⭐ (it
@@ -9579,10 +9843,13 @@ function renderTwitchRoomBox(d) {
   const t = d.twitch;
   const isHost = !!(d.host && me && d.host.user_id === me.id);
   if (!t) {
-    // No session. Only the host can prepare one — and only while the room is
-    // open (lobby/starting/in_battle). Spectators and guests see nothing.
-    const roomOpen = ['lobby', 'starting', 'in_battle'].includes(d.status);
-    box.innerHTML = (isHost && roomOpen)
+    // No session. v69 (item 5): GO LIVE is PRE-BATTLE ONLY — the host can
+    // prepare a stream while the room is open (lobby/starting) and no
+    // countdown/battle is live; during an active battle there is NO
+    // new-livestream control. Spectators and guests see nothing.
+    const roomOpen = ['lobby', 'starting'].includes(d.status);
+    const battleLive = !!(d.battle && ['countdown', 'active'].includes(d.battle.status));
+    box.innerHTML = (isHost && roomOpen && !battleLive)
       ? '<button type="button" id="btn-go-live-twitch" class="secondary" style="width:100%"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429z"/></svg> GO LIVE VIA TWITCH</button>'
       : '';
     return;
