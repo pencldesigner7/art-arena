@@ -1529,6 +1529,12 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     ['v67 themes: drop retired stitch customs from the map',
      `UPDATE users SET ui_theme_custom = ui_theme_custom - 'stitch'
        WHERE ui_theme_custom IS NOT NULL AND ui_theme_custom ? 'stitch'`],
+      // ---------------- v68 ----------------
+    // v68: 3v3 matchmaking team invites (the [+] slots on the searching
+    // screen) ride the ONE notification architecture — new type, same table,
+    // same WS push, same handled-marking as every other invitation.
+    ['v68 notification types: mm_team_invite',
+     `ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'mm_team_invite'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

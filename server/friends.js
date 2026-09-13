@@ -330,4 +330,4 @@ router.post('/teams/draft/open-room', ah(async (req, res) => {
   res.status(201).json({ ok: true, room_code: room.code, visibility: room.visibility || visibility, invited });
 }));
 
-module.exports = { router, friendsOf };
+module.exports = { router, friendsOf, areFriends };

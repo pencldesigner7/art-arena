@@ -83,10 +83,12 @@ async function tryMatch(client, initiator) {
   // v67: mode-aware pairing — 3v3 searchers now live in the SAME queue, so a
   // 1v1 enter must never pull a 3v3 row (and vice-versa: the 3v3 branch below
   // filters FOR '3v3'). Legacy rows without a battle_mode are treated as 1v1.
+  // v68: only 1v1 rows may pair here — 3v3 AND tournament rows live in the
+  // same queue table and must never be pulled into a 1v1 match.
   const { rows } = await client.query(
     `SELECT user_id FROM matchmaking_queue
       WHERE status = 'queued' AND user_id <> $1
-        AND COALESCE(prefs->>'battle_mode', '1v1') <> '3v3'
+        AND COALESCE(prefs->>'battle_mode', '1v1') = '1v1'
       ORDER BY queued_at, id
       LIMIT 1
       FOR UPDATE SKIP LOCKED`, [initiator.id]);
@@ -164,7 +166,11 @@ router.post('/enter', ah(async (req, res) => {
   const inRoom = await activeRoomOf(u.id);
   if (inRoom) throw new HttpError(409, 'You are already in a room — leave it before matchmaking.');
 
-  const mode = (req.body && req.body.mode === '3v3') ? '3v3' : '1v1';
+  // v68: three real modes — 1v1 (default), 3v3 team battle and PUBLIC
+  // TOURNAMENT discovery (join an existing open bracket event; never a
+  // fake head-to-head match).
+  const reqMode = (req.body && req.body.mode) || '1v1';
+  const mode = ['3v3', 'tournament'].includes(reqMode) ? reqMode : '1v1';
 
   // Already matched (missed the WS event / refreshed the page)? Re-claim.
   // v48 fix: the reclaim is only valid while the room still exists — /status
@@ -196,6 +202,10 @@ router.post('/enter', ah(async (req, res) => {
   // m3      = paired with another queued 3v3 searcher into a NEW shared room;
   // search3 = nobody to connect to → honestly queued (matched:false).
   let joined3 = null, m3 = null, search3 = null;
+  // v68: tournament outcomes — joinedT = seated into an existing open public
+  // tournament; searchT = honestly queued until one appears (deadline sweeper
+  // keeps trying to seat queued tournament searchers before expiring them).
+  let joinedT = null, searchT = null;
   let queuedAt = null; // v42: the queue instant — the deadline anchor
   try {
     await client.query('BEGIN');
@@ -333,6 +343,72 @@ router.post('/enter', ah(async (req, res) => {
       }
     }
 
+    else if (mode === 'tournament') {
+      // v68: TOURNAMENT discovery — the artist is looking for an existing
+      // PUBLIC tournament to join, not a head-to-head opponent. Only lobby
+      // rooms whose bracket has NOT been seeded yet are joinable (the roster
+      // locks at the draw — rooms.js enforces the same rule on /join).
+      const { rows: openT } = await client.query(
+        `SELECT r.id, r.code, r.max_players,
+                (SELECT count(*)::int FROM room_participants rp WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')) AS player_count
+           FROM battle_rooms r
+          WHERE r.battle_mode = 'tournament' AND r.visibility = 'public' AND r.status = 'lobby'
+            AND r.bracket IS NULL AND r.deleted_at IS NULL
+          ORDER BY r.created_at ASC
+          FOR UPDATE SKIP LOCKED`
+      );
+      const candT = openT.find((r) => r.player_count < r.max_players);
+      if (candT) {
+        const seat = await pickSeatForJoin(client, candT, u.id);
+        if (seat !== null) {
+          const { rows: ex } = await client.query(
+            `SELECT state FROM room_participants WHERE room_id = $1 AND user_id = $2`,
+            [candT.id, u.id]
+          );
+          if (ex[0]) {
+            await client.query(
+              `UPDATE room_participants SET state = 'waiting', left_at = NULL, seat = $3
+                WHERE room_id = $1 AND user_id = $2`,
+              [candT.id, u.id, seat]
+            );
+          } else {
+            await client.query(
+              `INSERT INTO room_participants (room_id, user_id, state, seat)
+               VALUES ($1, $2, 'waiting', $3)`,
+              [candT.id, u.id, seat]
+            );
+          }
+          joinedT = { code: candT.code, seat };
+          await client.query('COMMIT');
+        }
+      }
+      if (!joinedT) {
+        // No open public tournament right now → the REAL queue. The 5 s
+        // deadline sweeper re-offers queued tournament searchers to every
+        // newly created/opened public tournament before expiring anyone.
+        await client.query(
+          `INSERT INTO matchmaking_queue (user_id, prefs)
+           VALUES ($1, $2::jsonb)`,
+          [u.id, JSON.stringify({ competition_type: 'casual', format: 'tournament', battle_mode: 'tournament', time_limit_seconds: 1200 })]
+        );
+        const { rows: qT } = await client.query(
+          `SELECT queued_at FROM matchmaking_queue WHERE user_id = $1 AND status = 'queued'`, [u.id]);
+        queuedAt = qT[0] ? qT[0].queued_at : null;
+        await client.query('COMMIT');
+        searchT = {
+          matched: false,
+          in_queue: true,
+          mode: 'tournament',
+          battle_mode: 'tournament',
+          position: await queuePosition(u.id),
+          queued_at: queuedAt ? queuedAt.toISOString() : null,
+          deadline_at: queuedAt
+            ? new Date(queuedAt.getTime() + MM_TIMEOUT_S * 1000).toISOString()
+            : null,
+        };
+      }
+    }
+
     else {
       // 1v1 Matchmaking (default)
       await client.query(
@@ -369,6 +445,14 @@ router.post('/enter', ah(async (req, res) => {
     return res.json({ matched: true, room: m3.code, mode: '3v3', battle_mode: '3v3' });
   }
   if (search3) return res.json(search3);
+
+  // v68: tournament outcomes — same post-COMMIT discipline as 3v3.
+  if (joinedT) {
+    rt.emitRoom(joinedT.code, { action: 'joined', user_id: u.id, username: u.username, display_name: u.display_name, seat: joinedT.seat });
+    rt.broadcastRoomsList('joined');
+    return res.json({ matched: true, room: joinedT.code, mode: 'tournament', battle_mode: 'tournament' });
+  }
+  if (searchT) return res.json(searchT);
 
   if (m) {
     remember(m.a, m.b, m.code, '1v1');
@@ -424,6 +508,13 @@ router.post('/cancel', ah(async (req, res) => {
   if (q) {
     await pool.query(`UPDATE matchmaking_queue SET status = 'cancelled' WHERE id = $1`, [q.id]);
     recent.delete(u.id);
+    // v68: a cancelled search invalidates its pending 3v3 team invitations —
+    // an accept after this point gets the honest "that search has ended".
+    await pool.query(
+      `UPDATE notifications SET payload = payload || '{"handled":"expired"}'::jsonb
+        WHERE type = 'mm_team_invite' AND payload->>'from_user_id' = $1 AND payload->>'handled' IS NULL`,
+      [u.id]
+    ).catch(() => {});
     return res.json({ ok: true, canceled: 'queue' });
   }
   const m = claimable(u.id);
@@ -457,6 +548,214 @@ router.post('/cancel', ah(async (req, res) => {
 }));
 
 // ---------------------------------------------------------------------------
+// v68: 3v3 TEAM INVITES DURING MATCHMAKING — the two [+] slots on the
+// searching screen. Built on the EXISTING friend system (friendship check +
+// the one notification architecture); no parallel friend mechanism.
+//   POST /team-invite            { friend_id }  → notification 'mm_team_invite'
+//   POST /team-invite/:id/accept → the friend really joins: seats into the
+//                                  inviter's 3v3 lobby room if one exists,
+//                                  otherwise the inviter's live queue search
+//                                  becomes a shared public 3v3 room seating
+//                                  BOTH (inviter seat 1, friend seat 2 — one
+//                                  side). Everyone is notified over the hub.
+//   POST /team-invite/:id/decline
+// ---------------------------------------------------------------------------
+const MM_INVITE_WINDOW_H = 2; // invitations live as long as room invitations
+
+router.post('/team-invite', ah(async (req, res) => {
+  const u = req.user;
+  const fid = String((req.body || {}).friend_id || '');
+  if (!/^[0-9a-f-]{36}$/i.test(fid)) throw new HttpError(400, 'Pick a friend to invite.');
+  if (fid === u.id) throw new HttpError(400, 'You cannot invite yourself.');
+  const { areFriends } = require('./friends');
+  if (!(await areFriends(u.id, fid))) throw new HttpError(403, 'You can only invite friends.');
+
+  // My search state: queued for 3v3, OR already sitting in a 3v3 lobby room
+  // that a previous accepted invite created (the second [+] slot case).
+  const myRoom = await activeRoomOf(u.id);
+  const { rows: qRows } = await pool.query(
+    `SELECT prefs FROM matchmaking_queue WHERE user_id = $1 AND status = 'queued'`, [u.id]);
+  const queued3v3 = qRows[0] && (qRows[0].prefs || {}).battle_mode === '3v3';
+  if (myRoom && myRoom.battle_mode !== '3v3')
+    throw new HttpError(409, 'Team invites are for 3v3 battles only.');
+  if (!myRoom && !queued3v3)
+    throw new HttpError(409, 'Start a 3v3 search before inviting teammates.');
+
+  // The friend must be able to actually join: not seated anywhere else.
+  const { rows: frSeat } = await pool.query(
+    `SELECT u.username FROM users u JOIN room_participants rp ON rp.user_id = u.id
+      WHERE u.id = $1 AND rp.state IN ('waiting','ready')
+      LIMIT 1`, [fid]);
+  if (frSeat[0])
+    throw new HttpError(409, '@' + frSeat[0].username + ' is already in a room — they need to leave it before you can invite them.');
+
+  // One open invite per (inviter, friend) — no duplicates.
+  const { rows: dup } = await pool.query(
+    `SELECT id FROM notifications
+      WHERE user_id = $1 AND type = 'mm_team_invite' AND payload->>'from_user_id' = $2
+        AND payload->>'handled' IS NULL AND created_at > now() - make_interval(hours => $3)`,
+    [fid, u.id, MM_INVITE_WINDOW_H]);
+  if (dup[0]) throw new HttpError(409, 'That friend already has an open team invite from you.');
+  // The same person can never hold two pending invites from me (covered by
+  // the dup check) AND can never be invited twice INTO the same side: the
+  // side capacity below counts pending invites as claimed slots.
+
+  // Side capacity: my side holds 3 (me + 2 teammates). Count seated teammates
+  // (same side as me) + my pending invites.
+  let sideCount = 1; // me
+  if (myRoom) {
+    const { rows: mySeat } = await pool.query(
+      `SELECT seat FROM room_participants WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')`,
+      [myRoom.id, u.id]);
+    const mySide = mySeat[0] && mySeat[0].seat <= 3 ? 'A' : 'B';
+    const { rows: mates } = await pool.query(
+      `SELECT seat FROM room_participants
+        WHERE room_id = $1 AND user_id <> $2 AND state IN ('waiting','ready')`, [myRoom.id, u.id]);
+    sideCount += mates.filter((m) => (mySide === 'A' ? m.seat <= 3 : m.seat > 3)).length;
+  }
+  const { rows: pend } = await pool.query(
+    `SELECT count(*)::int AS n FROM notifications
+      WHERE type = 'mm_team_invite' AND payload->>'from_user_id' = $1
+        AND payload->>'handled' IS NULL AND created_at > now() - make_interval(hours => $2)`,
+    [u.id, MM_INVITE_WINDOW_H]);
+  if (sideCount + pend[0].n >= 3)
+    throw new HttpError(409, 'Your side is full — a 3v3 team holds you plus two teammates.');
+
+  const { notifyUser } = require('./notify');
+  await notifyUser(fid, 'mm_team_invite', {
+    from_user_id: u.id, from_username: u.username, from_display_name: u.display_name,
+  });
+  res.status(201).json({ ok: true, invited: fid });
+}));
+
+router.post('/team-invite/:id/accept', ah(async (req, res) => {
+  const u = req.user;
+  // Claim the invitation atomically — a second accept (or an accept after
+  // decline/expiry) finds it already handled and fails honestly.
+  const { rows } = await pool.query(
+    `UPDATE notifications SET payload = payload || '{"handled":"accepted"}'::jsonb
+      WHERE id = $1 AND user_id = $2 AND type = 'mm_team_invite' AND payload->>'handled' IS NULL
+      RETURNING payload`, [String(req.params.id), u.id]);
+  if (!rows[0]) throw new HttpError(409, 'That invitation was already handled.');
+  const inviterId = rows[0].payload && rows[0].payload.from_user_id;
+
+  // The acceptee must be free to sit down (one active seat per artist).
+  const myRoom = await activeRoomOf(u.id);
+  if (myRoom) throw new HttpError(409, 'You are already in a room — leave it before joining a team.');
+
+  const client = await pool.connect();
+  let code = null, createdNew = false, seatTaken = null;
+  try {
+    await client.query('BEGIN');
+    const inviterRoom = await activeRoomOf(inviterId, client);
+    if (inviterRoom && inviterRoom.battle_mode === '3v3' && inviterRoom.status === 'lobby') {
+      // The inviter already sits in a 3v3 lobby room (a previous accept or a
+      // queue pairing created it) — seat me on THEIR side in the first free slot.
+      await client.query(`SELECT id FROM battle_rooms WHERE id = $1 FOR UPDATE`, [inviterRoom.id]);
+      const { rows: invSeat } = await client.query(
+        `SELECT seat FROM room_participants WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')`,
+        [inviterRoom.id, inviterId]);
+      const sideSeats = invSeat[0] && invSeat[0].seat > 3 ? [4, 5, 6] : [1, 2, 3];
+      const { rows: takenRows } = await client.query(
+        `SELECT seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`, [inviterRoom.id]);
+      const taken = new Set(takenRows.map((t) => t.seat));
+      const free = sideSeats.find((s) => !taken.has(s));
+      if (free === undefined) throw new HttpError(409, 'Their side of the team is already full.');
+      const { rows: ex } = await client.query(
+        `SELECT state FROM room_participants WHERE room_id = $1 AND user_id = $2`, [inviterRoom.id, u.id]);
+      if (ex[0]) {
+        await client.query(
+          `UPDATE room_participants SET state = 'waiting', left_at = NULL, seat = $3
+            WHERE room_id = $1 AND user_id = $2`, [inviterRoom.id, u.id, free]);
+      } else {
+        await client.query(
+          `INSERT INTO room_participants (room_id, user_id, state, seat)
+           VALUES ($1, $2, 'waiting', $3)`, [inviterRoom.id, u.id, free]);
+      }
+      code = inviterRoom.code;
+      seatTaken = free;
+      await client.query('COMMIT');
+    } else if (inviterRoom) {
+      throw new HttpError(409, 'That search has ended — ask them to invite you again.');
+    } else {
+      // The inviter is still SEARCHING — this accept turns the search into a
+      // real shared public 3v3 room for both (inviter seat 1, me seat 2: one
+      // side; the open side fills via invites/public join, exactly like a
+      // queue-paired 3v3 room).
+      const { rows: invQ } = await client.query(
+        `SELECT id FROM matchmaking_queue
+          WHERE user_id = $1 AND status = 'queued' AND (prefs->>'battle_mode') = '3v3'
+          FOR UPDATE`, [inviterId]);
+      if (!invQ[0]) throw new HttpError(409, 'That search has ended — ask them to invite you again.');
+      let roomId = null;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        try {
+          code = newRoomCode();
+          const { rows: ins } = await client.query(
+            `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
+                                       time_limit_seconds, result_method, battle_mode, auto_start,
+                                       randomizer_config)
+             VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
+                     '{"categories":["character","environment","object","style"]}'::jsonb)
+             RETURNING id`,
+            [code, inviterId]
+          );
+          roomId = ins[0].id;
+          break;
+        } catch (e) {
+          if (e.code !== '23505') throw e;
+        }
+      }
+      if (!roomId) throw new HttpError(500, 'Could not allocate a room code. Try again.');
+      await client.query(
+        `INSERT INTO room_participants (room_id, user_id, state, seat)
+         VALUES ($1, $2, 'waiting', 1), ($1, $3, 'waiting', 2)`,
+        [roomId, inviterId, u.id]);
+      await client.query(
+        `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
+          WHERE user_id = $1 AND status = 'queued'`, [inviterId, roomId]);
+      // my own queue row (if I was searching too) is cancelled — I'm seated now
+      await client.query(
+        `UPDATE matchmaking_queue SET status = 'cancelled'
+          WHERE user_id = $1 AND status = 'queued'`, [u.id]);
+      createdNew = true;
+      seatTaken = 2;
+      await client.query('COMMIT');
+      remember({ id: inviterId }, null, code, '3v3');
+      remember({ id: u.id }, null, code, '3v3');
+    }
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+
+  // Post-COMMIT notifications (a notified client can never race the room row).
+  const brief = await userBrief(u.id);
+  rt.emitRoom(code, { action: 'joined', user_id: u.id, username: u.username, display_name: u.display_name, seat: seatTaken });
+  rt.broadcastRoomsList(createdNew ? 'created' : 'joined');
+  rt.sendToUser(inviterId, { type: 'matchmaking', action: 'teammate_joined', room: code, teammate: brief, battle_mode: '3v3' });
+  if (createdNew) {
+    // the inviter's search just became a real match — same event a queue pair gets
+    rt.sendToUser(inviterId, { type: 'matchmaking', action: 'found', room: code, opponent: null, mode: '3v3', battle_mode: '3v3' });
+  }
+  res.json({ ok: true, room: code });
+}));
+
+router.post('/team-invite/:id/decline', ah(async (req, res) => {
+  const u = req.user;
+  const { rows } = await pool.query(
+    `UPDATE notifications SET payload = payload || '{"handled":"declined"}'::jsonb
+      WHERE id = $1 AND user_id = $2 AND type = 'mm_team_invite' AND payload->>'handled' IS NULL
+      RETURNING payload`, [String(req.params.id), u.id]);
+  if (!rows[0]) throw new HttpError(409, 'That invitation was already handled.');
+  const inviterId = rows[0].payload && rows[0].payload.from_user_id;
+  if (inviterId) rt.sendToUser(inviterId, { type: 'matchmaking', action: 'invite_declined', user_id: u.id, username: u.username });
+  res.json({ ok: true, handled: 'declined' });
+}));
+
+// ---------------------------------------------------------------------------
 // Real-time hook (wired in realtime.js): a closed socket = the artist is
 // gone. Cancel their QUEUE entry — searching is an active intent. A FORMED
 // match survives: it stays claimable for 30 min so a dropped connection can
@@ -480,12 +779,105 @@ const sweep = setInterval(() => {
 }, SWEEP_MS);
 sweep.unref();
 
+// ---------------------------------------------------------------------------
+// v68: TOURNAMENT DISCOVERY ENGINE — seats queued tournament searchers into
+// open PUBLIC tournament rooms (lobby, bracket not yet seeded, free seat).
+// Called (a) right after a public tournament room is created (rooms.js hook)
+// and (b) by the 5 s deadline sweeper before it expires anyone, so seats
+// freed by leaves/kicks are re-offered too. All seating happens in ONE
+// transaction; the WS notifications fire AFTER the commit.
+let tournamentSweepRunning = false;
+async function matchTournamentSearchers() {
+  if (tournamentSweepRunning) return;
+  // cheap pre-check: nothing to do without both a queued searcher and an open room
+  const pre = await pool.query(
+    `SELECT EXISTS(SELECT 1 FROM matchmaking_queue
+                    WHERE status = 'queued' AND (prefs->>'battle_mode') = 'tournament') AS has_q,
+            EXISTS(SELECT 1 FROM battle_rooms r
+                    WHERE r.battle_mode = 'tournament' AND r.visibility = 'public' AND r.status = 'lobby'
+                      AND r.bracket IS NULL AND r.deleted_at IS NULL) AS has_room`);
+  if (!pre.rows[0].has_q || !pre.rows[0].has_room) return;
+  tournamentSweepRunning = true;
+  const placed = []; // { userId, code } — notified after COMMIT
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: openRooms } = await client.query(
+      `SELECT r.id, r.code, r.max_players,
+              (SELECT count(*)::int FROM room_participants rp WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')) AS player_count
+         FROM battle_rooms r
+        WHERE r.battle_mode = 'tournament' AND r.visibility = 'public' AND r.status = 'lobby'
+          AND r.bracket IS NULL AND r.deleted_at IS NULL
+        ORDER BY r.created_at ASC
+        FOR UPDATE SKIP LOCKED`
+    );
+    for (const room of openRooms) {
+      let free = room.max_players - room.player_count;
+      while (free > 0) {
+        const { rows: q } = await client.query(
+          `SELECT user_id FROM matchmaking_queue
+            WHERE status = 'queued' AND (prefs->>'battle_mode') = 'tournament'
+            ORDER BY queued_at, id
+            LIMIT 1
+            FOR UPDATE SKIP LOCKED`
+        );
+        if (!q[0]) break;
+        const uid = q[0].user_id;
+        // ghost row — the artist joined/created a room elsewhere since queueing
+        if (await activeRoomOf(uid, client)) {
+          await client.query(
+            `UPDATE matchmaking_queue SET status = 'cancelled' WHERE user_id = $1 AND status = 'queued'`, [uid]);
+          continue;
+        }
+        const seat = await pickSeatForJoin(client, room, uid);
+        if (seat === null) break; // room filled under us — try the next room
+        const { rows: ex } = await client.query(
+          `SELECT state FROM room_participants WHERE room_id = $1 AND user_id = $2`, [room.id, uid]);
+        if (ex[0]) {
+          await client.query(
+            `UPDATE room_participants SET state = 'waiting', left_at = NULL, seat = $3
+              WHERE room_id = $1 AND user_id = $2`, [room.id, uid, seat]);
+        } else {
+          await client.query(
+            `INSERT INTO room_participants (room_id, user_id, state, seat)
+             VALUES ($1, $2, 'waiting', $3)`, [room.id, uid, seat]);
+        }
+        await client.query(
+          `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
+            WHERE user_id = $1 AND status = 'queued'`, [uid, room.id]);
+        placed.push({ userId: uid, code: room.code });
+        free--;
+      }
+    }
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    placed.length = 0;
+  } finally {
+    client.release();
+    tournamentSweepRunning = false;
+  }
+  if (placed.length) {
+    for (const p of placed) {
+      try {
+        remember({ id: p.userId }, null, p.code, 'tournament');
+        rt.sendToUser(p.userId, { type: 'matchmaking', action: 'found', room: p.code, opponent: null, mode: 'tournament', battle_mode: 'tournament' });
+        rt.emitRoom(p.code, { action: 'joined', user_id: p.userId });
+      } catch (_) {}
+    }
+    rt.broadcastRoomsList('joined');
+  }
+}
+
 // v42: the search window is EXACTLY 180 s from queued_at — the SAME anchor
 // the client's countdown derives from. Rows past the deadline are expired
 // here (at most DEADLINE_SWEEP_MS late) and the searcher is told in real
 // time over the hub; the client's own deadline check is the fallback when
 // the WS is down. Neither side can end the session early.
 const deadlineSweep = setInterval(() => {
+  // v68: seat tournament searchers into any open public tournament FIRST —
+  // a discovery that lands in the same 5 s beat as the deadline still wins.
+  matchTournamentSearchers().catch(() => {});
   pool.query(
     `UPDATE matchmaking_queue SET status = 'expired'
       WHERE status = 'queued' AND queued_at < now() - make_interval(secs => $1)
@@ -499,4 +891,4 @@ const deadlineSweep = setInterval(() => {
 }, DEADLINE_SWEEP_MS);
 deadlineSweep.unref();
 
-module.exports = { router, handleDisconnect };
+module.exports = { router, handleDisconnect, matchTournamentSearchers };

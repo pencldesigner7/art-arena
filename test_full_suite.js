@@ -250,11 +250,13 @@ async function run() {
   await pool.query(`UPDATE battles SET status = 'cancelled' WHERE id = $1`, [start1v1.data.battle.id]);
   await req('DELETE', `/api/rooms/${room1v1Code}`, {}, premToken);
 
-  // 5. Test 3v3 Team Slot Rearrangement (Host Only)
-  console.log('\nTest 5: 3v3 Team Slot Rearrangement');
+  // 5. Test 3v3 Slot Movement REMOVED (v68 item 4)
+  // Seat movement was retired completely: normal join/leave/invite/kick and
+  // team-slot assignment on join stay, but NO route may move a seated player.
+  console.log('\nTest 5: 3v3 Slot Movement Removed (join/seat assignment intact)');
   // Create 3v3 room
   const create3v3 = await req('POST', '/api/rooms', {
-    name: '3v3 Team Move Test',
+    name: '3v3 Slot Removal Test',
     battle_mode: '3v3',
     max_players: 6,
     battle_type: 'voting_community',
@@ -264,40 +266,43 @@ async function run() {
   assert.strictEqual(create3v3.status, 201);
   const room3v3Code = create3v3.data.code;
 
-  // Free user joins 3v3 room
+  // Free user joins 3v3 room — join-time seat assignment still works
   const join3v3 = await req('POST', `/api/rooms/${room3v3Code}/join`, { drawing_app_key: 'krita' }, freeToken);
   assert.strictEqual(join3v3.status, 200);
   const freeUserSeat = join3v3.data.players.find((p) => p.user_id === freeUserId).seat;
+  assert.ok(freeUserSeat >= 1 && freeUserSeat <= 6, 'join assigned a real team slot');
+  console.log('  ✓ Join still assigns a team slot (seat ' + freeUserSeat + ')');
 
-  // Non-host tries to move player -> 403
+  // Non-host tries the (removed) move route -> 404 (gone for EVERYONE)
   const freeMove = await req('POST', `/api/rooms/${room3v3Code}/move-player`, {
     from_seat: freeUserSeat,
     to_seat: 5,
   }, freeToken);
-  assert.strictEqual(freeMove.status, 403);
-  console.log('  ✓ Non-host slot movement rejected with 403 Forbidden');
+  assert.strictEqual(freeMove.status, 404);
+  console.log('  ✓ /move-player is gone for non-hosts (404)');
 
-  // Host moves Free user to slot 5 (Team B slot 2)
+  // HOST tries the (removed) move route -> 404 as well (feature removed, not re-gated)
   const hostMove = await req('POST', `/api/rooms/${room3v3Code}/move-player`, {
     from_seat: freeUserSeat,
     to_seat: 5,
   }, premToken);
-  assert.strictEqual(hostMove.status, 200);
-  const updatedFreeSeat = hostMove.data.players.find((p) => p.user_id === freeUserId).seat;
-  assert.strictEqual(updatedFreeSeat, 5);
-  console.log('  ✓ Host moved player from slot ' + freeUserSeat + ' to slot 5');
+  assert.strictEqual(hostMove.status, 404);
+  console.log('  ✓ /move-player is gone for the HOST too (404)');
 
-  // Host swaps seat 1 (Host) with seat 5 (Free user)
-  const hostSwap = await req('POST', `/api/rooms/${room3v3Code}/move-player`, {
-    from_seat: 1,
+  // The older team-move route is gone as well
+  const teamMove = await req('POST', `/api/rooms/${room3v3Code}/teams/move`, {
+    user_id: freeUserId,
     to_seat: 5,
   }, premToken);
-  assert.strictEqual(hostSwap.status, 200);
-  const newHostSeat = hostSwap.data.players.find((p) => p.user_id === premUserId).seat;
-  const newFreeSeat = hostSwap.data.players.find((p) => p.user_id === freeUserId).seat;
-  assert.strictEqual(newHostSeat, 5);
-  assert.strictEqual(newFreeSeat, 1);
-  console.log('  ✓ Host successfully swapped slots between Team A and Team B (Seat 1 <-> Seat 5)');
+  assert.strictEqual(teamMove.status, 404);
+  console.log('  ✓ /teams/move is gone too (404)');
+
+  // Seats are untouched by the attempted moves
+  const afterMoves = await req('GET', `/api/rooms/${room3v3Code}`, {}, premToken);
+  assert.strictEqual(afterMoves.status, 200);
+  const seatNow = afterMoves.data.players.find((p) => p.user_id === freeUserId).seat;
+  assert.strictEqual(seatNow, freeUserSeat, 'seat unchanged after removed-route attempts');
+  console.log('  ✓ Seats unchanged after the removed-route attempts (no movement leftovers)');
 
   // 6. Test Friend Availability API & Online Status Logic
   console.log('\nTest 6: Friend availability & Online status checking');

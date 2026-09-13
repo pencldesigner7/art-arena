@@ -918,6 +918,12 @@ async function createRoomImpl(req, res) {
   const { rows } = await pool.query('SELECT code FROM battle_rooms WHERE id = $1', [roomId]);
   const payload = await roomPayload(rows[0].code, req.user.id);
   if (visibility === 'public') rt.broadcastRoomsList('created');
+  // v68: a NEW public tournament is offered to queued tournament searchers
+  // immediately (lazy require — matchmaking.js loads rooms.js at boot, so a
+  // top-level require here would be circular; at call time both are loaded).
+  if (battleMode === 'tournament' && visibility === 'public') {
+    try { require('./matchmaking').matchTournamentSearchers().catch(() => {}); } catch (_) {}
+  }
   res.status(201).json(payload);
 }
 
@@ -1559,55 +1565,6 @@ router.post('/:code/join-requests/:requesterId/accept', ah(async (req, res) => a
 router.post('/:code/join-requests/:requesterId/decline', ah(async (req, res) => answerJoinRequest(req, res, 'decline')));
 
 // ---------------------------------------------------------------------------
-// v65 — HOST TEAM ORGANIZER (3v3, pre-battle): the room creator can move any
-// seated player between Team A (seats 1-3) and Team B (seats 4-6) while the
-// room is still in the lobby. Capacity is enforced here (never more than
-// three per side) and the move broadcasts to everyone — the board re-renders
-// from the server payload on all screens. Once the battle starts the room
-// leaves 'lobby' and this route refuses (server-side lock).
-// ---------------------------------------------------------------------------
-router.post('/:code/teams/move', ah(async (req, res) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const { rows: roomRows } = await client.query(
-      `SELECT * FROM battle_rooms WHERE code = $1 AND deleted_at IS NULL FOR UPDATE`, [String(req.params.code).trim().toUpperCase()]
-    );
-    const room = roomRows[0];
-    if (!room) throw new HttpError(404, 'Room not found.');
-    requireHost(room, req.user.id);
-    if (room.battle_mode !== '3v3') throw new HttpError(400, 'Team sides only exist in 3v3 rooms.');
-    if (room.status !== 'lobby') throw new HttpError(409, 'Teams lock the moment the battle starts.');
-    const targetId = String((req.body || {}).user_id || '').trim();
-    if (!/^[0-9a-f-]{36}$/i.test(targetId)) throw new HttpError(400, 'Pick a seated player to move.');
-    if (targetId === req.user.id) throw new HttpError(400, 'The host side of a 3v3 room is Team A — the host cannot be moved.');
-    const side = String((req.body || {}).side || '').toUpperCase();
-    if (side !== 'A' && side !== 'B') throw new HttpError(400, 'Choose a side: A or B.');
-    const { rows: parts } = await client.query(
-      `SELECT user_id, seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`, [room.id]
-    );
-    const me = parts.find((x) => x.user_id === targetId);
-    if (!me) throw new HttpError(404, 'That player is not seated in this room.');
-    const curSide = me.seat <= 3 ? 'A' : 'B';
-    if (curSide === side) throw new HttpError(409, 'That player is already on Team ' + side + '.');
-    const onSide = (sd) => parts.filter((x) => x.user_id !== targetId && (sd === 'A' ? x.seat <= 3 : x.seat > 3)).length;
-    if (onSide(side) >= 3) throw new HttpError(409, 'Team ' + side + ' already has three players — move someone off it first.');
-    const free = side === 'A' ? [1, 2, 3] : [4, 5, 6];
-    const taken = new Set(parts.map((x) => x.seat));
-    const seat = free.find((n) => !taken.has(n));
-    await client.query(
-      `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`, [room.id, targetId, seat]
-    );
-    await client.query('COMMIT');
-    rt.emitRoom(room.code, { action: 'teams_moved', by: req.user.username, user_id: targetId, side });
-    res.json(await roomPayload(room.code, req.user.id));
-  } catch (e) {
-    await client.query('ROLLBACK').catch(() => {});
-    throw e;
-  } finally { client.release(); }
-}));
-
-// ---------------------------------------------------------------------------
 // CLOSE — host only, while in lobby (soft end: history is kept)
 // ---------------------------------------------------------------------------
 router.post('/:code/close', ah(async (req, res) => {
@@ -1725,82 +1682,6 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
   }
   res.json(await roomPayload(req.params.code, req.user.id));
 }));
-
-// ---------------------------------------------------------------------------
-// v65: MOVE / REARRANGE PLAYER SLOTS — host only (lobby phase).
-// Moves or swaps a seated player between team slots (1..max_players).
-// ---------------------------------------------------------------------------
-router.post('/:code/move-player', ah(async (req, res) => {
-  const room = await roomByCode(req.params.code);
-  if (!room) throw new HttpError(404, 'Room not found.');
-  requireHost(room, req.user.id);
-  if (room.status !== 'lobby') throw new HttpError(409, 'Cannot rearrange players once the battle has started.');
-
-  const b = req.body || {};
-  const targetUid = b.user_id ? String(b.user_id).trim() : null;
-  const fromSeat = Number(b.from_seat);
-  const toSeat = Number(b.to_seat);
-
-  if (!Number.isInteger(toSeat) || toSeat < 1 || toSeat > room.max_players) {
-    throw new HttpError(400, `Target slot must be between 1 and ${room.max_players}.`);
-  }
-
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const { rows: parts } = await client.query(
-      `SELECT user_id, seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready') FOR UPDATE`,
-      [room.id]
-    );
-
-    let pFrom = null;
-    if (targetUid) {
-      pFrom = parts.find((p) => p.user_id === targetUid);
-    } else if (Number.isInteger(fromSeat)) {
-      pFrom = parts.find((p) => p.seat === fromSeat);
-    }
-    if (!pFrom) throw new HttpError(404, 'Player not found in this room.');
-    if (pFrom.seat === toSeat) {
-      await client.query('COMMIT');
-      return res.json(await roomPayload(room.code, req.user.id));
-    }
-
-    const pTo = parts.find((p) => p.seat === toSeat);
-
-    if (pTo) {
-      // Swap seats using temporary negative seat to avoid conflict
-      await client.query(
-        `UPDATE room_participants SET seat = -1 WHERE room_id = $1 AND user_id = $2`,
-        [room.id, pFrom.user_id]
-      );
-      await client.query(
-        `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`,
-        [room.id, pTo.user_id, pFrom.seat]
-      );
-      await client.query(
-        `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`,
-        [room.id, pFrom.user_id, toSeat]
-      );
-    } else {
-      // Direct move into empty slot
-      await client.query(
-        `UPDATE room_participants SET seat = $3 WHERE room_id = $1 AND user_id = $2`,
-        [room.id, pFrom.user_id, toSeat]
-      );
-    }
-
-    await client.query('COMMIT');
-  } catch (e) {
-    await client.query('ROLLBACK').catch(() => {});
-    throw e;
-  } finally {
-    client.release();
-  }
-
-  rt.emitRoom(room.code, { action: 'slots_rearranged', by: req.user.username });
-  res.json(await roomPayload(room.code, req.user.id));
-}));
-
 
 // ---------------------------------------------------------------------------
 // v53: LAUNCH — the host ends the REVEAL phase. The locked challenge (as

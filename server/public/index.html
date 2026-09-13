@@ -307,14 +307,16 @@ try {
   #card-prem { pointer-events:auto; }
   #drawer-prem:hover, label .prem-chip:hover { filter:brightness(1.12); }
   body[data-ptheme="flame"] { --pink:var(--pth-c1,#FF5A00); --purple:var(--pth-c2,#FFC300); --pink-rgb:var(--pth-c1-rgb,255,90,0); --purple-rgb:var(--pth-c2-rgb,255,195,0); --muted:#c9a587; --line:#4a2a12; --btn-line:#4a2a12; --surface:#180d05; --surface-hover:#1f1108; --surface-2:#2a170a; --bg:#0e0703; --panel:#170d05; --auth-card:rgba(20,11,4,.86); --auth-page-bg:#0e0703; }
-  body[data-ptheme="flame"] .card, body[data-ptheme="flame"] .time-modal { border-color:rgba(255,120,20,.35); box-shadow:0 0 22px -12px rgba(255,110,0,.5); }
+  /* v68 (item 3): borders/outer glow follow the CUSTOM colour (--pink-rgb is
+     remapped to --pth-c1-rgb under flame/glitch/glowing), not a hardcoded hue. */
+  body[data-ptheme="flame"] .card, body[data-ptheme="flame"] .time-modal { border-color:rgba(var(--pink-rgb),.4); box-shadow:0 0 22px -12px rgba(var(--pink-rgb),.55); }
   body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#FF5A00), var(--pth-c2,#FFC300)); background-size:180% 180%; animation:pth-flame-shift 5s ease-in-out infinite; color:#1d0e02; border:none; font-weight:800; }
   @keyframes pth-flame-shift { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
   body[data-ptheme="cloud"] { --pink:#3E8EE0; --purple:#6FB6F2; --pink-rgb:62,142,224; --purple-rgb:111,182,242; --surface:#eaf4fd; --surface-hover:#e2eefa; --surface-2:#d7e9f9; --bg:#f2f8ff; --panel:#e6f1fb; --line:#c3dcf2; --text:#20344a; --muted:#5f7794; --header-bg:rgba(242,248,255,.9); --nav-bg:rgba(234,244,253,.97); --btn-line:#c3dcf2; --auth-card:rgba(242,248,255,.88); --auth-page-bg:#eaf4fd; }
   body[data-ptheme="cloud"] .card, body[data-ptheme="cloud"] .time-modal { border-radius:18px; border-color:#c3dcf2; box-shadow:0 10px 30px -18px rgba(62,142,224,.4); }
   body[data-ptheme="glitch"] { --pink:var(--pth-c1,#00F0FF); --purple:var(--pth-c2,#FF2BD1); --pink-rgb:var(--pth-c1-rgb,0,240,255); --purple-rgb:var(--pth-c2-rgb,255,43,209); --surface:#0a0d14; --surface-hover:#0e1219; --surface-2:#131826; --bg:#060810; --panel:#0c101a; --line:#1d2c44; --muted:#6f86a8; --btn-line:#1d2c44; --auth-card:rgba(8,10,16,.86); --auth-page-bg:#060810; }
   body[data-ptheme="glitch"] .card { border-style:solid; position:relative; }
-  body[data-ptheme="glitch"] .card::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(var(--pth-dir,135deg), rgba(0,240,255,.05), rgba(255,43,209,.05)); }
+  body[data-ptheme="glitch"] .card::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(var(--pth-dir,135deg), rgba(var(--pink-rgb),.06), rgba(var(--purple-rgb),.06)); } /* v68 (item 3): the wash tracks custom colours */
   .pth-glitch-pulse main { animation:pth-glitch-jolt .2s steps(2) 1; }
   .pth-glitch-pulse #top-header { animation:pth-glitch-jolt .18s steps(2) 1; }
   @keyframes pth-glitch-jolt { 0% { transform:translateX(0); filter:none; } 25% { transform:translateX(-2.5px); filter:hue-rotate(18deg); } 60% { transform:translateX(2px); } 100% { transform:translateX(0); } }
@@ -340,16 +342,15 @@ try {
   body[data-ptheme="graffiti"] .badge.next, body[data-ptheme="graffiti"] .state-chip { transform:rotate(-1.4deg); }
   body[data-ptheme="graffiti"] .card::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.5; background:radial-gradient(circle at 88% 8%, rgba(var(--purple-rgb),.16) 0 2px, transparent 3px), radial-gradient(circle at 92% 14%, rgba(var(--pink-rgb),.2) 0 2.5px, transparent 4px), radial-gradient(circle at 85% 16%, rgba(var(--purple-rgb),.14) 0 1.6px, transparent 3px); }
   body[data-ptheme="glowing"] { --pink:var(--pth-c1,#6ED4BF); --purple:var(--pth-c2,#51A8D9); --pink-rgb:var(--pth-c1-rgb,110,212,191); --purple-rgb:var(--pth-c2-rgb,81,168,217); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
-  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 18px -4px var(--pth-c1,#6ED4BF); }
-  /* v61: GLOWING containers use SOLID theme-coloured borders — no halo
-     box-shadow. Glow stays only on intentional accents (logo, icons, primary
-     buttons, active nav, focus rings). */
-  body[data-ptheme="glowing"] .card, body[data-ptheme="glowing"] .time-modal, body[data-ptheme="glowing"] .settings-appearance, body[data-ptheme="glowing"] .card-hero { border:1px solid rgba(var(--pink-rgb),.55); box-shadow:none; }
-  body[data-ptheme="glowing"] .card-hero { border-color:rgba(var(--pink-rgb),.7); }
-  /* v63: on the UPGRADE page the UI Customization showcase card is a plain
-     informational container — its border is removed under Glowing ONLY here;
-     every other card/button/stroke treatment is untouched. */
-  body[data-ptheme="glowing"] #prem-uicard { border:none; }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.85), 0 0 26px -4px rgba(var(--purple-rgb),.6), 0 0 48px -12px rgba(var(--pink-rgb),.5); }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):hover { box-shadow:0 0 12px 0 rgba(var(--pink-rgb),.95), 0 0 32px -4px rgba(var(--purple-rgb),.7), 0 0 64px -12px rgba(var(--pink-rgb),.55); }
+  /* v68 (item 7): NEON pass — the flat "solid border, no halo" treatment is
+     replaced by a real electric-neon look: a bright accent border plus a
+     layered bloom (tight glow → wide halo → faint inset tube-light). The
+     glow lives OUTSIDE the surface and under the text, so readability is
+     untouched; custom colours feed it through --pink-rgb/--purple-rgb. */
+  body[data-ptheme="glowing"] .card, body[data-ptheme="glowing"] .time-modal, body[data-ptheme="glowing"] .settings-appearance, body[data-ptheme="glowing"] .card-hero, body[data-ptheme="glowing"] .tt-side { border:1px solid rgba(var(--pink-rgb),.8); box-shadow:0 0 8px -1px rgba(var(--pink-rgb),.55), 0 0 26px -6px rgba(var(--pink-rgb),.38), 0 0 54px -14px rgba(var(--purple-rgb),.4), inset 0 0 18px -14px rgba(var(--pink-rgb),.5); }
+  body[data-ptheme="glowing"] .card-hero { border-color:rgba(var(--pink-rgb),.95); box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.65), 0 0 34px -6px rgba(var(--purple-rgb),.45), inset 0 0 22px -16px rgba(var(--pink-rgb),.55); }
   body[data-ptheme="magazine"] { --pink:#E6483E; --purple:#2B2B36; --pink-rgb:230,72,62; --purple-rgb:43,43,54; --surface:#f4f1ea; --surface-hover:#eeebe2; --surface-2:#e6e2d7; --bg:#e9e5dc; --panel:#f0ede5; --line:#c9c3b4; --text:#23211d; --muted:#6f6a5e; --header-bg:rgba(240,237,229,.92); --nav-bg:rgba(244,241,234,.97); --btn-line:#c9c3b4; --auth-card:rgba(244,241,234,.9); --auth-page-bg:#e9e5dc; }
   body[data-ptheme="magazine"] .card { border:none; border-left:5px solid #23211d; border-radius:2px; box-shadow:3px 4px 0 rgba(35,33,29,.22); transform:rotate(-.25deg); }
   body[data-ptheme="magazine"] .home-card:hover, body[data-ptheme="magazine"] .card:hover { transform:rotate(.3deg) translateY(-2px); }
@@ -370,6 +371,28 @@ try {
   body[data-ptheme="pixel"] .dest-ico svg { border:3px solid var(--pink); border-radius:0; padding:4px; }
   body[data-ptheme="pixel"] .hc-ico > svg { border:3px solid var(--pink); border-radius:0; padding:4px; }
   body[data-ptheme="pixel"] .home-card:hover, body[data-ptheme="pixel"] .card:hover { transform:none; }
+
+  /* ---- v68 (item 3): CUSTOM-COLOUR SURFACE WASH -------------------------
+     When the artist wears custom colours, EVERY major surface picks up a
+     faint gradient of their palette, blended over the theme's own background
+     (screen blend + low alpha → the theme identity and text readability are
+     preserved, but cards / panels / modals visibly follow the colours —
+     before this they stayed flat theme-fixed surfaces). Intentionally-fixed
+     art (logos, badges, canvas, battle board) is NOT touched. */
+  body[data-pcustom="1"] .card,
+  body[data-pcustom="1"] .settings-appearance,
+  body[data-pcustom="1"] .time-modal,
+  body[data-pcustom="1"] .tt-side,
+  body[data-pcustom="1"] .notif-item,
+  body[data-pcustom="1"] .join-section {
+    background-image:linear-gradient(var(--pth-dir,135deg), rgba(var(--pth-c1-rgb, var(--pink-rgb)),.10), rgba(var(--pth-c2-rgb, var(--purple-rgb)),.06) 78%, transparent);
+    background-blend-mode:screen;
+  }
+  body[data-pcustom="1"] .home-card { background-image:linear-gradient(var(--pth-dir,135deg), rgba(var(--pth-c1-rgb, var(--pink-rgb)),.09), rgba(var(--pth-c2-rgb, var(--purple-rgb)),.05)); background-blend-mode:screen; }
+  body[data-pcustom="1"] .card, body[data-pcustom="1"] .settings-appearance, body[data-pcustom="1"] .tt-side, body[data-pcustom="1"] .notif-item, body[data-pcustom="1"] .time-modal { border-color:rgba(var(--pth-c1-rgb, var(--pink-rgb)),.34); }
+  body[data-pcustom="1"] .home-card { border-color:rgba(var(--pth-c1-rgb, var(--pink-rgb)),.3); }
+  /* interactive states follow too — hover keeps the wash and lifts the border */
+  body[data-pcustom="1"] .home-card:hover, body[data-pcustom="1"] .card:hover { border-color:rgba(var(--pth-c1-rgb, var(--pink-rgb)),.6); }
 
   /* ============ v54: theme polish · glitch events · customization UI ============ */
 
@@ -488,29 +511,29 @@ try {
 
   /* ---- Glowing: hierarchy — primary actions + logo glow; everything else
        stays calm. One glow scale, applied with intent. ---- */
-  body[data-ptheme="glowing"] #top-brand img { filter:drop-shadow(0 0 14px rgba(var(--pink-rgb),.55)); }
+  body[data-ptheme="glowing"] #top-brand img { filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.9)) drop-shadow(0 0 16px rgba(var(--pink-rgb),.55)) drop-shadow(0 0 34px rgba(var(--purple-rgb),.35)); } /* v68 (item 7): neon — bright core + wide bloom */
   /* v57: the glowing wordmark GLOWS wherever it appears (home, auth, legal,
-     about, drawer, theme cards) — a live halo on top of the baked glow */
-  body[data-ptheme="glowing"] img[data-aa-logo] { filter:drop-shadow(0 0 10px rgba(var(--pink-rgb),.55)) drop-shadow(0 0 26px rgba(var(--purple-rgb),.35)); animation:pth-glow-breathe 3.8s ease-in-out infinite; }
+     about, drawer, theme cards) — a live NEON halo on top of the baked glow */
+  body[data-ptheme="glowing"] img[data-aa-logo] { filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.85)) drop-shadow(0 0 18px rgba(var(--pink-rgb),.5)) drop-shadow(0 0 40px rgba(var(--purple-rgb),.32)); animation:pth-glow-breathe 3.8s ease-in-out infinite; }
   body[data-ptheme="glowing"] .swatch-logo img[data-swatch-logo="glowing"], .swatch-logo img[src*="glowing"] { filter:drop-shadow(0 0 8px rgba(110,212,191,.55)); }
-  @keyframes pth-glow-breathe { 0%,100% { filter:drop-shadow(0 0 10px rgba(var(--pink-rgb),.5)) drop-shadow(0 0 26px rgba(var(--purple-rgb),.3)); } 50% { filter:drop-shadow(0 0 16px rgba(var(--pink-rgb),.8)) drop-shadow(0 0 34px rgba(var(--purple-rgb),.45)); } }
+  @keyframes pth-glow-breathe { 0%,100% { filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.8)) drop-shadow(0 0 18px rgba(var(--pink-rgb),.45)) drop-shadow(0 0 40px rgba(var(--purple-rgb),.3)); } 50% { filter:drop-shadow(0 0 9px rgba(var(--pink-rgb),1)) drop-shadow(0 0 28px rgba(var(--pink-rgb),.7)) drop-shadow(0 0 60px rgba(var(--purple-rgb),.45)); } }
   /* v54 hierarchy: home destination cards are <button>s — under Glowing they
      must NOT wear the primary CTA gradient+glow. They stay calm surfaces with
      a faint halo; only primary actions burn bright. */
-  body[data-ptheme="glowing"] button.home-card:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:var(--surface); color:var(--text); border:1px solid rgba(var(--pink-rgb),.55); font-weight:700; box-shadow:none; } /* v61: solid border, no glow */
-  body[data-ptheme="glowing"] button.home-card:hover { border-color:var(--pink); background:var(--surface-hover); box-shadow:none; }
-  body[data-ptheme="glowing"] #bottom-nav button.tab.active { color:var(--pink); text-shadow:0 0 12px rgba(var(--pink-rgb),.6); border-top-color:var(--pink); }
+  body[data-ptheme="glowing"] button.home-card:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini) { background:var(--surface); color:var(--text); border:1px solid rgba(var(--pink-rgb),.7); font-weight:700; box-shadow:0 0 7px -2px rgba(var(--pink-rgb),.4), 0 0 22px -8px rgba(var(--purple-rgb),.35); } /* v68 (item 7): a calm neon halo — surfaces glow softer than primary CTAs */
+  body[data-ptheme="glowing"] button.home-card:hover { border-color:var(--pink); background-color:var(--surface-hover); box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.6), 0 0 30px -6px rgba(var(--purple-rgb),.45); }
+  body[data-ptheme="glowing"] #bottom-nav button.tab.active { color:var(--pink); text-shadow:0 0 10px rgba(var(--pink-rgb),.9), 0 0 26px rgba(var(--pink-rgb),.5); border-top-color:var(--pink); }
   /* v61: sidebar rows are NAVIGATION, not primary buttons — the theme's
      primary-button glow/gradient must never reach them (that was the source
      of the stray glowing bars behind Community / LIVE / Profile …). Rows use
      a clean theme-coloured border; the hover box IS the row box. */
   body[data-ptheme="glowing"] #drawer-nav button, body[data-ptheme="glowing"] #drawer-nav button:hover, body[data-ptheme="glowing"] #drawer-nav button.active { box-shadow:none; background-image:none; animation:none; }
   body[data-ptheme="glowing"] #drawer-nav button:hover { background-color:rgba(var(--pink-rgb),.08); border-color:rgba(var(--pink-rgb),.35); color:var(--text); }
-  body[data-ptheme="glowing"] #drawer-nav button.active { background-color:rgba(var(--pink-rgb),.1); border-color:var(--pink); color:var(--text); }
-  body[data-ptheme="glowing"] #drawer-nav button.active svg { color:var(--pink); filter:drop-shadow(0 0 6px rgba(var(--pink-rgb),.6)); } /* the one intentional accent */
+  body[data-ptheme="glowing"] #drawer-nav button.active { background-color:rgba(var(--pink-rgb),.12); border-color:var(--pink); color:var(--text); box-shadow:0 0 10px -3px rgba(var(--pink-rgb),.55); } /* v68: the active nav row gets the neon accent */
+  body[data-ptheme="glowing"] #drawer-nav button.active svg { color:var(--pink); filter:drop-shadow(0 0 5px rgba(var(--pink-rgb),.9)) drop-shadow(0 0 12px rgba(var(--pink-rgb),.5)); }
   body[data-ptheme="glowing"] .room-ctxmenu button, body[data-ptheme="glowing"] .notif-actions button.secondary { box-shadow:none; }
-  body[data-ptheme="glowing"] input:focus, body[data-ptheme="glowing"] textarea:focus, body[data-ptheme="glowing"] select:focus { border-color:var(--pink); box-shadow:0 0 12px -3px rgba(var(--pink-rgb),.5); }
-  body[data-ptheme="glowing"] .theme-swatch.active { box-shadow:0 0 0 1px var(--pink) inset, 0 0 18px -6px rgba(var(--pink-rgb),.6); }
+  body[data-ptheme="glowing"] input:focus, body[data-ptheme="glowing"] textarea:focus, body[data-ptheme="glowing"] select:focus { border-color:var(--pink); box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.65), 0 0 26px -6px rgba(var(--purple-rgb),.45); }
+  body[data-ptheme="glowing"] .theme-swatch.active { box-shadow:0 0 0 1px var(--pink) inset, 0 0 12px -2px rgba(var(--pink-rgb),.8), 0 0 30px -8px rgba(var(--purple-rgb),.5); }
 
   /* ---- Settings: theme cards carry the LOGO (not just two colours) ---- */
   .theme-swatch { padding:10px 10px 12px; }
@@ -2298,7 +2321,7 @@ try {
   .home-tagline span { text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:4px; }
   .home-cards { display:flex; flex-direction:column; gap:14px; text-align:left; }
   .home-card { display:flex; align-items:center; gap:14px; width:100%; margin:0; padding:17px 18px; background:var(--surface); border:1px solid var(--line); border-radius:14px; color:var(--text); font:inherit; text-align:center; cursor:pointer; transition:border-color .25s ease, transform .25s ease, background-color .25s ease; }
-  .home-card:hover { border-color:rgba(var(--pink-rgb),.55); transform:translateY(-2px); background:var(--surface-hover); }
+  .home-card:hover { border-color:rgba(var(--pink-rgb),.55); transform:translateY(-2px); background-color:var(--surface-hover); } /* v68: background-color (not the shorthand) so a custom surface wash survives hover */
   .hc-ico { display:inline-flex; flex:0 0 auto; }
   .hc-label { flex:1; font-weight:700; font-size:14px; letter-spacing:2.5px; text-transform:uppercase; }
   .hc-chev { display:inline-flex; color:var(--pink); flex:0 0 auto; }
@@ -2392,6 +2415,33 @@ try {
   @keyframes mm-pop { from { transform:scale(.35); opacity:0; } to { transform:scale(1); opacity:1; } }
   .mm-name { font-weight:800; font-size:14px; letter-spacing:.4px; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mm-name-empty { color:var(--muted); font-weight:600; }
+  /* v68: 3v3 TEAM SEARCH stage — YOUR TEAM (you + two [+] invite slots) on
+     top, the flowing connection line + VS, then the three open OPPOSING
+     slots. Not three copies of the 1v1 layout: one team row per side. */
+  .mm-stage3, .mm-stage-t { display:flex; flex-direction:column; align-items:center; gap:16px; margin-top:18px; }
+  .mm-stage3.hidden, .mm-stage-t.hidden, #mm-stage.hidden { display:none; }
+  .mm-teamrow { display:flex; gap:16px; align-items:flex-start; justify-content:center; flex-wrap:nowrap; }
+  .mm-pos { display:flex; flex-direction:column; align-items:center; gap:10px; width:110px; }
+  .mm-pos .mm-slot { width:110px; margin-top:0; }
+  .mm-slot-tag { font-size:9.5px; letter-spacing:2px; color:var(--muted); font-weight:800; text-transform:uppercase; }
+  .mm-addslot { width:96px; height:96px; border-radius:50%; border:2px dashed var(--line); background:transparent; color:var(--muted); font-size:36px; font-weight:600; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; margin:0; padding:0; transition:border-color .15s ease, color .15s ease, transform .15s ease; }
+  .mm-addslot:hover { border-color:var(--pink); color:var(--pink); transform:translateY(-1px); }
+  .mm-addslot.invited { border-style:solid; border-color:var(--purple); color:var(--purple); font-size:10.5px; font-weight:800; letter-spacing:1px; cursor:default; }
+  .mm-addslot.invited:hover { transform:none; }
+  .mm-vsline { position:relative; width:min(430px, 92%); height:28px; display:flex; align-items:center; justify-content:center; margin:2px 0; }
+  .mm-vsline .mm-link-track { position:absolute; left:0; right:0; top:12px; height:3px; border-radius:99px; background:linear-gradient(90deg, var(--purple), var(--pink)); opacity:.18; }
+  .mm-vsline[data-mode="search"] .mm-link-track { opacity:.55; background:linear-gradient(90deg, var(--purple), var(--pink) 38%, rgba(255,255,255,.9) 50%, var(--pink) 62%, var(--purple)); background-size:220% 100%; animation:mm-line-sheen 1.6s linear infinite; box-shadow:0 0 10px rgba(var(--pink-rgb),.35); }
+  .mm-vsline[data-mode="connected"] .mm-link-track { opacity:1; background:linear-gradient(90deg, #22c55e, #4ade80); box-shadow:0 0 12px rgba(74,222,128,.5); }
+  .mm-vsline span { position:relative; background:var(--bg); padding:0 12px; font-weight:900; letter-spacing:3px; font-size:12px; color:var(--muted); }
+  .mm-invite-pop { width:min(380px, 94%); border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:12px; text-align:left; }
+  .mm-invite-pop .mm-inv-head { font-size:11px; font-weight:800; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+  .mm-invite-pop .tt-fr { display:flex; justify-content:space-between; align-items:center; gap:8px; border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:13px; margin-top:5px; }
+  @media (max-width: 560px) {
+    .mm-teamrow { gap:10px; }
+    .mm-pos, .mm-pos .mm-slot { width:96px; }
+    .mm-addslot { width:80px; height:80px; font-size:30px; }
+    .mm-stage3 .mm-ava { width:80px; height:80px; font-size:30px; }
+  }
   .mm-status { margin-top:26px; }
   .mm-status-main { font-size:27px; font-weight:800; letter-spacing:2px; background:linear-gradient(90deg,var(--pink),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
   #mm-status.found .mm-status-main { background-image:linear-gradient(90deg,var(--ok-tx),#4ade80); -webkit-background-clip:text; background-clip:text; }
@@ -2461,6 +2511,7 @@ try {
     if (t.custom && t.custom.c1) { b.style.setProperty('--pth-c1', t.custom.c1); b.style.setProperty('--pth-c1-rgb', rgb(t.custom.c1)); }
     if (t.custom && t.custom.c2) { b.style.setProperty('--pth-c2', t.custom.c2); b.style.setProperty('--pth-c2-rgb', rgb(t.custom.c2)); }
     if (t.custom && typeof t.custom.dir === 'number') b.style.setProperty('--pth-dir', t.custom.dir + 'deg');
+    if (t.custom && t.custom.c1) b.setAttribute('data-pcustom', '1'); // v68: surfaces are tinted from the very first paint
   } catch (_) {}
 })();
 </script>
@@ -2961,6 +3012,48 @@ try {
       </div>
     </div>
 
+    <!-- v68: 3v3 TEAM SEARCH — your row (YOU + two [+] friend-invite slots),
+         the flowing connection line + VS, then the three open OPPOSING
+         slots. The [+] opens the friend invite picker (same friends list the
+         room invite uses); an accepted invite fills the slot with the
+         friend's profile — no duplicate slots, no 1v1×3 look. -->
+    <div class="mm-stage3 hidden" id="mm-stage-3v3">
+      <div class="mm-teamrow" id="mm-team-a">
+        <div class="mm-pos">
+          <div class="mm-slot">
+            <div class="mm-ava" id="mm3-me-ava">•</div>
+            <div class="mm-name" id="mm3-me-name">—</div>
+          </div>
+          <div class="mm-slot-tag">YOU</div>
+        </div>
+        <div class="mm-pos" data-pos="1">
+          <div class="mm-slot hidden" id="mm3-slot-1"></div>
+          <button type="button" class="mm-addslot" id="mm3-add-1" data-add="1" aria-label="Invite a friend to your team">+</button>
+        </div>
+        <div class="mm-pos" data-pos="2">
+          <div class="mm-slot hidden" id="mm3-slot-2"></div>
+          <button type="button" class="mm-addslot" id="mm3-add-2" data-add="2" aria-label="Invite a friend to your team">+</button>
+        </div>
+      </div>
+      <div class="mm-invite-pop hidden" id="mm-invite-pop"></div>
+      <div class="mm-vsline" id="mm3-link" data-mode="off"><i class="mm-link-track"></i><span>VS</span></div>
+      <div class="mm-teamrow">
+        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse"></span><span class="mm-op-q">?</span></div><div class="mm-name mm-name-empty">Open slot</div></div></div>
+        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse mm-pulse2"></span><span class="mm-op-q">?</span></div><div class="mm-name mm-name-empty">Open slot</div></div></div>
+        <div class="mm-pos"><div class="mm-slot"><div class="mm-ava mm-ava-empty"><span class="mm-pulse"></span><span class="mm-op-q">?</span></div><div class="mm-name mm-name-empty">Open slot</div></div></div>
+      </div>
+    </div>
+
+    <!-- v68: PUBLIC TOURNAMENT SEARCH — the user's OWN profile only (no
+         opponent placeholders, no fake profiles); the status below shows
+         FINDING TOURNAMENT / CONNECTING… / timer. -->
+    <div class="mm-stage-t hidden" id="mm-stage-tourney">
+      <div class="mm-slot">
+        <div class="mm-ava" id="mmt-me-ava">•</div>
+        <div class="mm-name" id="mmt-me-name">—</div>
+      </div>
+    </div>
+
     <div class="mm-status" id="mm-status">
       <div class="mm-status-main" id="mm-status-main">Connecting<span class="mm-dots"><span>.</span><span>.</span><span>.</span></span></div>
       <div class="mm-status-sub" id="mm-status-sub">Art Arena is searching for an artist</div>
@@ -3366,9 +3459,8 @@ try {
       </table>
     </div>
     <div class="card" style="margin-top:12px" id="prem-uicard">
-      <div class="big" style="font-size:15px">🎨 UI CUSTOMIZATION</div>
-      <p class="muted" style="font-size:13px; margin:6px 0 0">Exclusive 2D interface themes — colour, accents, borders and backgrounds. Your theme persists across refreshes and logins, on every page.</p>
-      <div id="prem-themes" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-top:12px"></div>
+      <div class="big" style="font-size:15px">🎨 UI Customization</div>
+      <p class="muted" style="font-size:13px; margin:6px 0 0">Personalize the look and feel of Art Arena™ with premium UI customization options.</p>
     </div>
     <div class="card" style="margin-top:12px">
       <div class="big" style="font-size:15px">🎲 RANDOMIZER RE-ROLL</div>
@@ -3485,8 +3577,8 @@ try {
 
   <div id="time-modal" class="time-modal-backdrop hidden">
     <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="tm-title">
-      <h3 id="tm-title"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Set custom time</h3>
-      <p class="muted" style="margin:4px 0 0; font-size:13px">1 minute – 12 hours</p>
+      <h3 id="tm-title"><svg class="ic ic-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span id="tm-title-text">Set custom time</span></h3>
+      <p class="muted" id="tm-note" style="margin:4px 0 0; font-size:13px">1 minute – 12 hours</p>
       <div class="time-modal-row">
         <label>Hours<input type="number" id="tm-hours" min="0" max="11" step="1" value="1" inputmode="numeric"></label>
         <label>Minutes<input type="number" id="tm-mins" min="0" max="59" step="1" value="0" inputmode="numeric"></label>
@@ -3569,18 +3661,28 @@ try {
       <h3 id="bm-title" style="margin-bottom:4px">SELECT BATTLE TYPE</h3>
       <p class="muted" style="margin:0 0 16px; font-size:13.5px">Choose how you want to match in the Arena</p>
       <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+        <!-- v68 (icon spec): the mode icons stand ALONE — no boxed tiles.
+             Same Art Arena icon system (IC.sword / IC.users / IC.trophy),
+             same card list, same responsive behaviour. -->
         <button type="button" class="util-btn bm-choice-btn" data-bm-mode="1v1" style="display:flex; align-items:center; gap:14px; padding:14px 16px; text-align:left; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; width:100%; transition:all .15s ease;">
-          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--pink-rgb),.15), rgba(var(--purple-rgb),.2)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--pink);"><!-- v67: the app's own sword icon (IC.sword) — no generic emoji --><svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg></div>
+          <svg class="ic bm-icon" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; color:var(--pink)"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg>
           <div style="flex:1; min-width:0;">
             <div style="font-weight:800; font-size:15px; color:var(--text)">1v1 Duel</div>
             <div style="color:var(--muted); font-size:12px; margin-top:2px">Classic 1-on-1 duel. Matched against another artist.</div>
           </div>
         </button>
         <button type="button" class="util-btn bm-choice-btn" data-bm-mode="3v3" style="display:flex; align-items:center; gap:14px; padding:14px 16px; text-align:left; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; width:100%; transition:all .15s ease;">
-          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, rgba(var(--purple-rgb),.2), rgba(var(--pink-rgb),.15)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--purple);"><!-- v67: the app's own team icon (IC.users) — no generic emoji --><svg class="ic" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <svg class="ic bm-icon" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; color:var(--purple)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <div style="flex:1; min-width:0;">
             <div style="font-weight:800; font-size:15px; color:var(--text)">3v3 Team Battle</div>
             <div style="color:var(--muted); font-size:12px; margin-top:2px">Join or match into a 3v3 team room with 3 active lanes.</div>
+          </div>
+        </button>
+        <button type="button" class="util-btn bm-choice-btn" data-bm-mode="tournament" style="display:flex; align-items:center; gap:14px; padding:14px 16px; text-align:left; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; width:100%; transition:all .15s ease;">
+          <svg class="ic bm-icon" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; color:var(--pink)"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10M17 6h2.5A2.5 2.5 0 0 1 17 10"/><path d="M12 14v3"/><path d="M8 20h8"/></svg>
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:800; font-size:15px; color:var(--text)">Tournament</div>
+            <div style="color:var(--muted); font-size:12px; margin-top:2px">Find an open public tournament and join its bracket.</div>
           </div>
         </button>
       </div>
@@ -3826,7 +3928,12 @@ function applyThemeLogo(key, custom) {
   // theme animation now change together (and persist together, server-side).
   // The tinted wordmark is cached per colour signature; the async result is
   // applied only while the SAME theme + colours are still active.
-  if (key && custom && custom.c1 && THEME_LOGOS[key]) {
+  // v68 (item 6): the GLITCH wordmark is canonical artwork — it must NEVER be
+  // recoloured, tinted or filtered by the custom colours. The forEach above
+  // always resets img.src to the pristine THEME_LOGOS file, and the tint pass
+  // is skipped for glitch, so editing Glitch colours changes the UI accents
+  // but leaves the logo exactly as shipped.
+  if (key && key !== 'glitch' && custom && custom.c1 && THEME_LOGOS[key]) {
     const sig = key + '|' + custom.c1 + '|' + (custom.c2 || '') + '|' + (custom.dir || 135);
     pthTintedLogo(key, custom).then((url) => {
       if (!url || activeThemeKey !== key) return;
@@ -3888,12 +3995,19 @@ function applyPremiumTheme(key, custom) {
     b.style.setProperty('--pth-c2-rgb', pthHexToRgb(custom && custom.c2) || null);
     if (custom && typeof custom.dir === 'number') b.style.setProperty('--pth-dir', custom.dir + 'deg');
     else b.style.removeProperty('--pth-dir');
+    // v68 (item 3): flag that the artist is wearing CUSTOM colours, so every
+    // surface in the stylesheet (cards, panels, hero, settings groups, modals)
+    // picks up a faint wash of the chosen palette — customization is visible
+    // everywhere, not only on accents. Removed when no custom colour is set.
+    if (custom && custom.c1) b.setAttribute('data-pcustom', '1');
+    else b.removeAttribute('data-pcustom');
     // v54 (spec 12): this browser remembers the identity so the login page
     // keeps wearing it after logout. Server truth still wins after auth.
     try { localStorage.setItem('aa-ptheme', JSON.stringify({ key: activeThemeKey, custom: activeThemeCustom })); } catch (_) {}
   } else {
     b.removeAttribute('data-ptheme');
     root.removeAttribute('data-visual');
+    b.removeAttribute('data-pcustom'); // v68: no theme → no custom surface wash
     ['--pth-c1', '--pth-c2', '--pth-dir', '--pth-c1-rgb', '--pth-c2-rgb'].forEach((p) => b.style.removeProperty(p));
     try { localStorage.removeItem('aa-ptheme'); } catch (_) {}
   }
@@ -4403,6 +4517,9 @@ function paintAbout() {
   if (m && b) b.textContent = 'v' + m.content;
 }
 function show(name) {
+  // v68 (item 3): leaving a view commits any pending UI-colour auto-save so a
+  // Profile round-trip / navigation never drops the artist's latest edit.
+  try { pthFlushAutosave(); } catch (_) {}
   currentView = name;
   VIEWS.forEach((v) => $('#view-' + v).classList.toggle('hidden', v !== name));
   const inApp = APP_VIEWS.includes(name);
@@ -4809,12 +4926,25 @@ const timeModal = (() => {
     const s = h * 3600 + m * 60;
     return (s >= TIME_MIN_S && s <= TIME_MAX_S) ? s : null;
   }
+  // v68 (item 5): in a TOURNAMENT context this same card is the "Set time
+  // per round" control — every round of the bracket plays with the duration
+  // set here (the backend already uses room.time_limit_seconds per battle).
+  function perRoundCtx() {
+    if (target === 'create') { try { return createMode === 'tournament'; } catch (_) { return false; } }
+    return !!(typeof lastRoomData !== 'undefined' && lastRoomData && lastRoomData.battle_mode === 'tournament');
+  }
   function refreshSummary() {
     const s = totalSecs();
-    summary.textContent = s === null ? '— enter hours and minutes —' : '= ' + fmtTime(s);
+    summary.textContent = s === null ? '— enter hours and minutes —' : '= ' + fmtTime(s) + (perRoundCtx() ? ' per round' : '');
   }
   function open(ctx, initialSecs) {
     target = ctx;
+    const perRound = perRoundCtx();
+    const titleEl = $('#tm-title-text'), noteEl = $('#tm-note');
+    if (titleEl) titleEl.textContent = perRound ? 'Set time per round' : 'Set custom time';
+    if (noteEl) noteEl.textContent = perRound
+      ? 'Every round of the bracket plays with this duration · 1 minute – 12 hours'
+      : '1 minute – 12 hours';
     const base = validTime(initialSecs) ? initialSecs : 3600; // prefill: current custom or 1 h
     hIn.value = Math.floor(base / 3600);
     mIn.value = Math.round((base % 3600) / 60);
@@ -4922,6 +5052,18 @@ function commitCats(cats) {
 $('#cat-grid').addEventListener('change', (e) => {
   // capture NOW — never read the DOM again after a render may have replaced it
   const cats = selectedCats();
+  const cb = e.target;
+  // v68 (item 12): unchecking the LAST selected element is not allowed — the
+  // box is reverted immediately. Before this, the grid could show a zero
+  // selection while the server still held the old list; the next check would
+  // then commit a one-element list and silently wipe every other element.
+  // The revert keeps DOM and server in lockstep — no stale-state race.
+  if (cats.length === 0 && cb && cb.type === 'checkbox' && !cb.checked) {
+    cb.checked = true;
+    updateCatDifficulty();
+    msg('msg-room', 'Keep at least one challenge element selected.', false);
+    return;
+  }
   updateCatDifficulty();
   if (!currentRoomCode) return;
   if (cats.length === 0) { msg('msg-room', 'Select at least one challenge element.', false); return; }
@@ -5045,7 +5187,10 @@ async function refreshFriendState(force) {
   } catch (_) {}
 }
 function paintFriendChips() {
-  document.querySelectorAll('#room-players .friend-slot').forEach((slot) => {
+  // v68: also paint the friend-slot chips inside the 3v3 tournament board — the
+  // tt-name-row markup emits the span (and CSS styles it) but the painter never
+  // reached it, so 3v3 rows showed a permanently empty chip slot.
+  document.querySelectorAll('#room-players .friend-slot, #tt-board .friend-slot').forEach((slot) => {
     const uid = slot.dataset.uid, name = slot.dataset.name;
     let html;
     // v59: actionable relationship controls inside rooms:
@@ -5454,15 +5599,12 @@ function renderRoom(d) {
       const rows = seatsList.map((i) => {
         const p = d.players.find((x) => x.seat === i);
         if (!p) return '<div class="tt-seat empty"><span class="tt-num">' + i + '</span><span class="muted">' + label + '</span></div>';
-        const moveCtrl = (youHost && d.status === 'lobby')
-          ? '<select class="mini tt-slot-select" data-from-seat="' + i + '" title="Move player to slot" style="padding:2px 4px; font-size:11px; max-width:82px; margin:0; background:var(--surface-2); border:1px solid var(--line); border-radius:6px; color:var(--text);">' +
-            [1, 2, 3, 4, 5, 6].map((s) => '<option value="' + s + '"' + (s === i ? ' selected' : '') + '>' + (s <= 3 ? 'Slot A' + s : 'Slot B' + (s - 3)) + (s === i ? ' (here)' : '') + '</option>').join('') +
-            '</select>'
-          : '';
+        // v68: slot movement is REMOVED — seats are assigned on join and stay.
+        // The host manages the room with kick / invite, never by shuffling
+        // players between slots.
         return '<div class="tt-seat" data-uid="' + esc(p.user_id) + '" data-username="' + esc(p.username) + '" data-ishost="' + (p.is_host ? '1' : '') + '"><span style="min-width:0"><span class="tt-num">' + i + '</span> @' + esc(p.username) +
           (p.is_you ? ' <span class="muted">(you)</span>' : '') + '</span>' +
           '<span style="display:flex; gap:6px; align-items:center;">' +
-          moveCtrl +
           (p.drawing_app_key
             ? '<span class="state-chip canvas" title="Canvas">' + IC.brush + ' ' + esc(canvasAppName(p.drawing_app_key) || p.drawing_app_key) + '</span>'
             : '') +
@@ -5522,6 +5664,8 @@ function renderRoom(d) {
     $('#settings-static').classList.add('hidden');
     $('#settings-edit').classList.remove('hidden');
     $('#setting-type').value = d.battle_type;
+    const sTimeLbl = $('#setting-time-label'); // v68 (item 5): tournament rooms label the SAME time card "Time per round"
+    if (sTimeLbl) sTimeLbl.textContent = isTourney ? 'Time per round' : 'Time limit';
     const tKey = d.code + ':' + d.time_limit_seconds;
     if (timeRenderKey !== tKey) {
       timeRenderKey = tKey;
@@ -5625,7 +5769,7 @@ function renderRoom(d) {
       $('#btn-launch').classList.toggle('hidden', !(inReveal && roomOwnerLaunch));
       $('#launch-wait-note').classList.toggle('hidden', !(inReveal && iAmArtist && !roomOwnerLaunch));
     } else {
-      revealClose();
+      revealAutoClose(d); // v68 (item 13): battle alive, challenge momentarily absent — a pinned reveal rides out the transient gap
       $('#challenge-box').classList.add('hidden');
       $('#btn-reroll').classList.add('hidden');
       $('#btn-launch').classList.add('hidden');
@@ -5656,7 +5800,7 @@ function renderRoom(d) {
       : esc(BATTLE_NOTE_BY_STATUS[d.battle.status] || 'The challenge locks, the 3-2-1 countdown runs, then the battle goes live.');
     $('#battle-note').style.display = (isSpectator || !['active', 'countdown'].includes(d.battle.status)) ? 'block' : 'none';
   } else {
-    revealClose();
+    revealAutoClose(d); // v68 (item 13): no battle at all → the reveal really closes (and unpins)
     $('#battle-card').classList.add('hidden');
     $('#vote-box').classList.add('hidden'); // v58
     stopCountdownOverlay(); // v36: no battle → no countdown
@@ -6010,23 +6154,9 @@ $('#btn-room-invite').addEventListener('click', () => {
   };
   show('friends');
 });
-$('#tt-board').addEventListener('change', async (e) => {
-  const sel = e.target.closest('.tt-slot-select');
-  if (!sel || !currentRoomCode) return;
-  const fromSeat = Number(sel.dataset.fromSeat);
-  const toSeat = Number(sel.value);
-  if (fromSeat === toSeat) return;
-  sel.disabled = true;
-  try {
-    const res = await api('/api/rooms/' + currentRoomCode + '/move-player', { from_seat: fromSeat, to_seat: toSeat }, 'POST');
-    renderRoom(res);
-    toast('Player moved to slot ' + (toSeat <= 3 ? 'A' + toSeat : 'B' + (toSeat - 3)) + '.');
-  } catch (err) {
-    toast(err.message);
-    sel.disabled = false;
-    if (lastRoomData) renderRoom(lastRoomData);
-  }
-});
+// v68: slot movement REMOVED — the #tt-board no longer carries any seat-move
+// control or handler. Seats are assigned on join; the host manages the room
+// with kick / invite only.
 $('#btn-join').addEventListener('click', () => currentRoomCode && joinRoom(currentRoomCode));
 $('#btn-spectate').addEventListener('click', () => currentRoomCode && roomAction(currentRoomCode, '/spectate'));
 $('#btn-leave-spec').addEventListener('click', () => currentRoomCode && roomAction(currentRoomCode, '/leave-spectating'));
@@ -6181,7 +6311,6 @@ function rtToastText(ev) {
     case 'settings':         return ev.what === 'challenge elements' ? '⚙️ Challenge elements updated' : '⚙️ Room settings updated';
     case 'challenge_locked': return null; // v51: the countdown overlay is the message
     case 'host_transferred': return '👑 ' + who + ' is now the host';
-    case 'slots_rearranged': return '🔀 ' + who + ' rearranged the team slots'; // v67: host seat moves announce themselves
     // v51 (clean countdown): the start sequence is visual ONLY — the
     // countdown overlay IS the notification. No decorative toasts compete
     // with 3-2-1-GO (errors and safety messages are unaffected).
@@ -6688,7 +6817,7 @@ function paintCreateMode() {
   // exposes the choice. The switch is instant (no save step in between).
   const isTournament = createMode === 'tournament';
   const timeLbl = $('#create-time-label');
-  if (timeLbl) timeLbl.textContent = isTournament ? 'Set time per round' : 'Time limit';
+  if (timeLbl) timeLbl.textContent = isTournament ? 'Time per round' : 'Time limit'; // v68 (item 5): the per-round setting lives INSIDE the time card — the label names the card, the modal explains the round rule
   $('#create-max').value = isTournament
     ? String(createTournamentSize)
     : String(MODE_DEFAULT_MAX[createMode]);
@@ -6945,6 +7074,13 @@ const mm = (() => {
 
   function setMode(m) { searchMode = m || '1v1'; }
 
+  // v68: the honest timeout copy per mode (server deadline is the same 3 min).
+  function timeoutText() {
+    return searchMode === 'tournament'
+      ? 'No open public tournament in the last 3 minutes \u2014 give it another try.'
+      : 'No available artists in the last 3 minutes \u2014 give it another try.';
+  }
+
   function clearTimers() {
     for (const t of [tickT, pollT]) { if (t) clearInterval(t); }
     tickT = pollT = null;
@@ -6957,17 +7093,118 @@ const mm = (() => {
     const elapsed = Math.floor((Date.now() - enterStartT) / 1000);
     $('#mm-timer').textContent = fmtSearchClock(elapsed);
     if (elapsed >= TIMEOUT_MS / 1000 + 3) // +3 s grace — only fires if the server timeout event never arrived
-      fail('No available artists in the last 3 minutes \u2014 give it another try.');
+      fail(timeoutText());
+  }
+  function myAvaHtml() {
+    const who = (me && (me.display_name || me.username)) || '\u2022';
+    const url = meProfile && meProfile.avatar_url;
+    const ini = String(who.charAt(0) || '\u2022').toUpperCase();
+    return url
+      ? '<img src="' + esc(url) + '" alt="" data-initial="' + esc(ini) + '" onerror="this.onerror=null;avatarImgFailed(this)">'
+      : esc(ini);
   }
   function paintMySlot() {
     const ava = $('#mm-me-ava');
     const who = (me && (me.display_name || me.username)) || '\u2022';
-    const url = meProfile && meProfile.avatar_url;
     ava.classList.remove('mm-ava-empty');
-    ava.innerHTML = url
-      ? '<img src="' + esc(url) + '" alt="" data-initial="' + esc(String(who.charAt(0) || '\u2022').toUpperCase()) + '" onerror="this.onerror=null;avatarImgFailed(this)">'
-      : String(who.charAt(0) || '\u2022').toUpperCase();
+    ava.innerHTML = myAvaHtml();
     $('#mm-me-name').textContent = who;
+    // v68: the 3v3 + tournament stages show the SAME real profile (the
+    // tournament search shows nothing else — no opponent placeholders).
+    const a3 = $('#mm3-me-ava'), at = $('#mmt-me-ava');
+    if (a3) { a3.classList.remove('mm-ava-empty'); a3.innerHTML = myAvaHtml(); }
+    if ($('#mm3-me-name')) $('#mm3-me-name').textContent = who;
+    if (at) { at.classList.remove('mm-ava-empty'); at.innerHTML = myAvaHtml(); }
+    if ($('#mmt-me-name')) $('#mmt-me-name').textContent = who;
+  }
+  // v68: ONE stage per battle mode — 1v1 keeps the classic two-seat view,
+  // 3v3 shows the team rows, tournament shows only my own profile.
+  function stageFor() {
+    $('#mm-stage').classList.toggle('hidden', searchMode !== '1v1');
+    $('#mm-stage-3v3').classList.toggle('hidden', searchMode !== '3v3');
+    $('#mm-stage-tourney').classList.toggle('hidden', searchMode !== 'tournament');
+  }
+  // v68: 3v3 team slots — the two [+] positions on MY row. Each slot can be
+  // open (+), pending (invite SENT — locked against duplicates) or filled
+  // (an accepted invite painted the friend's profile in).
+  const invited = { 1: null, 2: null }; // pos -> invited friend id while pending
+  const seatedIds = [];                 // friend ids actually painted into slots
+  let invitePopPos = null;
+  function closeInvitePop() {
+    const p = $('#mm-invite-pop');
+    if (p) { p.classList.add('hidden'); p.innerHTML = ''; }
+    invitePopPos = null;
+  }
+  function resetTeamSlots() {
+    invited[1] = invited[2] = null;
+    seatedIds.length = 0;
+    for (const pos of [1, 2]) {
+      const slot = $('#mm3-slot-' + pos), btn = $('#mm3-add-' + pos);
+      if (!slot || !btn) continue;
+      slot.classList.add('hidden'); slot.innerHTML = '';
+      btn.classList.remove('hidden', 'invited'); btn.textContent = '+';
+      btn.removeAttribute('data-invited-to');
+    }
+    closeInvitePop();
+  }
+  function fillTeamSlot(pos, teammate) {
+    const uid = String(teammate.id || '');
+    if (uid && seatedIds.includes(uid)) return; // the same person can never occupy two slots
+    invited[pos] = null;
+    if (uid) seatedIds.push(uid);
+    const slot = $('#mm3-slot-' + pos), btn = $('#mm3-add-' + pos);
+    if (!slot || !btn) return;
+    const who = teammate.display_name || teammate.username || '?';
+    const url = teammate.avatar_url;
+    const ini = String(who.charAt(0) || '\u2022').toUpperCase();
+    slot.innerHTML = '<div class="mm-ava mm-ava-pop">' + (url
+        ? '<img src="' + esc(url) + '" alt="" data-initial="' + esc(ini) + '" onerror="this.onerror=null;avatarImgFailed(this)">'
+        : esc(ini)) + '</div>' +
+      '<div class="mm-name">' + esc(who) + '</div>' +
+      '<div class="mm-slot-tag">Teammate</div>';
+    slot.classList.remove('hidden');
+    btn.classList.add('hidden');
+    btn.removeAttribute('data-invited-to');
+  }
+  function markInvited(pos, friend) {
+    invited[pos] = String(friend.id);
+    const btn = $('#mm3-add-' + pos);
+    if (btn) { btn.classList.add('invited'); btn.textContent = 'Sent \u2713'; btn.dataset.invitedTo = String(friend.id); }
+    closeInvitePop();
+    toast('Team invite sent to ' + (friend.display_name || '@' + friend.username));
+  }
+  function resetInvitedPos(userId) {
+    for (const pos of [1, 2]) {
+      const btn = $('#mm3-add-' + pos);
+      if (invited[pos] && String(invited[pos]) === String(userId) && btn) {
+        invited[pos] = null;
+        btn.classList.remove('invited'); btn.textContent = '+';
+        btn.removeAttribute('data-invited-to');
+      }
+    }
+  }
+  async function openInvitePop(pos) {
+    const pop = $('#mm-invite-pop');
+    if (!pop) return;
+    invitePopPos = pos;
+    pop.classList.remove('hidden');
+    pop.innerHTML = '<div class="mm-inv-head">Invite a friend \u00b7 slot ' + (pos + 1) + '</div><div class="muted" style="font-size:12px">Loading friends\u2026</div>';
+    try {
+      const f = await api('/api/friends/list');
+      const all = f.friends || [];
+      // Never list a friend who is already invited (either slot) or seated —
+      // one person, one slot, one pending invite.
+      const blocked = new Set(seatedIds.concat([invited[1], invited[2]].filter(Boolean).map(String)));
+      const fs = all.filter((x) => !blocked.has(String(x.id)));
+      pop.innerHTML = '<div class="mm-inv-head">Invite a friend \u00b7 slot ' + (pos + 1) + '</div>' + (fs.length
+        ? fs.map((x) => '<div class="tt-fr"><span>' + esc(x.display_name || x.username) + ' <span class="muted">@' + esc(x.username) + '</span></span>' +
+            '<button type="button" class="mini mm-inv-go" data-fid="' + esc(x.id) + '" data-name="' + esc(x.username) + '" data-dname="' + esc(x.display_name || '') + '" data-pos="' + pos + '">Invite</button></div>').join('')
+        : '<p class="muted" style="font-size:12.5px; margin:0">' + (all.length
+            ? 'Every friend is already invited or seated.'
+            : 'No friends to invite yet \u2014 add friends from the FRIENDS page to team up.') + '</p>');
+    } catch (err) {
+      if (!handleAuthError(err)) pop.innerHTML = '<div class="mm-inv-head">Invite a friend</div><p class="muted" style="font-size:12.5px; margin:0">' + esc(err.message || 'Could not load friends.') + '</p>';
+    }
   }
   function paintOppSlot() {
     const ava = $('#mm-op-ava');
@@ -6992,11 +7229,16 @@ const mm = (() => {
     $('#mm-op-name').classList.add('mm-name-empty');
   }
   function paintSearching() {
+    stageFor();
     $('#mm-stage').classList.remove('found', 'cancelled');
     $('#mm-status').classList.remove('found', 'failed', 'cancelled');
     $('#mm-cancel-actions').classList.add('hidden');
-    $('#mm-status-main').innerHTML = 'Connecting<span class="mm-dots"><span>.</span><span>.</span><span>.</span></span>';
-    $('#mm-status-sub').textContent = searchMode === '3v3' ? 'Searching for a 3v3 team battle...' : 'Art Arena is searching for an artist';
+    // v68: the status line matches the mode — a tournament search says so
+    // explicitly: FINDING TOURNAMENT / Connecting… / timer.
+    $('#mm-status-main').innerHTML = (searchMode === 'tournament' ? 'Finding Tournament' : 'Connecting') + '<span class="mm-dots"><span>.</span><span>.</span><span>.</span></span>';
+    $('#mm-status-sub').textContent = searchMode === '3v3' ? 'Searching for a 3v3 team battle...'
+      : searchMode === 'tournament' ? 'Connecting\u2026'
+      : 'Art Arena is searching for an artist';
     $('#mm-status-sub').classList.remove('ok');
     $('#mm-timer').classList.remove('hidden');
     $('#mm-timer').textContent = '00:00'; // v46: counts UP from zero
@@ -7007,7 +7249,8 @@ const mm = (() => {
     $('#mm-stage').classList.add('found');
     $('#mm-status').classList.add('found');
     $('#mm-cancel-actions').classList.add('hidden');
-    $('#mm-status-main').textContent = searchMode === '3v3' ? 'Found 3v3 Match' : 'Found Player';
+    $('#mm-status-main').textContent = searchMode === 'tournament' ? 'Found Tournament'
+      : searchMode === '3v3' ? 'Found 3v3 Match' : 'Found Player';
     $('#mm-status-sub').textContent = 'Connected \u2713';
     $('#mm-status-sub').classList.add('ok');
     $('#mm-timer').classList.remove('hidden');
@@ -7019,8 +7262,8 @@ const mm = (() => {
     $('#mm-stage').classList.remove('found', 'cancelled');
     $('#mm-status').classList.add('failed');
     $('#mm-cancel-actions').classList.add('hidden');
-    $('#mm-status-main').textContent = title || 'Could Not Find Player';
-    $('#mm-status-sub').textContent = why || 'No available artists in the last 3 minutes.';
+    $('#mm-status-main').textContent = title || (searchMode === 'tournament' ? 'Could Not Find Tournament' : 'Could Not Find Player');
+    $('#mm-status-sub').textContent = why || timeoutText();
     $('#mm-status-sub').classList.remove('ok');
     $('#mm-actions').classList.add('hidden');
     $('#mm-fail-actions').classList.remove('hidden');
@@ -7058,9 +7301,10 @@ const mm = (() => {
     mmLinkSet('connected'); // v45: the line locks solid green
     paintFound();
     const is3v3 = (mode === '3v3' || searchMode === '3v3');
+    const isTour = (mode === 'tournament' || searchMode === 'tournament');
     proceedT = setTimeout(() => {
       openRoom(code);
-      if (!is3v3) {
+      if (!is3v3 && !isTour) {
         const t = setInterval(() => {
           if (lastRoomData && lastRoomData.code === code && currentView === 'room') {
             clearInterval(t);
@@ -7071,7 +7315,7 @@ const mm = (() => {
         }, 150);
         setTimeout(() => clearInterval(t), 12000);
       }
-    }, is3v3 ? 1800 : 2600);
+    }, (is3v3 || isTour) ? 1800 : 2600);
   }
   function fail(why, title) {
     if (state === 'idle') return;
@@ -7080,6 +7324,7 @@ const mm = (() => {
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
     mmLinkSet('off'); // v45: the line goes quiet
     api('/api/matchmaking/cancel', {}).catch(() => {}); // never leave a ghost queue row
+    resetTeamSlots(); // v68: the search is over — pending team invites die with it
     paintFailed(why, title);
   }
   async function enter(m) {
@@ -7090,6 +7335,7 @@ const mm = (() => {
     opponent = null;
     enterStartT = Date.now(); // the ONE display anchor — set the instant the search begins
     resetOppSlot();
+    resetTeamSlots();
     paintMySlot();
     paintSearching();
     mmLinkSet('search'); // v45: the dashes start flowing
@@ -7112,6 +7358,7 @@ const mm = (() => {
     try {
       await api('/api/matchmaking/cancel', {});
     } catch (_) { /* 404 = nothing queued — already out; either way we stay out */ }
+    resetTeamSlots(); // v68: cancelling expires my pending team invites server-side — clear the slots too
     paintCancelled();
     state = 'idle';
   }
@@ -7120,6 +7367,7 @@ const mm = (() => {
       api('/api/matchmaking/cancel', {}).catch(() => {});
       state = 'idle';
       clearTimers();
+      resetTeamSlots(); // v68
       show('arena');
     }
   }
@@ -7127,7 +7375,27 @@ const mm = (() => {
     if (message.action === 'found' && (state === 'searching' || state === 'cancelling'))
       found(message.room, message.opponent, message.battle_mode || searchMode);
     if (message.action === 'timeout' && (state === 'searching' || state === 'cancelling'))
-      fail('No available artists in the last 3 minutes \u2014 give it another try.');
+      fail(timeoutText());
+    // v68: a friend accepted my team invite — paint them into the pending
+    // slot I invited from (fall back: first open slot).
+    if (message.action === 'teammate_joined' && message.teammate) {
+      const uid = String(message.teammate.id || '');
+      let pos = null;
+      for (const p of [1, 2]) if (invited[p] && String(invited[p]) === uid) pos = p;
+      if (pos === null) {
+        for (const p of [1, 2]) {
+          const slot = $('#mm3-slot-' + p);
+          if (slot && slot.classList.contains('hidden') && !invited[p]) { pos = p; break; }
+        }
+      }
+      if (pos !== null) fillTeamSlot(pos, message.teammate);
+      toast((message.teammate.display_name || '@' + (message.teammate.username || 'A friend')) + ' joined your team');
+    }
+    // v68: a friend declined — the [+] slot reopens honestly.
+    if (message.action === 'invite_declined') {
+      resetInvitedPos(message.user_id);
+      toast('@' + (message.username || 'Your friend') + ' declined the team invite');
+    }
   }
   function onEnter() { if (state === 'idle') enter(searchMode); }
   function onLogout() {
@@ -7135,14 +7403,59 @@ const mm = (() => {
     state = 'idle';
     clearTimers();
     mmLinkSet('off');
+    resetTeamSlots();
     if (proceedT) { clearTimeout(proceedT); proceedT = null; }
+  }
+  // v68: local-only teardown — used when an accepted team invite (or any
+  // outside event) seats the user in a room while the mm module is ticking.
+  function resetLocal() {
+    state = 'idle';
+    clearTimers();
+    mmLinkSet('off');
+    resetTeamSlots();
+    if (proceedT) { clearTimeout(proceedT); proceedT = null; }
+    opponent = null;
   }
   $('#mm-cancel').addEventListener('click', cancel);
   $('#mm-retry').addEventListener('click', () => enter(searchMode));
   $('#mm-exit').addEventListener('click', exit);
   $('#mm-cancel-back').addEventListener('click', () => show('arena'));
   $('#mm-cancel-retry').addEventListener('click', () => enter(searchMode));
-  return { onWs, onEnter, onLogout, setMode, enter };
+  // v68: the [+] slots — open the friend invite picker while the 3v3 search
+  // is live. A pending (SENT ✓) or filled slot never opens it again.
+  for (const pos of [1, 2]) {
+    const btn = $('#mm3-add-' + pos);
+    if (btn) btn.addEventListener('click', () => {
+      if (state !== 'searching' || searchMode !== '3v3') return;
+      if (invited[pos]) return;
+      const slot = $('#mm3-slot-' + pos);
+      if (slot && !slot.classList.contains('hidden')) return;
+      openInvitePop(pos);
+    });
+  }
+  document.addEventListener('click', async (e) => {
+    const go = e.target.closest && e.target.closest('.mm-inv-go');
+    if (go) {
+      e.preventDefault();
+      const pos = Number(go.dataset.pos), fid = go.dataset.fid;
+      if (state !== 'searching' || searchMode !== '3v3') { closeInvitePop(); return; }
+      if (invited[pos] || seatedIds.includes(String(fid))) return; // never two slots for one person
+      go.disabled = true;
+      try {
+        const avail = await checkFriendAvailability(fid);
+        if (!avail.online) { toast('@' + (avail.username || go.dataset.name) + ' is offline right now.'); return; }
+        if (avail.in_room) { toast('@' + (avail.username || go.dataset.name) + ' is already in a room (' + (avail.room_code || '') + ').'); return; }
+        await api('/api/matchmaking/team-invite', { friend_id: fid });
+        markInvited(pos, { id: fid, username: go.dataset.name, display_name: go.dataset.dname });
+      } catch (err) {
+        if (!handleAuthError(err)) toast(err.message || 'Could not send the invite.');
+      } finally { go.disabled = false; }
+      return;
+    }
+    // click-away closes the invite picker (never swallows clicks inside it)
+    if (invitePopPos !== null && !(e.target.closest && e.target.closest('#mm-invite-pop, .mm-addslot'))) closeInvitePop();
+  });
+  return { onWs, onEnter, onLogout, setMode, enter, resetLocal };
 })();
 
 document.querySelectorAll('#battle-mode-modal [data-bm-mode]').forEach((btn) => {
@@ -7171,6 +7484,8 @@ function mmOnLogout() { mm.onLogout(); }
 function mmLinkSet(mode) {
   const el = $('#mm-link');
   if (el) el.dataset.mode = mode;
+  const el3 = $('#mm3-link'); // v68: the 3v3 stage's own VS line flows too
+  if (el3) el3.dataset.mode = mode;
 }
 
 
@@ -7782,6 +8097,9 @@ const NOTIF_TEXT = {
   battle_invitation: (p) => 'Battle invitation.',
   room_invitation: (p) => (p.from_display_name || '@' + p.from_username) + ' invited you to ' + (p.room_name ? '"' + p.room_name + '"' : 'their room') + (p.battle_mode && p.battle_mode !== '1v1' ? ' (' + p.battle_mode + ')' : '') + '.',
   team_invitation: (p) => (p.from_display_name || '@' + p.from_username) + ' picked you for their 3v3 team' + (p.team_name ? ' "' + p.team_name + '"' : '') + '.',
+  // v68: 3v3 matchmaking team invite — sent from the [+] slots while the
+  // inviter is searching; accepting really seats you with them.
+  mm_team_invite: (p) => (p.from_display_name || '@' + p.from_username) + ' invited you to join their 3v3 team in matchmaking.',
   // v65: join requests. Unhandled → the HOST decides; handled with host_user_id
   // → the REQUESTER's outcome; handled with requester_user_id → the host's
   // own row after they answered.
@@ -7824,11 +8142,13 @@ async function loadNotifications() {
     const riDone = n.type === 'room_invitation' && n.payload && n.payload.handled;
     const isTI = n.type === 'team_invitation' && n.payload && n.payload.draft_id && !n.payload.handled;    // v61
     const tiDone = n.type === 'team_invitation' && n.payload && n.payload.handled;
+    const isMMTI = n.type === 'mm_team_invite' && n.payload && !n.payload.handled;                          // v68: 3v3 matchmaking team invite
+    const mmtiDone = n.type === 'mm_team_invite' && n.payload && n.payload.handled;
     const jrIn = n.type === 'join_request' && n.payload && n.payload.requester_user_id && !n.payload.handled; // v65: host decides
     const jrDone = n.type === 'join_request' && n.payload && n.payload.handled; // v65: answer visible to both sides
     return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '"' + (n.payload && n.payload.from_user_id ? ' data-from-uid="' + esc(n.payload.from_user_id) + '"' : '') + '>' +
       '<span class="notif-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-      (n.type.startsWith('friend') || n.type === 'team_invitation' || n.type === 'room_invitation' ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : n.type === 'premium_activated' ? '<path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.55L12 17.1l-5.9 3.15L7.25 13.7 2.5 9.3l6.6-1.04z"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
+      (n.type.startsWith('friend') || n.type === 'team_invitation' || n.type === 'room_invitation' || n.type === 'mm_team_invite' ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : n.type === 'premium_activated' ? '<path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.55L12 17.1l-5.9 3.15L7.25 13.7 2.5 9.3l6.6-1.04z"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
       '</svg></span>' +
       '<div class="notif-body"><div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
       (isPM ? '<div class="notif-actions"><button type="button" class="notif-cta" data-pm-customize="1">Customize UI</button></div>' : '') +
@@ -7837,6 +8157,8 @@ async function loadNotifications() {
       (riDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Joined</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
       (isTI ? '<div class="notif-actions"><button type="button" data-ti-accept="' + esc(n.payload.draft_id) + '">Join team</button><button type="button" class="secondary" data-ti-decline="' + esc(n.payload.draft_id) + '">Decline</button></div>' : '') +
       (tiDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ On the team</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
+      (isMMTI ? '<div class="notif-actions"><button type="button" data-mmti-accept="' + esc(n.id) + '">Join team</button><button type="button" class="secondary" data-mmti-decline="' + esc(n.id) + '">Decline</button></div>' : '') +
+      (mmtiDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Joined their team</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
       (isRR ? '<div class="notif-actions"><button type="button" data-rr-accept="' + esc(n.payload.room_code) + '">Accept</button><button type="button" class="secondary" data-rr-decline="' + esc(n.payload.room_code) + '">Decline</button></div>' : '') +
       (rrDone ? '<div class="notif-when" style="color:var(--ok-tx)">' + (n.payload.handled === 'accepted' ? '✓ accepted — battle starting' : '✓ declined') + '</div>' : '') +
       (jrIn ? '<div class="notif-actions"><button type="button" data-jr-accept="1" data-jr-room="' + esc(n.payload.room_code) + '" data-jr-uid="' + esc(n.payload.requester_user_id) + '">Accept</button><button type="button" class="secondary" data-jr-decline="1" data-jr-room="' + esc(n.payload.room_code) + '" data-jr-uid="' + esc(n.payload.requester_user_id) + '">Decline</button></div>' : '') +
@@ -7898,6 +8220,25 @@ $('#notif-list').addEventListener('click', async (e) => {
   }
   const jro = e.target.closest('[data-jr-open]');
   if (jro) { openRoom(jro.dataset.jrOpen); return; } // v65: requester enters the room they were seated into
+  // v68: 3v3 matchmaking team invite → accepting really seats you with the
+  // inviter (shared room) and opens it; declining frees their [+] slot.
+  const mia = e.target.closest('[data-mmti-accept]'), mid = e.target.closest('[data-mmti-decline]');
+  if (mia || mid) {
+    const btn = mia || mid;
+    const box = btn.closest('.notif-actions'); box.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+    try {
+      if (mia) {
+        const r = await api('/api/matchmaking/team-invite/' + mia.dataset.mmtiAccept + '/accept', {}, 'POST');
+        mm.resetLocal(); // the server cancelled my own queue row (if any) — stop the local search UI too
+        toast('You joined the team! 🤝');
+        if (r && r.room) { openRoom(r.room); return; }
+      } else {
+        await api('/api/matchmaking/team-invite/' + mid.dataset.mmtiDecline + '/decline', {}, 'POST');
+        toast('Team invite declined.');
+      }
+    } catch (err) { toast(err.message); }
+    loadNotifications(); return;
+  }
   // v61: room invitation → the REAL join flow; team invitation → draft answer
   const rij = e.target.closest('[data-ri-join]'), rid = e.target.closest('[data-ri-decline]');
   if (rij || rid) {
@@ -7939,6 +8280,9 @@ $('#notif-list').addEventListener('click', async (e) => {
 
 // ------------------------ profile modal + friends ----------------------------
 let pmUserId = null;
+// v68: friend REMOVAL lives on the FRIENDS page only — never in a room
+// context. Captured when the profile modal opens, from the live view.
+let pmAllowUnfriend = false;
 function modalOpen(id) { const b = $(id); b.classList.remove('hidden'); requestAnimationFrame(() => b.classList.add('open')); }
 function modalClose(id) { const b = $(id); b.classList.remove('open'); setTimeout(() => b.classList.add('hidden'), 260); }
 $('#pm-close').addEventListener('click', () => modalClose('#profile-modal'));
@@ -7947,6 +8291,10 @@ $('#profile-modal').addEventListener('click', (e) => { if (e.target.id === 'prof
 async function openProfile(userId) {
   window.openProfile = openProfile;
   pmUserId = userId;
+  // v68 (item 9): "Remove Friend" is available ONLY from the FRIENDS page —
+  // never inside a room / matchmaking context. Capture the live view so the
+  // button below renders correctly regardless of where the modal was opened.
+  pmAllowUnfriend = (currentView === 'friends');
   const pmCard = $('#pm-card');
   if (pmCard) {
     pmCard.setAttribute('data-prof-theme', 'default');
@@ -8024,7 +8372,8 @@ async function openProfile(userId) {
   if (isMe) { btn.textContent = 'This is you'; btn.dataset.mode = 'none'; btn.disabled = true; }
   else if (outcome === 'accepted' && isFriend) { btn.textContent = '✓ Accepted'; btn.dataset.mode = 'none'; btn.disabled = true; }
   else if (outcome === 'declined' && !isFriend && !iSent && !theySent) { btn.textContent = 'Declined'; btn.dataset.mode = 'none'; btn.disabled = true; btn.classList.add('secondary'); }
-  else if (isFriend) { btn.textContent = 'Remove Friend'; btn.dataset.mode = 'friends'; btn.disabled = false; btn.classList.add('is-remove'); }
+  else if (isFriend && pmAllowUnfriend) { btn.textContent = 'Remove Friend'; btn.dataset.mode = 'friends'; btn.disabled = false; btn.classList.add('is-remove'); }
+  else if (isFriend) { btn.textContent = '✓ Friends'; btn.dataset.mode = 'none'; btn.disabled = true; btn.classList.add('secondary'); } // v68 (item 9): room/matchmaking context — friend removal lives on the FRIENDS page only
   else if (iSent) { btn.textContent = '⏳ Pending · Cancel request'; btn.dataset.mode = 'sent'; btn.disabled = false; btn.classList.add('secondary'); }
   else if (theySent) { btn.textContent = '✓ Accept request'; btn.dataset.mode = 'accept'; btn.disabled = false; dec.classList.remove('hidden'); }
   else { btn.textContent = '+ Add Friend'; btn.dataset.mode = 'add'; btn.disabled = false; }
@@ -8038,6 +8387,7 @@ $('#pm-friend').addEventListener('click', async () => {
   const mode = $('#pm-friend').dataset.mode, id = pmUserId;
   if (!mode || mode === 'none' || !id) return;
   if (mode === 'friends') { // confirmed removal; the modal re-renders itself afterwards
+    if (!pmAllowUnfriend) return; // v68: belt-and-braces — never unfriend outside the FRIENDS page
     const name = ($('#pm-body').textContent.match(/@([A-Za-z0-9_]+)/) || [])[1] || 'this artist';
     confirmUnfriend(id, name, () => { if (pmUserId === id) openProfile(id); });
     return;
@@ -8152,6 +8502,27 @@ function attachSeatModeration(container) {
   }, { passive: true });
   container.addEventListener('touchend', () => { clearTimeout(ctxTimer); }, { passive: true });
   container.addEventListener('touchmove', () => { clearTimeout(ctxTimer); }, { passive: true });
+  // v68 (item 8): DESKTOP long-press — holding the left button on a seated
+  // player (~500 ms) opens Remove Player for the host, mirroring the mobile
+  // gesture. It reuses the ctxLongFired protocol, so the click that follows
+  // the hold is swallowed (no menu popping over the confirm dialog). A
+  // non-host hold does nothing special — their click still opens the menu.
+  container.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest('.friend-add, .friend-chip, .friend-slot, button, a')) return;
+    const s = e.target.closest('.seat[data-uid], .tt-seat[data-uid]');
+    if (!s || !s.dataset.uid) return;
+    clearTimeout(ctxTimer);
+    ctxTimer = setTimeout(() => {
+      if (lastRoomData && lastRoomData.host && me && lastRoomData.host.user_id === me.id && s.dataset.uid !== me.id && s.dataset.ishost !== '1') {
+        ctxLongFired = true;
+        handleSeatSelect(s);
+        promptKickPlayer(s.dataset.uid, s.dataset.username);
+      }
+    }, 500);
+  });
+  container.addEventListener('mouseup', () => { clearTimeout(ctxTimer); });
+  container.addEventListener('mouseleave', () => { clearTimeout(ctxTimer); });
 }
 
 attachSeatModeration($('#room-players'));
@@ -8222,20 +8593,11 @@ async function renderPremiumPage() {
   $('#prem-activate-wrap').classList.toggle('hidden', d.premium);
   $('#prem-revoke-wrap').classList.toggle('hidden', !d.premium);
   $('#prem-confirm').classList.add('hidden');
-  // v63b: the theme showcase on the Premium page is Premium-only — free
-  // members see the UI Customization explanation (and the upgrade path) with
-  // no theme cards at all; Premium members see the (text-only) theme row here
-  // and customize in Settings (pointer in the status line above). The cards
-  // stay informational: nothing here picks, previews or unlocks a theme —
-  // real customization lives in Settings and the server stays the gate.
-  // v67: the theme LOGO images were removed from this page (the logos belong
-  // to the app chrome and Settings — the Premium page shows names only).
-  const premLogoCards = d.themes.map((t) =>
-    '<div class="prem-swatch">' +
-    '<span class="swatch-name">' + esc(t.name) + (t.premium ? ' <span class="prem-chip" title="Premium"><span class="prem-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#pe-sym"/></svg></span></span>' : '') + '</span>' +
-    '</div>').join('');
-  $('#prem-themes').innerHTML = d.premium ? premLogoCards : '';
-  $('#prem-themes').classList.toggle('hidden', !d.premium);
+  // v68 (item 2): the Premium page no longer lists individual internal theme
+  // names (Glitch / Glow / …) — those are developer-facing labels. The card
+  // above is now a single, friendly "UI Customization" summary; real theme
+  // picking/previewing lives in Settings → UI Customization and the server
+  // stays the entitlement gate. Nothing here is theme-specific anymore.
 }
 $('#prem-activate').addEventListener('click', () => {
   $('#prem-confirm').classList.remove('hidden');
@@ -8536,19 +8898,41 @@ function revealRender(d) {
   $('#rv-wait').classList.toggle('hidden', !(inReveal && iAmArtist && !roomOwnerLaunch));
   $('#rv-back').textContent = inReveal ? 'Back to room' : 'Close';
 }
-function revealOpen(d) {
+// v68 (item 13): PINNING — when the artist explicitly opens the reveal
+// ("View challenge reveal"), the overlay is pinned to that challenge+room.
+// A transient poll payload (e.g. a re-roll in flight) can no longer slam the
+// view shut; only the user's own close, a room change, a challenge change or
+// the battle genuinely moving on closes it. Auto-opens are NOT pinned.
+let revealPinnedFor = null;  // challenge id the user pinned (null = not pinned)
+let revealPinnedRoom = null; // room code the pin belongs to
+function revealOpen(d, pin) {
   if (!d || !d.battle || !d.battle.challenge) return;
   revealRender(d);
   revealShownFor = d.battle.challenge.id;
   revealDismissed = null;
+  if (pin) { revealPinnedFor = d.battle.challenge.id; revealPinnedRoom = d.code || currentRoomCode; }
   revealArmEntrance(d.battle.challenge.id);
   $('#reveal-view').classList.remove('hidden');
   $('#reveal-view').scrollTop = 0;
 }
-function revealClose() {
+function revealClose() { // USER-initiated (Back / Escape / backdrop)
   if ($('#reveal-view').classList.contains('hidden')) return;
   if (revealShownFor) revealDismissed = revealShownFor;
   revealShownFor = null;
+  revealPinnedFor = null; revealPinnedRoom = null; // an explicit close unpins
+  $('#reveal-view').classList.add('hidden');
+}
+// renderRoom-driven close (battle advanced / challenge gone). Deliberately
+// does NOT set revealDismissed — if the payload was transient and the
+// challenge returns, the reveal may auto-open again instead of staying shut.
+function revealAutoClose(d) {
+  if ($('#reveal-view').classList.contains('hidden')) { revealPinnedFor = null; revealPinnedRoom = null; return; }
+  const battle = d && d.battle;
+  const sameRoom = !!(revealPinnedRoom && d && d.code === revealPinnedRoom);
+  const stillRevealPhase = !!(battle && battle.status === 'challenge_locked');
+  if (revealPinnedFor && sameRoom && stillRevealPhase) return; // pinned → ride out the transient gap
+  revealShownFor = null;
+  revealPinnedFor = null; revealPinnedRoom = null;
   $('#reveal-view').classList.add('hidden');
 }
 // called from renderRoom whenever a challenge exists — opens ONCE per
@@ -8556,6 +8940,9 @@ function revealClose() {
 function revealSync(d) {
   if (!d || !d.battle || !d.battle.challenge) return;
   const ch = d.battle.challenge;
+  // v68 (item 13): the challenge CHANGED (re-roll / new round) — the old pin
+  // no longer applies; the fresh challenge follows the normal open rules.
+  if (revealPinnedFor && revealPinnedFor !== ch.id) { revealPinnedFor = null; revealPinnedRoom = null; }
   const isRevealVisible = !$('#reveal-view').classList.contains('hidden');
 
   // If the reveal overlay is already open, simply update its contents without closing or restarting animation
@@ -8576,13 +8963,9 @@ $('#rv-back').addEventListener('click', revealClose);
 $('#reveal-view').addEventListener('click', (e) => { if (e.target.id === 'reveal-view') revealClose(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#reveal-view').classList.contains('hidden')) revealClose(); });
 $('#rv-launch').addEventListener('click', () => $('#btn-launch').click());
-$('#rv-back').addEventListener('click', revealClose);
-$('#reveal-view').addEventListener('click', (e) => { if (e.target.id === 'reveal-view') revealClose(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#reveal-view').classList.contains('hidden')) revealClose(); });
-$('#rv-launch').addEventListener('click', () => $('#btn-launch').click());
 $('#rv-reroll').addEventListener('click', () => $('#btn-reroll').click());
 $('#challenge-box').addEventListener('click', (e) => {
-  if (e.target.closest('#btn-reveal-open') && lastRoomData && lastRoomData.battle && lastRoomData.battle.challenge) { revealDismissed = null; revealOpen(lastRoomData); }
+  if (e.target.closest('#btn-reveal-open') && lastRoomData && lastRoomData.battle && lastRoomData.battle.challenge) { revealDismissed = null; revealOpen(lastRoomData, true); } // v68 (item 13): a manual open PINS the reveal
 });
 
 // v54: Settings → UI Customization (Premium). Cards carry the real THEME
@@ -8596,7 +8979,10 @@ function pthLogoFor(key) { return (key && THEME_LOGOS[key]) ? THEME_LOGOS[key] :
 const pthTintCache = {};
 function pthTintedLogo(key, custom) {
   return new Promise((res) => {
-    if (!key || !THEME_LOGOS[key] || !custom || !custom.c1) { res(null); return; }
+    // v68 (item 6): the GLITCH wordmark is canonical artwork and is NEVER
+    // tinted — one guard here protects every caller (app chrome, Settings
+    // swatches, live preview). Callers receiving null keep the pristine file.
+    if (!key || key === 'glitch' || !THEME_LOGOS[key] || !custom || !custom.c1) { res(null); return; }
     const sig = key + '|' + custom.c1 + '|' + custom.c2 + '|' + (custom.dir || 135);
     if (pthTintCache[sig] !== undefined) { res(pthTintCache[sig]); return; }
     const im = new Image();
@@ -8637,6 +9023,12 @@ async function renderSettingsThemes() {
     (active ? '<span class="swatch-hint" style="color:var(--pink)">✓ active</span>' : '') +
     (locked ? '<span class="swatch-lock">🔒</span>' : '') + '</div>';
   mePremium = !!d.premium; // v61: the server answer is the entitlement truth for this view
+  // v68 (item 3): HYDRATE the live theme state from the server every time the
+  // customization area renders. Without this, a Profile round-trip can leave
+  // activeThemeKey/activeThemeCustom stale (or null), which silently disables
+  // the live-preview + Apply gates and lets the wheels repaint over unsaved
+  // edits. applyPremiumTheme is idempotent, so this is safe on every render.
+  applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
   $('#btn-premium-mini').classList.toggle('hidden', mePremium); // header ⭐ follows the same truth
   // v61: FREE plan = a simplified Settings page — Appearance (Light/Dark),
   // Animations (On/Off) and ONE "Upgrade to Premium" button. The whole
@@ -8689,6 +9081,36 @@ $('#settings-theme-grid').addEventListener('click', async (e) => {
 });
 // live preview: wheel/dial changes recolor the app + card logo immediately;
 // Apply persists to the account (the server stays the source of truth).
+// v68 (item 3): edits ALSO auto-persist (debounced) so a Profile round-trip,
+// a view change or a page reload never loses the artist's colours — the
+// account is updated ~600 ms after the last adjustment, silently (no toast,
+// no input repaint), and the explicit Apply button stays for a firm commit.
+let pthAutosaveT = null;
+function pthCurrentCustom() {
+  const c1 = $('#pth-c1'), c2 = $('#pth-c2'), dr = $('#pth-dir');
+  if (!c1 || !c2 || !dr) return null;
+  return { c1: c1.value, c2: c2.value, dir: Number(dr.value) };
+}
+function pthPersist(custom) {
+  if (!activeThemeKey || !mePremium || !custom) return Promise.resolve(null);
+  return api('/api/premium/theme', { theme: activeThemeKey, custom }, 'PUT').then((r) => {
+    // silently adopt the server-normalised custom so signatures stay in sync
+    activeThemeCustom = (r && r.ui_custom) || custom;
+    try { localStorage.setItem('aa-ptheme', JSON.stringify({ key: activeThemeKey, custom: activeThemeCustom })); } catch (_) {}
+    return r;
+  }).catch(() => null); // transient — the explicit Apply still works
+}
+function pthScheduleAutosave() {
+  if (!activeThemeKey || !mePremium) return;
+  if (pthAutosaveT) clearTimeout(pthAutosaveT);
+  pthAutosaveT = setTimeout(() => { pthAutosaveT = null; pthPersist(pthCurrentCustom()); }, 600);
+}
+function pthFlushAutosave() { // commit a pending edit NOW (leaving the view / unloading)
+  if (!pthAutosaveT) return;
+  clearTimeout(pthAutosaveT); pthAutosaveT = null;
+  pthPersist(pthCurrentCustom());
+}
+function pthCancelAutosave() { if (pthAutosaveT) { clearTimeout(pthAutosaveT); pthAutosaveT = null; } }
 function pthLivePreview() {
   if (!activeThemeKey || !mePremium) return; // v61: gated
   const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };
@@ -8697,6 +9119,7 @@ function pthLivePreview() {
     const el = document.querySelector('[data-swatch-logo="' + activeThemeKey + '"]');
     if (el && url) el.src = url;
   });
+  pthScheduleAutosave(); // v68 (item 3): the edit persists by itself
 }
 // ---- the colour wheel: hue ring + saturation/value square + hex ----------
 const pthWheel = (() => {
@@ -8816,6 +9239,7 @@ $('#pth-dir').addEventListener('input', () => { pthDirPaint(); pthLivePreview();
 $('#pth-save').addEventListener('click', async () => {
   if (!mePremium) { openUpsell('Manual colours are Premium', 'Upgrade to Art Arena Premium to customise your theme colours.'); return; } // v61
   if (!activeThemeKey) return;
+  pthCancelAutosave(); // v68: the explicit save supersedes any pending auto-save
   const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };
   try {
     const r = await api('/api/premium/theme', { theme: activeThemeKey, custom }, 'PUT');
@@ -8831,6 +9255,7 @@ $('#pth-save').addEventListener('click', async () => {
 $('#pth-reset').addEventListener('click', async () => {
   if (!mePremium) { openUpsell('Manual colours are Premium', 'Upgrade to Art Arena Premium to customise your theme colours.'); return; }
   if (!activeThemeKey) return;
+  pthCancelAutosave(); // v68
   try {
     const r = await api('/api/premium/theme', { theme: activeThemeKey, custom: null }, 'PUT');
     applyPremiumTheme(r.ui_theme, r.ui_custom || null);
