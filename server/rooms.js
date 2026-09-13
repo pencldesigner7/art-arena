@@ -1690,40 +1690,142 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
 // can only begin after GO!, as ever — server-authoritative).
 // ---------------------------------------------------------------------------
 router.post('/:code/launch', ah(async (req, res) => {
-  const room = await roomByCode(req.params.code);
-  if (!room) throw new HttpError(404, 'Room not found.');
-  requireHost(room, req.user.id);
-  const battle = await latestBattleRow(room.id);
-  if (!battle || battle.status !== 'challenge_locked')
-    throw new HttpError(409, 'There is no revealed challenge to launch.');
-  const { rows } = await pool.query(
-    `UPDATE battles SET status = 'countdown', countdown_ends_at = now() + interval '3 seconds'
-      WHERE id = $1 AND status = 'challenge_locked' RETURNING countdown_ends_at`,
-    [battle.id]);
-  if (!rows[0]) throw new HttpError(409, 'The battle is already launching.');
-  rt.emitRoom(room.code, { action: 'countdown', countdown_ends_at: rows[0].countdown_ends_at });
-  res.json(await roomPayload(req.params.code, req.user.id));
+  const code = String(req.params.code).trim();
+  const client = await pool.connect();
+  let countdownEnds = null;
+  try {
+    await client.query('BEGIN');
+    const { rows: roomRows } = await client.query(
+      'SELECT * FROM battle_rooms WHERE code = $1 AND deleted_at IS NULL FOR UPDATE', [code]);
+    const room = roomRows[0];
+    if (!room) throw new HttpError(404, 'Room not found.');
+    requireHost(room, req.user.id);
+    const { rows: bRows } = await client.query(
+      `SELECT id, status FROM battles WHERE room_id = $1 ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
+      [room.id]);
+    const battle = bRows[0];
+    if (!battle || battle.status !== 'challenge_locked')
+      throw new HttpError(409, 'There is no revealed challenge to launch.');
+    // v69 (item 7): AUTHORITATIVE membership re-validation at launch time —
+    // every artist registered in this battle must still hold a live seat
+    // right now. A disabled Start button in the client is a courtesy; THIS
+    // is the enforcement (the kick path also cancels pre-launch battles, so
+    // reaching here with a gone member means something raced — refuse it).
+    const { rows: gone } = await client.query(
+      `SELECT u.username FROM battle_participants bp JOIN users u ON u.id = bp.user_id
+        WHERE bp.battle_id = $1
+          AND NOT EXISTS (SELECT 1 FROM room_participants rp
+                           WHERE rp.room_id = $2 AND rp.user_id = bp.user_id
+                             AND rp.state IN ('waiting','ready'))`,
+      [battle.id, room.id]);
+    if (gone.length)
+      throw new HttpError(409, '@' + gone[0].username + ' is no longer in this room — the battle cannot launch.');
+    const { rows } = await client.query(
+      `UPDATE battles SET status = 'countdown', countdown_ends_at = now() + interval '3 seconds'
+        WHERE id = $1 AND status = 'challenge_locked' RETURNING countdown_ends_at`,
+      [battle.id]);
+    if (!rows[0]) throw new HttpError(409, 'The battle is already launching.');
+    countdownEnds = rows[0].countdown_ends_at;
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+  rt.emitRoom(code, { action: 'countdown', countdown_ends_at: countdownEnds });
+  res.json(await roomPayload(code, req.user.id));
 }));
 
+// v69 (item 7): battle phase sets for membership changes. A PRE-LAUNCH battle
+// (created, revealed, even counting down but not yet live) is invalidated when
+// it loses a member — a battle must never reference someone who is no longer
+// in the room. Once the match is LIVE, members cannot be removed until it
+// finishes (that was how a kicked artist stayed "logically present" and a
+// host could launch a battle nobody was actually seated for).
+const PRE_LAUNCH_BATTLE = ['waiting', 'challenge_locked', 'countdown'];
 router.post('/:code/kick', ah(async (req, res) => {
-  const room = await roomByCode(req.params.code);
-  if (!room) throw new HttpError(404, 'Room not found.');
-  requireHost(room, req.user.id);
+  const room0 = await roomByCode(req.params.code);
+  if (!room0) throw new HttpError(404, 'Room not found.');
+  requireHost(room0, req.user.id);
   const target = String((req.body || {}).user_id || '');
   if (!target) throw new HttpError(400, 'A user_id is required.');
   if (target === req.user.id) throw new HttpError(400, 'You cannot kick yourself.');
-  if (target === room.host_id) throw new HttpError(403, 'The room owner cannot be kicked.');
-  const { rows } = await pool.query(
-    `UPDATE room_participants SET state = 'left', left_at = now()
-      WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')
-      RETURNING user_id`,
-    [room.id, target]
-  );
-  if (!rows[0]) throw new HttpError(409, 'That artist is not in this room.');
+  if (target === room0.host_id) throw new HttpError(403, 'The room owner cannot be kicked.');
+  const code = String(req.params.code).trim();
+  const client = await pool.connect();
+  let battleCancelled = false, roomEnded = false;
+  try {
+    await client.query('BEGIN');
+    const { rows: roomRows } = await client.query(
+      'SELECT * FROM battle_rooms WHERE code = $1 AND deleted_at IS NULL FOR UPDATE', [code]);
+    const room = roomRows[0];
+    if (!room) throw new HttpError(404, 'Room not found.');
+    const { rows: bRows } = await client.query(
+      `SELECT id, status FROM battles WHERE room_id = $1 ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
+      [room.id]);
+    const battle = bRows[0] || null;
+    if (battle && !TERMINAL_BATTLE.includes(battle.status) && !PRE_LAUNCH_BATTLE.includes(battle.status))
+      throw new HttpError(409, 'A battle is in progress — players cannot be removed until it finishes.');
+    const { rows } = await client.query(
+      `UPDATE room_participants SET state = 'left', left_at = now()
+        WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')
+        RETURNING user_id`,
+      [room.id, target]
+    );
+    if (!rows[0]) throw new HttpError(409, 'That artist is not in this room.');
+    if (battle && PRE_LAUNCH_BATTLE.includes(battle.status)) {
+      // The pending battle just lost a member — cancel it, reopen the lobby
+      // and expire any pending rematch request so nothing can resurrect the
+      // stale membership. The host starts a FRESH battle with the CURRENT
+      // members (the /start core validates counts from the DB).
+      await client.query(`UPDATE battles SET status = 'cancelled' WHERE id = $1`, [battle.id]);
+      await client.query(
+        `UPDATE battle_rooms SET status = 'lobby', ended_at = NULL, starts_at = NULL WHERE id = $1`,
+        [room.id]);
+      await client.query(
+        `UPDATE rematch_requests SET status = 'expired', responded_at = now()
+          WHERE room_id = $1 AND status = 'pending'`, [room.id]);
+      battleCancelled = true;
+    }
+    // v69: a tournament bracket treats a kick like a lobby leave — the
+    // removed artist's path forfeits and the sweep auto-advances (which can
+    // crown the champion and end the room).
+    if (room.battle_mode === 'tournament' && room.bracket) {
+      const bracketApi = require('./bracket');
+      const v = bracketApi.onLeave(room.bracket, target);
+      if (v.state === 'champion') {
+        room.bracket.champion = v.id;
+        await client.query(
+          `UPDATE battle_rooms SET bracket = $2::jsonb, status = 'ended', ended_at = now() WHERE id = $1`,
+          [room.id, JSON.stringify(room.bracket)]
+        );
+        await client.query(
+          `UPDATE room_participants SET state = 'left', left_at = now()
+            WHERE room_id = $1 AND state IN ('waiting','ready') AND user_id <> $2`,
+          [room.id, target]
+        );
+        roomEnded = true;
+      } else {
+        await client.query(
+          `UPDATE battle_rooms SET bracket = $2::jsonb WHERE id = $1`,
+          [room.id, JSON.stringify(room.bracket)]
+        );
+      }
+    }
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
   const kicked = (await pool.query('SELECT username, display_name FROM users WHERE id = $1', [target])).rows[0];
-  rt.emitRoom(room.code, { action: 'kicked', user_id: target, username: kicked.username, display_name: kicked.display_name, by: req.user.username });
-  rt.sendToUser(target, { type: 'room.kicked', code: room.code, by: req.user.username });
-  res.json(await roomPayload(req.params.code, req.user.id));
+  rt.emitRoom(code, { action: 'kicked', user_id: target, username: kicked.username, display_name: kicked.display_name, by: req.user.username });
+  if (battleCancelled) rt.emitRoom(code, { action: 'battle_cancelled', reason: 'player_removed' });
+  if (roomEnded) rt.emitRoom(code, { action: 'closed', by: req.user.username });
+  rt.sendToUser(target, { type: 'room.kicked', code, by: req.user.username });
+  res.json(await roomPayload(code, req.user.id));
 }));
 
 // ---------------------------------------------------------------------------

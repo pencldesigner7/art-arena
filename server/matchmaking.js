@@ -488,14 +488,44 @@ router.get('/status', ah(async (req, res) => {
       `SELECT status FROM battle_rooms WHERE code = $1`, [match.room_code]);
     if (!rows[0] || rows[0].status === 'ended') { recent.delete(req.user.id); match = null; }
   }
+  // v69 (item 1): the searcher's OWN pending team invites — the server truth
+  // the [+] slots restore from after a refresh (first invite → slot 1, second
+  // → slot 2, in send order). Only unhandled invites count; declined/expired/
+  // accepted ones are already reflected in the room/match state.
+  let pendingTeamInvites = [];
+  // v69 (item 1): the queued mode travels with the status so a client that
+  // lost its local search state (refresh, nav round-trip) can ADOPT the live
+  // queue row instead of fighting it with a doomed POST /enter.
+  let qMode = null;
+  if (q) {
+    const { rows: mrow } = await pool.query(
+      `SELECT prefs->>'battle_mode' AS mode FROM matchmaking_queue WHERE id = $1`, [q.id]);
+    qMode = (mrow[0] && mrow[0].mode) || '1v1';
+  }
+  if (q) {
+    const { rows: inv } = await pool.query(
+      `SELECT n.id, n.user_id AS to_user_id, u.username, u.display_name
+         FROM notifications n JOIN users u ON u.id = n.user_id
+        WHERE n.type = 'mm_team_invite' AND n.payload->>'handled' IS NULL
+          AND n.payload->>'from_user_id' = $1
+          AND (SELECT prefs->>'battle_mode' FROM matchmaking_queue mq
+                WHERE mq.id = $2) = '3v3'
+        ORDER BY n.created_at`,
+      [req.user.id, q.id]);
+    pendingTeamInvites = inv.map((r) => ({
+      id: r.id, to_user_id: r.to_user_id, username: r.username, display_name: r.display_name,
+    }));
+  }
   res.json({
     in_queue: !!q,
+    mode: qMode, // v69 (item 1)
     queued_at: q ? q.queued_at : null,
     deadline_at: q
       ? new Date(new Date(q.queued_at).getTime() + MM_TIMEOUT_S * 1000).toISOString()
       : null, // v42: the client derives its countdown from this
     position: q ? await queuePosition(req.user.id) : 0,
     match,
+    pending_team_invites: pendingTeamInvites, // v69 (item 1)
   });
 }));
 
@@ -630,6 +660,10 @@ router.post('/team-invite', ah(async (req, res) => {
 
 router.post('/team-invite/:id/accept', ah(async (req, res) => {
   const u = req.user;
+  // v69 (production safety): a malformed invite id must 404, never reach the
+  // uuid cast as garbage (that surfaced as a logged 500).
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(req.params.id || '')))
+    throw new HttpError(404, 'Invitation not found.');
   // Claim the invitation atomically — a second accept (or an accept after
   // decline/expiry) finds it already handled and fails honestly.
   const { rows } = await pool.query(
@@ -647,7 +681,18 @@ router.post('/team-invite/:id/accept', ah(async (req, res) => {
   let code = null, createdNew = false, seatTaken = null;
   try {
     await client.query('BEGIN');
-    const inviterRoom = await activeRoomOf(inviterId, client);
+    // v69 (item 1): the FULL room row — activeRoomOf() only returns
+    // {code,status}, which silently killed the "inviter already sits in a 3v3
+    // lobby → seat me beside them" branch (battle_mode was always undefined
+    // and every second accept 409'd with "that search has ended"). Pending
+    // team invites must keep seating real teammates into the team room.
+    const { rows: invRoomRows } = await client.query(
+      `SELECT r.id, r.code, r.status, r.battle_mode FROM battle_rooms r
+        WHERE r.deleted_at IS NULL AND r.status IN ('lobby','starting','in_battle')
+          AND r.id IN (SELECT room_id FROM room_participants
+                        WHERE user_id = $1 AND state IN ('waiting','ready'))
+        ORDER BY r.created_at DESC LIMIT 1`, [inviterId]);
+    const inviterRoom = invRoomRows[0] || null;
     if (inviterRoom && inviterRoom.battle_mode === '3v3' && inviterRoom.status === 'lobby') {
       // The inviter already sits in a 3v3 lobby room (a previous accept or a
       // queue pairing created it) — seat me on THEIR side in the first free slot.
@@ -745,6 +790,10 @@ router.post('/team-invite/:id/accept', ah(async (req, res) => {
 
 router.post('/team-invite/:id/decline', ah(async (req, res) => {
   const u = req.user;
+  // v69 (production safety): a malformed invite id must 404, never reach the
+  // uuid cast as garbage (that surfaced as a logged 500).
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(req.params.id || '')))
+    throw new HttpError(404, 'Invitation not found.');
   const { rows } = await pool.query(
     `UPDATE notifications SET payload = payload || '{"handled":"declined"}'::jsonb
       WHERE id = $1 AND user_id = $2 AND type = 'mm_team_invite' AND payload->>'handled' IS NULL
@@ -886,6 +935,18 @@ const deadlineSweep = setInterval(() => {
   ).then(({ rows }) => {
     for (const r of rows) {
       try { rt.sendToUser(r.user_id, { type: 'matchmaking', action: 'timeout' }); } catch (_) {}
+    }
+    // v69 (item 1): a timed-out search cleans up its pending team invites —
+    // same handled-marking the /cancel path uses, so an Accept button can
+    // never outlive the search it belonged to (it would 409 anyway; now the
+    // notification honestly shows the expired outcome).
+    if (rows.length) {
+      pool.query(
+        `UPDATE notifications SET payload = payload || '{"handled":"expired"}'::jsonb
+          WHERE type = 'mm_team_invite' AND payload->>'handled' IS NULL
+            AND (payload->>'from_user_id')::uuid = ANY($1::uuid[])`,
+        [rows.map((r) => r.user_id)]
+      ).catch(() => {});
     }
   }).catch(() => {});
 }, DEADLINE_SWEEP_MS);
