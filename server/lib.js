@@ -41,9 +41,12 @@ const pool = new Pool(
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
 
 class HttpError extends Error {
-  constructor(status, message) {
+  constructor(status, message, data) {
     super(message);
     this.status = status;
+    // v71: optional machine-readable extras (e.g. { code:'members_not_ready' })
+    // — the error middleware nests them under `data` for the client.
+    if (data) this.data = data;
   }
 }
 

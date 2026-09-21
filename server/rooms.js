@@ -366,6 +366,7 @@ async function roomPayload(code, me) {
     battle_mode: room.battle_mode || '1v1',          // v35
     bracket: (room.battle_mode === 'tournament') ? (room.bracket || null) : null, // v63c
     auto_start: !!room.auto_start,                   // v35 (matchmaking rooms)
+    origin: room.origin || 'created',                // v71 (item 8): 'created' | 'matchmaking'
     time_limit_seconds: room.time_limit_seconds,
     battle_type: room.result_method,
     spectator_allowed: room.spectator_allowed,
@@ -434,6 +435,17 @@ function requireHost(room, me) {
   if (room.host_id !== me) throw new HttpError(403, 'Only the host can do that.');
 }
 
+// v71 (items 9/14/17): room ADMINISTRATION belongs to the owner of a
+// USER-CREATED room only. Matchmaking-GENERATED rooms have a host purely
+// for gameplay (start / launch / re-roll); they expose no user-owned admin
+// surface (kick, close, delete, settings, ownership transfer) — to ANYONE.
+function requireRoomAdmin(room, me) {
+  requireHost(room, me);
+  if ((room.origin || 'created') === 'matchmaking')
+    throw new HttpError(403, 'Matchmaking rooms have no room administration.',
+      { code: 'mm_room_no_admin' });
+}
+
 // ---------------------------------------------------------------------------
 // The START CORE (v35) — shared by the host's /start AND matchmaking
 // auto-start. Enforces the flow the product promises, in one place:
@@ -457,6 +469,12 @@ async function startBattleInTx(client, room, players, actorId, opts) {
     // applies only to the FIRST start, when the roster is drawn.
     if (!room.bracket && players.length < room.max_players)
       throw new HttpError(409, `Waiting for all players to join (${players.length}/${room.max_players}).`);
+  } else if (mode === '3v3') {
+    // v71 (item 12): a 3v3 battle needs EXACTLY six artists — never two,
+    // never five. Server truth; the lobby shows the same n/6 count.
+    if (players.length !== 6)
+      throw new HttpError(409, `A 3v3 battle needs exactly 6 players (${players.length}/6 connected).`,
+        { code: '3v3_not_full', connected: players.length });
   } else if (players.length < room.max_players) {
     throw new HttpError(409, `Waiting for all players to join (${players.length}/${room.max_players}).`);
   }
@@ -470,9 +488,11 @@ async function startBattleInTx(client, room, players, actorId, opts) {
   // its winner and returned the room to lobby). Draws keep the same pairing
   // open for a replay.
   let seated;
+  let tourneyPairGate = false; // v71: later rounds only gate the seated pair
   if (mode === 'tournament') {
     const bracketApi = require('./bracket');
     let bracket = room.bracket || null;
+    tourneyPairGate = !!bracket; // an existing bracket = a later round
     if (!bracket) {
       bracket = bracketApi.seedBracket(players.map((p) => p.user_id));
       // v63d: the rooms layer annotates the tree with display names — the
@@ -507,6 +527,25 @@ async function startBattleInTx(client, room, players, actorId, opts) {
     // The current battle engine is one-on-one: the two seated artists
     // battle; the room's mode + capacity stay the creator's truth.
     seated = players.slice(0, 2);
+  }
+  // v71 (item 3): PRESENT ≠ READY. The launch only goes through when every
+  // artist who will actually fight has explicitly pressed Ready. Someone
+  // who navigated home while seated is still `waiting` and honestly blocks
+  // the start — 409 with a machine-readable code, the lobby re-syncs.
+  // Tournaments only gate the pair the bracket just seated (the rest of the
+  // roster is spectating between rounds). auto_start rooms are EXEMPT:
+  // queueing for matchmaking IS the consent, and their battle is minted
+  // from the canvas-save path, not a Ready button.
+  if (!room.auto_start) {
+    // First tournament draw: the WHOLE roster commits (Ready) before the
+    // bracket is seeded; later rounds: only the two artists the bracket
+    // just seated. 1v1/3v3: seated === every active participant anyway.
+    const needReady = (mode === 'tournament' && tourneyPairGate) ? seated : players;
+    const notReady = needReady.filter((p) => p.state !== 'ready');
+    if (notReady.length)
+      throw new HttpError(409,
+        'Waiting for every player to press Ready (' + notReady.map((p) => '@' + p.username).join(', ') + ').',
+        { code: 'members_not_ready', missing: notReady.map((p) => p.user_id) });
   }
   // v64: a 3v3 room runs ONE battle across all six artists (format 'multi',
   // lanes derived from seats at judging time); 1v1 and tournament matches
@@ -1348,7 +1387,7 @@ router.post('/:code/leave-spectating', ah(async (req, res) => {
 router.patch('/:code', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
-  requireHost(room, req.user.id);
+  requireRoomAdmin(room, req.user.id); // v71 (item 9): no admin surface on matchmaking rooms
   // v51: Edit Room also works after the battle (the owner shaping the
   // REMATCH) — settings apply to the next battle the room mints. Only an
   // in-flight battle locks settings.
@@ -1570,7 +1609,7 @@ router.post('/:code/join-requests/:requesterId/decline', ah(async (req, res) => 
 router.post('/:code/close', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
-  requireHost(room, req.user.id);
+  requireRoomAdmin(room, req.user.id); // v71 (item 9): no admin surface on matchmaking rooms
   // v51: Close Room works in the lobby AND after the battle (the owner's
   // post-battle exit). Only an in-flight battle blocks closing.
   if (room.status !== 'lobby' && room.status !== 'ended')
@@ -1747,7 +1786,7 @@ const PRE_LAUNCH_BATTLE = ['waiting', 'challenge_locked', 'countdown'];
 router.post('/:code/kick', ah(async (req, res) => {
   const room0 = await roomByCode(req.params.code);
   if (!room0) throw new HttpError(404, 'Room not found.');
-  requireHost(room0, req.user.id);
+  requireRoomAdmin(room0, req.user.id); // v71 (item 14): removal is owner-of-created-room only
   const target = String((req.body || {}).user_id || '');
   if (!target) throw new HttpError(400, 'A user_id is required.');
   if (target === req.user.id) throw new HttpError(400, 'You cannot kick yourself.');
@@ -1842,10 +1881,40 @@ router.post('/:code/kick', ah(async (req, res) => {
 // runs out (the v44 sweeper), after which the room is deletable.
 // ---------------------------------------------------------------------------
 const TERMINAL_BATTLE = ['complete', 'cancelled', 'forfeited', 'disqualified'];
+// ---------------------------------------------------------------------------
+// v71 (item 11): TRANSFER ROOM OWNERSHIP — the owner of a USER-CREATED room
+// hands it to another seated artist. Atomic (single guarded UPDATE), pushed
+// to every client (host_transferred), persisted (survives refresh/reconnect).
+// Hidden AND rejected for non-owners; rejected entirely for rooms that
+// MATCHMAKING generated (requireRoomAdmin covers both).
+// ---------------------------------------------------------------------------
+router.post('/:code/transfer-ownership', ah(async (req, res) => {
+  const room = await roomByCode(req.params.code);
+  if (!room) throw new HttpError(404, 'Room not found.');
+  requireRoomAdmin(room, req.user.id);
+  const target = String((req.body || {}).user_id || '');
+  if (!target) throw new HttpError(400, 'A user_id is required.');
+  if (target === room.host_id) throw new HttpError(400, 'You already own this room.');
+  const { rows } = await pool.query(
+    `UPDATE battle_rooms SET host_id = $2
+      WHERE id = $1 AND deleted_at IS NULL AND host_id = $3
+        AND EXISTS (SELECT 1 FROM room_participants rp
+                     WHERE rp.room_id = $1 AND rp.user_id = $2
+                       AND rp.state IN ('waiting','ready'))
+      RETURNING code,
+              (SELECT username FROM users WHERE id = $2) AS uname,
+              (SELECT display_name FROM users WHERE id = $2) AS dname`,
+    [room.id, target, req.user.id]
+  );
+  if (!rows[0]) throw new HttpError(409, 'Only an active seated player of this room can become its owner.');
+  rt.emitRoom(room.code, { action: 'host_transferred', username: rows[0].uname, display_name: rows[0].dname });
+  res.json(await roomPayload(room.code, req.user.id));
+}));
+
 router.delete('/:code', ah(async (req, res) => {
   const room = await roomByCode(req.params.code);
   if (!room) throw new HttpError(404, 'Room not found.');
-  requireHost(room, req.user.id); // 403 for everyone else — server-side rule
+  requireRoomAdmin(room, req.user.id); // v71 (item 9): 403 for non-owners AND for matchmaking rooms
   const { rows: battles } = await pool.query(
     `SELECT status FROM battles WHERE room_id = $1`, [room.id]
   );
@@ -2136,8 +2205,12 @@ router.post('/:code/rematch/accept', ah(async (req, res) => {
     // v44: re-seating can race with a fresh join elsewhere — the DB unique
     // index is the last word; surface it as a friendly 409, never a 500.
     try {
+      // v71 (item 3/5): a rematch is EXPLICIT consent from both artists —
+      // the requester asked, the acceptor accepted — so they re-seat as
+      // READY, which is what the start core now requires (presence alone
+      // never starts a battle).
       await client.query(
-        `UPDATE room_participants SET state = 'waiting', left_at = NULL, ready_at = NULL, joined_at = now()
+        `UPDATE room_participants SET state = 'ready', left_at = NULL, ready_at = now(), joined_at = now()
           WHERE room_id = $1 AND user_id IN ($2, $3)`,
         [room.id, request.from_user_id, req.user.id]
       );
@@ -2155,6 +2228,14 @@ router.post('/:code/rematch/accept', ah(async (req, res) => {
     await client.query(
       `UPDATE battle_rooms SET status = 'lobby', ended_at = NULL, starts_at = NULL WHERE id = $1`,
       [room.id]
+    );
+    // v71 (item 5): the REMATCH REQUESTER becomes the room owner once the
+    // acceptance establishes the new battle — persisted server-side, pushed
+    // to every client, and it survives refresh (no path restores the old
+    // owner). This runs INSIDE the acceptance transaction.
+    await client.query(
+      `UPDATE battle_rooms SET host_id = $2 WHERE id = $1`,
+      [room.id, request.from_user_id]
     );
     const players = await activeParticipants(room.id, client);
     summary = await startBattleInTx(client, { ...room, status: 'lobby' }, players, null, { reveal: true }); // v53: reveal → launch
@@ -2176,6 +2257,9 @@ router.post('/:code/rematch/accept', ah(async (req, res) => {
     client.release();
   }
   rt.emitRoom(room.code, { action: 'rematch_accepted', username: req.user.username, display_name: req.user.display_name });
+  // v71 (item 5): the requester is now the owner — tell every client with
+  // the same event the leave-flow uses, so feeds/toasts stay consistent.
+  if (requester) rt.emitRoom(room.code, { action: 'host_transferred', username: requester.username, display_name: requester.display_name });
   rt.emitRoom(room.code, { action: 'started', by: 'rematch' });
   if (summary) rt.emitRoom(room.code, { action: 'challenge_locked', by: 'randomizer', summary });
   await emitCountdownIfArmed(room.code);
@@ -2265,9 +2349,9 @@ async function createMatchRoom(userA, userB, client) {
         // Not editable: PATCH refuses auto_start rooms (see below).
         `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
                                    time_limit_seconds, result_method, battle_mode, auto_start,
-                                   randomizer_config)
+                                   origin, randomizer_config)
          VALUES ($1, $2, NULL, 'casual', 'public', 2, 3600, 'voting_community', '1v1', true,
-                 '{"categories":["character","environment","object","style"]}'::jsonb)
+                 'matchmaking', '{"categories":["character","environment","object","style"]}'::jsonb)
          RETURNING id`,
         [newRoomCode(), userA.id]
       );

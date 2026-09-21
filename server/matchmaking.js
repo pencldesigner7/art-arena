@@ -300,9 +300,9 @@ router.post('/enter', ah(async (req, res) => {
               const { rows } = await client.query(
                 `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
                                            time_limit_seconds, result_method, battle_mode, auto_start,
-                                           randomizer_config)
+                                           origin, randomizer_config)
                  VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
-                         '{"categories":["character","environment","object","style"]}'::jsonb)
+                         'matchmaking', '{"categories":["character","environment","object","style"]}'::jsonb)
                  RETURNING id`,
                 [code3v3, u.id]
               );
@@ -739,9 +739,9 @@ router.post('/team-invite/:id/accept', ah(async (req, res) => {
           const { rows: ins } = await client.query(
             `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
                                        time_limit_seconds, result_method, battle_mode, auto_start,
-                                       randomizer_config)
+                                       origin, randomizer_config)
              VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
-                     '{"categories":["character","environment","object","style"]}'::jsonb)
+                     'matchmaking', '{"categories":["character","environment","object","style"]}'::jsonb)
              RETURNING id`,
             [code, inviterId]
           );
