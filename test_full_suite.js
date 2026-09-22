@@ -226,6 +226,13 @@ async function run() {
   const join1v1 = await req('POST', `/api/rooms/${room1v1Code}/join`, { drawing_app_key: 'krita' }, freeToken);
   assert.strictEqual(join1v1.status, 200);
 
+  // v71 (item 3): PRESENT ≠ READY — both artists explicitly Ready before the
+  // host may start (the server now rejects a start with unready members).
+  const readyH1 = await req('POST', `/api/rooms/${room1v1Code}/ready`, {}, premToken);
+  assert.strictEqual(readyH1.status, 200);
+  const readyG1 = await req('POST', `/api/rooms/${room1v1Code}/ready`, {}, freeToken);
+  assert.strictEqual(readyG1.status, 200);
+
   // Host starts battle -> triggers authoritative challenge generation
   const start1v1 = await req('POST', `/api/rooms/${room1v1Code}/start`, {}, premToken);
   assert.strictEqual(start1v1.status, 200);
@@ -359,6 +366,14 @@ async function run() {
     });
     tUsers.push({ id: regT.data.user.id, token: logT.data.session_token, username: `tuser_${i}_${rand}` });
     await req('POST', `/api/rooms/${tourneyCode}/join`, { drawing_app_key: 'krita' }, logT.data.session_token);
+  }
+
+  // v71 (item 3): the first tournament draw needs the WHOLE roster Ready
+  const readyTH = await req('POST', `/api/rooms/${tourneyCode}/ready`, {}, premToken);
+  assert.strictEqual(readyTH.status, 200);
+  for (const t of tUsers) {
+    const rt2 = await req('POST', `/api/rooms/${tourneyCode}/ready`, {}, t.token);
+    assert.strictEqual(rt2.status, 200);
   }
 
   // Host starts the tournament -> seeds bracket and starts first match between 2 artists

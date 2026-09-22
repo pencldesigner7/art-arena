@@ -310,7 +310,7 @@ try {
   /* v68 (item 3): borders/outer glow follow the CUSTOM colour (--pink-rgb is
      remapped to --pth-c1-rgb under flame/glitch/glowing), not a hardcoded hue. */
   body[data-ptheme="flame"] .card, body[data-ptheme="flame"] .time-modal { border-color:rgba(var(--pink-rgb),.4); box-shadow:0 0 22px -12px rgba(var(--pink-rgb),.55); }
-  body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#FF5A00), var(--pth-c2,#FFC300)); background-size:180% 180%; animation:pth-flame-shift 5s ease-in-out infinite; color:#1d0e02; border:none; font-weight:800; }
+  body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#FF5A00), var(--pth-c2,#FFC300)); background-size:180% 180%; animation:pth-flame-shift 5s ease-in-out infinite; color:#1d0e02; border:none; font-weight:800; }
   @keyframes pth-flame-shift { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
   body[data-ptheme="cloud"] { --pink:#3E8EE0; --purple:#6FB6F2; --pink-rgb:62,142,224; --purple-rgb:111,182,242; --surface:#eaf4fd; --surface-hover:#e2eefa; --surface-2:#d7e9f9; --bg:#f2f8ff; --panel:#e6f1fb; --line:#c3dcf2; --text:#20344a; --muted:#5f7794; --header-bg:rgba(242,248,255,.9); --nav-bg:rgba(234,244,253,.97); --btn-line:#c3dcf2; --auth-card:rgba(242,248,255,.88); --auth-page-bg:#eaf4fd; }
   body[data-ptheme="cloud"] .card, body[data-ptheme="cloud"] .time-modal { border-radius:18px; border-color:#c3dcf2; box-shadow:0 10px 30px -18px rgba(62,142,224,.4); }
@@ -323,8 +323,8 @@ try {
   body[data-ptheme="graffiti"] { --pink:#F4F4F4; --purple:#C7C7C7; --pink-rgb:244,244,244; --purple-rgb:199,199,199; --surface:#181818; --surface-hover:#202020; --surface-2:#282828; --bg:#101010; --panel:#151515; --line:#3d3d3d; --muted:#b0b0b0; --btn-line:#3d3d3d; --auth-card:rgba(14,14,14,.9); --auth-page-bg:#0d0d0d; }
   body[data-ptheme="graffiti"] .card, body[data-ptheme="graffiti"] .time-modal { border-width:2px; border-color:#3d3d3d; border-radius:14px 5px 13px 6px; background-color:rgba(16,16,16,.9); }
   body[data-ptheme="graffiti"] .home-card:hover, body[data-ptheme="graffiti"] .card:hover { transform:rotate(-.35deg) translateY(-2px); }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { position:relative; border-radius:9px 6px 10px 6px; background:#F4F4F4; color:#0d0d0d; font-weight:800; border:none; box-shadow:3px 3px 0 rgba(0,0,0,.55); overflow:visible; }
-  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):hover { transform:rotate(-1deg) translateY(-1px); }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { position:relative; border-radius:9px 6px 10px 6px; background:#F4F4F4; color:#0d0d0d; font-weight:800; border:none; box-shadow:3px 3px 0 rgba(0,0,0,.55); overflow:visible; }
+  body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):hover { transform:rotate(-1deg) translateY(-1px); }
   /* v63b: no paint runs under buttons — the white drip decorations
      were removed at the user's request ("running lines on the graffiti UI").
      Buttons keep their flat white slab + hard offset shadow. */
@@ -342,8 +342,8 @@ try {
   body[data-ptheme="graffiti"] .badge.next, body[data-ptheme="graffiti"] .state-chip { transform:rotate(-1.4deg); }
   body[data-ptheme="graffiti"] .card::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.5; background:radial-gradient(circle at 88% 8%, rgba(var(--purple-rgb),.16) 0 2px, transparent 3px), radial-gradient(circle at 92% 14%, rgba(var(--pink-rgb),.2) 0 2.5px, transparent 4px), radial-gradient(circle at 85% 16%, rgba(var(--purple-rgb),.14) 0 1.6px, transparent 3px); }
   body[data-ptheme="glowing"] { --pink:var(--pth-c1,#6ED4BF); --purple:var(--pth-c2,#51A8D9); --pink-rgb:var(--pth-c1-rgb,110,212,191); --purple-rgb:var(--pth-c2-rgb,81,168,217); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
-  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.85), 0 0 26px -4px rgba(var(--purple-rgb),.6), 0 0 48px -12px rgba(var(--pink-rgb),.5); }
-  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):hover { box-shadow:0 0 12px 0 rgba(var(--pink-rgb),.95), 0 0 32px -4px rgba(var(--purple-rgb),.7), 0 0 64px -12px rgba(var(--pink-rgb),.55); }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.85), 0 0 26px -4px rgba(var(--purple-rgb),.6), 0 0 48px -12px rgba(var(--pink-rgb),.5); }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):hover { box-shadow:0 0 12px 0 rgba(var(--pink-rgb),.95), 0 0 32px -4px rgba(var(--purple-rgb),.7), 0 0 64px -12px rgba(var(--pink-rgb),.55); }
   /* v68 (item 7): NEON pass — the flat "solid border, no halo" treatment is
      replaced by a real electric-neon look: a bright accent border plus a
      layered bloom (tight glow → wide halo → faint inset tube-light). The
@@ -354,7 +354,7 @@ try {
   body[data-ptheme="magazine"] { --pink:#E6483E; --purple:#2B2B36; --pink-rgb:230,72,62; --purple-rgb:43,43,54; --surface:#f4f1ea; --surface-hover:#eeebe2; --surface-2:#e6e2d7; --bg:#e9e5dc; --panel:#f0ede5; --line:#c9c3b4; --text:#23211d; --muted:#6f6a5e; --header-bg:rgba(240,237,229,.92); --nav-bg:rgba(244,241,234,.97); --btn-line:#c9c3b4; --auth-card:rgba(244,241,234,.9); --auth-page-bg:#e9e5dc; }
   body[data-ptheme="magazine"] .card { border:none; border-left:5px solid #23211d; border-radius:2px; box-shadow:3px 4px 0 rgba(35,33,29,.22); transform:rotate(-.25deg); }
   body[data-ptheme="magazine"] .home-card:hover, body[data-ptheme="magazine"] .card:hover { transform:rotate(.3deg) translateY(-2px); }
-  body[data-ptheme="magazine"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { background:#23211d; color:#f4f1ea; border-radius:2px; box-shadow:2px 3px 0 #E6483E; }
+  body[data-ptheme="magazine"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { background:#23211d; color:#f4f1ea; border-radius:2px; box-shadow:2px 3px 0 #E6483E; }
 
   /* ---- v56: PIXELATED — the UI itself goes pixel. Sharp corners, chunky
        borders, hard offset shadows, arcade gradient buttons, stepped
@@ -362,9 +362,9 @@ try {
        (magenta #E337C4 + cyan #77D5DF) on the reference's dark navy. ---- */
   body[data-ptheme="pixel"] { --pink:#E337C4; --purple:#77D5DF; --pink-rgb:227,55,196; --purple-rgb:119,213,223; --surface:#16283A; --surface-hover:#1C3247; --surface-2:#243A52; --bg:#0E1E2C; --panel:#12243A; --line:#2E4A63; --muted:#9FB6C9; --btn-line:#2E4A63; --auth-card:rgba(14,30,44,.93); --auth-page-bg:#0E1E2C; }
   body[data-ptheme="pixel"] .card, body[data-ptheme="pixel"] .time-modal, body[data-ptheme="pixel"] .settings-appearance { border:3px solid #2E4A63; border-radius:0; box-shadow:4px 4px 0 rgba(0,0,0,.5); }
-  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn) { border-radius:0; border:3px solid #0A1420; background:linear-gradient(135deg, #E337C4, #77D5DF); color:#0A0A14; font-weight:800; box-shadow:4px 4px 0 #000; }
-  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 #000; }
-  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):active { transform:translate(2px,2px); box-shadow:1px 1px 0 #000; }
+  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { border-radius:0; border:3px solid #0A1420; background:linear-gradient(135deg, #E337C4, #77D5DF); color:#0A0A14; font-weight:800; box-shadow:4px 4px 0 #000; }
+  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 #000; }
+  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):active { transform:translate(2px,2px); box-shadow:1px 1px 0 #000; }
   body[data-ptheme="pixel"] h1, body[data-ptheme="pixel"] h2, body[data-ptheme="pixel"] .legal-title { text-shadow:2px 2px 0 rgba(0,0,0,.75); letter-spacing:.5px; }
   body[data-ptheme="pixel"] input, body[data-ptheme="pixel"] textarea, body[data-ptheme="pixel"] select { border-radius:0; }
   body[data-ptheme="pixel"] .badge, body[data-ptheme="pixel"] .state-chip { border-radius:0; }
@@ -519,9 +519,14 @@ try {
      renders exactly as shipped while the surface around it burns neon.
      Glitch stays 100% as-is (its art is canonical; this ring is theme-scoped
      to glowing only and touches no pixels either way). */
-  body[data-ptheme="glowing"] img[data-aa-logo] { border-radius:12px; box-shadow:0 0 8px rgba(var(--pink-rgb),.55), 0 0 22px rgba(var(--pink-rgb),.3), 0 0 44px rgba(var(--purple-rgb),.22); animation:pth-glow-breathe 3.8s ease-in-out infinite; }
-  body[data-ptheme="glowing"] .swatch-logo { box-shadow:0 0 8px rgba(110,212,191,.45), 0 0 20px rgba(110,212,191,.22); }
-  @keyframes pth-glow-breathe { 0%,100% { box-shadow:0 0 8px rgba(var(--pink-rgb),.5), 0 0 22px rgba(var(--pink-rgb),.28), 0 0 44px rgba(var(--purple-rgb),.2); } 50% { box-shadow:0 0 12px rgba(var(--pink-rgb),.75), 0 0 32px rgba(var(--pink-rgb),.45), 0 0 64px rgba(var(--purple-rgb),.32); } }
+  /* v71 (item 1): NO BORDER, NO FRAME, NO BOX. The v69 ring painted a
+     rectangular box-shadow directly on the wordmark <img> — a visible frame
+     around the logo on a transparent background. The halo now rides the
+     artwork's ALPHA SILHOUETTE via drop-shadow (its own composited layer
+     behind the image): the pixels render exactly as shipped — sharp, full
+     opacity, unblurred — while a subtle static neon glow breathes around
+     the letters themselves. Legible on every surface, glowing theme only. */
+  body[data-ptheme="glowing"] img[data-aa-logo] { filter:drop-shadow(0 0 10px rgba(var(--pink-rgb),.30)) drop-shadow(0 0 26px rgba(var(--purple-rgb),.16)); }
   /* v54 hierarchy: home destination cards are <button>s — under Glowing they
      must NOT wear the primary CTA gradient+glow. They stay calm surfaces with
      a faint halo; only primary actions burn bright. */
@@ -563,7 +568,13 @@ try {
   .pth-custom { margin-top:12px; border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--surface); }
   .pth-custom-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .pth-hidden-color { position:absolute; width:0; height:0; opacity:0; pointer-events:none; }
-  .pth-dot { width:38px; height:38px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0; background:var(--dot,#888); box-shadow:inset 0 0 0 3px rgba(0,0,0,.2); transition:transform .12s; }
+  /* v71 (item 7): the two circles are SOLID source colours — flat fills, no
+     inset bevel, no gradient. The UI gradient is BUILT from them; the ring
+     is just contrast so a dark colour stays visible on a dark surface. */
+  .pth-dot { width:38px; height:38px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0; background:var(--dot,#888); transition:transform .12s; }
+  /* v71 (item 7): always-visible live gradient preview — the direction
+     slider's effect rendered immediately, in every theme. */
+  .pth-preview { flex:0 0 auto; width:56px; height:38px; border-radius:9px; border:1px solid var(--line); background:linear-gradient(135deg, var(--pth-c1,#888), var(--pth-c2,#ccc)); }
   .pth-dot:hover { transform:scale(1.12); border-color:var(--pink); }
   .pth-arrow { color:var(--muted); font-size:16px; }
   .pth-dir-wrap { display:flex; align-items:center; gap:8px; flex:1 1 150px; min-width:150px; }
@@ -3428,7 +3439,7 @@ try {
          is open and no match is live; session states (PREPARING / LIVE /
          watch embed) keep rendering for everyone in every phase. -->
     <div id="golive-box">
-      <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="#FF0000" d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.54 12 3.54 12 3.54s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg> GO LIVE VIA YOUTUBE</button>
+      <button type="button" id="btn-go-live" class="secondary hidden" style="width:100%; margin-top:10px"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" style="margin-right:6px"><path fill="#FF0000" d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.54 12 3.54 12 3.54s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81z"/><path fill="#FFFFFF" d="M9.55 8.43v7.14L15.82 12 9.55 8.43z"/></svg> GO LIVE VIA YOUTUBE</button>
       <!-- v62: GO LIVE VIA TWITCH — the real Twitch flow, filled by
            renderTwitchRoomBox from the server-truth room payload (d.twitch). -->
       <div id="twitch-room-box" style="margin-top:10px"></div>
@@ -3610,6 +3621,7 @@ try {
           <span class="pth-arrow" id="pth-c-arrow">→</span>
           <button type="button" class="pth-dot" id="pth-c2-dot" title="Color 2"></button><input type="color" id="pth-c2" class="pth-hidden-color" tabindex="-1" aria-hidden="true">
           <span class="pth-dir-wrap"><input type="range" id="pth-dir" min="0" max="360" step="15"><span class="pth-dir-deg" id="pth-dir-deg">135°</span></span>
+          <span class="pth-preview" id="pth-preview" aria-hidden="true"></span>
           <button type="button" class="mini" id="pth-save">Apply</button>
         </div>
         <!-- v67: Reset Theme — clears the SAVED custom colours of the
@@ -3879,8 +3891,8 @@ try {
        entry) / prepare (connected: real broadcast form) / status (existing
        broadcast). Never fakes a connection or a broadcast. -->
   <div id="live-modal" class="time-modal-backdrop hidden">
-    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="glv-title" style="width:min(430px,100%)">
-      <h3 id="glv-title"><span class="live-dot"></span> GO LIVE VIA YOUTUBE</h3>
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="glv-modal-title" style="width:min(430px,100%)">
+      <h3 id="glv-modal-title">GO LIVE VIA YOUTUBE</h3>
       <div id="glv-body"></div>
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="glv-close">Close</button>
@@ -3894,8 +3906,8 @@ try {
        preparing until Twitch confirms the stream is online, then LIVE).
        Never fakes a connection or a live state. -->
   <div id="tw-modal" class="time-modal-backdrop hidden">
-    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="tw-title" style="width:min(430px,100%)">
-      <h3 id="tw-title"><span class="live-dot"></span> GO LIVE VIA TWITCH</h3>
+    <div class="time-modal" role="dialog" aria-modal="true" aria-labelledby="tw-modal-title" style="width:min(430px,100%)">
+      <h3 id="tw-modal-title">GO LIVE VIA TWITCH</h3>
       <div id="tw-body"></div>
       <div class="time-modal-actions">
         <button type="button" class="secondary" id="tw-close">Close</button>
@@ -3992,6 +4004,19 @@ const NAV_ICONS = {
 };
 // v29: back button throughout the app. Every non-home view has a parent;
 // the header's back chevron returns to it. Arena (home) has none.
+// v71 (item 6): REAL navigation history for the Back button. Every in-app
+// view change pushes; Back pops the current view and returns to the one
+// the user actually came from (Home / Profile / Matchmaking / Room /
+// Settings / Help …). No consecutive duplicates, capped, and a refresh
+// starts a fresh stack — then Back falls back to BACK_TARGETS, and
+// finally to Home. BACK_TARGETS below survives only as that fallback.
+const navStack = [];
+function navPush(name) {
+  if (navStack[navStack.length - 1] === name) return;
+  navStack.push(name);
+  if (navStack.length > 60) navStack.shift();
+}
+
 const BACK_TARGETS = {
   rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena', live: 'arena',
   account: 'arena', quickmatch: 'arena', findartist: 'arena', grandarena: 'arena',
@@ -4157,6 +4182,11 @@ function pthHexToRgb(h) {
 // renderSettingsThemes from the server theme list — the diff baseline that
 // decides whether Reset Theme is visible.
 let pthActiveDefaults = null;
+// v71 (item 18): monotonic live-edit counter. An async themes render that
+// started BEFORE a newer edit must never hydrate over it (the stale payload
+// would silently roll the live state back — that race hid Reset Theme after
+// a direction-only change and could revert wheel/slider edits mid-flight).
+let pthEditSeq = 0;
 function pthCustomIsModified() {
   if (!activeThemeKey || !pthActiveDefaults) return false;
   const cu = activeThemeCustom;
@@ -4232,7 +4262,7 @@ window.__pthGlitchAllowed = function () {
 // visible primary buttons; always readable, always clickable.
 window.addEventListener('aa-glitch-burst', () => {
   if (activeThemeKey !== 'glitch' || !animIsOn()) return;
-  const btns = Array.from(document.querySelectorAll('body[data-ptheme="glitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn)'))
+  const btns = Array.from(document.querySelectorAll('body[data-ptheme="glitch"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot)'))
     .filter((x) => x.offsetParent !== null);
   const n = Math.min(3, btns.length);
   for (let i = 0; i < n; i++) {
@@ -4722,6 +4752,7 @@ function show(name) {
   // v68 (item 3): leaving a view commits any pending UI-colour auto-save so a
   // Profile round-trip / navigation never drops the artist's latest edit.
   try { pthFlushAutosave(); } catch (_) {}
+  if (APP_VIEWS.includes(name) && name !== currentView) navPush(name); // v71 (item 6): real history
   currentView = name;
   VIEWS.forEach((v) => $('#view-' + v).classList.toggle('hidden', v !== name));
   const inApp = APP_VIEWS.includes(name);
@@ -5858,11 +5889,11 @@ function renderRoom(d) {
   // shown by a one-off classList.remove that the next renderRoom (2.5 s poll,
   // any WS room.event, even the PATCH response) immediately undid → "modal
   // appears then disappears". Now it is state (roomEditOpen), honoured here.
-  const roomOwnerPost = !!(d.host && me && d.host.user_id === me.id) && d.status === 'ended' && !d.auto_start;
+  const roomOwnerPost = !!(d.host && me && d.host.user_id === me.id) && d.status === 'ended' && !d.auto_start && !isMmRoom(d); // v71 (item 9): no post-battle edit surface on matchmaking rooms
   if (roomEditOpen && (roomEditOpen !== d.code || !roomOwnerPost)) roomEditOpen = null; // room changed / re-opened / not ours
   const editingPost = roomEditOpen === d.code;
   $('#settings-edit-done').classList.toggle('hidden', !editingPost);
-  if ((isHost && isInLobby && !d.auto_start && !isTourney) || editingPost) { // v63c: tournaments keep fixed settings
+  if ((isHost && isInLobby && !d.auto_start && !isTourney && !isMmRoom(d)) || editingPost) { // v63c: tournaments keep fixed settings · v71 (item 9): matchmaking rooms keep theirs too
     $('#settings-static').classList.add('hidden');
     $('#settings-edit').classList.remove('hidden');
     $('#setting-type').value = d.battle_type;
@@ -5955,16 +5986,19 @@ function renderRoom(d) {
       const rr = d.battle.reroll;
       const inReveal = d.battle.status === 'challenge_locked';
       const iAmArtist = d.players.some((x) => x.is_you);
+      // launch: HOST only, during the reveal
+      const roomOwnerLaunch = !!(d.host && me && d.host.user_id === me.id && d.players.some((x) => x.is_you));
+      // v71 (item 4): RE-ROLL is OWNER-ONLY — hidden for every non-owner
+      // (the backend already rejects them; the UI now agrees, and it
+      // re-evaluates on every render, so ownership changes update live).
       const rrBtn = $('#btn-reroll');
-      rrBtn.classList.toggle('hidden', !(inReveal && iAmArtist));
-      if (inReveal && iAmArtist) {
+      rrBtn.classList.toggle('hidden', !(inReveal && roomOwnerLaunch));
+      if (inReveal && roomOwnerLaunch) {
         rrBtn.classList.toggle('locked', !rr || !rr.allowed);
         rrBtn.innerHTML = (rr && rr.allowed)
           ? IC.dice + ' RE-ROLL'
           : IC.lock + ' RE-ROLL <span class="muted">· Premium</span>';
       }
-      // launch: HOST only, during the reveal
-      const roomOwnerLaunch = !!(d.host && me && d.host.user_id === me.id && d.players.some((x) => x.is_you));
       $('#btn-launch').classList.toggle('hidden', !(inReveal && roomOwnerLaunch));
       $('#launch-wait-note').classList.toggle('hidden', !(inReveal && iAmArtist && !roomOwnerLaunch));
     } else {
@@ -6192,21 +6226,25 @@ function renderRoom(d) {
   // READY (Phase 5): any seated player in the lobby can toggle ready; the
   // server broadcasts the state change to everyone in the room live.
   const amReady = !!(meInRoom && meInRoom.state === 'ready');
-  $('#btn-ready').classList.toggle('hidden', !(isPlayer && isInLobby && !isTourney)); // v63c: host starts each bracket match
+  // v71 (item 3): Ready is the launch gate now — tournaments included. The
+  // first draw needs the whole roster Ready; later rounds need the pair the
+  // bracket seated (the host still starts each match).
+  $('#btn-ready').classList.toggle('hidden', !(isPlayer && isInLobby));
   $('#btn-ready').classList.toggle('ready-on', amReady);
   $('#btn-ready').innerHTML = amReady ? IC.x + ' Cancel ready' : IC.check + ' Ready';
+  const mmRoom = isMmRoom(d); // v71 (item 9): matchmaking-generated rooms
   $('#btn-leave').classList.toggle('hidden', !(isPlayer && isInLobby && !isHost));
-  $('#btn-close').classList.toggle('hidden', !(isHost && isInLobby));
+  $('#btn-close').classList.toggle('hidden', !(isHost && isInLobby && !mmRoom));
   // v35 + v42: host, lobby OR ended — hard delete (Close room stays for the
   // soft end). Ended rooms can finally be removed, with the confirm modal.
-  $('#btn-delete').classList.toggle('hidden', !(isHost && (isInLobby || d.status === 'ended')));
+  $('#btn-delete').classList.toggle('hidden', !(isHost && (isInLobby || d.status === 'ended') && !mmRoom)); // v71 (item 9)
   // v35: honest hints — team-format status + the canvas gate (every artist
   // must pick a canvas before the Randomizer may run) + fill-the-room nudge.
   const notes = [];
   if (isTourney)
     notes.push(IC.sword + ' Tournament — single elimination, every match decided by the community vote' + (d.bracket ? '.' : '; the bracket is drawn at random when the first match starts.'));
   else if (d.battle_mode === '3v3')
-    notes.push(IC.sword + ' 3v3 Team Battle — six artists, two sides of three; after the draw the community votes on three lanes and the side that takes 2 of 3 lanes wins. Host: open a new room to run it back.');
+    notes.push(IC.sword + ' 3v3 Team Battle — ' + d.player_count + '/6 seats filled (exactly 6 artists start); two sides of three, and after the draw the community votes on three lanes — the side that takes 2 of 3 lanes wins. Host: open a new room to run it back.'); // v71 (item 12): live n/6 count
   else if (d.battle_mode && d.battle_mode !== '1v1')
     notes.push(IC.sword + ' ' + esc(MODE_LABELS[d.battle_mode] || d.battle_mode) + ' — team battles arrive soon; for now the battle runs as a 1v1 between the first two seated artists.');
   if (isInLobby && !isSpectator && d.player_count === d.max_players && d.player_count >= 2 &&
@@ -6340,7 +6378,6 @@ function myCanvasApp() {
   return (lastRoomData.players.find((p) => p.is_you) || {}).drawing_app_key || null;
 }
 $('#btn-start').addEventListener('click', () => {
-  window.__cmStartClick = { hasCode: !!currentRoomCode, code: currentRoomCode };
   if (!currentRoomCode) return;
   canvasModal.open('start', currentRoomCode, myCanvasApp());
 });
@@ -7469,7 +7506,8 @@ const mm = (() => {
     // v68: the status line matches the mode — a tournament search says so
     // explicitly: FINDING TOURNAMENT / Connecting… / timer.
     $('#mm-status-main').innerHTML = (searchMode === 'tournament' ? 'Finding Tournament' : 'Connecting') + '<span class="mm-dots"><span>.</span><span>.</span><span>.</span></span>';
-    $('#mm-status-sub').textContent = searchMode === '3v3' ? 'Searching for a 3v3 team battle...'
+    // v71 (item 12): honest 3v3 status — exactly six artists, no earlier.
+    $('#mm-status-sub').textContent = searchMode === '3v3' ? 'Searching for a 3v3 team battle — it opens when all 6 seats are filled'
       : searchMode === 'tournament' ? 'Connecting\u2026'
       : 'Art Arena is searching for an artist';
     $('#mm-status-sub').classList.remove('ok');
@@ -8023,8 +8061,13 @@ function closeDrawer() {
   setTimeout(() => { b.classList.add('hidden'); }, 260);
 }
 $('#btn-back').addEventListener('click', () => {
-  const t = BACK_TARGETS[currentView];
-  if (t) show(t);
+  // v71 (item 6): pop the current view, return to the REAL previous one.
+  // Exhausted/fresh history (e.g. right after a refresh) falls back to the
+  // static map, and finally to Home — never a loop, never a stale ref.
+  if (navStack[navStack.length - 1] === currentView) navStack.pop();
+  let t = navStack[navStack.length - 1];
+  if (!t || t === currentView) t = BACK_TARGETS[currentView] || 'arena';
+  show(t);
 });
 $('#btn-menu').addEventListener('click', openDrawer);
 $('#btn-drawer-close').addEventListener('click', closeDrawer);
@@ -8676,13 +8719,37 @@ let selectedSeatUid = null, selectedSeatUname = null;
 let ctxTimer = null, ctxLongFired = false;
 function closeRoomMenu() { const m = document.querySelector('.room-ctxmenu'); if (m) m.remove(); }
 
+// v71 (items 9/14): matchmaking-GENERATED rooms have no user room-admin
+// surface — the server rejects it too (this is display honesty, not the
+// permission itself). User-created rooms keep the owner's full controls.
+function isMmRoom(d) { return !!(d && (d.origin || 'created') === 'matchmaking'); }
+
 function promptKickPlayer(uid, uname) {
   if (!uid || !me || !lastRoomData) return;
   if (!lastRoomData.host || lastRoomData.host.user_id !== me.id) return;
+  if (isMmRoom(lastRoomData)) return; // v71: no removal in matchmaking rooms
   if (uid === me.id) return;
   $('#kc-title').textContent = 'Remove Player';
   $('#kc-text').textContent = 'Are you sure you want to remove @' + uname + ' from this room?';
   $('#kc-confirm').dataset.uid = uid;
+  $('#kc-confirm').dataset.act = 'kick';
+  $('#kc-confirm').innerHTML = 'Remove';
+  modalOpen('#kick-confirm-modal');
+}
+
+// v71 (item 11): TRANSFER ROOM OWNERSHIP — owner-only, user-created rooms
+// only, target must be a seated player. The server performs the atomic
+// transfer and broadcasts host_transferred to every client.
+function promptTransferOwnership(uid, uname) {
+  if (!uid || !me || !lastRoomData) return;
+  if (!lastRoomData.host || lastRoomData.host.user_id !== me.id) return;
+  if (isMmRoom(lastRoomData)) return;
+  if (uid === me.id) return;
+  $('#kc-title').textContent = 'Transfer Room Ownership';
+  $('#kc-text').textContent = 'Hand this room to @' + uname + '? They gain the full owner controls and you become a regular player.';
+  $('#kc-confirm').dataset.uid = uid;
+  $('#kc-confirm').dataset.act = 'transfer';
+  $('#kc-confirm').innerHTML = 'Transfer';
   modalOpen('#kick-confirm-modal');
 }
 
@@ -8693,7 +8760,10 @@ function roomMenuFor(seat) {
   const isHost = !!(lastRoomData.host && lastRoomData.host.user_id === me.id);
   const isSelf = (uid === me.id);
   const isTargetHost = seat.dataset.ishost === '1';
-  const canKick = isHost && !isSelf && !isTargetHost;
+  const canKick = isHost && !isSelf && !isTargetHost && !isMmRoom(lastRoomData); // v71 (item 14)
+  // v71 (item 11): the owner of a USER-CREATED room can hand it to any
+  // other seated player; matchmaking rooms have no ownership management.
+  const canTransfer = isHost && !isSelf && !isMmRoom(lastRoomData);
 
   const m = document.createElement('div');
   m.className = 'room-ctxmenu';
@@ -8701,7 +8771,8 @@ function roomMenuFor(seat) {
   m.style.top = Math.max(12, seat.getBoundingClientRect().top - 8) + 'px';
   m.innerHTML =
     '<button type="button" class="util-btn" data-act="profile"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c.5-3.6 3.7-5.6 7.5-5.6s7 2 7.5 5.6"/></svg> View Profile</button>' +
-    (canKick ? '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Remove Player</button>' : '');
+    (canKick ? '<button type="button" class="danger" data-act="kick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="m15 8 4 4-4 4"/><line x1="19" y1="12" x2="9" y2="12"/></svg> Remove Player</button>' : '') +
+    (canTransfer ? '<button type="button" class="util-btn" data-act="transfer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px"><path d="M4 8h11"/><path d="m12 5 3 3-3 3"/><path d="M20 16H9"/><path d="m12 13-3 3 3 3"/></svg> Transfer Room Ownership</button>' : '');
   m.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-act]');
     if (!b) return;
@@ -8709,6 +8780,8 @@ function roomMenuFor(seat) {
     if (b.dataset.act === 'profile') openProfile(uid);
     else if (b.dataset.act === 'kick') {
       promptKickPlayer(uid, uname);
+    } else if (b.dataset.act === 'transfer') {
+      promptTransferOwnership(uid, uname);
     }
   });
   document.body.appendChild(m);
@@ -8750,7 +8823,7 @@ function attachSeatModeration(container) {
     ctxLongFired = false;
     ctxTimer = setTimeout(() => {
       ctxLongFired = true;
-      if (lastRoomData && lastRoomData.host && me && lastRoomData.host.user_id === me.id && s.dataset.uid !== me.id && s.dataset.ishost !== '1') {
+      if (lastRoomData && lastRoomData.host && me && lastRoomData.host.user_id === me.id && s.dataset.uid !== me.id && s.dataset.ishost !== '1' && !isMmRoom(lastRoomData)) {
         promptKickPlayer(s.dataset.uid, s.dataset.username);
       } else {
         roomMenuFor(s);
@@ -8772,7 +8845,7 @@ function attachSeatModeration(container) {
     if (!s || !s.dataset.uid) return;
     clearTimeout(ctxTimer);
     ctxTimer = setTimeout(() => {
-      if (lastRoomData && lastRoomData.host && me && lastRoomData.host.user_id === me.id && s.dataset.uid !== me.id && s.dataset.ishost !== '1') {
+      if (lastRoomData && lastRoomData.host && me && lastRoomData.host.user_id === me.id && s.dataset.uid !== me.id && s.dataset.ishost !== '1' && !isMmRoom(lastRoomData)) {
         ctxLongFired = true;
         handleSeatSelect(s);
         promptKickPlayer(s.dataset.uid, s.dataset.username);
@@ -8793,6 +8866,7 @@ window.addEventListener('keydown', (e) => {
     if (tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target && e.target.isContentEditable)) return;
     if (currentView !== 'room' || !currentRoomCode || !lastRoomData) return;
     if (!lastRoomData.host || !me || lastRoomData.host.user_id !== me.id) return; // host only
+    if (isMmRoom(lastRoomData)) return; // v71 (item 14): no removal in matchmaking rooms
     if (!selectedSeatUid || selectedSeatUid === me.id) return; // not self or unselected
     const p = lastRoomData.players && lastRoomData.players.find((x) => x.user_id === selectedSeatUid);
     if (!p || p.is_host) return;
@@ -8804,13 +8878,23 @@ $('#kc-cancel').addEventListener('click', () => modalClose('#kick-confirm-modal'
 $('#kick-confirm-modal').addEventListener('click', (e) => { if (e.target.id === 'kick-confirm-modal') modalClose('#kick-confirm-modal'); });
 $('#kc-confirm').addEventListener('click', async () => {
   const uid = $('#kc-confirm').dataset.uid, code = currentRoomCode;
+  const act = $('#kc-confirm').dataset.act || 'kick';
   modalClose('#kick-confirm-modal');
   if (!uid || !code) return;
   try {
-    await api('/api/rooms/' + code + '/kick', { user_id: uid }, 'POST');
-    toast('Player removed from the room.');
+    if (act === 'transfer') {
+      // v71 (item 11): atomic server-side transfer; the host_transferred WS
+      // event re-renders every client, and the payload here re-renders us.
+      const d = await api('/api/rooms/' + code + '/transfer-ownership', { user_id: uid }, 'POST');
+      if (d && d.code) renderRoom(d);
+      toast('Room ownership transferred.');
+    } else {
+      await api('/api/rooms/' + code + '/kick', { user_id: uid }, 'POST');
+      toast('Player removed from the room.');
+    }
   } catch (err) {
     toast(err.message);
+    refreshRoom(); // v71: re-sync with server truth after a rejected action
   }
 });
 
@@ -9092,16 +9176,21 @@ const REVEAL_ORDER = ['character', 'environment', 'object', 'style', 'color', 'l
 const REVEAL_LABELS = { style: 'Art Style', color: 'Color Combination' };
 let revealShownFor = null;   // challenge id currently on screen
 let revealDismissed = null;  // challenge id the user closed (don't re-open on every poll)
-// v61: entrance-animation state. A challenge id animates its entrance ONCE
-// (first open after generation / re-roll). Reopening the same challenge
-// shows the finished state immediately. A new challenge id resets this.
-let revealAnimatedFor = null;
+// v71 (item 2): the entrance plays EVERY TIME the reveal view opens —
+// first open, re-open after Back, returning from another screen, or a
+// page refresh. The v61 one-shot `revealAnimatedFor` flag suppressed all
+// of those after the first play; it is gone. Internal re-renders
+// (revealSync while the view is visible) never re-arm this function, and
+// re-arming clears the in-flight timer and restarts the class from frame 0
+// (remove → reflow → add), so rapid navigation can never stack or
+// duplicate an animation. Challenge STATE is never touched — this is pure
+// CSS-class choreography on the overlay.
 let revealEnterTimer = null;
-function revealArmEntrance(challengeId) {
+function revealArmEntrance() {
   const v = $('#reveal-view');
   clearTimeout(revealEnterTimer);
-  if (revealAnimatedFor === challengeId) { v.classList.remove('rv-entering'); return; }
-  revealAnimatedFor = challengeId;
+  v.classList.remove('rv-entering');
+  void v.offsetWidth; // forced reflow — the entrance restarts cleanly
   v.classList.add('rv-entering');
   const n = document.querySelectorAll('#rv-grid .rv-card').length;
   const sw = document.querySelectorAll('#rv-grid .rv-sw').length;
@@ -9141,14 +9230,15 @@ function revealRender(d) {
       '<div class="rv-val">' + esc(el.value) + '</div></div>';
   }).join('');
   $('#rv-count').textContent = els.length + ' element' + (els.length === 1 ? '' : 's') + ' · one complete challenge';
-  // actions mirror the room card's (same server rules): host launches, artists re-roll (Premium)
+  // actions mirror the room card's (same server rules): the OWNER launches
+  // AND re-rolls (v71 item 4 — re-roll is owner-only everywhere, Premium).
   const inReveal = d.battle.status === 'challenge_locked';
   const iAmArtist = d.players.some((x) => x.is_you);
   const roomOwnerLaunch = !!(d.host && me && d.host.user_id === me.id && iAmArtist);
   const rr = d.battle.reroll;
   const rrBtn = $('#rv-reroll');
-  rrBtn.classList.toggle('hidden', !(inReveal && iAmArtist));
-  if (inReveal && iAmArtist) {
+  rrBtn.classList.toggle('hidden', !(inReveal && roomOwnerLaunch));
+  if (inReveal && roomOwnerLaunch) {
     rrBtn.classList.toggle('locked', !rr || !rr.allowed);
     rrBtn.innerHTML = (rr && rr.allowed) ? IC.dice + ' RE-ROLL' : IC.lock + ' RE-ROLL <span class="muted">· Premium</span>';
   }
@@ -9169,7 +9259,7 @@ function revealOpen(d, pin) {
   revealShownFor = d.battle.challenge.id;
   revealDismissed = null;
   if (pin) { revealPinnedFor = d.battle.challenge.id; revealPinnedRoom = d.code || currentRoomCode; }
-  revealArmEntrance(d.battle.challenge.id);
+  revealArmEntrance(); // v71: animate on every open
   $('#reveal-view').classList.remove('hidden');
   $('#reveal-view').scrollTop = 0;
 }
@@ -9263,6 +9353,7 @@ function pthTintedLogo(key, custom) {
   });
 }
 async function renderSettingsThemes() {
+  const seqAtFetch = pthEditSeq; // v71 (item 18): freshness anchor
   let d = null;
   try { d = await api('/api/premium/themes'); } catch (e) { return; }
   const grid = $('#settings-theme-grid'), customRow = $('#settings-theme-custom');
@@ -9288,7 +9379,10 @@ async function renderSettingsThemes() {
   // activeThemeKey/activeThemeCustom stale (or null), which silently disables
   // the live-preview + Apply gates and lets the wheels repaint over unsaved
   // edits. applyPremiumTheme is idempotent, so this is safe on every render.
-  applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
+  // v71 (item 18): …unless the artist edited WHILE this GET was in flight —
+  // then this payload is the stale one and the live state wins.
+  const pthFresh = pthEditSeq === seqAtFetch;
+  if (pthFresh) applyPremiumTheme(d.ui_theme || null, d.ui_custom || null);
   // v69 (item 10): ONE housing for both account states. FREE members see the
   // SAME UI Customization card with every preset LOCKED (🔒 cards open the
   // upsell) plus the honest Upgrade CTA under the grid — no Premium emblem,
@@ -9319,9 +9413,11 @@ async function renderSettingsThemes() {
     customRow.classList.remove('hidden');
     // v69 (item 3): the diff baseline — the theme's factory colours/dir.
     pthActiveDefaults = { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
-    const cu = d.ui_custom || { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
-    $('#pth-c1').value = cu.c1; $('#pth-c2').value = cu.c2; $('#pth-dir').value = cu.dir;
-    $('#pth-c1-dot').style.setProperty('--dot', cu.c1); $('#pth-c2-dot').style.setProperty('--dot', cu.c2);
+    if (pthFresh) { // v71 (item 18): never repaint the inputs over a newer live edit
+      const cu = d.ui_custom || { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
+      $('#pth-c1').value = cu.c1; $('#pth-c2').value = cu.c2; $('#pth-dir').value = cu.dir;
+      $('#pth-c1-dot').style.setProperty('--dot', cu.c1); $('#pth-c2-dot').style.setProperty('--dot', cu.c2);
+    }
     pthDirPaint();
   } else {
     customRow.classList.add('hidden');
@@ -9378,6 +9474,8 @@ function pthFlushAutosave() { // commit a pending edit NOW (leaving the view / u
 function pthCancelAutosave() { if (pthAutosaveT) { clearTimeout(pthAutosaveT); pthAutosaveT = null; } }
 function pthLivePreview() {
   if (!activeThemeKey || !mePremium) return; // v61: gated
+  pthEditSeq++; // v71 (item 18): a live edit — in-flight renders are now stale
+  pthPreviewPaint(); // v71 (item 7): the strip tracks colour edits instantly too
   const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };
   applyPremiumTheme(activeThemeKey, custom);
   pthTintedLogo(activeThemeKey, custom).then((url) => {
@@ -9499,11 +9597,24 @@ function pthDirPaint() {
   const min = Number(r.min) || 0, max = Number(r.max) || 360;
   r.style.setProperty('--pth-dir-pct', ((Number(r.value) - min) / (max - min) * 100) + '%');
   $('#pth-dir-deg').textContent = r.value + '°';
+  pthPreviewPaint(); // v71 (item 7)
+}
+// v71 (item 7): the preview strip shows the EXACT gradient the theme builds
+// from the two solid colours at the current angle — 0° = left→right, 90° =
+// top→bottom, 180° = right→left, continuous in between. Immediate, in every
+// theme (it paints its own background, independent of themed surfaces).
+function pthPreviewPaint() {
+  const pv = $('#pth-preview');
+  if (!pv) return;
+  const c1 = $('#pth-c1').value || '#888888', c2 = $('#pth-c2').value || '#cccccc';
+  const dir = Number($('#pth-dir').value || 135);
+  pv.style.background = 'linear-gradient(' + dir + 'deg, ' + c1 + ', ' + c2 + ')';
 }
 $('#pth-dir').addEventListener('input', () => { pthDirPaint(); pthLivePreview(); });
 $('#pth-save').addEventListener('click', async () => {
   if (!mePremium) { openUpsell('Manual colours are Premium', 'Upgrade to Art Arena Premium to customise your theme colours.'); return; } // v61
   if (!activeThemeKey) return;
+  pthEditSeq++; // v71 (item 18)
   pthCancelAutosave(); // v68: the explicit save supersedes any pending auto-save
   const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };
   try {
@@ -9520,6 +9631,7 @@ $('#pth-save').addEventListener('click', async () => {
 $('#pth-reset').addEventListener('click', async () => {
   if (!mePremium) { openUpsell('Manual colours are Premium', 'Upgrade to Art Arena Premium to customise your theme colours.'); return; }
   if (!activeThemeKey) return;
+  pthEditSeq++; // v71 (item 18): the reset itself is an edit
   pthCancelAutosave(); // v68
   try {
     const r = await api('/api/premium/theme', { theme: activeThemeKey, custom: null }, 'PUT');
@@ -9531,6 +9643,7 @@ $('#pth-reset').addEventListener('click', async () => {
 // v54 (spec 11): Deactivate UI — theme off, entitlement untouched, the saved
 // Light/Dark preference takes over again (persisted + refresh-safe).
 $('#pth-deactivate').addEventListener('click', async () => {
+  pthEditSeq++; // v71 (item 18)
   try {
     await api('/api/premium/theme', { theme: 'default' }, 'PUT');
     applyPremiumTheme(null);
@@ -9850,7 +9963,7 @@ function renderTwitchRoomBox(d) {
     const roomOpen = ['lobby', 'starting'].includes(d.status);
     const battleLive = !!(d.battle && ['countdown', 'active'].includes(d.battle.status));
     box.innerHTML = (isHost && roomOpen && !battleLive)
-      ? '<button type="button" id="btn-go-live-twitch" class="secondary" style="width:100%"><span class="live-dot" style="margin-right:6px"></span><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429z"/></svg> GO LIVE VIA TWITCH</button>'
+      ? '<button type="button" id="btn-go-live-twitch" class="secondary" style="width:100%"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" style="margin-right:6px"><path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429z"/></svg> GO LIVE VIA TWITCH</button>'
       : '';
     return;
   }

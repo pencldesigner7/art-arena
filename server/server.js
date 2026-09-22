@@ -1535,6 +1535,16 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // same WS push, same handled-marking as every other invitation.
     ['v68 notification types: mm_team_invite',
      `ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'mm_team_invite'`],
+      // ---------------- v71 ----------------
+    // v71 (item 8): ROOM ORIGIN is server truth — a room knows whether a
+    // USER created it or MATCHMAKING generated it. Existing rows keep
+    // 'created' unless they are provably matchmaking-generated (auto_start
+    // rooms are only ever minted by createMatchRoom; the '3v3 Team Arena'
+    // name is the matchmaking 3v3 mint stamp).
+    ['v71 room origin (created vs matchmaking-generated)',
+     `ALTER TABLE battle_rooms ADD COLUMN IF NOT EXISTS origin text NOT NULL DEFAULT 'created'`],
+    ['v71 backfill matchmaking-generated rooms',
+     `UPDATE battle_rooms SET origin = 'matchmaking' WHERE auto_start = true OR name = '3v3 Team Arena'`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

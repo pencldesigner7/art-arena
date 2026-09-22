@@ -684,6 +684,10 @@ CREATE TABLE public.battle_rooms (
     ended_at timestamp with time zone,
     battle_mode text DEFAULT '1v1'::text NOT NULL,
     auto_start boolean DEFAULT false NOT NULL,
+    -- v71 (item 8): how the room came to exist — 'created' (a user made it;
+    -- the owner keeps the full room-admin surface) or 'matchmaking' (the
+    -- queue minted it; no user-owned administration, gameplay controls only).
+    origin text NOT NULL DEFAULT 'created',
     deleted_at timestamp with time zone,
     CONSTRAINT battle_rooms_max_players_check CHECK (((max_players >= 2) AND (max_players <= 16))),
     CONSTRAINT battle_rooms_name_check CHECK ((char_length(name) <= 60)),
