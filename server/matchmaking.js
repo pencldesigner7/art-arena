@@ -156,6 +156,67 @@ function claimable(userId) {
   return m;
 }
 
+// Shared queue assembly for search and optional friend invitations. No room is
+// published until two complete teams exist. Caller holds advisory lock 336336.
+async function assemble3v3(client) {
+  await client.query(`UPDATE matchmaking_queue q SET status = 'cancelled'
+    WHERE q.status = 'queued' AND q.prefs->>'battle_mode' = '3v3'
+      AND EXISTS (SELECT 1 FROM room_participants p JOIN battle_rooms r ON r.id = p.room_id
+        WHERE p.user_id = q.user_id AND p.state IN ('waiting','ready')
+          AND r.deleted_at IS NULL AND r.status IN ('lobby','starting','in_battle'))`);
+  const { rows } = await client.query(`SELECT user_id, prefs FROM matchmaking_queue
+    WHERE status = 'queued' AND prefs->>'battle_mode' = '3v3'
+    ORDER BY queued_at, id FOR UPDATE`);
+  const groups = new Map();
+  for (const row of rows) {
+    const key = row.prefs.team_id || row.user_id;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row.user_id);
+  }
+  // Small capacity DP: keep invited groups together, fill exactly 3 + 3.
+  let states = new Map([['0,0', [[], []]]]);
+  for (const group of groups.values()) {
+    for (const [key, teams] of [...states]) {
+      for (const side of [0, 1]) {
+        if (teams[side].length + group.length > 3) continue;
+        const next = teams.map(t => t.slice()); next[side].push(...group);
+        const k = next[0].length + ',' + next[1].length;
+        if (!states.has(k)) states.set(k, next);
+      }
+    }
+    if (states.has('3,3')) break;
+  }
+  if (!states.has('3,3')) return null;
+  const members = states.get('3,3').flat();
+  let code3v3, room3v3Id;
+  for (let attempt = 0; attempt < 10; attempt++) {
+    code3v3 = newRoomCode();
+    const { rows } = await client.query(
+      `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
+        time_limit_seconds, result_method, battle_mode, auto_start, origin, randomizer_config)
+       VALUES ($1,$2,'3v3 Team Arena','casual','public',6,3600,'voting_community','3v3',false,
+        'matchmaking','{"categories":["character","environment","object","style"]}'::jsonb)
+       ON CONFLICT DO NOTHING RETURNING id`, [code3v3, members[0]]);
+    if (rows[0]) { room3v3Id = rows[0].id; break; }
+  }
+  if (!room3v3Id) throw new HttpError(409, 'Could not allocate a room code. Try again.');
+  for (let i = 0; i < members.length; i++) {
+    await client.query(`INSERT INTO room_participants (room_id,user_id,state,seat)
+      VALUES ($1,$2,'waiting',$3)`, [room3v3Id,members[i],i+1]);
+  }
+  await client.query(`UPDATE matchmaking_queue SET status='matched', matched_room_id=$2
+    WHERE user_id=ANY($1::uuid[]) AND status='queued'`, [members,room3v3Id]);
+  return { code:code3v3,members };
+
+}
+function announce3v3(match) {
+  for (const id of match.members) {
+    remember({ id }, null, match.code, '3v3');
+    rt.sendToUser(id, { type: 'matchmaking', action: 'found', room: match.code, mode: '3v3', battle_mode: '3v3' });
+  }
+  rt.broadcastRoomsList('created');
+}
+
 // ---------------------------------------------------------------------------
 // POST /enter — join the queue; if a partner exists, the match is made
 // inside this request (response: { matched:true, room, opponent }).
@@ -182,7 +243,8 @@ router.post('/enter', ah(async (req, res) => {
   let prev = claimable(u.id);
   if (prev) {
     const { rows } = await pool.query(
-      `SELECT status FROM battle_rooms WHERE code = $1`, [prev.room_code]);
+      `SELECT r.status FROM battle_rooms r WHERE r.code = $1 AND r.deleted_at IS NULL
+       AND EXISTS (SELECT 1 FROM room_participants p WHERE p.room_id = r.id AND p.user_id = $2 AND p.state IN ('waiting','ready'))`, [prev.room_code, u.id]);
     if (!rows[0] || rows[0].status === 'ended') { recent.delete(u.id); prev = null; }
   }
   // v67: the reclaim reports the MATCH's own mode — a claimable 3v3 room
@@ -199,7 +261,7 @@ router.post('/enter', ah(async (req, res) => {
   let m = null;
   // v67: 3v3 outcomes — exactly one of these is set when the mode is 3v3.
   // joined3 = seated into an existing open public room (a REAL connection);
-  // m3      = paired with another queued 3v3 searcher into a NEW shared room;
+  // m3      = six queued artists assembled into a NEW shared room;
   // search3 = nobody to connect to → honestly queued (matched:false).
   let joined3 = null, m3 = null, search3 = null;
   // v68: tournament outcomes — joinedT = seated into an existing open public
@@ -211,6 +273,8 @@ router.post('/enter', ah(async (req, res) => {
     await client.query('BEGIN');
 
     if (mode === '3v3') {
+      // Serialize assembly so simultaneous sixth/seventh entrants cannot strand a full queue.
+      await client.query('SELECT pg_advisory_xact_lock(336336)');
       // 3v3 Matchmaking (v67 — REAL connections only):
       // 1. First, look for an existing open public 3v3 room with free seats in
       //    lobby — joining it IS a real connection (there is already at least
@@ -264,64 +328,8 @@ router.post('/enter', ah(async (req, res) => {
           `SELECT queued_at FROM matchmaking_queue WHERE user_id = $1 AND status = 'queued'`, [u.id]);
         queuedAt = q3[0] ? q3[0].queued_at : null;
 
-        // 3. Pair with the oldest OTHER queued 3v3 searcher (locked row — two
-        //    concurrent enters can never double-pair).
-        const { rows: queued3v3 } = await client.query(
-          `SELECT user_id FROM matchmaking_queue
-            WHERE status = 'queued' AND user_id <> $1 AND (prefs->>'battle_mode') = '3v3'
-            ORDER BY queued_at, id
-            LIMIT 1
-            FOR UPDATE SKIP LOCKED`, [u.id]
-        );
-        const other3v3Id = queued3v3[0] && queued3v3[0].user_id;
-        let other3v3User = null;
-        if (other3v3Id) {
-          const otherRoom = await activeRoomOf(other3v3Id, client);
-          if (otherRoom) {
-            // ghost row — that artist joined a room elsewhere since queueing
-            await client.query(
-              `UPDATE matchmaking_queue SET status = 'cancelled' WHERE user_id = $1 AND status = 'queued'`,
-              [other3v3Id]
-            );
-          } else {
-            other3v3User = await userBrief(other3v3Id);
-          }
-        }
-
-        if (other3v3User) {
-          // REAL MATCH: ONE shared public 3v3 room seats BOTH searchers
-          // (seat 1 = team A side, seat 4 = team B side). The remaining four
-          // seats stay open — the next 3v3 searcher joins this room via
-          // step 1, so the teams genuinely fill up.
-          let code3v3 = null, room3v3Id = null;
-          for (let attempt = 0; attempt < 10; attempt++) {
-            try {
-              code3v3 = newRoomCode();
-              const { rows } = await client.query(
-                `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
-                                           time_limit_seconds, result_method, battle_mode, auto_start,
-                                           origin, randomizer_config)
-                 VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
-                         'matchmaking', '{"categories":["character","environment","object","style"]}'::jsonb)
-                 RETURNING id`,
-                [code3v3, u.id]
-              );
-              room3v3Id = rows[0].id;
-              break;
-            } catch (e) {
-              if (e.code !== '23505') throw e;
-            }
-          }
-          await client.query(
-            `INSERT INTO room_participants (room_id, user_id, state, seat)
-             VALUES ($1, $2, 'waiting', 1), ($1, $3, 'waiting', 4)`,
-            [room3v3Id, u.id, other3v3User.id]
-          );
-          await client.query(
-            `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
-              WHERE user_id IN ($1, $3) AND status = 'queued'`, [u.id, room3v3Id, other3v3User.id]
-          );
-          m3 = { code: code3v3, other: other3v3User };
+        m3 = await assemble3v3(client);
+        if (m3) {
           await client.query('COMMIT');
         } else {
           // Nobody to pair with — stay queued. The 180 s deadline sweeper
@@ -439,9 +447,7 @@ router.post('/enter', ah(async (req, res) => {
     return res.json({ matched: true, room: joined3.code, mode: '3v3', battle_mode: '3v3' });
   }
   if (m3) {
-    remember(u, m3.other, m3.code, '3v3');
-    rt.sendToUser(m3.other.id, { type: 'matchmaking', action: 'found', room: m3.code, mode: '3v3', battle_mode: '3v3' });
-    rt.broadcastRoomsList('created');
+    announce3v3(m3);
     return res.json({ matched: true, room: m3.code, mode: '3v3', battle_mode: '3v3' });
   }
   if (search3) return res.json(search3);
@@ -485,8 +491,18 @@ router.get('/status', ah(async (req, res) => {
   if (match) {
     // The room must still be around (it can be closed/deleted).
     const { rows } = await pool.query(
-      `SELECT status FROM battle_rooms WHERE code = $1`, [match.room_code]);
+      `SELECT r.status FROM battle_rooms r WHERE r.code = $1 AND r.deleted_at IS NULL
+       AND EXISTS (SELECT 1 FROM room_participants p WHERE p.room_id = r.id AND p.user_id = $2 AND p.state IN ('waiting','ready'))`, [match.room_code, req.user.id]);
     if (!rows[0] || rows[0].status === 'ended') { recent.delete(req.user.id); match = null; }
+  }
+  if (!match) {
+    const { rows } = await pool.query(`SELECT r.code, r.battle_mode
+      FROM matchmaking_queue q JOIN battle_rooms r ON r.id=q.matched_room_id
+      JOIN room_participants p ON p.room_id=r.id AND p.user_id=q.user_id
+      WHERE q.user_id=$1 AND q.status='matched' AND r.deleted_at IS NULL
+        AND r.status IN ('lobby','starting','in_battle') AND p.state IN ('waiting','ready')
+      ORDER BY q.queued_at DESC LIMIT 1`, [req.user.id]);
+    if (rows[0]) match = { room_code:rows[0].code, battle_mode:rows[0].battle_mode, opponent:null };
   }
   // v69 (item 1): the searcher's OWN pending team invites — the server truth
   // the [+] slots restore from after a refresh (first invite → slot 1, second
@@ -584,10 +600,9 @@ router.post('/cancel', ah(async (req, res) => {
 //   POST /team-invite            { friend_id }  → notification 'mm_team_invite'
 //   POST /team-invite/:id/accept → the friend really joins: seats into the
 //                                  inviter's 3v3 lobby room if one exists,
-//                                  otherwise the inviter's live queue search
-//                                  becomes a shared public 3v3 room seating
-//                                  BOTH (inviter seat 1, friend seat 2 — one
-//                                  side). Everyone is notified over the hub.
+//                                  otherwise both remain queued as a team
+//                                  until all six artists are assembled.
+//                                  Everyone is notified over the same hub.
 //   POST /team-invite/:id/decline
 // ---------------------------------------------------------------------------
 const MM_INVITE_WINDOW_H = 2; // invitations live as long as room invitations
@@ -602,7 +617,8 @@ router.post('/team-invite', ah(async (req, res) => {
 
   // My search state: queued for 3v3, OR already sitting in a 3v3 lobby room
   // that a previous accepted invite created (the second [+] slot case).
-  const myRoom = await activeRoomOf(u.id);
+  const active = await activeRoomOf(u.id);
+  const myRoom = active ? (await pool.query('SELECT * FROM battle_rooms WHERE code = $1', [active.code])).rows[0] : null;
   const { rows: qRows } = await pool.query(
     `SELECT prefs FROM matchmaking_queue WHERE user_id = $1 AND status = 'queued'`, [u.id]);
   const queued3v3 = qRows[0] && (qRows[0].prefs || {}).battle_mode === '3v3';
@@ -664,23 +680,17 @@ router.post('/team-invite/:id/accept', ah(async (req, res) => {
   // uuid cast as garbage (that surfaced as a logged 500).
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(req.params.id || '')))
     throw new HttpError(404, 'Invitation not found.');
-  // Claim the invitation atomically — a second accept (or an accept after
-  // decline/expiry) finds it already handled and fails honestly.
-  const { rows } = await pool.query(
-    `UPDATE notifications SET payload = payload || '{"handled":"accepted"}'::jsonb
-      WHERE id = $1 AND user_id = $2 AND type = 'mm_team_invite' AND payload->>'handled' IS NULL
-      RETURNING payload`, [String(req.params.id), u.id]);
-  if (!rows[0]) throw new HttpError(409, 'That invitation was already handled.');
-  const inviterId = rows[0].payload && rows[0].payload.from_user_id;
-
-  // The acceptee must be free to sit down (one active seat per artist).
-  const myRoom = await activeRoomOf(u.id);
-  if (myRoom) throw new HttpError(409, 'You are already in a room — leave it before joining a team.');
-
   const client = await pool.connect();
-  let code = null, createdNew = false, seatTaken = null;
+  let code = null, createdNew = false, seatTaken = null, inviterId, queuedTeam = false, assembled = null;
   try {
     await client.query('BEGIN');
+    await client.query('SELECT pg_advisory_xact_lock(336336)');
+    const { rows } = await client.query(`UPDATE notifications SET payload = payload || '{"handled":"accepted"}'::jsonb
+      WHERE id = $1 AND user_id = $2 AND type = 'mm_team_invite' AND payload->>'handled' IS NULL
+        AND created_at > now() - interval '2 hours' RETURNING payload`, [req.params.id, u.id]);
+    if (!rows[0]) throw new HttpError(409, 'That invitation was already handled or expired.');
+    inviterId = rows[0].payload.from_user_id;
+    if (await activeRoomOf(u.id, client)) throw new HttpError(409, 'Leave your current room before joining a team.');
     // v69 (item 1): the FULL room row — activeRoomOf() only returns
     // {code,status}, which silently killed the "inviter already sits in a 3v3
     // lobby → seat me beside them" branch (battle_mode was always undefined
@@ -723,51 +733,23 @@ router.post('/team-invite/:id/accept', ah(async (req, res) => {
     } else if (inviterRoom) {
       throw new HttpError(409, 'That search has ended — ask them to invite you again.');
     } else {
-      // The inviter is still SEARCHING — this accept turns the search into a
-      // real shared public 3v3 room for both (inviter seat 1, me seat 2: one
-      // side; the open side fills via invites/public join, exactly like a
-      // queue-paired 3v3 room).
-      const { rows: invQ } = await client.query(
-        `SELECT id FROM matchmaking_queue
-          WHERE user_id = $1 AND status = 'queued' AND (prefs->>'battle_mode') = '3v3'
-          FOR UPDATE`, [inviterId]);
-      if (!invQ[0]) throw new HttpError(409, 'That search has ended — ask them to invite you again.');
-      let roomId = null;
-      for (let attempt = 0; attempt < 10; attempt++) {
-        try {
-          code = newRoomCode();
-          const { rows: ins } = await client.query(
-            `INSERT INTO battle_rooms (code, host_id, name, room_type, visibility, max_players,
-                                       time_limit_seconds, result_method, battle_mode, auto_start,
-                                       origin, randomizer_config)
-             VALUES ($1, $2, '3v3 Team Arena', 'casual', 'public', 6, 3600, 'voting_community', '3v3', false,
-                     'matchmaking', '{"categories":["character","environment","object","style"]}'::jsonb)
-             RETURNING id`,
-            [code, inviterId]
-          );
-          roomId = ins[0].id;
-          break;
-        } catch (e) {
-          if (e.code !== '23505') throw e;
-        }
-      }
-      if (!roomId) throw new HttpError(500, 'Could not allocate a room code. Try again.');
-      await client.query(
-        `INSERT INTO room_participants (room_id, user_id, state, seat)
-         VALUES ($1, $2, 'waiting', 1), ($1, $3, 'waiting', 2)`,
-        [roomId, inviterId, u.id]);
-      await client.query(
-        `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
-          WHERE user_id = $1 AND status = 'queued'`, [inviterId, roomId]);
-      // my own queue row (if I was searching too) is cancelled — I'm seated now
-      await client.query(
-        `UPDATE matchmaking_queue SET status = 'cancelled'
-          WHERE user_id = $1 AND status = 'queued'`, [u.id]);
-      createdNew = true;
-      seatTaken = 2;
+      // Accepted teammates remain in the real queue; no two-player room.
+      const { rows: invQ } = await client.query(`SELECT prefs FROM matchmaking_queue
+        WHERE user_id = $1 AND status = 'queued' AND prefs->>'battle_mode' = '3v3' FOR UPDATE`, [inviterId]);
+      if (!invQ[0]) throw new HttpError(409, 'That search has ended — ask for another invite.');
+      const teamId = invQ[0].prefs.team_id || inviterId;
+      const { rows: team } = await client.query(`SELECT user_id FROM matchmaking_queue
+        WHERE status = 'queued' AND (prefs->>'team_id' = $1 OR user_id::text = $1)`, [teamId]);
+      if (team.filter(p => p.user_id !== u.id).length >= 3) throw new HttpError(409, 'Their team is full.');
+      await client.query(`UPDATE matchmaking_queue SET prefs = prefs || jsonb_build_object('team_id', $2::text)
+        WHERE user_id = $1 AND status = 'queued'`, [inviterId, teamId]);
+      const own = await queuedRow(u.id, client);
+      if (own) await client.query(`UPDATE matchmaking_queue SET status = 'cancelled' WHERE id = $1`, [own.id]);
+      await client.query(`INSERT INTO matchmaking_queue (user_id, prefs) VALUES ($1,$2::jsonb)`,
+        [u.id, JSON.stringify({ battle_mode:'3v3', team_id:teamId, competition_type:'casual', format:'three_on_three', time_limit_seconds:3600 })]);
+      assembled = await assemble3v3(client);
+      queuedTeam = true;
       await client.query('COMMIT');
-      remember({ id: inviterId }, null, code, '3v3');
-      remember({ id: u.id }, null, code, '3v3');
     }
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
@@ -776,6 +758,12 @@ router.post('/team-invite/:id/accept', ah(async (req, res) => {
     client.release();
   }
 
+  if (queuedTeam) {
+    if (assembled) announce3v3(assembled);
+    const mine = assembled && assembled.members.includes(u.id);
+    rt.sendToUser(inviterId, { type:'matchmaking', action:'teammate_joined', teammate:await userBrief(u.id), battle_mode:'3v3' });
+    return res.json({ ok:true, room:mine ? assembled.code : null, in_queue:!mine, battle_mode:'3v3' });
+  }
   // Post-COMMIT notifications (a notified client can never race the room row).
   const brief = await userBrief(u.id);
   rt.emitRoom(code, { action: 'joined', user_id: u.id, username: u.username, display_name: u.display_name, seat: seatTaken });

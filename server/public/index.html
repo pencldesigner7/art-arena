@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="aa-ui-version" content="67">
 <title>Art Arena</title>
-<link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=art-arena-mark-2">
+<link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=art-arena-mark-3">
 <script>
 /* v44 (appearance): apply the saved theme BEFORE first paint. Dark is the
    default Art Arena theme; light is opt-in and persisted in localStorage
@@ -526,7 +526,7 @@ try {
      behind the image): the pixels render exactly as shipped — sharp, full
      opacity, unblurred — while a subtle static neon glow breathes around
      the letters themselves. Legible on every surface, glowing theme only. */
-  body[data-ptheme="glowing"] img[data-aa-logo] { filter:drop-shadow(0 0 10px rgba(var(--pink-rgb),.30)) drop-shadow(0 0 26px rgba(var(--purple-rgb),.16)); }
+  body[data-ptheme="glowing"] img[data-aa-logo] { filter:drop-shadow(0 0 1px rgba(var(--pink-rgb),.95)) drop-shadow(0 0 4px rgba(var(--pink-rgb),.65)) drop-shadow(0 0 12px rgba(var(--purple-rgb),.35)); }
   /* v54 hierarchy: home destination cards are <button>s — under Glowing they
      must NOT wear the primary CTA gradient+glow. They stay calm surfaces with
      a faint halo; only primary actions burn bright. */
@@ -805,7 +805,7 @@ try {
   .tw-chip { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; letter-spacing:1.2px; padding:3px 9px; border-radius:999px; border:1px solid var(--pink); color:var(--pink); }
   .tw-chip.preparing { border-color:var(--btn-line); color:var(--muted); letter-spacing:1px; }
   .tw-embed { position:relative; width:100%; aspect-ratio:16/9; max-height:340px; border-radius:12px; overflow:hidden; background:#000; border:1px solid var(--line); }
-  .tw-embed iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .tw-embed iframe { background:#000; color-scheme:normal; opacity:1; position:absolute; inset:0; width:100%; height:100%; border:0; }
   .tw-connect { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:8px; }
   .tw-connect img { width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); object-fit:cover; }
   .tw-connect .tw-id { font-weight:800; font-size:14.5px; }
@@ -2530,7 +2530,19 @@ try {
   .theme-row { display:flex; gap:8px; margin-top:6px; }
   .theme-opt { flex:1; margin:0; padding:9px 12px; border-radius:10px; border:1px solid var(--btn-line); background:var(--surface); color:var(--text); font:inherit; font-weight:700; font-size:13px; letter-spacing:.4px; cursor:pointer; }
   .theme-opt.active { border-color:var(--pink); box-shadow:0 0 0 1px var(--pink), 0 0 14px rgba(var(--pink-rgb),.25); }
+
+  /* Document-entry only. Theme changes update inherited tokens, never lifecycle. */
+  #aa-entry { position:fixed; inset:0; z-index:2147483000; display:grid; place-items:center;
+    background:radial-gradient(ellipse at 25% 35%,rgba(var(--pink-rgb),.28),transparent 60%),
+      radial-gradient(ellipse at 80% 65%,rgba(var(--purple-rgb),.32),transparent 65%),var(--bg);
+    pointer-events:none; animation:aa-entry-exit .35s ease 1.15s forwards; }
+  #aa-entry img { width:min(48vw,280px); height:min(48vw,280px); object-fit:contain;
+    animation:aa-entry-mark .85s ease both; }
+  @keyframes aa-entry-mark { from { opacity:0; transform:translateY(8px) scale(.96); } to { opacity:1; transform:none; } }
+  @keyframes aa-entry-exit { to { opacity:0; visibility:hidden; } }
+  @media(prefers-reduced-motion:reduce) { #aa-entry { animation-delay:.15s; animation-duration:.1s; } #aa-entry img { animation:none; } }
 </style>
+<link rel="stylesheet" href="/premium-themes.css?v=3">
 </head>
 <body>
 <script>
@@ -2542,7 +2554,7 @@ try {
   try {
     var t = JSON.parse(localStorage.getItem('aa-ptheme') || 'null');
     if (!t || !t.key) return;
-    var KEYS = ['flame', 'cloud', 'glitch', 'graffiti', 'glowing', 'magazine', 'pixel'];
+    var KEYS = ['flame', 'cloud', 'glitch', 'graffiti', 'glowing', 'magazine', 'pixel', 'chrome', 'comic'];
     if (KEYS.indexOf(t.key) < 0) {
       localStorage.removeItem('aa-ptheme');
       return;
@@ -2556,6 +2568,40 @@ try {
     if (t.custom && typeof t.custom.dir === 'number') b.style.setProperty('--pth-dir', t.custom.dir + 'deg');
     if (t.custom && t.custom.c1) b.setAttribute('data-pcustom', '1'); // v68: surfaces are tinted from the very first paint
   } catch (_) {}
+})();
+</script>
+
+<div id="aa-entry" aria-hidden="true"><img src="/favicon.png?v=art-arena-mark-3" alt=""></div>
+<script>
+(() => {
+  const entry = document.getElementById('aa-entry');
+  const marks = new Set(['flame','cloud','glitch','pixel','magazine','chrome','comic','glowing','graffiti']);
+  window.ArenaBrandmarks = {
+    set(key, custom) {
+      const name = key === 'chrome' && custom && custom.finish === 'gold' ? 'chrome-gold' : key === 'comic' && custom && custom.finish === 'manga' ? 'comic-manga' : key;
+      entry.dataset.mark = key || 'default';
+      const root = marks.has(key) ? '/themes/marks/' + name : null;
+      const mark = root ? root + '.png' : '/favicon.png?v=art-arena-mark-3';
+      const icon = root ? root + '-icon.png' : '/favicon.png?v=art-arena-mark-3';
+      if (entry.querySelector('img').getAttribute('src') !== mark) entry.querySelector('img').src = mark;
+      const link = document.querySelector('link[rel="icon"]');
+      if (link.getAttribute('href') !== icon) link.href = icon;
+    }
+  };
+  try { const saved=JSON.parse(localStorage.getItem('aa-ptheme')||'null'); if(saved) window.ArenaBrandmarks.set(saved.key,saved.custom); } catch (_) {}
+
+  // One listener for browser document restoration; never tied to show()/renderRoom().
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    entry.classList.add('aa-entry-reset');
+    entry.style.animation = 'none';
+    const mark = entry.querySelector('img');
+    mark.style.animation = 'none';
+    void entry.offsetWidth;
+    entry.style.animation = '';
+    mark.style.animation = '';
+    entry.classList.remove('aa-entry-reset');
+  });
 })();
 </script>
   <!-- v37: LOGIN BACKGROUND — full-viewport fixed layer BEHIND the entire
@@ -3631,6 +3677,18 @@ try {
              pthSyncResetVisibility); hidden by default and after any reset. -->
         <button type="button" id="pth-reset" class="secondary hidden" style="width:100%; margin-top:10px">Reset Theme</button>
       </div>
+      <div id="chrome-finish" class="hidden"><strong>Metal finish</strong>
+        <div class="finish-options" role="group" aria-label="Metal finish">
+          <button type="button" class="secondary" data-chrome-finish="chrome" aria-pressed="true">Chrome</button>
+          <button type="button" class="secondary" data-chrome-finish="gold" aria-pressed="false">Gold</button>
+        </div>
+      </div>
+      <div id="comic-finish" class="hidden"><strong>Comic style</strong>
+        <div class="finish-options" role="group" aria-label="Comic style">
+          <button type="button" class="secondary" data-comic-finish="comic" aria-pressed="true">Comic</button>
+          <button type="button" class="secondary" data-comic-finish="manga" aria-pressed="false">Manga</button>
+        </div>
+      </div>
       <button type="button" id="pth-deactivate" class="secondary hidden" style="width:100%; margin-top:12px">⏻ Deactivate UI</button>
     </div>
   </section>
@@ -4115,15 +4173,17 @@ try {
 let mePremium = false;
 let activeThemeKey = null, activeThemeCustom = null;
 const THEME_LOGOS = {
+  chrome: '/themes/chrome.png', comic: '/themes/comic.png',
   flame: '/themes/flame.png', cloud: '/themes/cloud.png', glitch: '/themes/glitch.png',
   graffiti: '/themes/graffiti.png',
-  glowing: '/themes/glowing.png?v=57', // v57: FILLED wordmark (bg removed, green→blue fill, baked glow) — versioned so no page keeps the old hollow file
+  glowing: '/themes/glowing.png?v=72', // retain the crisp filled artwork; restrained alpha halo + CSS edge light
   magazine: '/themes/magazine.png', // v55: the supplied cutout logo (bg removed, art exact)
   pixel: '/themes/pixel.png',        // v56: the supplied pixel-art logo (as-is, NEAREST-scaled)
 };
 function applyThemeLogo(key, custom) {
+  if (window.ArenaBrandmarks) window.ArenaBrandmarks.set(key, custom);
   document.querySelectorAll('img[data-aa-logo]').forEach((img) => {
-    const target = key && THEME_LOGOS[key] ? THEME_LOGOS[key] : '/logo.png';
+    const target = key === 'chrome' && custom && custom.finish === 'gold' ? '/themes/chrome-gold.png' : key === 'comic' && custom && custom.finish === 'manga' ? '/themes/comic-manga.png' : key && THEME_LOGOS[key] ? THEME_LOGOS[key] : '/logo.png';
     img.classList.remove('pth-logo-graffiti', 'pth-logo-tagged');
     if (key === 'graffiti') { void img.offsetWidth; img.classList.add('pth-logo-graffiti'); } // stencil/spray reveal on the wall
     if (img.getAttribute('src') !== target) {
@@ -4202,6 +4262,18 @@ function pthSyncResetVisibility() {
   if (btn) btn.classList.toggle('hidden', !pthCustomIsModified());
 }
 function pthRefreshCustomUI() {
+  const finishRow = document.getElementById('chrome-finish');
+  if (finishRow) {
+    finishRow.classList.toggle('hidden', !(mePremium && activeThemeKey === 'chrome'));
+    const finish = activeThemeCustom && activeThemeCustom.finish === 'gold' ? 'gold' : 'chrome';
+    finishRow.querySelectorAll('[data-chrome-finish]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.chromeFinish === finish)));
+  }
+  const comicFinishRow = document.getElementById('comic-finish');
+  if (comicFinishRow) {
+    comicFinishRow.classList.toggle('hidden', !(mePremium && activeThemeKey === 'comic'));
+    const finish = activeThemeCustom && activeThemeCustom.finish === 'manga' ? 'manga' : 'comic';
+    comicFinishRow.querySelectorAll('[data-comic-finish]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.comicFinish === finish)));
+  }
   const deact = document.getElementById('pth-deactivate');
   if (deact) deact.classList.toggle('hidden', !activeThemeKey);
   if (activeThemeCustom) {
@@ -4215,6 +4287,7 @@ function applyPremiumTheme(key, custom) {
   activeThemeKey = key && key !== 'default' ? key : null;
   activeThemeCustom = custom || null;
   const b = document.body, root = document.documentElement;
+  b.dataset.finish = activeThemeKey === 'comic' ? (custom && custom.finish === 'manga' ? 'manga' : 'comic') : (activeThemeKey === 'chrome' && custom && custom.finish === 'gold' ? 'gold' : 'chrome');
   if (activeThemeKey) {
     b.setAttribute('data-ptheme', activeThemeKey);
     // v54 (spec 10/13): ONE visual mode at a time — while a premium theme is
@@ -4247,7 +4320,7 @@ function applyPremiumTheme(key, custom) {
   try { updateModeRow(); } catch (_) {}
   try { pthRefreshCustomUI(); } catch (_) {}
   // the background scene follows the theme (exactly one animation, ever)
-  try { startHomeBg(); } catch (_) {}
+  try { if (typeof AUTH_BG_VIEWS !== 'undefined' && AUTH_BG_VIEWS.includes(currentView)) stopHomeBg(); else startHomeBg(); } catch (_) {}
   // v54: the login backdrop follows the theme too (when we're on auth views)
   try { if (typeof AUTH_BG_VIEWS !== 'undefined' && AUTH_BG_VIEWS.includes(currentView)) startLoginBg(); } catch (_) {}
 }
@@ -4629,7 +4702,7 @@ function startLoginBg() {
   // v54 (spec 12): a premium theme carries its own backdrop on auth screens —
   // the same ThemeScene the app uses (one scene, one canvas, disposed on nav).
   if (activeThemeKey && window.ThemeScene) {
-    if (loginBgScene && loginBgScene.__kind !== 'theme') { try { loginBgScene.dispose(); } catch (_) {} loginBgScene = null; }
+    if (loginBgScene && (loginBgScene.__kind !== 'theme' || loginBgScene.theme !== activeThemeKey)) { try { loginBgScene.dispose(); } catch (_) {} loginBgScene = null; }
     if (!loginBgScene) {
       try { loginBgScene = new window.ThemeScene(host, { theme: activeThemeKey, custom: activeThemeCustom }); loginBgScene.__kind = 'theme'; try { loginBgScene.setMotion(animIsOn()); } catch (_) {} }
       catch (e) { console.warn('[theme-login-bg]', e.message); loginBgScene = null; }
@@ -4695,6 +4768,10 @@ function startHomeBg() {
   if (!host) return;
   // v53: an active design theme carries its OWN animated background.
   if (activeThemeKey) {
+    if (homeBgScene && homeBgScene.__kind === 'theme' && homeBgScene.theme === activeThemeKey && ['chrome','comic'].includes(activeThemeKey)) {
+      homeBgScene.setPalette(activeThemeKey, activeThemeCustom);
+      return;
+    }
     if (homeBgScene) { try { homeBgScene.dispose(); } catch (_) {} homeBgScene = null; }
     if (window.ThemeScene) {
       host.classList.add('on');
@@ -4753,6 +4830,10 @@ function show(name) {
   // Profile round-trip / navigation never drops the artist's latest edit.
   try { pthFlushAutosave(); } catch (_) {}
   if (APP_VIEWS.includes(name) && name !== currentView) navPush(name); // v71 (item 6): real history
+  if (currentView === 'room' && name !== 'room') {
+    revealAutoClose(null);
+    revealDismissed = null; // genuine navigation re-entry may reveal again
+  }
   currentView = name;
   VIEWS.forEach((v) => $('#view-' + v).classList.toggle('hidden', v !== name));
   const inApp = APP_VIEWS.includes(name);
@@ -5846,7 +5927,7 @@ function renderRoom(d) {
           (p.is_you || !p.user_id ? '' : '<span class="friend-slot" data-uid="' + esc(p.user_id) + '" data-name="' + esc(p.username) + '"></span>') +
           '</span></div>';
       }).join('');
-      const invite = (team === 'A' && youHost && d.status === 'lobby' && !d.auto_start && youSeated)
+      const invite = (team === 'A' && youHost && d.status === 'lobby' && !d.auto_start && !isMmRoom(d) && youSeated)
         ? '<div class="tt-invite-row">' +
           '<button type="button" class="mini" id="btn-tt-invite">' + IC.users + ' Invite friends to this side</button>' +
           '<span class="muted" style="font-size:11.5px">They join by code and seat here — the open side fills first.</span>' +
@@ -6168,7 +6249,7 @@ function renderRoom(d) {
       expiryEl.dataset.expires = new Date(new Date(pending.requested_at).getTime() + 2 * 60 * 1000).toISOString();
     } else expiryEl.classList.add('hidden');
     // v51: the owner gets Edit Room here (settings apply to the rematch).
-    const roomOwner = !!(d.host && me && d.host.user_id === me.id); // seats are released at completion — meInRoom is gone post-battle
+    const roomOwner = !!(d.host && me && d.host.user_id === me.id) && !isMmRoom(d); // seats are released at completion — meInRoom is gone post-battle
     $('#btn-edit-room').classList.toggle('hidden', !(rematchable && roomOwner && !d.auto_start && !isTourney && !is3v3)); // v58: fixed settings for matchmaking rooms // v63c: no rematch → no editor // v64: 3v3 rooms are single matches
     if (rematchable) {
       const fromName = pending ? (pending.from_display_name || '@' + pending.from_username) : null;
@@ -6233,7 +6314,7 @@ function renderRoom(d) {
   $('#btn-ready').classList.toggle('ready-on', amReady);
   $('#btn-ready').innerHTML = amReady ? IC.x + ' Cancel ready' : IC.check + ' Ready';
   const mmRoom = isMmRoom(d); // v71 (item 9): matchmaking-generated rooms
-  $('#btn-leave').classList.toggle('hidden', !(isPlayer && isInLobby && !isHost));
+  $('#btn-leave').classList.toggle('hidden', !(isPlayer && (isInLobby || (d.battle && ['waiting','challenge_locked','countdown'].includes(d.battle.status)))));
   $('#btn-close').classList.toggle('hidden', !(isHost && isInLobby && !mmRoom));
   // v35 + v42: host, lobby OR ended — hard delete (Close room stays for the
   // soft end). Ended rooms can finally be removed, with the confirm modal.
@@ -7861,7 +7942,7 @@ const canvasModal = (() => {
   function updateConfirm() {
     const selApp = (appsCache || []).find((a) => a.app_key === selected);
     confirmBtn.disabled = busy || !selApp || !selApp.selectable;
-    confirmBtn.innerHTML = mode === 'start' ? IC.sword + ' START BATTLE' : IC.check + ' CONTINUE';
+    confirmBtn.innerHTML = directReady ? IC.check + ' SELECT CANVAS' : mode === 'start' ? IC.sword + ' START BATTLE' : IC.check + ' READY';
   }
 
   function selectApp(key) {
@@ -7931,7 +8012,8 @@ const canvasModal = (() => {
       // auto-started between our canvas save and the commit) is handled
       // here as the success it is; the payload re-sync comes from the
       // realtime event / the next poll.
-      if (mode === 'start') await commitStart(code, directReady);
+      if (directReady) { refreshRoom(); } // automatic canvas selection never consents to Ready
+      else if (mode === 'start') await commitStart(code, false);
       else await readyNow(code); // v43: canvas chosen → Ready DIRECTLY (manual and matchmaking auto-flow alike — the "Continue with…" popup only ever comes from CANCEL READY)
     } catch (err) {
       // v35: the room may auto-start (matchmaking) between our canvas save
@@ -8533,6 +8615,7 @@ $('#notif-list').addEventListener('click', async (e) => {
         mm.resetLocal(); // the server cancelled my own queue row (if any) — stop the local search UI too
         toast('You joined the team! 🤝');
         if (r && r.room) { openRoom(r.room); return; }
+        if (r && r.in_queue) { mm.setMode('3v3'); show('matchmaking'); return; }
       } else {
         await api('/api/matchmaking/team-invite/' + mid.dataset.mmtiDecline + '/decline', {}, 'POST');
         toast('Team invite declined.');
@@ -8623,7 +8706,7 @@ async function openProfile(userId) {
     // v67 (theme-state safety): a Premium member with no explicit theme
     // choice keeps the STANDARD look — never an automatic Flame.
     const rawTh = String(u.ui_theme || 'default').toLowerCase();
-    const VALID_THEMES = ['flame', 'cloud', 'glowing', 'glitch', 'graffiti', 'magazine', 'pixel'];
+    const VALID_THEMES = ['flame', 'cloud', 'glowing', 'glitch', 'graffiti', 'magazine', 'pixel', 'chrome', 'comic'];
     if (VALID_THEMES.includes(rawTh)) {
       activeTheme = rawTh;
     } else {
@@ -8632,6 +8715,7 @@ async function openProfile(userId) {
   }
   if (pmCard) {
     pmCard.setAttribute('data-prof-theme', activeTheme);
+    pmCard.dataset.finish = activeTheme === 'comic' ? (u.ui_custom && u.ui_custom.finish === 'manga' ? 'manga' : 'comic') : (activeTheme === 'chrome' && u.ui_custom && u.ui_custom.finish === 'gold' ? 'gold' : 'chrome');
     if (isTargetPremium && u.ui_custom) {
       if (u.ui_custom.c1) pmCard.style.setProperty('--pm-c1', u.ui_custom.c1);
       else pmCard.style.removeProperty('--pm-c1');
@@ -9230,6 +9314,9 @@ function revealRender(d) {
       '<div class="rv-val">' + esc(el.value) + '</div></div>';
   }).join('');
   $('#rv-count').textContent = els.length + ' element' + (els.length === 1 ? '' : 's') + ' · one complete challenge';
+  revealRenderActions(d);
+}
+function revealRenderActions(d) {
   // actions mirror the room card's (same server rules): the OWNER launches
   // AND re-rolls (v71 item 4 — re-roll is owner-only everywhere, Premium).
   const inReveal = d.battle.status === 'challenge_locked';
@@ -9259,8 +9346,9 @@ function revealOpen(d, pin) {
   revealShownFor = d.battle.challenge.id;
   revealDismissed = null;
   if (pin) { revealPinnedFor = d.battle.challenge.id; revealPinnedRoom = d.code || currentRoomCode; }
-  revealArmEntrance(); // v71: animate on every open
+  const entering = $('#reveal-view').classList.contains('hidden');
   $('#reveal-view').classList.remove('hidden');
+  if (entering) revealArmEntrance();
   $('#reveal-view').scrollTop = 0;
 }
 function revealClose() { // USER-initiated (Back / Escape / backdrop)
@@ -9295,6 +9383,7 @@ function revealSync(d) {
 
   // If the reveal overlay is already open, simply update its contents without closing or restarting animation
   if (isRevealVisible) {
+    revealRenderActions(d); // owner controls update even during the entrance animation
     revealShownFor = ch.id;
     if (!$('#reveal-view').classList.contains('rv-entering')) {
       revealRender(d);
@@ -9425,12 +9514,40 @@ async function renderSettingsThemes() {
   }
   pthRefreshCustomUI();
 }
+$('#chrome-finish').addEventListener('click', async (event) => {
+  const btn = event.target.closest('[data-chrome-finish]');
+  if (!btn || !mePremium || activeThemeKey !== 'chrome') return;
+  const buttons = [...$('#chrome-finish').querySelectorAll('button')];
+  if (buttons.some(b => b.disabled)) return;
+  buttons.forEach(b => b.disabled = true);
+  pthEditSeq++;
+  try {
+    const r = await api('/api/premium/theme', { theme:'chrome', custom:{ finish:btn.dataset.chromeFinish } }, 'PUT');
+    // If the user navigated to another theme meanwhile, do not overwrite it.
+    if (activeThemeKey === 'chrome') applyPremiumTheme(r.ui_theme,r.ui_custom);
+  } catch (err) { toast(err.message); }
+  finally { buttons.forEach(b => b.disabled = false); }
+});
+$('#comic-finish').addEventListener('click', async (event) => {
+  const btn = event.target.closest('[data-comic-finish]');
+  if (!btn || !mePremium || activeThemeKey !== 'comic') return;
+  const buttons = [...$('#comic-finish').querySelectorAll('button')];
+  if (buttons.some(b => b.disabled)) return;
+  buttons.forEach(b => b.disabled = true);
+  pthEditSeq++;
+  try {
+    const r = await api('/api/premium/theme', { theme:'comic', custom:{ finish:btn.dataset.comicFinish } }, 'PUT');
+    // If the user navigated to another theme meanwhile, do not overwrite it.
+    if (activeThemeKey === 'comic') applyPremiumTheme(r.ui_theme,r.ui_custom);
+  } catch (err) { toast(err.message); }
+  finally { buttons.forEach(b => b.disabled = false); }
+});
 $('#settings-upgrade-btn').addEventListener('click', () => show('premium'));
 $('#settings-theme-grid').addEventListener('click', async (e) => {
   if (e.target.closest('#pth-upgrade')) { show('premium'); return; }
   if (!mePremium) { openUpsell('Design themes are Premium', 'UI Customization is part of Art Arena Premium. Upgrade to unlock the Preset Themes and manual colours.'); return; } // v61: the whole grid is inert for free members
   const up = e.target.closest('[data-upsell]');
-  if (up) { openUpsell('Design themes are Premium', 'Preset Themes — Flame, Cloud, Glitch, Graffiti, Glowing, Magazine Cutout and Pixelated — each restyling the entire app.'); return; }
+  if (up) { openUpsell('Design themes are Premium', 'Preset Themes — Chrome, Comic, Flame, Cloud, Glitch, Graffiti, Glowing, Magazine Cutout and Pixelated — each restyling the entire app.'); return; }
   const sw = e.target.closest('[data-settings-theme]');
   if (!sw) return;
   try {
@@ -10194,7 +10311,7 @@ window.__aaTwitchHandoff = null;
     // classic logo. Server truth still wins the moment a session resolves.
     try {
       const t = JSON.parse(localStorage.getItem('aa-ptheme') || 'null');
-      if (t && t.key && ['flame', 'cloud', 'glitch', 'graffiti', 'glowing', 'magazine', 'pixel'].indexOf(t.key) >= 0) {
+      if (t && t.key && ['flame', 'cloud', 'glitch', 'graffiti', 'glowing', 'magazine', 'pixel', 'chrome', 'comic'].indexOf(t.key) >= 0) {
         applyPremiumTheme(t.key, t.custom || null);
       } else if (t) {
         localStorage.removeItem('aa-ptheme');
@@ -10244,6 +10361,7 @@ window.__aaTwitchHandoff = null;
 <script src="/glitter-wrap.js"></script>
 <script src="/rising-lines.js"></script>
 <script src="/cloud-sky.js"></script><!-- v56: the user-supplied CloudSky shader (cloud theme) -->
+<script src="/premium-scenes.js?v=1"></script>
 <script src="/themes.js"></script><!-- v53: per-theme animated backgrounds -->
 <!-- v45: the matchmaking globe (globe-wrap.js + d3) and the beacon scanner
      (mm-scan-wrap.js) are REMOVED; the searching line is pure CSS.

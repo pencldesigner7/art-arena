@@ -528,15 +528,9 @@ async function startBattleInTx(client, room, players, actorId, opts) {
     // battle; the room's mode + capacity stay the creator's truth.
     seated = players.slice(0, 2);
   }
-  // v71 (item 3): PRESENT ≠ READY. The launch only goes through when every
-  // artist who will actually fight has explicitly pressed Ready. Someone
-  // who navigated home while seated is still `waiting` and honestly blocks
-  // the start — 409 with a machine-readable code, the lobby re-syncs.
-  // Tournaments only gate the pair the bracket just seated (the rest of the
-  // roster is spectating between rounds). auto_start rooms are EXEMPT:
-  // queueing for matchmaking IS the consent, and their battle is minted
-  // from the canvas-save path, not a Ready button.
-  if (!room.auto_start) {
+  // Presence and canvas selection are never readiness, including matchmaking.
+  // Rematch request/accept explicitly reseat both participants as ready.
+  {
     // First tournament draw: the WHOLE roster commits (Ready) before the
     // bracket is seeded; later rounds: only the two artists the bracket
     // just seated. 1v1/3v3: seated === every active participant anyway.
@@ -1004,7 +998,7 @@ async function pickSeatForJoin(client, room, userId) {
     [userId, room.code]
   );
   const invitedA = inv.rows.length > 0;
-  const order = invitedA ? [2, 3, 4, 5, 6] : [4, 5, 6, 2, 3];
+  const order = invitedA ? [1, 2, 3, 4, 5, 6] : [4, 5, 6, 1, 2, 3];
   for (const i of order) if (i >= 1 && i <= room.max_players && !taken.has(i)) return i;
   return null;
 }
@@ -1153,15 +1147,32 @@ router.post('/:code/leave', ah(async (req, res) => {
     );
     const room = roomRows[0];
     if (!room) throw new HttpError(404, 'Room not found.');
-    if (room.status !== 'lobby' && room.status !== 'ended') throw new HttpError(409, 'The battle has already started.');
+    let pendingBattle = null;
+    if (room.status !== 'lobby' && room.status !== 'ended') {
+      const b = await client.query('SELECT id,status FROM battles WHERE room_id=$1 ORDER BY created_at DESC LIMIT 1 FOR UPDATE', [room.id]);
+      pendingBattle = b.rows[0];
+      if (!pendingBattle || !PRE_LAUNCH_BATTLE.includes(pendingBattle.status))
+        throw new HttpError(409, 'The battle has already started.');
+    }
 
     const { rows: gone } = await client.query(
-      `UPDATE room_participants SET state = 'left', left_at = now()
+      `UPDATE room_participants SET state = 'left', left_at = now(), ready_at = NULL
         WHERE room_id = $1 AND user_id = $2 AND state IN ('waiting','ready')
         RETURNING user_id`,
       [room.id, req.user.id]
     );
     wasSeated = !!gone[0];
+    if (wasSeated && pendingBattle) {
+      await client.query("UPDATE battles SET status='cancelled' WHERE id=$1", [pendingBattle.id]);
+      await client.query("UPDATE battle_rooms SET status='lobby', starts_at=NULL, ended_at=NULL WHERE id=$1", [room.id]);
+      await client.query("UPDATE rematch_requests SET status='expired', responded_at=now() WHERE room_id=$1 AND status='pending'", [room.id]);
+      room.status = 'lobby';
+    }
+    if (wasSeated) {
+      await client.query(`UPDATE matchmaking_queue SET status = 'cancelled'
+        WHERE user_id = $1 AND status IN ('queued','matched')`, [req.user.id]);
+    }
+
     // v63c: a tournament player leaving in lobby forfeits their bracket
     // path — their open slot is cleared and the sweep auto-advances (BYE /
     // forfeit). If that crowns a champion the room ends here.
@@ -1176,7 +1187,7 @@ router.post('/:code/leave', ah(async (req, res) => {
         );
         room.status = 'ended'; // host-transfer/close logic below stays inert
         await client.query(
-          `UPDATE room_participants SET state = 'left', left_at = now()
+          `UPDATE room_participants SET state = 'left', left_at = now(), ready_at = NULL
             WHERE room_id = $1 AND state IN ('waiting','ready') AND user_id <> $2`,
           [room.id, req.user.id]
         );
@@ -1238,6 +1249,7 @@ router.post('/:code/leave', ah(async (req, res) => {
 router.post('/:code/ready', ah(async (req, res) => {
   const client = await pool.connect();
   let newState;
+  let started = false;
   try {
     await client.query('BEGIN');
     const { rows: roomRows } = await client.query(
@@ -1263,6 +1275,13 @@ router.post('/:code/ready', ah(async (req, res) => {
         WHERE room_id = $1 AND user_id = $2`,
       [room.id, req.user.id, newState]
     );
+    if (room.auto_start && newState === 'ready') {
+      const players = await activeParticipants(room.id, client);
+      if (players.length === room.max_players && players.every(p => p.state === 'ready' && p.drawing_app_key)) {
+        await startBattleInTx(client, room, players, room.host_id, { reveal: true });
+        started = true;
+      }
+    }
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
@@ -1277,6 +1296,7 @@ router.post('/:code/ready', ah(async (req, res) => {
     display_name: req.user.display_name,
     seat: (payload.players.find((p) => p.is_you) || {}).seat,
   });
+  if (started) rt.emitRoom(payload.code, { action: 'started', by: 'ready' });
   res.json(payload);
 }));
 
@@ -1314,7 +1334,7 @@ router.post('/:code/canvas', ah(async (req, res) => {
     if (room.auto_start) {
       const players = await activeParticipants(room.id, client);
       if (players.length === room.max_players && players.length >= 2 &&
-          players.every((p) => p.drawing_app_key)) {
+          players.every((p) => p.drawing_app_key && p.state === 'ready')) {
         challengeSummary = await startBattleInTx(client, room, players, room.host_id);
         autoStarted = true;
       }
@@ -1450,7 +1470,12 @@ router.patch('/:code', ah(async (req, res) => {
   }
   if (!sets.length) throw new HttpError(400, 'Nothing to update.');
   params.push(room.id);
-  await pool.query(`UPDATE battle_rooms SET ${sets.join(', ')} WHERE id = $${params.length}`, params);
+  const roomParam = params.length;
+  params.push(req.user.id);
+  const saved = await pool.query(`UPDATE battle_rooms SET ${sets.join(', ')}
+    WHERE id = $${roomParam} AND host_id = $${params.length} AND deleted_at IS NULL
+      AND COALESCE(origin,'created') = 'created' AND status IN ('lobby','ended') RETURNING id`, params);
+  if (!saved.rowCount) throw new HttpError(409, 'Room ownership or state changed — refresh and try again.');
   rt.emitRoom(room.code, { action: 'settings', username: req.user.username, what: sets.join(', ') });
   if ('visibility' in b && b.visibility === 'public') rt.broadcastRoomsList('visibility');
   res.json(await roomPayload(req.params.code, req.user.id));
@@ -1614,17 +1639,21 @@ router.post('/:code/close', ah(async (req, res) => {
   // post-battle exit). Only an in-flight battle blocks closing.
   if (room.status !== 'lobby' && room.status !== 'ended')
     throw new HttpError(409, 'The battle is still in progress — it completes automatically when its clock runs out.');
-  await pool.query(
-    `UPDATE battle_rooms SET status = 'ended', ended_at = now() WHERE id = $1`, [room.id]
-  );
-  // Bug fix (v43): the room is over — release every seated player ('left')
-  // so the room leaves THEIR Rooms list too (it used to linger forever as
-  // an "ended" card with no way out for non-hosts). The host still sees
-  // the ended room (their call to delete or keep it) — host_id visibility.
-  await pool.query(
-    `UPDATE room_participants SET state = 'left', left_at = now()
-      WHERE room_id = $1 AND state IN ('waiting','ready')`, [room.id]
-  );
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const locked = await client.query('SELECT * FROM battle_rooms WHERE id=$1 AND deleted_at IS NULL FOR UPDATE', [room.id]);
+    if (!locked.rows[0]) throw new HttpError(404, 'Room not found.');
+    requireRoomAdmin(locked.rows[0], req.user.id);
+    if (!['lobby','ended'].includes(locked.rows[0].status)) throw new HttpError(409, 'The battle is still in progress.');
+    await client.query("UPDATE battle_rooms SET status='ended', ended_at=now() WHERE id=$1", [room.id]);
+    await client.query(`UPDATE room_participants SET state='left', ready_at=NULL, left_at=now()
+      WHERE room_id=$1 AND state IN ('waiting','ready')`, [room.id]);
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally { client.release(); }
   rt.emitRoom(room.code, { action: 'closed', by: req.user.username });
   if (room.visibility === 'public') rt.broadcastRoomsList('closed');
   res.json(await roomPayload(req.params.code, req.user.id));
@@ -1661,6 +1690,13 @@ router.post('/:code/challenge/reroll', ah(async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    const locked = await client.query('SELECT * FROM battle_rooms WHERE id=$1 AND deleted_at IS NULL FOR UPDATE', [room.id]);
+    if (!locked.rows[0]) throw new HttpError(404, 'Room not found.');
+    requireHost(locked.rows[0], req.user.id);
+    const phase = await client.query('SELECT status FROM battles WHERE id=$1 FOR UPDATE', [battle.id]);
+    if (!phase.rows[0] || phase.rows[0].status !== 'challenge_locked')
+      throw new HttpError(409, 'The challenge is no longer available to re-roll.');
+
     // keep the categories, never repeat the outgoing elements (same strict
     // single-concept pool — a re-roll is as clean as the first draw)
     const { rows: prev } = await client.query(
@@ -1800,6 +1836,7 @@ router.post('/:code/kick', ah(async (req, res) => {
       'SELECT * FROM battle_rooms WHERE code = $1 AND deleted_at IS NULL FOR UPDATE', [code]);
     const room = roomRows[0];
     if (!room) throw new HttpError(404, 'Room not found.');
+    requireRoomAdmin(room, req.user.id); // re-check after locking; ownership may have changed
     const { rows: bRows } = await client.query(
       `SELECT id, status FROM battles WHERE room_id = $1 ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
       [room.id]);
@@ -1895,7 +1932,14 @@ router.post('/:code/transfer-ownership', ah(async (req, res) => {
   const target = String((req.body || {}).user_id || '');
   if (!target) throw new HttpError(400, 'A user_id is required.');
   if (target === room.host_id) throw new HttpError(400, 'You already own this room.');
-  const { rows } = await pool.query(
+  const client = await pool.connect();
+  let rows;
+  try {
+    await client.query('BEGIN');
+    const locked = await client.query('SELECT * FROM battle_rooms WHERE id=$1 AND deleted_at IS NULL FOR UPDATE', [room.id]);
+    if (!locked.rows[0]) throw new HttpError(404, 'Room not found.');
+    requireRoomAdmin(locked.rows[0], req.user.id);
+    ({ rows } = await client.query(
     `UPDATE battle_rooms SET host_id = $2
       WHERE id = $1 AND deleted_at IS NULL AND host_id = $3
         AND EXISTS (SELECT 1 FROM room_participants rp
@@ -1905,8 +1949,13 @@ router.post('/:code/transfer-ownership', ah(async (req, res) => {
               (SELECT username FROM users WHERE id = $2) AS uname,
               (SELECT display_name FROM users WHERE id = $2) AS dname`,
     [room.id, target, req.user.id]
-  );
+  ));
   if (!rows[0]) throw new HttpError(409, 'Only an active seated player of this room can become its owner.');
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally { client.release(); }
   rt.emitRoom(room.code, { action: 'host_transferred', username: rows[0].uname, display_name: rows[0].dname });
   res.json(await roomPayload(room.code, req.user.id));
 }));
@@ -1930,6 +1979,12 @@ router.delete('/:code', ah(async (req, res) => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      const locked = await client.query('SELECT * FROM battle_rooms WHERE id=$1 AND deleted_at IS NULL FOR UPDATE', [room.id]);
+      if (!locked.rows[0]) throw new HttpError(404, 'Room not found.');
+      requireRoomAdmin(locked.rows[0], req.user.id);
+      const currentBattles = await client.query('SELECT status FROM battles WHERE room_id=$1', [room.id]);
+      if (currentBattles.rows.some(b => !TERMINAL_BATTLE.includes(b.status)))
+        throw new HttpError(409, 'A battle is still in progress in this room.');
       await client.query(
         `UPDATE room_participants SET state = 'left', left_at = now()
           WHERE room_id = $1 AND state IN ('waiting','ready')`, [room.id]);
@@ -1954,6 +2009,12 @@ router.delete('/:code', ah(async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+      const locked = await client.query('SELECT * FROM battle_rooms WHERE id=$1 AND deleted_at IS NULL FOR UPDATE', [room.id]);
+      if (!locked.rows[0]) throw new HttpError(404, 'Room not found.');
+      requireRoomAdmin(locked.rows[0], req.user.id);
+      const currentBattles = await client.query('SELECT status FROM battles WHERE room_id=$1', [room.id]);
+      if (currentBattles.rows.some(b => !TERMINAL_BATTLE.includes(b.status)))
+        throw new HttpError(409, 'A battle is still in progress in this room.');
     await client.query(
       `UPDATE battle_rooms SET deleted_at = now(), status = 'ended',
                                ended_at = COALESCE(ended_at, now())
@@ -2066,6 +2127,7 @@ router.post('/:code/start', ah(async (req, res) => {
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
+    if (e.status === 409) rt.emitRoom(String(req.params.code).trim(), { action: 'start_rejected' });
     throw e;
   } finally {
     client.release();

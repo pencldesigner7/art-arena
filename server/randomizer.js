@@ -62,7 +62,7 @@ router.post('/rooms/:code/randomizer-config', ah(async (req, res) => {
   requireRoomHost(room, req.user.id);
   if (room.status !== 'lobby')
     throw new HttpError(409, 'Challenge elements are locked once the battle starts.');
-  if (room.auto_start) // v58: matchmaking battles use the fixed default categories
+  if (room.auto_start || room.origin === 'matchmaking') // room origin, not the join path: matchmaking battles use the fixed default categories
     throw new HttpError(409, 'Matchmaking battles use the default challenge elements (Character · Environment · Object · Style).');
 
   const catsIn = (req.body || {}).categories;
@@ -80,10 +80,12 @@ router.post('/rooms/:code/randomizer-config', ah(async (req, res) => {
     throw new HttpError(400, 'Select at least one category.');
 
   const config = { categories: cats, difficulty: difficultyFor(cats.length), updated_at: new Date().toISOString() };
-  await pool.query(
-    'UPDATE battle_rooms SET randomizer_config = $1 WHERE id = $2',
-    [JSON.stringify(config), room.id]
+  const saved = await pool.query(
+    `UPDATE battle_rooms SET randomizer_config = $1 WHERE id = $2 AND host_id = $3
+      AND status = 'lobby' AND deleted_at IS NULL AND COALESCE(origin,'created') = 'created'
+      RETURNING id`, [JSON.stringify(config), room.id, req.user.id]
   );
+  if (!saved.rowCount) throw new HttpError(409, 'Room ownership or state changed — refresh and try again.');
   rt.emitRoom(room.code, { action: 'settings', username: req.user.username, what: 'challenge elements' });
   res.json(await roomPayload(room.code, req.user.id));
 }));

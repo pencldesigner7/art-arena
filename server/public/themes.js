@@ -43,6 +43,8 @@
 
   function ThemeScene(host, opts) {
     opts = opts || {};
+    if (opts.theme === 'chrome' && window.ChromeThemeScene) return new window.ChromeThemeScene(host, opts);
+    if (opts.theme === 'comic' && window.ComicThemeScene) return new window.ComicThemeScene(host, opts);
     this.host = host;
     this.theme = opts.theme || 'flame';
     this.custom = opts.custom || null;

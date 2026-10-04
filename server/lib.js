@@ -154,6 +154,8 @@ function authUserPayload(u) {
 // glowing additionally expose manual color customization (solid or gradient
 // + direction) persisted in users.ui_theme_custom. All strictly 2D.
 const PREMIUM_THEMES = [
+  { key: 'chrome', name: 'Liquid Chrome', hint: 'Reflective metal · switch between Chrome and Gold', premium: true, customizable: false, finishes: ['chrome','gold'] },
+  { key: 'comic', name: 'Comic', hint: 'Comic / Manga · pop art or monochrome ink', premium: true, customizable: false, finishes: ['comic','manga'] },
   { key: 'flame',    name: 'Flame',           hint: 'Fire gradients · ember background · animated buttons', premium: true,  customizable: true, c1: '#FF5A00', c2: '#FFC300' },
   { key: 'cloud',    name: 'Cloud',           hint: 'Blue sky · drifting clouds · calm and smooth', premium: true,  customizable: false },
   { key: 'glitch',   name: 'Glitch',          hint: 'Neon RGB · occasional glitch pulses', premium: true,  customizable: true, c1: '#00F0FF', c2: '#FF2BD1' },
@@ -171,7 +173,10 @@ function themeCatalog() { return [...FREE_THEMES, ...PREMIUM_THEMES]; }
 // is dropped server-side; the client never decides entitlement.
 function sanitizeThemeCustom(themeKey, custom) {
   const t = PREMIUM_THEMES.find((x) => x.key === themeKey);
-  if (!t || !t.customizable || !custom || typeof custom !== 'object') return null;
+  if (!t || !custom || typeof custom !== 'object' || Array.isArray(custom)) return null;
+  if (themeKey === 'comic') return { finish: custom.finish === 'manga' ? 'manga' : 'comic' };
+  if (themeKey === 'chrome') return { finish: custom.finish === 'gold' ? 'gold' : 'chrome' };
+  if (!t.customizable) return null;
   const hex = (v) => /^#[0-9a-fA-F]{6}$/.test(String(v)) ? String(v).toUpperCase() : null;
   const c1 = hex(custom.c1) || t.c1;
   const c2 = hex(custom.c2) || t.c2;

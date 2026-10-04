@@ -275,9 +275,17 @@ async function runRandomizerV2Tests() {
   const joinRes = await req('POST', `/api/rooms/${roomCode}/join`, { seat: 2 }, guestToken);
   assert.strictEqual(joinRes.status, 200);
 
-  // Both pick canvas
-  await req('POST', `/api/rooms/${roomCode}/canvas`, { drawing_app_key: 'photoshop' }, hostToken);
-  await req('POST', `/api/rooms/${roomCode}/canvas`, { drawing_app_key: 'krita' }, guestToken);
+  // Use an available integration; selecting a canvas does not imply Ready.
+  for (const token of [hostToken, guestToken]) {
+    const canvas = await req('POST', `/api/rooms/${roomCode}/canvas`, { drawing_app_key: 'krita' }, token);
+    assert.strictEqual(canvas.status, 200);
+  }
+  const notReady = await req('POST', `/api/rooms/${roomCode}/start`, {}, hostToken);
+  assert.strictEqual(notReady.status, 409, 'Presence/canvas alone must not start the battle');
+  for (const token of [hostToken, guestToken]) {
+    const ready = await req('POST', `/api/rooms/${roomCode}/ready`, {}, token);
+    assert.strictEqual(ready.status, 200);
+  }
 
   // Host starts battle (arms reveal / challenge_locked)
   const startRes = await req('POST', `/api/rooms/${roomCode}/start`, {}, hostToken);
