@@ -752,7 +752,11 @@ app.get('/api/notifications/unread', requireAuth, ah(async (req, res) => {
 // SAME table with source='paystack' after verified payment — gating, badge,
 // themes and re-roll read ONLY the entitlement, never the button.
 // ---------------------------------------------------------------------------
-const PREMIUM_TEST_MODE = process.env.PREMIUM_TEST_MODE !== '0'; // set PREMIUM_TEST_MODE=0 in production
+// OPT-IN since the security audit: test activation is OFF unless the
+// deployment EXPLICITLY sets PREMIUM_TEST_MODE=1 (controlled dev/testing
+// only). An unset or '0' value keeps /api/premium/test-activate locked —
+// no authenticated user can self-grant Premium on a default deployment.
+const PREMIUM_TEST_MODE = process.env.PREMIUM_TEST_MODE === '1';
 app.get('/api/premium/status', requireAuth, ah(async (req, res) => {
   res.json({ ...(await premiumOf(req.user.id)), test_mode: PREMIUM_TEST_MODE });
 }));

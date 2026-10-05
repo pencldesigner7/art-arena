@@ -1589,3 +1589,76 @@ CREATE INDEX IF NOT EXISTS idx_twitch_sessions_broadcaster
     ON public.twitch_stream_sessions (broadcaster_twitch_id, status);
 CREATE INDEX IF NOT EXISTS idx_twitch_sessions_host
     ON public.twitch_stream_sessions (host_user_id, created_at DESC);
+
+-- ============================================================================
+-- v53/v58/v61/v63c/v68 — BOOT-MIGRATION COMPLETENESS
+-- Everything the server's idempotent startup migrations would otherwise add
+-- is embedded here, so a brand-new database created from THIS file is fully
+-- runtime-complete on its own — including under the documented least-
+-- privilege app role (DML only, no DDL). Statements mirror the boot
+-- migrations verbatim and are idempotent: on an already-migrated database
+-- every line below is a no-op.
+-- ============================================================================
+
+-- v53: per-theme UI customization map (login reads u.ui_theme_custom).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS ui_theme_custom jsonb;
+
+-- v58: the community-voting window (the battle-end sweeper closes it).
+ALTER TABLE battles ADD COLUMN IF NOT EXISTS voting_ends_at timestamptz;
+
+-- v58: battle_votes primary key + lookup index.
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                  WHERE conrelid = 'battle_votes'::regclass AND contype = 'p') THEN
+    ALTER TABLE battle_votes ADD CONSTRAINT battle_votes_pkey PRIMARY KEY (id);
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_battle_votes_battle ON battle_votes (battle_id);
+
+-- v58: matched_room_id → ON DELETE SET NULL (a deleted room must never
+-- strand a queue claim).
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint
+              WHERE conname = 'matchmaking_queue_matched_room_id_fkey'
+                AND conrelid = 'matchmaking_queue'::regclass
+                AND confdeltype <> 'n') THEN
+    ALTER TABLE matchmaking_queue DROP CONSTRAINT matchmaking_queue_matched_room_id_fkey;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                  WHERE conname = 'matchmaking_queue_matched_room_id_fkey'
+                    AND conrelid = 'matchmaking_queue'::regclass) THEN
+    -- orphans from earlier hard deletes would block the ADD; null them first
+    UPDATE matchmaking_queue q SET matched_room_id = NULL
+     WHERE matched_room_id IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM battle_rooms r WHERE r.id = q.matched_room_id);
+    ALTER TABLE matchmaking_queue
+      ADD CONSTRAINT matchmaking_queue_matched_room_id_fkey
+      FOREIGN KEY (matched_room_id) REFERENCES battle_rooms(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+-- v61: profile pictures persist in the DB (the container disk is ephemeral).
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS avatar_data bytea;
+
+-- v61: 3v3 team-selection foundation.
+CREATE TABLE IF NOT EXISTS team_drafts (
+   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+   captain_id uuid NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+   name text,
+   created_at timestamptz NOT NULL DEFAULT now(),
+   updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS team_draft_members (
+   draft_id uuid NOT NULL REFERENCES team_drafts(id) ON DELETE CASCADE,
+   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+   position smallint NOT NULL,
+   status text NOT NULL DEFAULT 'drafted' CHECK (status IN ('drafted','invited','accepted','declined')),
+   invited_at timestamptz, responded_at timestamptz,
+   PRIMARY KEY (draft_id, user_id));
+
+-- v63c: tournament bracket store (seeded single-elim tree).
+ALTER TABLE battle_rooms ADD COLUMN IF NOT EXISTS bracket jsonb;
+
+-- v54/v61/v68: notification vocabulary the runtime inserts.
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'premium_activated';
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'team_invitation';
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'mm_team_invite';

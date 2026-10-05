@@ -25,6 +25,10 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENV NODE_ENV=development
+# Premium test activation is OPT-IN and stays OFF in the image. A deployment
+# that genuinely needs /api/premium/test-activate must explicitly override
+# PREMIUM_TEST_MODE=1 in its platform environment (controlled testing only).
+ENV PREMIUM_TEST_MODE=0
 # Render injects its own PORT (default 10000); the app reads process.env.PORT.
 EXPOSE 10000
 CMD ["/entrypoint.sh"]
