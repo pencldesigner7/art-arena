@@ -7,16 +7,16 @@ const {chromium}=require('playwright');
  await p.goto('http://127.0.0.1:3000');await p.waitForTimeout(1700);assert.equal(await p.evaluate(()=>entryStarts),1);
  for(const key of ['graffiti','glowing','flame']){await p.evaluate(k=>applyPremiumTheme(k,null),key);assert((await p.locator('link[rel="icon"]').getAttribute('href')).includes(key+'-icon'));await p.locator('#aa-entry img').evaluate(im=>im.decode());assert.equal(await p.locator('#aa-entry').getAttribute('data-mark'),key);if(key!=='graffiti')assert((await p.locator('#aa-entry img').evaluate(e=>getComputedStyle(e).filter)).includes('drop-shadow'));}
  assert.equal(await p.evaluate(()=>entryStarts),1);
- await p.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));await p.waitForTimeout(100);assert.equal(await p.evaluate(()=>entryStarts),2);
+ await p.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));await p.waitForTimeout(400);assert.equal(await p.evaluate(()=>entryStarts),2);
  assert.equal(await p.locator('#aa-entry').evaluate(e=>getComputedStyle(e,'::after').content),'none');
  await p.waitForTimeout(1600);assert.equal(await p.locator('#aa-entry').evaluate(e=>getComputedStyle(e).visibility),'hidden');
  for(const finish of ['comic','manga']){
   await p.evaluate(f=>applyPremiumTheme('comic',{finish:f}),finish);await p.waitForSelector('.aa-comic-scene');
-  assert.equal(await p.locator('.aa-comic-scene img').count(),finish==='comic'?7:5);
+  assert.equal(await p.locator('.aa-comic-scene img').count(),7); // v72: manga gains the two supplied SFX stickers (ドドン/ポカーン)
   const wall=()=>p.locator('.aa-comic-scene').evaluate(e=>getComputedStyle(e,'::before').transform);
   const a=await wall();await p.waitForTimeout(160);assert.notEqual(await wall(),a);
-  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationName),finish==='comic'?'aa-comic-impact':'aa-comic-pop');
-  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationDuration),'22s');
+  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationName),finish==='comic'?'aa-comic-impact':'aa-manga-pop'); // v72: manga gets its own livelier choreography
+  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationDuration),finish==='comic'?'22s':'9.5s'); // v72: varied per-sticker timing in manga
   assert.equal(await p.locator('.aa-comic-scene').evaluate(e=>getComputedStyle(e).transform),'none');
   if(finish==='comic')await p.locator('img[src="/themes/comic/pow.png"]').evaluate(im=>im.decode());
   await p.evaluate(()=>setAnimations(false));assert.equal(await p.locator('.aa-comic-scene').evaluate(e=>getComputedStyle(e,'::before').animationName),'none');await p.evaluate(()=>setAnimations(true));

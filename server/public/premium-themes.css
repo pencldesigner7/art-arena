@@ -73,11 +73,14 @@ body[data-ptheme="comic"][data-finish="manga"] .card,body[data-ptheme="comic"][d
 .aa-comic-scene.still::before { animation:none; transform:scale(1.02); will-change:auto; }
 /* One-shot cinematic entry: crown/mark resolves through a soft bloom, without a ring. */
 #aa-entry { overflow:hidden; isolation:isolate; }
-#aa-entry img { position:relative; z-index:2; transform-origin:50% 60%; animation:aa-entry-mark .95s cubic-bezier(.18,.75,.25,1) both; }
-@keyframes aa-entry-mark { 0% { opacity:0; transform:translateY(22px) scale(.76) rotate(-5deg); } 56% { opacity:1; transform:translateY(-5px) scale(1.06) rotate(1deg); } 80% { transform:translateY(1px) scale(.99); } 100% { opacity:1; transform:none; } }
+/* v72: NO BOUNCE — the mark fades in and then stays perfectly static.
+   (previously this premium override sprang the mark in with overshoot) */
+#aa-entry img { position:relative; z-index:2; animation:aa-entry-mark .85s ease both; }
+@keyframes aa-entry-mark { 0% { opacity:0; } 100% { opacity:1; } }
 #aa-entry::before { content:""; position:absolute; width:min(85vw,620px); aspect-ratio:1; border-radius:50%; background:radial-gradient(circle,rgba(var(--pink-rgb),.28),rgba(var(--purple-rgb),.1) 42%,transparent 68%); animation:aa-entry-bloom 1.35s ease-out both; }
 @keyframes aa-entry-bloom { from { opacity:0; transform:scale(.5); } 40% { opacity:1; } to { opacity:.35; transform:scale(1.2); } }
-#aa-entry[data-mark="flame"] img { filter:drop-shadow(0 0 9px rgba(255,133,30,.85)) drop-shadow(0 0 25px rgba(255,65,10,.45)); }
+/* v72: Flame mark glow is YELLOW neon (tight, crisp) — never orange. */
+#aa-entry[data-mark="flame"] img { filter:drop-shadow(0 0 5px rgba(255,224,64,.9)) drop-shadow(0 0 16px rgba(255,214,0,.5)); }
 #aa-entry[data-mark="glowing"] img { filter:drop-shadow(0 0 8px rgba(130,255,230,.85)) drop-shadow(0 0 26px rgba(40,165,255,.5)); }
 #aa-entry.aa-entry-reset::before { animation:none; }
 html[data-anim="off"] #aa-entry { animation-delay:.15s; animation-duration:.1s; }
@@ -101,4 +104,31 @@ html[data-anim="off"] #aa-entry::before { animation:none; display:none; }
   8%,12% { opacity:1; transform:translate(0,0) rotate(var(--pop-angle)) scale(1.06); }
   13.5% { opacity:1; transform:translate(0,-5px) rotate(calc(var(--pop-angle) - 5deg)) scale(1.22,.88); }
   16%,100% { opacity:0; transform:translate(calc(0px - var(--impact-x)),-75px) rotate(calc(var(--pop-angle) + 24deg)) scale(.25,1.4); }
+}
+
+/* v72: MANGA onomatopoeia choreography — as lively as the pop-art impact
+   (directional scale-in with overshoot, squash & stretch, impact shake,
+   staggered appearances, varied per-sticker timing, directional exit) while
+   staying readable: a static hold window, no overlapping chaos. Artwork only;
+   reduced-motion / .still keep the calm layout. */
+@media (prefers-reduced-motion:no-preference) {
+  .aa-comic-scene.manga:not(.still) img { animation-name:aa-manga-pop; animation-duration:var(--pop-dur,8s); animation-timing-function:cubic-bezier(.2,.8,.25,1); width:clamp(78px,13vw,200px); }
+  .aa-comic-scene.manga:not(.still) img.sfx { width:clamp(120px,21vw,300px); }
+}
+@keyframes aa-manga-pop {
+  0%,1%   { opacity:0; transform:translate(calc(var(--impact-x) * .8),60px) rotate(calc(var(--pop-angle) - 20deg)) scale(.18,.45); }
+  2.6%    { opacity:1; transform:translate(0,-11px) rotate(calc(var(--pop-angle) + 8deg)) scale(1.32,1.08); }
+  4%      { opacity:1; transform:translate(0,7px)  rotate(calc(var(--pop-angle) - 6deg)) scale(1.14,.78); }
+  5.4%    { opacity:1; transform:translate(-5px,-4px) rotate(calc(var(--pop-angle) + 4deg)) scale(.92,1.14); }
+  6.8%    { opacity:1; transform:translate(4px,2px)  rotate(calc(var(--pop-angle) - 2deg)) scale(1.07,.95); }
+  8%,27%  { opacity:1; transform:translate(0,0) rotate(var(--pop-angle)) scale(1); }
+  31%,100%{ opacity:0; transform:translate(calc(var(--impact-x) * -.6),-70px) rotate(calc(var(--pop-angle) + 18deg)) scale(.3,1.25); }
+}
+
+/* v72: the supplied Glitch artwork is a white wordmark — on LIGHT mode it
+   needs a thin dark contour to stay legible (visibility aid only; the
+   artwork pixels themselves are never recoloured). */
+html[data-theme="light"] body[data-ptheme="glitch"] img[data-aa-logo],
+html[data-theme="light"] #aa-entry[data-mark="glitch"] img {
+  filter:drop-shadow(0 0 1px rgba(20,16,40,.9)) drop-shadow(0 1px 2px rgba(20,16,40,.55));
 }

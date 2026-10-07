@@ -874,6 +874,26 @@ router.post('/sessions/:id/end', requireAuth, ah(async (req, res) => {
   res.json({ ok: true });
 }));
 
+// v72: CANCEL a stream that is only STARTING (status 'preparing') — owner
+// only. The row is removed entirely so no stale starting state survives.
+// A session that is already live must use /sessions/:id/end instead.
+router.post('/sessions/:id/cancel', requireAuth, ah(async (req, res) => {
+  const id = String(req.params.id || '');
+  const { rows } = await pool.query(
+    `SELECT id, status FROM twitch_stream_sessions WHERE id = $1 AND host_user_id = $2 LIMIT 1`,
+    [id, req.user.id]
+  );
+  const session = rows[0];
+  if (!session) throw new HttpError(404, 'No starting stream session to cancel.');
+  if (session.status === 'live')
+    throw new HttpError(409, 'This stream is live — use End Stream instead.');
+  if (session.status === 'ended')
+    throw new HttpError(409, 'This stream session already ended.');
+  await pool.query(`DELETE FROM twitch_stream_sessions WHERE id = $1`, [session.id]);
+  emitSessionEvent(session, 'twitch_cancelled');
+  res.json({ ok: true, cancelled: true });
+}));
+
 // ---------------------------------------------------------------------------
 // The LIVE page data — exported for server.js (merged with youtube.liveData()
 // under GET /api/live). A battle appears LIVE only when Twitch GENUINELY

@@ -577,22 +577,8 @@ try {
   .pth-preview { flex:0 0 auto; width:56px; height:38px; border-radius:9px; border:1px solid var(--line); background:linear-gradient(135deg, var(--pth-c1,#888), var(--pth-c2,#ccc)); }
   .pth-dot:hover { transform:scale(1.12); border-color:var(--pink); }
   .pth-arrow { color:var(--muted); font-size:16px; }
-  .pth-dir-wrap { display:flex; align-items:center; gap:8px; flex:1 1 150px; min-width:150px; }
-  /* v59: the direction slider inherited the GLOBAL input rule (padding 10px
-     12px, border, margin-top, surface background). A padded/bordered range is
-     drawn as a box that is wider than its real track, so the thumb's min/max
-     stopped 12px+ short of the visible ends and the box had "dead" space.
-     Reset the box model completely and size track + thumb explicitly so the
-     thumb's travel (thumb-radius … width − thumb-radius) IS the drawn track. */
-  .pth-dir-wrap input[type="range"] { -webkit-appearance:none; appearance:none; flex:1 1 auto; width:auto; min-width:90px; height:18px; margin:0; padding:0; border:0; border-radius:0; background:transparent; cursor:pointer; accent-color:var(--pink); }
-  .pth-dir-wrap input[type="range"]:focus { outline:none; }
-  .pth-dir-wrap input[type="range"]:focus-visible { outline:2px solid var(--purple); outline-offset:3px; border-radius:9px; }
-  .pth-dir-wrap input[type="range"]::-webkit-slider-runnable-track { height:6px; border-radius:3px; background:linear-gradient(90deg, var(--pth-c1, var(--pink)) 0%, var(--pth-c1, var(--pink)) var(--pth-dir-pct, 37.5%), var(--line) var(--pth-dir-pct, 37.5%), var(--line) 100%); }
-  .pth-dir-wrap input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; margin-top:-5px; border-radius:50%; background:var(--pth-c1, var(--pink)); border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.4); }
-  .pth-dir-wrap input[type="range"]::-moz-range-track { height:6px; border-radius:3px; background:var(--line); }
-  .pth-dir-wrap input[type="range"]::-moz-range-progress { height:6px; border-radius:3px; background:var(--pth-c1, var(--pink)); }
-  .pth-dir-wrap input[type="range"]::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:var(--pth-c1, var(--pink)); border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.4); }
-  .pth-dir-deg { font-size:11.5px; color:var(--muted); width:34px; text-align:right; flex:0 0 auto; }
+  /* v72: the gradient-direction slider was removed (useless control) — the
+     theme gradient is fixed at 135deg. No replacement was added. */
   #pth-save { margin-left:auto; }
   #pth-deactivate { border-color:var(--pink); color:var(--pink); font-weight:700; }
 
@@ -783,6 +769,27 @@ try {
   .live-meta { font-size:13.5px; color:var(--muted); }
   .live-challenge { font-size:13px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:6px 10px; }
   .live-platform { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--muted); border:1px solid var(--btn-line); border-radius:999px; padding:2px 9px; }
+  .live-platform svg { display:block; }
+
+  /* v72 MY STREAMS status cards — wide, homepage-card language, themed via
+     tokens so every theme + light/dark adapts automatically. */
+  .my-streams { display:flex; flex-direction:column; gap:12px; }
+  .stream-card { display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 16px; transition:border-color .25s ease; }
+  .stream-card:hover { border-color:rgba(var(--pink-rgb),.5); }
+  .stream-card .sc-logo { flex:0 0 auto; display:grid; place-items:center; width:52px; height:40px; }
+  .stream-card .sc-body { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .sc-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .sc-head b { font-size:15px; }
+  .sc-state { font-size:12px; color:var(--muted); }
+  .sc-state.err { color:var(--danger-tx); }
+  .sc-controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .sc-controls select, .sc-controls input { flex:1 1 140px; min-width:120px; margin:0; }
+  .sc-timer { font-variant-numeric:tabular-nums; font-weight:800; color:var(--pink); font-size:13px; }
+  .sc-dot { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px; font-size:10px; font-weight:800; letter-spacing:.6px; color:var(--muted); }
+  .sc-dot i { width:14px; height:14px; border-radius:50%; background:#e5484d; box-shadow:0 0 0 3px rgba(229,72,77,.22); }
+  .sc-dot[data-on="1"] i { background:#30a46c; box-shadow:0 0 0 3px rgba(48,164,108,.22); }
+  .sc-dot[data-on="1"] { color:#30a46c; }
+  .sc-dot em { font-style:normal; }
   .live-count { font-variant-numeric:tabular-nums; font-weight:800; font-size:13px; color:var(--text); }
   .live-empty { text-align:center; padding:26px 14px; border:1px dashed var(--line); border-radius:12px; margin-top:8px; }
   .live-empty b { display:block; font-size:15.5px; margin-bottom:4px; }
@@ -804,7 +811,10 @@ try {
   .tw-line .muted { font-size:12px; }
   .tw-chip { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; letter-spacing:1.2px; padding:3px 9px; border-radius:999px; border:1px solid var(--pink); color:var(--pink); }
   .tw-chip.preparing { border-color:var(--btn-line); color:var(--muted); letter-spacing:1px; }
-  .tw-embed { position:relative; width:100%; aspect-ratio:16/9; max-height:340px; border-radius:12px; overflow:hidden; background:#000; border:1px solid var(--line); }
+  .tw-embed { position:relative; width:100%; aspect-ratio:16/9; max-height:340px; border-radius:12px; overflow:hidden; background:#000; border:1px solid var(--line); isolation:isolate; }
+  /* v72: the Twitch player must sit on solid black in BOTH modes — no white
+     or transparent backdrop may show through around the real embed. */
+  html[data-theme="light"] .tw-embed, html[data-theme="light"] .tw-embed iframe { background:#000; }
   .tw-embed iframe { background:#000; color-scheme:normal; opacity:1; position:absolute; inset:0; width:100%; height:100%; border:0; }
   .tw-connect { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:8px; }
   .tw-connect img { width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); object-fit:cover; }
@@ -2535,12 +2545,31 @@ try {
   #aa-entry { position:fixed; inset:0; z-index:2147483000; display:grid; place-items:center;
     background:radial-gradient(ellipse at 25% 35%,rgba(var(--pink-rgb),.28),transparent 60%),
       radial-gradient(ellipse at 80% 65%,rgba(var(--purple-rgb),.32),transparent 65%),var(--bg);
-    pointer-events:none; animation:aa-entry-exit .35s ease 1.15s forwards; }
+    pointer-events:none; }
+  /* v72 network gate: while the connection check runs the overlay HOLDS the
+     user on the entry screen (pointer-events:auto) and shows a themed
+     spinner; once online it exits exactly once. */
+  #aa-entry.aa-hold { pointer-events:auto; }
+  #aa-entry.aa-exit { animation:aa-entry-exit .35s ease forwards; }
+  /* after exit the overlay is gone for good: no invisible blocking layer. */
+  #aa-entry.aa-done { display:none; visibility:hidden; }
   #aa-entry img { width:min(48vw,280px); height:min(48vw,280px); object-fit:contain;
     animation:aa-entry-mark .85s ease both; }
-  @keyframes aa-entry-mark { from { opacity:0; transform:translateY(8px) scale(.96); } to { opacity:1; transform:none; } }
+  /* v72: fade in, hold the final opacity, done — no bounce, no overshoot,
+     no pulse, no float. The mark is completely static once settled. */
+  @keyframes aa-entry-mark { from { opacity:0; } to { opacity:1; } }
   @keyframes aa-entry-exit { to { opacity:0; visibility:hidden; } }
-  @media(prefers-reduced-motion:reduce) { #aa-entry { animation-delay:.15s; animation-duration:.1s; } #aa-entry img { animation:none; } }
+  #aa-entry .aa-net { position:absolute; left:50%; bottom:11%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:10px; max-width:86vw;
+    color:var(--muted); font-size:13px; text-align:center; }
+  /* the author display:flex above would otherwise beat the UA [hidden] rule */
+  #aa-entry .aa-net[hidden], #aa-entry .aa-net-err[hidden] { display:none; }
+  #aa-entry .aa-spin { width:26px; height:26px; border-radius:50%; border:3px solid var(--line);
+    border-top-color:var(--pink); animation:aa-spin .9s linear infinite; }
+  @keyframes aa-spin { to { transform:rotate(360deg); } }
+  #aa-entry .aa-net-err { color:var(--danger-tx); background:var(--danger-bg); border:1px solid var(--danger-bd);
+    padding:8px 12px; border-radius:10px; }
+  @media(prefers-reduced-motion:reduce) { #aa-entry.aa-exit { animation-duration:.1s; } #aa-entry img { animation:none; } #aa-entry .aa-spin { animation-duration:1.6s; } }
 </style>
 <link rel="stylesheet" href="/premium-themes.css?v=3">
 </head>
@@ -2565,13 +2594,12 @@ try {
     var rgb = function (h) { var m = /^#?([0-9a-f]{6})$/i.exec(String(h || '')); if (!m) return null; var n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(','); };
     if (t.custom && t.custom.c1) { b.style.setProperty('--pth-c1', t.custom.c1); b.style.setProperty('--pth-c1-rgb', rgb(t.custom.c1)); }
     if (t.custom && t.custom.c2) { b.style.setProperty('--pth-c2', t.custom.c2); b.style.setProperty('--pth-c2-rgb', rgb(t.custom.c2)); }
-    if (t.custom && typeof t.custom.dir === 'number') b.style.setProperty('--pth-dir', t.custom.dir + 'deg');
     if (t.custom && t.custom.c1) b.setAttribute('data-pcustom', '1'); // v68: surfaces are tinted from the very first paint
   } catch (_) {}
 })();
 </script>
 
-<div id="aa-entry" aria-hidden="true"><img src="/favicon.png?v=art-arena-mark-3" alt=""></div>
+<div id="aa-entry" aria-hidden="true"><img src="/favicon.png?v=art-arena-mark-3" alt=""><div class="aa-net" id="aa-net" hidden><span class="aa-spin" aria-hidden="true"></span><span id="aa-net-msg">Checking connection…</span><span class="aa-net-err" id="aa-net-err" hidden>No network connection. Please check your connection and try again.</span></div></div>
 <script>
 (() => {
   const entry = document.getElementById('aa-entry');
@@ -2590,9 +2618,61 @@ try {
   };
   try { const saved=JSON.parse(localStorage.getItem('aa-ptheme')||'null'); if(saved) window.ArenaBrandmarks.set(saved.key,saved.custom); } catch (_) {}
 
+  // v72 NETWORK GATE — the entry overlay is the app gate. Offline visitors
+  // stay on it with a themed "Checking connection…" spinner; once a ping
+  // succeeds (or the browser fires `online`) the gate releases exactly once.
+  // No aggressive polling: retries back off and browser events do the rest.
+  const netBox = entry.querySelector('#aa-net');
+  const netMsg = entry.querySelector('#aa-net-msg');
+  const netErr = entry.querySelector('#aa-net-err');
+  let gateSettled = false, gateTries = 0, gateTimer = null, gateStart = performance.now(), exitTimer = null, killTimer = null;
+  const showHold = (on) => { entry.classList.toggle('aa-hold', on); netBox.hidden = !on; if (!on) netErr.hidden = true; };
+  const exitEntry = () => {
+    const minHold = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1150; // reduced motion exits as soon as the gate clears
+    const wait = Math.max(0, minHold - (performance.now() - gateStart)); // pre-v72 settle timing
+    clearTimeout(exitTimer); clearTimeout(killTimer); // one exit in flight at a time
+    exitTimer = setTimeout(() => {
+      entry.classList.remove('aa-hold');
+      netBox.hidden = true;
+      entry.classList.add('aa-exit');
+      entry.addEventListener('animationend', (e) => { if (e.target === entry) entry.classList.add('aa-done'); });
+      killTimer = setTimeout(() => entry.classList.add('aa-done'), 900); // never leave a blocking layer
+    }, wait);
+  };
+  const gatePing = () => fetch('/api/health', { cache: 'no-store' }).then((r) => r.ok).catch(() => false);
+  const gateCheck = async () => {
+    if (gateSettled) return;
+    const ok = navigator.onLine !== false && await gatePing();
+    if (ok) { gateSettled = true; showHold(false); exitEntry(); return; }
+    showHold(true);
+    gateTries += 1;
+    netMsg.textContent = 'Checking connection…';
+    netErr.hidden = gateTries < 2; // clear error notice from the second failed check onward
+    gateTimer = setTimeout(gateCheck, [1500, 2500, 5000, 8000][Math.min(gateTries - 1, 3)]);
+  };
+  window.addEventListener('offline', () => {
+    if (gateSettled) return;
+    clearTimeout(gateTimer);
+    showHold(true);
+    netMsg.textContent = 'Checking connection…';
+    netErr.hidden = false;
+  });
+  window.addEventListener('online', () => {
+    if (gateSettled) return;
+    clearTimeout(gateTimer);
+    gateTries = 0;
+    gateCheck();
+  });
+  gateCheck();
+
   // One listener for browser document restoration; never tied to show()/renderRoom().
   window.addEventListener('pageshow', event => {
     if (!event.persisted) return;
+    gateSettled = false; gateTries = 0;
+    clearTimeout(gateTimer); clearTimeout(exitTimer); clearTimeout(killTimer); // stale exit/kill timers must never stomp the restore
+    gateStart = performance.now();
+    entry.classList.remove('aa-done', 'aa-exit', 'aa-hold');
+    netBox.hidden = true; netErr.hidden = true;
     entry.classList.add('aa-entry-reset');
     entry.style.animation = 'none';
     const mark = entry.querySelector('img');
@@ -2601,6 +2681,7 @@ try {
     entry.style.animation = '';
     mark.style.animation = '';
     entry.classList.remove('aa-entry-reset');
+    gateCheck(); // re-arm the gate for the restored document LAST (async)
   });
 })();
 </script>
@@ -2909,6 +2990,30 @@ try {
     <h2 style="margin-top:24px">UPCOMING LIVE BATTLES</h2>
     <div id="live-upcoming-list" class="live-grid"></div>
     <div id="live-upcoming-empty" class="live-empty hidden"><b>No upcoming live battles yet</b><span>Scheduled livestream battles will appear here with a countdown.</span></div>
+
+    <!-- v72 MY STREAMS: per-platform status cards (real official logos,
+         right-side circular NOT LIVE / LIVE indicator, independent states,
+         Cancel while starting). Stream timers render ONLY on this page. -->
+    <h2 style="margin-top:24px">MY STREAMS</h2>
+    <p class="muted" style="margin:0 0 12px; font-size:13px">Set up and control your battle broadcasts. YouTube and Twitch are independent — run one, or both at the same time.</p>
+    <div class="my-streams">
+      <div class="stream-card" id="sc-yt">
+        <span class="sc-logo" aria-hidden="true"><svg viewBox="0 0 28 20" width="34" height="24"><path fill="#FF0000" d="M27.4 3.12c-.32-1.2-1.26-2.14-2.45-2.46C22.8.1 14 .1 14 .1S5.2.1 3.05.66C1.86.98.92 1.92.6 3.12.06 5.28.06 9.8.06 9.8s0 4.52.54 6.68c.32 1.2 1.26 2.14 2.45 2.46C5.2 19.5 14 19.5 14 19.5s8.8 0 10.95-.56c1.19-.32 2.13-1.26 2.45-2.46.54-2.16.54-6.68.54-6.68s0-4.52-.54-6.68Z"/><path fill="#fff" d="M11.2 13.86 18.5 9.8l-7.3-4.06v8.12Z"/></svg></span>
+        <div class="sc-body">
+          <div class="sc-head"><b>YouTube</b><span class="sc-state" id="sc-yt-state">Checking…</span></div>
+          <div class="sc-controls" id="sc-yt-controls"></div>
+        </div>
+        <span class="sc-dot" id="sc-yt-dot" data-on="0"><i></i><em id="sc-yt-dot-label">NOT LIVE</em></span>
+      </div>
+      <div class="stream-card" id="sc-tw">
+        <span class="sc-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57V4.714Zm4.715 0H18v5.143h-1.714V4.714ZM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6Zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429Z"/></svg></span>
+        <div class="sc-body">
+          <div class="sc-head"><b>Twitch</b><span class="sc-state" id="sc-tw-state">Checking…</span></div>
+          <div class="sc-controls" id="sc-tw-controls"></div>
+        </div>
+        <span class="sc-dot" id="sc-tw-dot" data-on="0"><i></i><em id="sc-tw-dot-label">NOT LIVE</em></span>
+      </div>
+    </div>
   </section>
 
   <!-- ======================= ARENA HOME (main) — v26 ===================== -->
@@ -3666,7 +3771,6 @@ try {
           <button type="button" class="pth-dot" id="pth-c1-dot" title="Color 1"></button><input type="color" id="pth-c1" class="pth-hidden-color" tabindex="-1" aria-hidden="true">
           <span class="pth-arrow" id="pth-c-arrow">→</span>
           <button type="button" class="pth-dot" id="pth-c2-dot" title="Color 2"></button><input type="color" id="pth-c2" class="pth-hidden-color" tabindex="-1" aria-hidden="true">
-          <span class="pth-dir-wrap"><input type="range" id="pth-dir" min="0" max="360" step="15"><span class="pth-dir-deg" id="pth-dir-deg">135°</span></span>
           <span class="pth-preview" id="pth-preview" aria-hidden="true"></span>
           <button type="button" class="mini" id="pth-save">Apply</button>
         </div>
@@ -4298,8 +4402,7 @@ function applyPremiumTheme(key, custom) {
     b.style.setProperty('--pth-c2', (custom && custom.c2) || null);
     b.style.setProperty('--pth-c1-rgb', pthHexToRgb(custom && custom.c1) || null);
     b.style.setProperty('--pth-c2-rgb', pthHexToRgb(custom && custom.c2) || null);
-    if (custom && typeof custom.dir === 'number') b.style.setProperty('--pth-dir', custom.dir + 'deg');
-    else b.style.removeProperty('--pth-dir');
+    b.style.removeProperty('--pth-dir'); // v72: slider removed — angle fixed at 135deg
     // v68 (item 3): flag that the artist is wearing CUSTOM colours, so every
     // surface in the stylesheet (cards, panels, hero, settings groups, modals)
     // picks up a faint wash of the chosen palette — customization is visible
@@ -4855,7 +4958,7 @@ function show(name) {
   if (name === 'rooms' || name === 'arena') {
     startPolling(refreshRoomsList);
     }
-  else if (name === 'live') { startPolling(refreshLive); startLiveTicker(); } // v50: LIVE feed + countdowns
+  else if (name === 'live') { startPolling(refreshLiveAll); startLiveTicker(); refreshMyStreams(); } // v50+v72: LIVE feed + MY STREAMS + countdowns (timers live ONLY here)
   else if (name === 'room') startPolling(refreshRoom);
   else if (name === 'join') refreshJoinList();   // v35: live public list
   else if (name === 'premium') renderPremiumPage(); // v52: entitlement + catalog, server truth
@@ -4868,6 +4971,7 @@ function show(name) {
   else if (name === 'settings') refreshAccount(); // v45: settings form always reflects the server
   else if (name === 'about') paintAbout(); // v38: About shows the real version
   else if (name === 'notifications') loadNotifications(); // v51: real history
+  if (name !== 'live') stopLiveTicker(); // v72: stream timers exist ONLY on the LIVE page
   window.scrollTo(0, 0);
   rtSyncSubscriptions();
   // v38: any route into an auth view also closes the drawer (defense in
@@ -9504,10 +9608,10 @@ async function renderSettingsThemes() {
     pthActiveDefaults = { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
     if (pthFresh) { // v71 (item 18): never repaint the inputs over a newer live edit
       const cu = d.ui_custom || { c1: activeTheme.c1, c2: activeTheme.c2, dir: 135 };
-      $('#pth-c1').value = cu.c1; $('#pth-c2').value = cu.c2; $('#pth-dir').value = cu.dir;
+      $('#pth-c1').value = cu.c1; $('#pth-c2').value = cu.c2;
       $('#pth-c1-dot').style.setProperty('--dot', cu.c1); $('#pth-c2-dot').style.setProperty('--dot', cu.c2);
     }
-    pthDirPaint();
+    pthPreviewPaint();
   } else {
     customRow.classList.add('hidden');
     pthActiveDefaults = null; // v69: no editable colours → no Reset button
@@ -9565,9 +9669,9 @@ $('#settings-theme-grid').addEventListener('click', async (e) => {
 // no input repaint), and the explicit Apply button stays for a firm commit.
 let pthAutosaveT = null;
 function pthCurrentCustom() {
-  const c1 = $('#pth-c1'), c2 = $('#pth-c2'), dr = $('#pth-dir');
-  if (!c1 || !c2 || !dr) return null;
-  return { c1: c1.value, c2: c2.value, dir: Number(dr.value) };
+  const c1 = $('#pth-c1'), c2 = $('#pth-c2'); // v72: direction slider removed — 135deg fixed
+  if (!c1 || !c2) return null;
+  return { c1: c1.value, c2: c2.value, dir: 135 };
 }
 function pthPersist(custom) {
   if (!activeThemeKey || !mePremium || !custom) return Promise.resolve(null);
@@ -9593,7 +9697,7 @@ function pthLivePreview() {
   if (!activeThemeKey || !mePremium) return; // v61: gated
   pthEditSeq++; // v71 (item 18): a live edit — in-flight renders are now stale
   pthPreviewPaint(); // v71 (item 7): the strip tracks colour edits instantly too
-  const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };
+  const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: 135 };
   applyPremiumTheme(activeThemeKey, custom);
   pthTintedLogo(activeThemeKey, custom).then((url) => {
     const el = document.querySelector('[data-swatch-logo="' + activeThemeKey + '"]');
@@ -9708,32 +9812,21 @@ $('#pth-c2-dot').addEventListener('click', (e) => {
   if ($('#settings-theme-custom').classList.contains('hidden')) return;
   pthWheel.open(e.currentTarget, $('#pth-c2').value, (hx) => { $('#pth-c2').value = hx; $('#pth-c2-dot').style.setProperty('--dot', hx); pthLivePreview(); });
 });
-function pthDirPaint() {
-  const r = $('#pth-dir');
-  if (!r) return;
-  const min = Number(r.min) || 0, max = Number(r.max) || 360;
-  r.style.setProperty('--pth-dir-pct', ((Number(r.value) - min) / (max - min) * 100) + '%');
-  $('#pth-dir-deg').textContent = r.value + '°';
-  pthPreviewPaint(); // v71 (item 7)
-}
 // v71 (item 7): the preview strip shows the EXACT gradient the theme builds
-// from the two solid colours at the current angle — 0° = left→right, 90° =
-// top→bottom, 180° = right→left, continuous in between. Immediate, in every
+// from the two solid colours at the fixed 135deg angle. Immediate, in every
 // theme (it paints its own background, independent of themed surfaces).
 function pthPreviewPaint() {
   const pv = $('#pth-preview');
   if (!pv) return;
   const c1 = $('#pth-c1').value || '#888888', c2 = $('#pth-c2').value || '#cccccc';
-  const dir = Number($('#pth-dir').value || 135);
-  pv.style.background = 'linear-gradient(' + dir + 'deg, ' + c1 + ', ' + c2 + ')';
+  pv.style.background = 'linear-gradient(135deg, ' + c1 + ', ' + c2 + ')';
 }
-$('#pth-dir').addEventListener('input', () => { pthDirPaint(); pthLivePreview(); });
 $('#pth-save').addEventListener('click', async () => {
   if (!mePremium) { openUpsell('Manual colours are Premium', 'Upgrade to Art Arena Premium to customise your theme colours.'); return; } // v61
   if (!activeThemeKey) return;
   pthEditSeq++; // v71 (item 18)
   pthCancelAutosave(); // v68: the explicit save supersedes any pending auto-save
-  const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: Number($('#pth-dir').value) };
+  const custom = { c1: $('#pth-c1').value, c2: $('#pth-c2').value, dir: 135 };
   try {
     const r = await api('/api/premium/theme', { theme: activeThemeKey, custom }, 'PUT');
     applyPremiumTheme(r.ui_theme, r.ui_custom);
@@ -9822,7 +9915,7 @@ function liveCard(x, isLive) {
   return `<div class="live-card${isLive ? ' is-live' : ''}">
     <div class="live-top">
       ${isLive ? '<span class="live-dot"></span><span class="live-badge">LIVE</span>' : '<span class="live-badge soon">UPCOMING</span>'}
-      <span class="live-platform">${x.platform === 'twitch' ? '🔴 TWITCH' : '▶ YOUTUBE'}</span>
+      <span class="live-platform">${x.platform === 'twitch' ? SC_LOGO.tw + 'TWITCH' : SC_LOGO.yt + 'YOUTUBE'}</span>
       ${!isLive && x.scheduledStart ? '<span class="live-count" data-live-start="' + esc(x.scheduledStart) + '"></span>' : ''}
     </div>
     <div class="live-title">${esc(x.title)}</div>
@@ -9848,6 +9941,118 @@ document.addEventListener('click', (e) => {
   const w = e.target.closest('[data-watch]');
   if (w) window.open(w.dataset.watch, '_blank', 'noopener');
 });
+
+// --------------------------- v72 MY STREAMS -------------------------------
+// Per-platform stream control on the LIVE page only. YouTube and Twitch keep
+// fully independent states; every status below is server/provider truth —
+// no credentials on this deployment renders an honest setup state, never a
+// fake connection. Stream timers exist only on this page (the ticker that
+// paints [data-live-start] runs solely while the LIVE view is shown).
+const SC_LOGO = {
+  yt: '<svg viewBox="0 0 28 20" width="16" height="12" aria-hidden="true"><path fill="#FF0000" d="M27.4 3.12c-.32-1.2-1.26-2.14-2.45-2.46C22.8.1 14 .1 14 .1S5.2.1 3.05.66C1.86.98.92 1.92.6 3.12.06 5.28.06 9.8.06 9.8s0 4.52.54 6.68c.32 1.2 1.26 2.14 2.45 2.46C5.2 19.5 14 19.5 14 19.5s8.8 0 10.95-.56c1.19-.32 2.13-1.26 2.45-2.46.54-2.16.54-6.68.54-6.68s0-4.52-.54-6.68Z"/><path fill="#fff" d="M11.2 13.86 18.5 9.8l-7.3-4.06v8.12Z"/></svg>',
+  tw: '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57V4.714Zm4.715 0H18v5.143h-1.714V4.714ZM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0H6Zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714v9.429Z"/></svg>',
+};
+let myStreamsRooms = [];
+function scSetDot(prefix, on) {
+  $('#sc-' + prefix + '-dot').dataset.on = on ? '1' : '0';
+  $('#sc-' + prefix + '-dot-label').textContent = on ? 'LIVE' : 'NOT LIVE';
+}
+function scGoLiveControls(prefix) {
+  const opts = myStreamsRooms.map((r) => '<option value="' + esc(r.code) + '">' + esc(r.name || ('ROOM #' + r.code)) + '</option>').join('');
+  return '<select id="sc-' + prefix + '-room" aria-label="Battle room">' + (opts || '<option value="">No open room</option>') + '</select>' +
+    '<input id="sc-' + prefix + '-title" maxlength="100" placeholder="Stream title" value="Art Arena battle live" aria-label="Stream title">' +
+    '<button type="button" id="sc-' + prefix + '-go">Go Live</button>';
+}
+async function refreshMyStreams() {
+  if (currentView !== 'live' || !sessionToken) return;
+  try {
+    const d = await api('/api/rooms');
+    myStreamsRooms = (d.rooms || []).filter((r) => r.my_role === 'host' && r.status === 'lobby');
+  } catch (_) { myStreamsRooms = []; }
+
+  // ---- YouTube (independent) ----
+  let ytConn = null, ytList = [];
+  try { ytConn = await api('/api/youtube/connection'); } catch (_) {}
+  try { ytList = (await api('/api/youtube/broadcasts')).broadcasts || []; } catch (_) {}
+  const ytLive = ytList.find((b) => b.last_known_status === 'live');
+  const ytSoon = !ytLive && ytList.find((b) => !['ended', 'failed', 'cancelled', 'revoked'].includes(b.last_known_status));
+  const ytCtl = $('#sc-yt-controls'), ytState = $('#sc-yt-state');
+  ytState.classList.remove('err');
+  if (ytLive) {
+    ytState.textContent = 'Streaming live on YouTube';
+    ytCtl.innerHTML = (ytLive.watch_url ? '<button type="button" data-watch="' + esc(ytLive.watch_url) + '">Watch Live</button>' : '') +
+      '<span class="muted" style="font-size:12px">End it from your encoder or YouTube Studio.</span>';
+  } else if (ytSoon) {
+    ytState.textContent = 'Stream scheduled — starting soon';
+    ytCtl.innerHTML = '<span class="sc-timer" data-live-start="' + esc(ytSoon.scheduled_start) + '"></span>' +
+      '<button type="button" class="danger" id="sc-yt-cancel" data-id="' + esc(ytSoon.id) + '">Cancel Stream</button>';
+  } else if (ytConn && ytConn.status === 'active') {
+    ytState.textContent = 'Connected' + (ytConn.channel_title ? ' — ' + ytConn.channel_title : '');
+    ytCtl.innerHTML = scGoLiveControls('yt');
+  } else {
+    ytState.textContent = ytConn && ytConn.revoked ? 'Authorization expired — reconnect' : 'Not connected';
+    ytCtl.innerHTML = '<button type="button" id="sc-yt-connect">Connect YouTube</button>';
+  }
+  scSetDot('yt', !!ytLive);
+
+  // ---- Twitch (independent) ----
+  let twConn = null, twList = [];
+  try { twConn = await api('/api/twitch/connection'); } catch (_) {}
+  try { twList = (await api('/api/twitch/sessions')).sessions || []; } catch (_) {}
+  const twLive = twList.find((s) => s.status === 'live');
+  const twSoon = !twLive && twList.find((s) => s.status === 'preparing');
+  const twCtl = $('#sc-tw-controls'), twState = $('#sc-tw-state');
+  twState.classList.remove('err');
+  if (twLive) {
+    twState.textContent = 'Streaming live on Twitch';
+    twCtl.innerHTML = (twLive.room_code ? '<span class="muted" style="font-size:12px">ROOM ' + esc(twLive.room_code) + '</span>' : '') +
+      '<button type="button" class="danger" id="sc-tw-end" data-id="' + esc(twLive.id) + '">End Stream</button>';
+  } else if (twSoon) {
+    twState.textContent = 'Starting — waiting for Twitch to confirm the stream';
+    twCtl.innerHTML = '<button type="button" class="danger" id="sc-tw-cancel" data-id="' + esc(twSoon.id) + '">Cancel Stream</button>';
+  } else if (twConn && twConn.status === 'active') {
+    twState.textContent = 'Connected' + (twConn.login ? ' — @' + twConn.login : '');
+    twCtl.innerHTML = scGoLiveControls('tw');
+  } else {
+    twState.textContent = twConn && twConn.revoked ? 'Authorization expired — reconnect' : 'Not connected';
+    twCtl.innerHTML = '<button type="button" id="sc-tw-connect">Connect Twitch</button>';
+  }
+  scSetDot('tw', !!twLive);
+}
+document.querySelector('.my-streams').addEventListener('click', async (e) => {
+  const b = e.target.closest('button'); if (!b || !b.id) return;
+  if (b.id === 'sc-yt-connect') { location.assign('/api/youtube/connect'); return; }
+  if (b.id === 'sc-tw-connect') { location.assign('/api/twitch/connect'); return; }
+  if (b.id === 'sc-yt-go' || b.id === 'sc-tw-go') {
+    const prefix = b.id === 'sc-yt-go' ? 'yt' : 'tw';
+    const room = ($('#sc-' + prefix + '-room') || {}).value;
+    const title = (($('#sc-' + prefix + '-title') || {}).value || '').trim() || 'Art Arena battle live';
+    if (!room) { toast('Create a battle room first — Go Live streams a room.'); return; }
+    try {
+      if (prefix === 'yt') await api('/api/youtube/broadcasts', { roomCode: room, title }, 'POST');
+      else await api('/api/twitch/sessions', { roomCode: room, title }, 'POST');
+      toast(prefix === 'yt' ? 'YouTube stream scheduled.' : 'Twitch stream is preparing.');
+    } catch (err) { toast(err.message); }
+    await refreshMyStreams();
+    return;
+  }
+  if (b.id === 'sc-yt-cancel') {
+    try { await api('/api/youtube/broadcasts/' + encodeURIComponent(b.dataset.id) + '/cancel', {}, 'POST'); toast('YouTube stream cancelled.'); }
+    catch (err) { toast(err.message); }
+    await refreshMyStreams(); return;
+  }
+  if (b.id === 'sc-tw-cancel') {
+    try { await api('/api/twitch/sessions/' + encodeURIComponent(b.dataset.id) + '/cancel', {}, 'POST'); toast('Twitch stream cancelled.'); }
+    catch (err) { toast(err.message); }
+    await refreshMyStreams(); return;
+  }
+  if (b.id === 'sc-tw-end') {
+    try { await api('/api/twitch/sessions/' + encodeURIComponent(b.dataset.id) + '/end', {}, 'POST'); toast('Twitch stream ended.'); }
+    catch (err) { toast(err.message); }
+    await refreshMyStreams(); return;
+  }
+});
+async function refreshLiveAll() { await Promise.all([refreshLive(), refreshMyStreams()]); }
 
 // ------------------------------ Go Live modal -------------------------------
 function glvOpen() { const b = $('#live-modal'); b.classList.remove('hidden'); requestAnimationFrame(() => b.classList.add('open')); }

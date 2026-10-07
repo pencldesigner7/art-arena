@@ -19,7 +19,10 @@ async function user(){const name='manga_'+randomBytes(5).toString('hex'),passwor
  try{
  const ctx=await b.newContext({viewport:{width:1280,height:900}});await ctx.addInitScript(t=>sessionStorage.setItem('arena_session_token',t),token);
  const p=await ctx.newPage();p.on('pageerror',e=>errors.push(e.message));p.on('response',r=>{if(r.status()===404)errors.push(r.url());});await p.goto(base);await p.waitForFunction(()=>document.body.dataset.finish==='manga'&&!!document.querySelector('.aa-comic-scene.manga'));
- assert.equal(await p.locator('.aa-comic-scene img').count(),5);assert((await p.locator('link[rel="icon"]').getAttribute('href')).includes('comic-manga-icon'));
+ assert.equal(await p.locator('.aa-comic-scene img').count(),7); // v72: +ドドン/ポカーン SFX stickers
+ await p.locator('img[src="/themes/comic/manga/dodon.png"]').evaluate(im=>im.decode());
+ await p.locator('img[src="/themes/comic/manga/pokan.png"]').evaluate(im=>im.decode());
+ assert((await p.locator('link[rel="icon"]').getAttribute('href')).includes('comic-manga-icon'));
  assert((await p.locator('.home-logo img').getAttribute('src')).includes('comic-manga.png'));
  await p.evaluate(()=>show('settings'));await p.waitForSelector('#comic-finish:not(.hidden)');assert(await p.locator('#chrome-finish').evaluate(e=>e.classList.contains('hidden')));
  await p.locator('[data-comic-finish="comic"]').click();await p.waitForFunction(()=>document.body.dataset.finish==='comic');assert.equal(await p.locator('.aa-comic-scene img').count(),7);

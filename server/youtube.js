@@ -547,6 +547,34 @@ router.post('/broadcasts', requireAuth, ah(async (req, res) => {
   res.status(201).json({ broadcast: inserted[0], reused: false });
 }));
 
+// v72: CANCEL a scheduled/starting broadcast — owner only, and only while it
+// is NOT live (a live broadcast must be ended, not cancelled). Removes the
+// row so no stale "starting" state survives, and best-effort tells YouTube
+// the broadcast is gone when provider credentials exist.
+router.post('/broadcasts/:id/cancel', requireAuth, ah(async (req, res) => {
+  const { rows } = await pool.query(
+    `SELECT id, last_known_status FROM youtube_broadcasts WHERE id = $1 AND user_id = $2 LIMIT 1`,
+    [String(req.params.id || ''), req.user.id]
+  );
+  const b = rows[0];
+  if (!b) throw new HttpError(404, 'No scheduled stream to cancel.');
+  if (b.last_known_status === 'live')
+    throw new HttpError(409, 'This stream is already live — end it from your streaming software or YouTube Studio.');
+  if (isConfigured()) {
+    const tok = await usableAccessToken(req.user.id).catch(() => null);
+    if (tok && tok.accessToken) {
+      await ytFetch(tok.accessToken,
+        `liveBroadcasts/transition?broadcastStatus=complete&id=${encodeURIComponent(b.id)}&part=id`,
+        { method: 'POST', body: '{}' }).catch(() => null);
+      await ytFetch(tok.accessToken,
+        `liveBroadcasts?id=${encodeURIComponent(b.id)}&part=id`,
+        { method: 'DELETE' }).catch(() => null);
+    }
+  }
+  await pool.query(`DELETE FROM youtube_broadcasts WHERE id = $1`, [b.id]);
+  res.json({ ok: true, cancelled: true });
+}));
+
 // ---------------------------------------------------------------------------
 // The LIVE page data — exported for server.js to mount at GET /api/live.
 // A battle appears LIVE only when YouTube genuinely reports it live;

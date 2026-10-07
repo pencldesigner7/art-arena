@@ -67,8 +67,22 @@ void main(){float ar=uRes.x/max(uRes.y,1.);vec2 uv=gl_FragCoord.xy/uRes;vec2 p=(
       this._vis=()=>this.updateMotion();this.reduced=matchMedia('(prefers-reduced-motion: reduce)');document.addEventListener('visibilitychange',this._vis);this.reduced.addEventListener('change',this._vis);this.updateMotion();}
     renderStickers(){
       const manga=this.custom&&this.custom.finish==='manga';this.root.classList.toggle('manga',!!manga);this.root.replaceChildren();
-      const names=manga?['nnnn','nnnnn','nnnnnn','nn','nnn']:['kapow','no','crack','pop','boom','zap','pow'];
-      names.forEach((name,index)=>{const i=!manga&&name==='pow'?7:index;const im=document.createElement('img');im.src='/themes/comic/'+(manga?'manga/':'')+name+'.png';im.alt='';im.style.setProperty('--pop-delay',(-i*2.8)+'s');im.style.setProperty('--pop-x',([5,78,12,80,4,76,45,57][i])+'%');im.style.setProperty('--pop-y',([12,19,56,68,83,42,6,79][i])+'%');im.style.setProperty('--pop-angle',([-12,10,7,-9,12,-8,5,-6][i])+'deg');this.root.append(im);});
+      // v72: the manga finish adds the supplied Japanese SFX (ドドン… impact,
+      // ポカーン stagger) to the onomatopoeia set, each with its own timing.
+      const names=manga?['dodon','nnnn','pokan','nnnnn','nn','nnnnnn','nnn']:['kapow','no','crack','pop','boom','zap','pow'];
+      names.forEach((name,index)=>{const i=!manga&&name==='pow'?7:index;const im=document.createElement('img');im.src='/themes/comic/'+(manga?'manga/':'')+name+'.png';im.alt='';
+        if(manga){
+          im.style.setProperty('--pop-delay',(-index*1.9)+'s');
+          im.style.setProperty('--pop-x',([6,58,66,14,78,40,8][index])+'%');
+          im.style.setProperty('--pop-y',([26,14,64,58,80,40,78][index])+'%');
+          im.style.setProperty('--pop-angle',([-8,10,-6,9,-10,7,-5][index])+'deg');
+          im.style.setProperty('--pop-dur',([9.5,7.2,8.6,7.8,6.9,7.4,6.5][index])+'s');
+          im.style.setProperty('--impact-x',(index%2?-70:70)+'px');
+          if(name==='dodon'||name==='pokan')im.classList.add('sfx');
+        }else{
+          im.style.setProperty('--pop-delay',(-i*2.8)+'s');im.style.setProperty('--pop-x',([5,78,12,80,4,76,45,57][i])+'%');im.style.setProperty('--pop-y',([12,19,56,68,83,42,6,79][i])+'%');im.style.setProperty('--pop-angle',([-12,10,7,-9,12,-8,5,-6][i])+'deg');
+        }
+        this.root.append(im);});
     }
     setPalette(theme,custom){const old=this.custom&&this.custom.finish;this.custom=custom||null;if(old!==(this.custom&&this.custom.finish))this.renderStickers();}
     setMotion(on){this.motion=!!on;this.updateMotion();}
