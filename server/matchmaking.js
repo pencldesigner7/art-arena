@@ -218,6 +218,82 @@ function announce3v3(match) {
 }
 
 // ---------------------------------------------------------------------------
+// v73 (items 7-9): 3v3 AUTO-REFILL. When a player leaves a FORMING
+// (matchmaking-created, pre-start) 3v3 room, matchmaking resumes on its own
+// for exactly the missing seats — no user action: no re-queue, no invite,
+// no refresh. The room is the single search context (one search per seat,
+// never duplicates), and refill runs through the NORMAL 3v3 queue with the
+// same eligibility rules assemble3v3 enforces (searcher must not be seated
+// in any active room). Replacements are seated as FRESH participants —
+// state 'waiting', lowest free seat, never inheriting the departed player's
+// ready state, seat or permissions. Reuses the queue, the advisory lock and
+// the room layer; no new engine, no loops, no timers.
+// ---------------------------------------------------------------------------
+async function backfill3v3Room(roomId) {
+  const client = await pool.connect();
+  const placed = [];
+  let roomCode = null;
+  let missing = 0;
+  try {
+    await client.query('BEGIN');
+    await client.query('SELECT pg_advisory_xact_lock(336336)'); // same lock as assembly
+    const { rows: roomRows } = await client.query(
+      `SELECT id, code FROM battle_rooms
+        WHERE id = $1 AND battle_mode = '3v3' AND status = 'lobby' AND deleted_at IS NULL
+        FOR UPDATE`, [roomId]);
+    const room = roomRows[0];
+    if (!room) { await client.query('COMMIT'); return null; } // gone/started/ended — nothing to refill
+    roomCode = room.code;
+    const { rows: seated } = await client.query(
+      `SELECT seat FROM room_participants WHERE room_id = $1 AND state IN ('waiting','ready')`, [roomId]);
+    missing = 6 - seated.length;
+    if (missing > 0) {
+      const { rows: candidates } = await client.query(
+        `SELECT q.user_id, u.username, u.display_name FROM matchmaking_queue q
+           JOIN users u ON u.id = q.user_id
+          WHERE q.status = 'queued' AND q.prefs->>'battle_mode' = '3v3'
+            AND NOT EXISTS (SELECT 1 FROM room_participants p JOIN battle_rooms r ON r.id = p.room_id
+              WHERE p.user_id = q.user_id AND p.state IN ('waiting','ready')
+                AND r.deleted_at IS NULL AND r.status IN ('lobby','starting','in_battle'))
+          ORDER BY q.queued_at, q.id FOR UPDATE`);
+      const taken = new Set(seated.map((s) => s.seat));
+      for (const c of candidates) {
+        if (placed.length >= missing) break;
+        let seat = null;
+        for (let s = 1; s <= 6; s++) { if (!taken.has(s)) { seat = s; break; } }
+        if (seat === null) break;
+        taken.add(seat);
+        await client.query(
+          `INSERT INTO room_participants (room_id, user_id, state, seat) VALUES ($1, $2, 'waiting', $3)`,
+          [roomId, c.user_id, seat]);
+        await client.query(
+          `UPDATE matchmaking_queue SET status = 'matched', matched_room_id = $2
+            WHERE user_id = $1 AND status = 'queued'`, [c.user_id, roomId]);
+        placed.push({ id: c.user_id, username: c.username, display_name: c.display_name, seat });
+      }
+      missing = 6 - seated.length - placed.length;
+    }
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+  // Announce OUTSIDE the transaction — never emit under a held lock.
+  for (const p of placed) {
+    remember({ id: p.id }, null, roomCode, '3v3');
+    rt.sendToUser(p.id, { type: 'matchmaking', action: 'found', room: roomCode, mode: '3v3', battle_mode: '3v3' });
+    rt.emitRoom(roomCode, { action: 'joined', username: p.username, display_name: p.display_name, seat: p.seat });
+  }
+  // Remaining members always learn the current search state (chip in the UI),
+  // even when the queue is empty — honest "searching", never fake players.
+  rt.emitRoom(roomCode, { action: 'mm_searching', missing });
+  rt.broadcastRoomsList('updated');
+  return { filled: placed.length, missing };
+}
+
+// ---------------------------------------------------------------------------
 // POST /enter — join the queue; if a partner exists, the match is made
 // inside this request (response: { matched:true, room, opponent }).
 // Supports mode: '1v1' (default) or '3v3' (team battle).
@@ -940,4 +1016,4 @@ const deadlineSweep = setInterval(() => {
 }, DEADLINE_SWEEP_MS);
 deadlineSweep.unref();
 
-module.exports = { router, handleDisconnect, matchTournamentSearchers };
+module.exports = { router, handleDisconnect, matchTournamentSearchers, backfill3v3Room }; // v73: 3v3 auto-refill

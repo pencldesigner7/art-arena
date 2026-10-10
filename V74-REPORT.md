@@ -1,0 +1,155 @@
+# v74 — MANGA SETTINGS FIX · REFERENCE CHAT PAGE · PREMIUM CHAT CUSTOMIZATION
+
+Base: `76b2098` + uncommitted Community/v73 work (21-suite battery green before this task).
+Result: **24/24 suites green** (21 pre-existing + `chat-core` + `_shot-chat-v74` + `_shot-settings-v74`).
+**Nothing committed or pushed** — all changes left in the working tree for review.
+
+---
+
+## 1. Root cause of the Manga Settings background issue
+
+The Settings theme cards render each preset as a `.swatch-logo.sl-<key>` container whose
+**background** is hard-coded per theme in `premium-themes.css`
+(`.theme-swatch .swatch-logo.sl-comic { background:#ffb500 url('/themes/comic/background.jpg') … }`),
+while the v73 logo-sync in `applyThemeLogo()` only swapped the **logo `<img src>`** to the Manga
+wordmark. The two visuals therefore desynchronized: with the Manga finish active the Comic card
+showed the Manga wordmark sitting on the Comic orange burst, and Chrome/Gold had the same latent
+mismatch (gold wordmark on the silver gradient). The page-level ambient scene and app-wide
+variables *did* follow the finish — only the card pairing was broken, which is exactly the
+"logo changes but the background does not" symptom.
+
+**Fix (not a CSS override of one symptom):** a single sync point — `pthSyncSwatchBgs(key, custom)` —
+called from `applyThemeLogo()` (theme switch, finish toggle) **and** after every
+`renderSettingsThemes()` grid rebuild, toggling `is-manga` / `is-gold` classes whose CSS rules carry
+the matching backgrounds (`/themes/comic/manga/background.jpg`, gold gradient). Because the same
+function drives logo `src` and container class, logo and background now always belong to the same
+theme: selecting Manga, opening Settings with Manga active, switching away and back, and
+refreshing all verified by `_shot-settings-v74` (browser). The identical consistency check was
+applied to Chrome (Gold) and re-verified for Comic/Chrome/Glitch/Cloud/Glowing cards.
+
+## 2. Logo sizing correction
+
+Settings swatch logo boxes grew from 58 px → 96 px and images from `max-height:50px / max-width:86%`
+to `max-height:84px / max-width:92%` with `object-fit:contain` (never stretched/cropped —
+`_shot-settings-v74` asserts each rendered logo's aspect ratio matches its natural ratio within 12%
+and enforces minimum visible size). Wide wordmarks (Manga, Comic, Chrome) now fill the card width;
+squarer marks scale by height — every logo reads as designed-into the card, centred, no overlap
+with labels/borders, and the grid stays responsive (`auto-fill minmax(150px,1fr)`).
+
+## 3. Chat layout fidelity to the reference
+
+The conversation view reproduces the reference composition inside Art Arena's token system:
+
+- circular **back button**, ringed **avatar**, username header + appearance (palette) button;
+- **date pills** ("Today"/"Yesterday"/date) between day changes;
+- **text bubbles** with 2px accent borders (own = `--purple` blue, theirs = `--pink`), timestamps
+  under each bubble;
+- **composer**: the form itself is the pill **typing space** ("Send a chat"); the emoji button
+  and the sticker / voice-note / image cluster **rest inside it** as perfect circles with visible
+  icons; typing a letter makes all four **rise up** out of the typing space (spring `aa-rise`
+  keyframes, suppressed under `prefers-reduced-motion`) while the **deliver button** appears at
+  the pill's right edge; clearing the text drops them back in and hides the deliver button.
+  `_shot-chat-v74` asserts at rest: 4 tools, `|w−h| ≤ 2` (circles, not ovals), icons ≥ 12 px,
+  inside the pill, deliver opacity 0; when typing: all tools risen above the pill top.
+  (Root cause of the earlier oval/icon-less rendering: the app's global
+  `button { padding:11px 20px; margin-top:8px }` rule hit the composer buttons — the padding
+  inflated them to 42×38 and squeezed each inner SVG to 0 width; `.aa-cbtn`/`.aa-send` now reset
+  `padding:0; margin:0; aspect-ratio:1` and fix the SVG size.)
+- emoji picker popover; stickers send the **official brandmarks** as real messages;
+  voice notes use real `MediaRecorder` (honest toast when no mic); image attach uploads through
+  the validated uploads endpoint.
+
+All phase-6 messaging behaviour preserved: friends-only threads, groups, cursor-paged history,
+unread dots, realtime WS push (no polling), read state, block enforcement, deep links, and the
+existing artwork/profile/battle/room/stream share payloads — now with rich server-validated cards
+in bubbles (`cmOpenPost`/`openProfile`/`openRoom` wired to the real openers).
+
+## 4. The decorative line behind the bubbles
+
+Implemented as each sender-group's `::before` stroke: a 4 px rounded vertical bar running the full
+height of the group (extending slightly past first/last bubble, exactly as the reference's
+side strokes), right side + blue glow for own groups, left side + pink glow for theirs. It is
+`pointer-events:none` (never intercepts touch/scroll), `z-index` below the bubbles (bubbles are
+`z-index:1` opaque surfaces, so the line never obscures text or controls), and the browser suite
+asserts computed `width == 4px`, `pointerEvents == 'none'`, bubble `zIndex == '1'`. Consecutive
+messages from one sender share one stroke — matching the reference's grouped container.
+
+## 5. Wallpaper sources supported
+
+One server-built registry (`GET /api/messages/threads/:id/walls`) derived from the **actual shipped
+assets** — no second catalogue:
+
+| Source | Contents |
+|---|---|
+| Brandmarks | every official mark in `public/themes/marks/` (chrome, chrome-gold, cloud, comic, comic-manga *Manga*, flame, glitch, glowing, graffiti, magazine, pixel) |
+| Full logos | every full wordmark in `public/themes/*.png` **plus** `/themes/comic-manga.png` (full Japanese Manga logo) and `/themes/chrome-gold.png` — exposed **separately** from brandmarks |
+| Theme art | comic + manga backgrounds, graffiti wall, and each premium theme's profile artwork (`profile-<key>.<ext>` with per-theme correct extension) |
+| Profile images | your own avatar + conversation members' avatars (public data, clearly labelled) |
+| Device uploads | PNG/JPEG/WebP, magic-byte sniffed, dimension-validated (16–10 000 px), 5 MB cap, stored bytea, bounded to the 12 most recent unreferenced wallpapers |
+| Premium-theme backgrounds | same theme-art list (single registry; selecting a chat wallpaper never changes the account theme) |
+
+Display controls: position (center/top/bottom), fit (fill/fit), dim overlay 0–80 %
+(`#msg-wall::after` themed scrim), Reset/Cancel/Apply with live preview.
+
+## 6. Premium enforcement
+
+- `PUT /threads/:id/customization` and `POST /uploads (kind=wallpaper)` check `premiumOf()`
+  server-side → 403 `{premium:true}` otherwise; verified by `chat-core` including a **direct-API
+  bypass attempt** and a revoke-then-try case.
+- Non-premium UI shows an upgrade CTA in the panel (no tiles), normal messaging untouched.
+- No auto-activation anywhere; the existing explicit `test-activate` dev endpoint is the only
+  test path (used by tests exactly as the premium suites always have).
+
+## 7. Per-conversation storage
+
+New table `chat_customizations (user_id, conversation_id, wallpaper jsonb, updated_at,
+PK(user_id, conversation_id))` — one **personal** row per member per conversation:
+- changing A's wallpaper never touches B's row (asserted for DMs **and** groups);
+- strangers/non-members get 404 on customization and 403 on private upload bytes;
+- attachments (`chat_uploads` with `conversation_id`) readable by members only.
+Schema additions: `chat_customizations`, `chat_uploads` (+ index), widened
+`messages_payload_type_check` (profile/stream/sticker/image/audio shares). Present in
+`schema.sql` **and** idempotent boot migrations — `schema-bootstrap` (fresh-vs-migrated parity)
+passes.
+
+## 8. Modified & new files
+
+**Modified:** `server/server.js` (v74 migrations), `server/schema.sql`, `server/messages.js`
+(share payloads + uploads + catalogue + customization endpoints), `server/public/index.html`
+(chat view rebuild, appearance panel, Part-1 sync + sizing), `server/public/premium-themes.css`
+(finish-matched card backgrounds), `server/tests/_shot-messages.js` (new DOM selectors).
+**New:** `server/tests/chat-core.js`, `server/tests/_shot-chat-v74.js`,
+`server/tests/_shot-settings-v74.js`, this report.
+
+## 9. Tests & results
+
+Previews (real components, live server): `/home/user/theme-previews/`
+`v74-settings-manga.png`, `v74-settings-cards.png`, `v74-chat-manga-wall.png`,
+`v74-chat-panel.png`, `v74-chat-gallery-logos.png`, `v74-chat-profile-wall.png`,
+`v74-chat-upload-wall.png`, `v74-chat-nonpremium.png`, `v74-chat-mobile.png`,
+`v74-chat-light.png` — covering all ten required visual-review items.
+
+- `chat-core` — premium gating incl. bypass attempts, catalogue honesty (brandmarks ≠ logos,
+  Manga in both), magic-byte/dimension rejection, private uploads, per-conversation &
+  per-member isolation, sticker/profile/image/audio share snapshots, revoke behaviour. **PASS**
+- `_shot-settings-v74` — Manga logo+background travel together (open/switch/return/refresh),
+  Chrome/Gold consistency, logo prominence + aspect-ratio assertions. **PASS**
+- `_shot-chat-v74` — reference composition, 4 px non-interactive stroke behind layered bubbles,
+  deliver-on-type + cluster bounce, emoji/sticker tools, panel sections, Manga + profile +
+  upload wallpapers (live preview → apply → persist across reload), non-premium lock,
+  member isolation, long-message wrapping, mobile viewport, and **light-theme readability**
+  over a busy wallpaper (bubble surface asserted opaque, text/bg contrast asserted,
+  `v74-chat-light.png`). **PASS**
+- **Full battery 24/24 PASS** (Community, Messages, moderation, safety, matchmaking,
+  3v3 auto-fill, premium, themes, schema parity, streams, navigation, network gate, …).
+  No existing test deleted or weakened; `_shot-messages.js` only updated to the new DOM.
+
+## 10. Known limitations
+
+- Swipe-to-act-on-bubbles (annotation in the mock) not implemented — message actions remain
+  via existing safety/profile controls; noted as mock annotation, not a spec requirement.
+- Voice notes require a microphone; browsers without one get an honest toast (no fake send).
+- Wallpaper dim default is 35 %; extremely busy user uploads rely on the dim slider + opaque
+  bubble surfaces for readability.
+- Boot log still shows benign owner-permission migration lines on the restricted app role
+  (objects exist via `schema.sql`; fresh-schema parity proven by `schema-bootstrap`).

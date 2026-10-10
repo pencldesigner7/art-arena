@@ -39,6 +39,7 @@
  */
 const { pool, DEV } = require('./lib');
 const rt = require('./realtime');
+const { notifyUser } = require('./notify'); // v73 COMMUNITY phase 4: result notifications
 
 // How each participant outcome moves user_statistics. Deliberate rules:
 //   win/loss/draw — Battles +1 and the matching counter +1; a WIN also
@@ -298,6 +299,17 @@ async function decideInTx(client, b, { winnerId, scores, reason, team, teamWinne
     [b.room_id]
   );
   const room = roomRows[0];
+  // v73 COMMUNITY (phase 4): results surface in Community — every participant
+  // gets an individual notification carrying the view + share links. Payload
+  // comes only from this authoritative decide path; never from the client.
+  {
+    const { rows: [ch] } = await client.query(`SELECT summary_text FROM battle_challenges WHERE battle_id = $1`, [b.id]);
+    for (const p of parts)
+      await notifyUser(p.user_id, 'battle_result', {
+        battle_id: b.id, outcome: outcomes[p.user_id] || 'draw',
+        theme: ch ? ch.summary_text : null, room_code: room ? room.code : null,
+      });
+  }
   if (room && room.battle_mode === 'tournament') {
     const bracket = room.bracket || null;
     if (bracket) {

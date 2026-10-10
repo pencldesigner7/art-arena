@@ -12,11 +12,14 @@ const {chromium}=require('playwright');
  await p.waitForTimeout(1600);assert.equal(await p.locator('#aa-entry').evaluate(e=>getComputedStyle(e).visibility),'hidden');
  for(const finish of ['comic','manga']){
   await p.evaluate(f=>applyPremiumTheme('comic',{finish:f}),finish);await p.waitForSelector('.aa-comic-scene');
-  assert.equal(await p.locator('.aa-comic-scene img').count(),7); // v72: manga gains the two supplied SFX stickers (ドドン/ポカーン)
+  assert.equal(await p.locator('.aa-comic-scene img').count(),7); // v72: manga gains the two supplied SFX stickers (ドドン/ポカーン) — v73: still 7, matching comic's element count
   const wall=()=>p.locator('.aa-comic-scene').evaluate(e=>getComputedStyle(e,'::before').transform);
   const a=await wall();await p.waitForTimeout(160);assert.notEqual(await wall(),a);
-  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationName),finish==='comic'?'aa-comic-impact':'aa-manga-pop'); // v72: manga gets its own livelier choreography
-  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationDuration),finish==='comic'?'22s':'9.5s'); // v72: varied per-sticker timing in manga
+  // v73 (item 5): the Manga finish IS the Comic Pop Art composition — same
+  // impact choreography, same 22s cycle, same stagger; only the artwork set
+  // (Japanese SFX) differs. No separate choreography, no custom tempos.
+  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationName),'aa-comic-impact');
+  assert.equal(await p.locator('.aa-comic-scene img').first().evaluate(e=>getComputedStyle(e).animationDuration),'22s');
   assert.equal(await p.locator('.aa-comic-scene').evaluate(e=>getComputedStyle(e).transform),'none');
   if(finish==='comic')await p.locator('img[src="/themes/comic/pow.png"]').evaluate(im=>im.decode());
   await p.evaluate(()=>setAnimations(false));assert.equal(await p.locator('.aa-comic-scene').evaluate(e=>getComputedStyle(e,'::before').animationName),'none');await p.evaluate(()=>setAnimations(true));

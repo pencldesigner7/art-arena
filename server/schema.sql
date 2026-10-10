@@ -224,6 +224,8 @@ CREATE TYPE public.notification_type AS ENUM (
     'tournament_reminder',
     'new_follower',
     'message',
+    'post_like',
+    'post_comment',
     'livestream_start',
     'achievement',
     'dispute_update'
@@ -761,7 +763,8 @@ CREATE TABLE public.blocks (
     blocker_id uuid NOT NULL,
     blocked_id uuid NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT ck_no_self_block CHECK ((blocker_id <> blocked_id))
+    CONSTRAINT ck_no_self_block CHECK ((blocker_id <> blocked_id)),
+    CONSTRAINT blocks_pkey PRIMARY KEY (blocker_id, blocked_id)
 );
 
 
@@ -811,7 +814,8 @@ CREATE TABLE public.community_comments (
 CREATE TABLE public.community_post_likes (
     post_id uuid NOT NULL,
     user_id uuid NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT community_post_likes_pkey PRIMARY KEY (post_id, user_id)
 );
 
 
@@ -838,16 +842,63 @@ CREATE TABLE public.community_posts (
 
 
 --
+-- Name: community_artwork; Type: TABLE; Schema: public; Owner: -
+-- v73 COMMUNITY (phase 2): the artwork byte store. community_posts references
+-- it via image_storage_key (same key pattern as avatars); bytes live in
+-- Postgres so restarts never orphan files.
+--
+
+CREATE TABLE public.community_artwork (
+    storage_key text NOT NULL,
+    data bytea NOT NULL,
+    mime text NOT NULL,
+    width integer,
+    height integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT community_artwork_pkey PRIMARY KEY (storage_key)
+);
+
+
+--
+-- Name: artwork_saves; Type: TABLE; Schema: public; Owner: -
+-- v73 COMMUNITY (phase 2): private per-user saves. Never public.
+--
+
+CREATE TABLE public.artwork_saves (
+    user_id uuid NOT NULL,
+    post_id uuid NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT artwork_saves_pkey PRIMARY KEY (user_id, post_id)
+);
+
+
+--
 -- Name: conversations; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.conversations (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    participant_a uuid NOT NULL,
-    participant_b uuid NOT NULL,
+    participant_a uuid,
+    participant_b uuid,
+    -- v73 COMMUNITY phase 6: the dormant DM tables grow groups. DMs keep the
+    -- a/b pair; groups use the members table. One message store for both.
+    is_group boolean DEFAULT false NOT NULL,
+    name text,
+    created_by uuid,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT ck_conversation_distinct CHECK ((participant_a <> participant_b))
+    CONSTRAINT ck_conversation_distinct CHECK ((participant_a <> participant_b)),
+    CONSTRAINT ck_group_or_pair CHECK ((is_group AND (participant_a IS NULL) AND (participant_b IS NULL)) OR (NOT is_group AND (participant_a IS NOT NULL) AND (participant_b IS NOT NULL))),
+    CONSTRAINT conversations_pkey PRIMARY KEY (id)
+);
+
+-- v73 phase 6: membership + per-member read state for every conversation.
+CREATE TABLE public.conversation_members (
+    conversation_id uuid NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
+    user_id uuid NOT NULL,
+    joined_at timestamp with time zone DEFAULT now() NOT NULL,
+    last_read_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT conversation_members_pkey PRIMARY KEY (conversation_id, user_id)
 );
 
 
@@ -889,6 +940,7 @@ CREATE TABLE public.follows (
     follower_id uuid NOT NULL,
     following_id uuid NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT follows_pkey PRIMARY KEY (follower_id, following_id),
     CONSTRAINT ck_no_self_follow CHECK ((follower_id <> following_id))
 );
 
@@ -968,6 +1020,7 @@ CREATE TABLE public.matchmaking_queue (
 
 CREATE TABLE public.messages (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
+    CONSTRAINT messages_pkey PRIMARY KEY (id),
     conversation_id uuid NOT NULL,
     sender_id uuid NOT NULL,
     body text NOT NULL,
@@ -976,7 +1029,7 @@ CREATE TABLE public.messages (
     is_read boolean DEFAULT false NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT messages_body_check CHECK (((char_length(body) >= 1) AND (char_length(body) <= 4000))),
-    CONSTRAINT messages_payload_type_check CHECK ((payload_type = ANY (ARRAY['battle_invitation'::text, 'artwork_share'::text, 'room_share'::text])))
+    CONSTRAINT messages_payload_type_check CHECK ((payload_type = ANY (ARRAY['battle_invitation'::text, 'artwork_share'::text, 'room_share'::text, 'profile_share'::text, 'stream_share'::text, 'sticker_share'::text, 'image_share'::text, 'audio_share'::text])))
 );
 
 
@@ -988,8 +1041,15 @@ CREATE TABLE public.mutes (
     muter_id uuid NOT NULL,
     muted_id uuid NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT ck_no_self_mute CHECK ((muter_id <> muted_id))
+    CONSTRAINT ck_no_self_mute CHECK ((muter_id <> muted_id)),
+    CONSTRAINT mutes_pkey PRIMARY KEY (muter_id, muted_id)
 );
+
+-- v73 phase 6: one DM thread per pair (groups are exempt).
+CREATE UNIQUE INDEX uq_one_dm_per_pair ON public.conversations (
+    LEAST(participant_a, participant_b), GREATEST(participant_a, participant_b)
+) WHERE NOT is_group;
+CREATE INDEX idx_messages_thread_time ON public.messages (conversation_id, created_at DESC);
 
 
 --
@@ -1662,3 +1722,31 @@ ALTER TABLE battle_rooms ADD COLUMN IF NOT EXISTS bracket jsonb;
 ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'premium_activated';
 ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'team_invitation';
 ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'mm_team_invite';
+
+ALTER TABLE ONLY public.conversation_members
+    ADD CONSTRAINT conversation_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+-- v74: per-user per-conversation chat appearance (Premium customization).
+-- Personal by design: one row per (user, conversation); other members' rows
+-- are independent and never overwritten by someone else's choice.
+CREATE TABLE IF NOT EXISTS chat_customizations (
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    wallpaper jsonb NOT NULL DEFAULT '{}'::jsonb,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    PRIMARY KEY (user_id, conversation_id));
+
+-- v74: chat uploads — device wallpapers + image/audio attachments.
+-- Bytea like community_artwork; served only through the authed handler.
+CREATE TABLE IF NOT EXISTS chat_uploads (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    CONSTRAINT chat_uploads_pkey PRIMARY KEY (id),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    conversation_id uuid REFERENCES conversations(id) ON DELETE SET NULL,
+    kind text NOT NULL CHECK (kind IN ('wallpaper','image','audio')),
+    mime text NOT NULL,
+    width integer,
+    height integer,
+    data bytea NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_chat_uploads_user ON chat_uploads (user_id, kind, created_at DESC);

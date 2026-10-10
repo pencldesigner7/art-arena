@@ -27,6 +27,9 @@ body[data-ptheme="comic"] #aa-entry { background:#ffa900 url('/themes/comic/back
 .aa-comic-scene.still img:nth-child(n+4) { display:none; }
 .theme-swatch .swatch-logo.sl-chrome { background:linear-gradient(140deg,#131923,#637991,#d9e6ef); }
 .theme-swatch .swatch-logo.sl-comic { background:#ffb500 url('/themes/comic/background.jpg') center/cover; }
+/* v74: the card background ALWAYS belongs to the theme the logo shows. */
+.theme-swatch .swatch-logo.sl-comic.is-manga { background:#fff url('/themes/comic/manga/background.jpg') center/cover; }
+.theme-swatch .swatch-logo.sl-chrome.is-gold { background:linear-gradient(140deg,#281a06,#e8c45b,#624716); }
 /* Profile styling is owner-scoped, never derived from the viewer's selected theme. */
 .prof-modal-card[data-prof-theme="chrome"] { background:linear-gradient(rgba(9,17,29,.70),rgba(9,17,29,.91)),url('/themes/profile-chrome.jpg') center/cover !important; color:#f5f9ff !important; border:2px solid #c7d8eb !important; box-shadow:0 0 0 5px #2d4055,0 22px 65px #0009 !important; border-radius:22px !important; --pm-c1:#c7d8eb; --pm-c2:#7e9bb9; }
 .prof-modal-card[data-prof-theme="chrome"][data-finish="gold"] { background-image:linear-gradient(rgba(38,25,7,.66),rgba(38,25,7,.91)),url('/themes/profile-chrome-gold.png') !important; border-color:#f3ce77 !important; --pm-c1:#f3ce77; --pm-c2:#ae7b28; }
@@ -68,7 +71,7 @@ body[data-ptheme="comic"][data-finish="manga"] .card,body[data-ptheme="comic"][d
 /* The wall breathes on its own layer; stickers retain their original 22s timing. */
 .aa-comic-scene::before { content:""; position:absolute; inset:-3%; background:inherit; transform-origin:50% 45%; animation:aa-ink-wall-breathe 13s ease-in-out infinite alternate; will-change:transform; }
 @keyframes aa-ink-wall-breathe { from { transform:translate(-.35%,.15%) scale(1); } to { transform:translate(.35%,-.25%) scale(1.045); } }
-.aa-comic-scene.manga::before { animation-duration:16s; }
+
 .aa-comic-scene.paused::before { animation-play-state:paused; }
 .aa-comic-scene.still::before { animation:none; transform:scale(1.02); will-change:auto; }
 /* One-shot cinematic entry: crown/mark resolves through a soft bloom, without a ring. */
@@ -88,11 +91,13 @@ html[data-anim="off"] #aa-entry img { animation:none; }
 html[data-anim="off"] #aa-entry::before { animation:none; display:none; }
 @media(prefers-reduced-motion:reduce) { .aa-comic-scene::before { animation:none; transform:scale(1.02); will-change:auto; } #aa-entry img { animation:none; } #aa-entry::before { animation:none; display:none; } }
 
-/* Comic-only impact choreography. Manga keeps its existing onomatopoeia bounce.
-   Only the artwork transforms: the wall and app controls never shake. */
+/* Comic Pop Art impact choreography — shared by the Manga finish (v73
+   item 5): identical timing, intensity and layout; only the artwork set
+   differs. Only the artwork transforms: the wall and app controls never
+   shake. */
 @media (prefers-reduced-motion:no-preference) {
-  .aa-comic-scene:not(.manga):not(.still) img { width:clamp(90px,15vw,220px); --impact-x:65px; animation-name:aa-comic-impact; animation-timing-function:cubic-bezier(.2,.8,.25,1); }
-  .aa-comic-scene:not(.manga):not(.still) img:nth-child(even) { --impact-x:-65px; }
+  .aa-comic-scene:not(.still) img { width:clamp(90px,15vw,220px); --impact-x:65px; animation-name:aa-comic-impact; animation-timing-function:cubic-bezier(.2,.8,.25,1); }
+  .aa-comic-scene:not(.still) img:nth-child(even) { --impact-x:-65px; }
 }
 @keyframes aa-comic-impact {
   0%,1% { opacity:0; transform:translate(var(--impact-x),65px) rotate(calc(var(--pop-angle) - 24deg)) scale(.15,.35); }
@@ -104,25 +109,6 @@ html[data-anim="off"] #aa-entry::before { animation:none; display:none; }
   8%,12% { opacity:1; transform:translate(0,0) rotate(var(--pop-angle)) scale(1.06); }
   13.5% { opacity:1; transform:translate(0,-5px) rotate(calc(var(--pop-angle) - 5deg)) scale(1.22,.88); }
   16%,100% { opacity:0; transform:translate(calc(0px - var(--impact-x)),-75px) rotate(calc(var(--pop-angle) + 24deg)) scale(.25,1.4); }
-}
-
-/* v72: MANGA onomatopoeia choreography — as lively as the pop-art impact
-   (directional scale-in with overshoot, squash & stretch, impact shake,
-   staggered appearances, varied per-sticker timing, directional exit) while
-   staying readable: a static hold window, no overlapping chaos. Artwork only;
-   reduced-motion / .still keep the calm layout. */
-@media (prefers-reduced-motion:no-preference) {
-  .aa-comic-scene.manga:not(.still) img { animation-name:aa-manga-pop; animation-duration:var(--pop-dur,8s); animation-timing-function:cubic-bezier(.2,.8,.25,1); width:clamp(78px,13vw,200px); }
-  .aa-comic-scene.manga:not(.still) img.sfx { width:clamp(120px,21vw,300px); }
-}
-@keyframes aa-manga-pop {
-  0%,1%   { opacity:0; transform:translate(calc(var(--impact-x) * .8),60px) rotate(calc(var(--pop-angle) - 20deg)) scale(.18,.45); }
-  2.6%    { opacity:1; transform:translate(0,-11px) rotate(calc(var(--pop-angle) + 8deg)) scale(1.32,1.08); }
-  4%      { opacity:1; transform:translate(0,7px)  rotate(calc(var(--pop-angle) - 6deg)) scale(1.14,.78); }
-  5.4%    { opacity:1; transform:translate(-5px,-4px) rotate(calc(var(--pop-angle) + 4deg)) scale(.92,1.14); }
-  6.8%    { opacity:1; transform:translate(4px,2px)  rotate(calc(var(--pop-angle) - 2deg)) scale(1.07,.95); }
-  8%,27%  { opacity:1; transform:translate(0,0) rotate(var(--pop-angle)) scale(1); }
-  31%,100%{ opacity:0; transform:translate(calc(var(--impact-x) * -.6),-70px) rotate(calc(var(--pop-angle) + 18deg)) scale(.3,1.25); }
 }
 
 /* v72: the supplied Glitch artwork is a white wordmark — on LIGHT mode it

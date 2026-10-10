@@ -1036,6 +1036,9 @@ app.delete('/api/friends/:userId', requireAuth, ah(async (req, res) => {
 
 app.use('/api/rooms', rooms.router);
 app.use('/api', require('./friends').router); // v61: Friends page (list/presence, room invites, 3v3 team drafts)
+app.get('/community-art/:key', ah(require('./community').artHandler)); // v73: artwork bytes, public like /avatars (img tags carry no headers)
+app.use('/api/community', require('./community').router); // v73: Community (artwork, follows, comments, saves, reports)
+app.use('/api/messages', require('./messages').router); // v73 phase 6: DMs + groups on the dormant shipped tables
 // v50: YouTube LIVE foundation (OAuth + broadcasts) + the LIVE page feed.
 const youtube = require('./youtube');
 app.use('/api/youtube', youtube.router);
@@ -1547,6 +1550,71 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // name is the matchmaking 3v3 mint stamp).
     ['v71 room origin (created vs matchmaking-generated)',
      `ALTER TABLE battle_rooms ADD COLUMN IF NOT EXISTS origin text NOT NULL DEFAULT 'created'`],
+      // ---------------- v73 (COMMUNITY phase 1-2) ----------------
+    // The community data tables shipped in the original dump stay untouched;
+    // v73 adds ONLY what is genuinely missing: the artwork byte store, the
+    // private saves table and two community notification types. All idempotent.
+    ['v73 community artwork byte store',
+     `CREATE TABLE IF NOT EXISTS community_artwork (
+        storage_key text PRIMARY KEY, data bytea NOT NULL, mime text NOT NULL,
+        width integer, height integer, created_at timestamptz NOT NULL DEFAULT now())`],
+    ['v73 private artwork saves',
+     `CREATE TABLE IF NOT EXISTS artwork_saves (
+        user_id uuid NOT NULL, post_id uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now(),
+        PRIMARY KEY (user_id, post_id))`],
+    ['v73 notification types: post_like',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'post_like'`],
+    ['v73 notification types: post_comment',
+     `ALTER TYPE public.notification_type ADD VALUE IF NOT EXISTS 'post_comment'`],
+    // the original dump shipped these tables WITHOUT uniqueness — one like per
+    // user per post and one follow per pair are product rules (§13/§33).
+    ['v73 one like per user per post',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_like_per_post ON community_post_likes (post_id, user_id)`],
+    ['v73 one follow per pair',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_follow_per_pair ON follows (follower_id, following_id)`],
+    // v73 COMMUNITY phase 6: dormant DM tables grow groups + membership.
+    ['v73 conversations: group support columns',
+     `ALTER TABLE conversations ADD COLUMN IF NOT EXISTS is_group boolean NOT NULL DEFAULT false,
+       ADD COLUMN IF NOT EXISTS name text, ADD COLUMN IF NOT EXISTS created_by uuid`],
+    ['v73 conversations: pair becomes nullable for groups',
+     `ALTER TABLE conversations ALTER COLUMN participant_a DROP NOT NULL, ALTER COLUMN participant_b DROP NOT NULL`],
+    ['v73 conversations groups-vs-pair integrity',
+     `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='ck_group_or_pair') THEN ALTER TABLE conversations ADD CONSTRAINT ck_group_or_pair CHECK ((is_group AND (participant_a IS NULL) AND (participant_b IS NULL)) OR (NOT is_group AND (participant_a IS NOT NULL) AND (participant_b IS NOT NULL))); END IF; END $$`],
+    ['v73 conversation_members (membership + read state)',
+     `CREATE TABLE IF NOT EXISTS conversation_members (conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE, user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, joined_at timestamptz NOT NULL DEFAULT now(), last_read_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (conversation_id, user_id))`],
+    ['v73 backfill DM membership from pairs',
+     `INSERT INTO conversation_members (conversation_id, user_id) SELECT id, participant_a FROM conversations WHERE NOT is_group ON CONFLICT DO NOTHING`],
+    ['v73 backfill DM membership from pairs (b)',
+     `INSERT INTO conversation_members (conversation_id, user_id) SELECT id, participant_b FROM conversations WHERE NOT is_group ON CONFLICT DO NOTHING`],
+    ['v73 conversations primary key', `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='conversations_pkey') THEN ALTER TABLE conversations ADD CONSTRAINT conversations_pkey PRIMARY KEY (id); END IF; END $$`],
+    ['v73 messages primary key', `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='messages_pkey') THEN ALTER TABLE messages ADD CONSTRAINT messages_pkey PRIMARY KEY (id); END IF; END $$`],
+    ['v73 mutes primary key', `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='mutes_pkey') THEN ALTER TABLE mutes ADD CONSTRAINT mutes_pkey PRIMARY KEY (muter_id, muted_id); END IF; END $$`],
+    ['v73 one DM thread per pair',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_dm_per_pair ON conversations (LEAST(participant_a, participant_b), GREATEST(participant_a, participant_b)) WHERE NOT is_group`],
+    ['v73 messages thread-time lookup index',
+     `CREATE INDEX IF NOT EXISTS idx_messages_thread_time ON messages (conversation_id, created_at DESC)`],
+    ['v73 blocks primary key', `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='blocks_pkey') THEN ALTER TABLE blocks ADD CONSTRAINT blocks_pkey PRIMARY KEY (blocker_id, blocked_id); END IF; END $$`],
+    // ---------------- v74: chat appearance + uploads ----------------
+    ['v74 chat_customizations (per-user per-conversation appearance)',
+     `CREATE TABLE IF NOT EXISTS chat_customizations (
+        user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+        wallpaper jsonb NOT NULL DEFAULT '{}'::jsonb,
+        updated_at timestamptz NOT NULL DEFAULT now(),
+        PRIMARY KEY (user_id, conversation_id))`],
+    ['v74 chat_uploads (chat wallpapers + image/audio attachments)',
+     `CREATE TABLE IF NOT EXISTS chat_uploads (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        conversation_id uuid REFERENCES conversations(id) ON DELETE SET NULL,
+        kind text NOT NULL CHECK (kind IN ('wallpaper','image','audio')),
+        mime text NOT NULL, width integer, height integer,
+        data bytea NOT NULL, created_at timestamptz NOT NULL DEFAULT now())`],
+    ['v74 chat_uploads user lookup index', `CREATE INDEX IF NOT EXISTS idx_chat_uploads_user ON chat_uploads (user_id, kind, created_at DESC)`],
+    ['v74 messages payload vocabulary (chat shares + attachments)',
+     `DO $$ BEGIN ALTER TABLE messages DROP CONSTRAINT IF EXISTS messages_payload_type_check;
+        ALTER TABLE messages ADD CONSTRAINT messages_payload_type_check
+        CHECK (payload_type = ANY (ARRAY['battle_invitation','artwork_share','room_share','profile_share','stream_share','sticker_share','image_share','audio_share'])); END $$`],
     ['v71 backfill matchmaking-generated rooms',
      `UPDATE battle_rooms SET origin = 'matchmaking' WHERE auto_start = true OR name = '3v3 Team Arena'`],
 ];

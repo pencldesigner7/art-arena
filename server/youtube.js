@@ -246,11 +246,15 @@ async function syncBroadcastRow(row, accessToken) {
     const yt = body.items && body.items[0];
     const lc = yt && yt.status && yt.status.lifeCycleStatus;
     if (lc) {
+      const next = mapLifecycle(lc);
       await pool.query(
         `UPDATE youtube_broadcasts SET last_known_status = $2, last_synced_at = now() WHERE id = $1`,
-        [row.id, mapLifecycle(lc)]
+        [row.id, next]
       );
-      return mapLifecycle(lc);
+      // v73 phase 5: genuine inactive→live flip → notify Community followers
+      if (next === 'live' && row.last_known_status !== 'live')
+        require('./notify').notifyLiveStart(row.user_id, 'youtube', row.title).catch(() => {});
+      return next;
     }
   } catch (err) {
     // quota/transient problems must not crash the page — keep last status.

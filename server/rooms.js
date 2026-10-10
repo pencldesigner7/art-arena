@@ -1140,6 +1140,7 @@ router.post('/:code/leave', ah(async (req, res) => {
   let newHostUser = null;
   let roomVisibility = 'public';
   let wasSeated = false;
+  let mm3v3Room = null; // v73 (items 7-9): forming matchmaking 3v3 → auto-refill after leave
   try {
     await client.query('BEGIN');
     const { rows: roomRows } = await client.query(
@@ -1228,6 +1229,11 @@ router.post('/:code/leave', ah(async (req, res) => {
         closedRoom = true;
       }
     }
+    // v73 (items 7-9): a player left a FORMING matchmaking 3v3 — after the
+    // commit, the server resumes matchmaking for exactly the missing seats.
+    if (wasSeated && !closedRoom && room.status === 'lobby' && room.battle_mode === '3v3'
+        && (room.origin || 'created') === 'matchmaking')
+      mm3v3Room = room.id;
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
@@ -1240,6 +1246,14 @@ router.post('/:code/leave', ah(async (req, res) => {
   if (closedRoom) rt.emitRoom(payload.code, { action: 'closed', by: req.user.username });
   else if (newHostUser) rt.emitRoom(payload.code, { action: 'host_transferred', username: newHostUser.username, display_name: newHostUser.display_name });
   if (closedRoom && roomVisibility === 'public') rt.broadcastRoomsList('closed');
+  // v73 (items 7-9): 3v3 AUTO-REFILL — the leave is already durable; the
+  // refill runs fire-and-forget so a queue hiccup can never trap the leaver
+  // (their leave always succeeds). Failures log; the room stays refillable
+  // for the next queue entrant either way.
+  if (mm3v3Room) {
+    require('./matchmaking').backfill3v3Room(mm3v3Room)
+      .catch((e) => console.error('[3v3-autofill]', e.message));
+  }
   res.json(payload);
 }));
 

@@ -328,7 +328,7 @@ function emitSessionEvent(session, action) {
 async function activeSessionsForBroadcaster(broadcasterId) {
   const { rows } = await pool.query(
     `SELECT s.id, s.status, s.title, s.broadcaster_login, s.broadcaster_display_name,
-            r.code AS room_code
+            s.host_user_id, r.code AS room_code
        FROM twitch_stream_sessions s
        LEFT JOIN battle_rooms r ON r.id = s.room_id
       WHERE s.broadcaster_twitch_id = $1
@@ -358,6 +358,8 @@ async function applyStreamOnline(broadcasterId) {
       flipped += 1;
       row.status = 'live';
       emitSessionEvent(row, 'twitch_live');
+      // v73 phase 5: genuine flip → notify Community followers (realtime + persistent)
+      require('./notify').notifyLiveStart(row.host_user_id, 'twitch', row.title).catch(() => {});
       if (DEV) console.log(`  ⚡ twitch stream.online → LIVE (session ${String(row.id).slice(0, 8)}…)`);
     }
   }
