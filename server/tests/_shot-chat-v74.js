@@ -124,9 +124,24 @@ function png64() {
   await pa.waitForTimeout(650); // let the rise animation settle
   const risen = await pa.evaluate(() => {
     const f = document.querySelector('#msg-form').getBoundingClientRect();
-    return [...document.querySelectorAll('#msg-form .aa-cbtn')].every((b) => b.getBoundingClientRect().bottom < f.top + 4);
+    const up = [...document.querySelectorAll('#msg-form .aa-cluster .aa-cbtn')].every((b) => b.getBoundingClientRect().bottom < f.top + 4);
+    const em = document.querySelector('#msg-emoji').getBoundingClientRect();
+    return up && em.top >= f.top - 1 && em.bottom <= f.bottom + 1;
   });
-  assert.ok(risen, 'tools rise up out of the typing space when a letter is typed');
+  assert.ok(risen, 'the three tools rise on typing while the emoji button stays in the typing space');
+
+  // long text wraps to new lines and ends at the back of the deliver button
+  await pa.fill('#msg-input', 'a'.repeat(160));
+  await pa.waitForTimeout(250);
+  const wrap = await pa.evaluate(() => {
+    const i = document.querySelector('#msg-input'); const cs = getComputedStyle(i);
+    return { multi: i.scrollHeight > 44, pr: parseInt(cs.paddingRight, 10), tag: i.tagName };
+  });
+  assert.equal(wrap.tag, 'TEXTAREA', 'typing space grows with content');
+  assert.ok(wrap.multi, 'long text moves to a new line inside the typing space');
+  assert.ok(wrap.pr >= 44, 'text ends at the back of the deliver button (no dead gap)');
+  await pa.fill('#msg-input', 'Hello!');
+  await pa.waitForTimeout(250);
   await pa.click('#msg-send');
   await pa.waitForSelector('.msg-grp.mine .msg-bub');
   const stroke = await pa.evaluate(() => {
