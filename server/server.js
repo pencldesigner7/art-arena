@@ -1344,7 +1344,10 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // randomizer_seed.json (single nouns / established compounds only — the
     // adjective cross-product variants are gone at the DATA source).
     ['v52 randomizer: single-concept pool (re-seed from curated base list)',
-     `DELETE FROM randomizer_elements`],
+     // guarded: never empty a healthy pool at boot (a concurrent reader or a
+     // second boot must never observe an empty randomizer); the trailing
+     // ensureRandomizerSeed() still repairs genuinely short pools.
+     `DELETE FROM randomizer_elements WHERE (SELECT count(*) FROM randomizer_elements WHERE status = 'active') < 1000`],
       // ---------------- v53 ----------------
     ['v53 users.ui_theme_custom (manual theme colors)',
      `ALTER TABLE users ADD COLUMN IF NOT EXISTS ui_theme_custom jsonb`],
@@ -1352,7 +1355,7 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
     // the v53 JSON — long-tail over-specific compounds out, broad inspiring
     // direction concepts in. One concise concept per category, as ever.
     ['v53 randomizer: broader open-concept pool (re-seed)',
-     `DELETE FROM randomizer_elements`],
+     `DELETE FROM randomizer_elements WHERE (SELECT count(*) FROM randomizer_elements WHERE status = 'active') < 1000`],
       // ---------------- v58 ----------------
     // v58 FIX (Rooms error): production carries a foreign key
     // matchmaking_queue.matched_room_id -> battle_rooms(id) that the shipped

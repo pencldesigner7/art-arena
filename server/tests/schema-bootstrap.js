@@ -124,7 +124,7 @@ async function main() {
   let health = null;
   for (let i = 0; i < 60; i++) {
     await new Promise((r) => setTimeout(r, 1000));
-    try { health = (await http('GET', '/health')).body; if (health && health.ok) break; } catch (_) {}
+    try { health = (await http('GET', '/health')).body; if (health && health.ok && health.schema !== 'unchecked') break; } catch (_) {} // schema check is async at boot; wait for it to land
   }
   assert(health && health.ok, 'server never became healthy on the fresh bootstrap DB:\n' + bootLog.slice(-2000));
   assert.equal(health.schema, 'ok', 'health probe reports incomplete schema on fresh bootstrap: ' + health.schema);

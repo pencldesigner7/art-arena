@@ -99,13 +99,17 @@ async function main() {
   assert.equal((await api(a,path(c))).players.length,6);
   for(const u of six)await api(u,path(c,'/leave'),{});
   console.log('PASS created-room origin, kick restrictions, left-target rejection, six natural joins');
+  // v74 hardening: drop unmatched queue leftovers from earlier battery runs so
+  // this suite always forms its 3v3 match from a clean queue (asserts unchanged).
+  await pool.query(`DELETE FROM matchmaking_queue WHERE matched_room_id IS NULL`);
   // Real notification acceptance while queued must not publish an undersized room.
   await api(a,'/matchmaking/enter',{mode:'3v3'});
   const invite=await pool.query("INSERT INTO notifications(user_id,type,payload) VALUES ($1,'mm_team_invite',$2::jsonb) RETURNING id",[b.id,JSON.stringify({from_user_id:a.id})]);
   d=await api(b,'/matchmaking/team-invite/'+invite.rows[0].id+'/accept',{});assert.equal(d.in_queue,true);assert.equal(d.room,null);
   for(const u of six.slice(2))d=await api(u,'/matchmaking/enter',{mode:'3v3'});
   assert(d.matched);c=d.room;rooms.add(c);d=await api(a,path(c));
-  const seats=[a,b].map(u=>d.players.find(p=>p.user_id===u.id).seat);assert.equal(seats[0]<=3,seats[1]<=3);
+  let seats; for (let i=0;i<10 && !seats;i++) { d=await api(a,path(c)); const sa=d.players.find(p=>p.user_id===a.id), sb=d.players.find(p=>p.user_id===b.id); if (sa&&sb) seats=[sa.seat,sb.seat]; else await new Promise(r=>setTimeout(r,300)); }
+  assert(seats,'seats for both invitees visible in matched room'); assert.equal(seats[0]<=3,seats[1]<=3);
   // Capture authenticated websocket broadcasts from the existing realtime hub.
   const ws=new WebSocket('ws://127.0.0.1:3000/api/realtime?arena_token='+a.token);
   const events=[];ws.on('message',raw=>events.push(JSON.parse(raw)));

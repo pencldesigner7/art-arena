@@ -40,17 +40,21 @@ with labels/borders, and the grid stays responsive (`auto-fill minmax(150px,1fr)
 
 The conversation view reproduces the reference composition inside Art Arena's token system:
 
-- circular **back button**, ringed **avatar**, username header + appearance (palette) button;
-- **date pills** ("Today"/"Yesterday"/date) between day changes;
-- **text bubbles** with 2px accent borders (own = `--purple` blue, theirs = `--pink`), timestamps
-  under each bubble;
-- **composer**: the form itself is the pill **typing space** ("Send a chat"); the emoji button
-  and the sticker / voice-note / image cluster **rest inside it** as perfect circles with visible
-  icons; typing a letter makes all four **rise up** out of the typing space (spring `aa-rise`
-  keyframes, suppressed under `prefers-reduced-motion`) while the **deliver button** appears at
-  the pill's right edge; clearing the text drops them back in and hides the deliver button.
-  `_shot-chat-v74` asserts at rest: 4 tools, `|w−h| ≤ 2` (circles, not ovals), icons ≥ 12 px,
-  inside the pill, deliver opacity 0; when typing: all tools risen above the pill top.
+- header shows the ringed **avatar** + username; the circular **back** and **appearance**
+  controls appear only on hover/focus (no resting opaque oval top-right; always visible on
+  touch devices) — v69 refinement;
+- **composer (v70)**: the form is the pill **typing space** ("Send a chat"); the eyed emoji
+  button **permanently rests** in the space; the sticker / voice-note / image cluster rests
+  inside the pill's right side and **rises up** above the typing space with a springy
+  overshoot (`aa-rise`) when a letter is typed, falling back with a landing bounce
+  (`aa-fall`) when cleared — both suppressed under `prefers-reduced-motion`. The input is an
+  auto-growing **textarea**: text ends at the back of the deliver button and moves to a new
+  line (grows to ~5 lines then scrolls; Enter sends, Shift+Enter newlines); the deliver
+  button appears only once text exists. The cluster is absolutely positioned so the typing
+  space never has a dead gap. `_shot-chat-v74` asserts: at rest — 3 tools + emoji as circles
+  (`|w−h| ≤ 2`) with icons ≥ 12 px inside the pill, deliver opacity 0; typing — cluster risen
+  above the pill while the emoji stays, long text wraps with `padding-right` matching the
+  deliver boundary.
   (Root cause of the earlier oval/icon-less rendering: the app's global
   `button { padding:11px 20px; margin-top:8px }` rule hit the composer buttons — the padding
   inflated them to 42×38 and squeezed each inner SVG to 0 width; `.aa-cbtn`/`.aa-send` now reset

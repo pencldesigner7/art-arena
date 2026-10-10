@@ -15,16 +15,45 @@
 // ============================================================================
 const assert = require('node:assert/strict');
 const { randomBytes } = require('node:crypto');
-const { spawn } = require('node:child_process');
+const { spawn, execFileSync } = require('node:child_process');
 const path = require('node:path');
+const fs = require('node:fs');
+const os = require('node:os');
 
-const db = new URL(process.env.DATABASE_URL || 'http://missing');
-assert(['localhost', '127.0.0.1'].includes(db.hostname), 'Local disposable DATABASE_URL required');
+// v74 fix: the spawned servers used to INHERIT the battery's shared
+// DATABASE_URL, re-running boot migrations (incl. randomizer pool wipes)
+// against the DB other suites use — flaking room-regressions. premium-mode
+// now builds its own disposable DB and spawns servers against it only.
+const ADMIN_URL = process.env.TEST_PG_ADMIN_URL;
+assert(ADMIN_URL, 'TEST_PG_ADMIN_URL required (admin role for the disposable DB)');
+assert(['localhost', '127.0.0.1'].includes(new URL(ADMIN_URL).hostname), 'Local TEST_PG_ADMIN_URL required');
+const PDB = 'aa_premium_mode_db';
+const PROLE = 'aa_premium_mode';
+const PPW = 'premium-mode-pw';
+const APP_URL = `postgresql://${PROLE}:${PPW}@127.0.0.1:5432/${PDB}`;
+function psqlAdmin(url, args) {
+  const u = new URL(url);
+  execFileSync('psql', [u.toString(), ...args], {
+    env: { ...process.env, PGPASSWORD: decodeURIComponent(u.password || '') }, stdio: 'pipe',
+  });
+}
+psqlAdmin(ADMIN_URL, ['-c', `DROP DATABASE IF EXISTS ${PDB}`]);
+psqlAdmin(ADMIN_URL, ['-c', `DROP ROLE IF EXISTS ${PROLE}`]);
+psqlAdmin(ADMIN_URL, ['-c', `CREATE ROLE ${PROLE} LOGIN PASSWORD '${PPW}'`]);
+psqlAdmin(ADMIN_URL, ['-c', `CREATE DATABASE ${PDB}`]);
+psqlAdmin(ADMIN_URL, ['-c', `GRANT CONNECT ON DATABASE ${PDB} TO ${PROLE}`]);
+{
+  const u = new URL(ADMIN_URL); u.pathname = '/' + PDB;
+  const stage = path.join(os.tmpdir(), 'aa_premium_mode_schema.sql');
+  fs.writeFileSync(stage, fs.readFileSync(path.join(__dirname, '..', 'schema.sql'), 'utf8'), { mode: 0o644 });
+  psqlAdmin(u, ['-v', 'ON_ERROR_STOP=1', '-q', '-f', stage]);
+  psqlAdmin(u, ['-c', `GRANT USAGE ON SCHEMA public TO ${PROLE}; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${PROLE}; GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO ${PROLE};`]);
+}
 
 function startServer(port, extraEnv) {
   const proc = spawn(process.execPath, ['server.js'], {
     cwd: path.join(__dirname, '..'),
-    env: { ...process.env, PORT: String(port), NODE_ENV: 'development', MAIL_PROVIDER: 'dev', ...extraEnv },
+    env: { ...process.env, DATABASE_URL: APP_URL, PORT: String(port), NODE_ENV: 'development', MAIL_PROVIDER: 'dev', ...extraEnv },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let log = '';
