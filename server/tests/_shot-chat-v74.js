@@ -80,6 +80,25 @@ function png64() {
   await pa.click('.msg-row');
   await pa.waitForSelector('#msg-thread:not(.hidden)');
 
+  // header controls: true circles, hidden at rest (no opaque oval top-right),
+  // revealed on hover
+  const head = await pa.evaluate(() => {
+    const ap = document.querySelector('#msg-appearance'); const bk = document.querySelector('#msg-back');
+    const ra = ap.getBoundingClientRect(); const rb = bk.getBoundingClientRect();
+    const si = ap.querySelector('svg').getBoundingClientRect();
+    return { apOp: getComputedStyle(ap).opacity, bkOp: getComputedStyle(bk).opacity,
+      sq: Math.abs(ra.width - ra.height) <= 1 && Math.abs(rb.width - rb.height) <= 1, icon: si.width >= 12 };
+  });
+  assert.equal(head.apOp, '0', 'appearance control hidden at rest (oval removed)');
+  assert.equal(head.bkOp, '0', 'back control hidden at rest');
+  assert.ok(head.sq, 'header controls are circles');
+  assert.ok(head.icon, 'appearance icon visible when revealed');
+  await pa.hover('.aa-mh');
+  await pa.waitForTimeout(250);
+  assert.equal(await pa.evaluate(() => getComputedStyle(document.querySelector('#msg-appearance')).opacity), '1', 'header controls appear on hover');
+  await pa.mouse.move(550, 700); // rest the pointer off the header
+  await pa.waitForTimeout(250);
+
   // composer at rest: four circular tools WITH visible icons resting INSIDE the
   // typing space; deliver button hidden until a letter is typed
   const rest = await pa.evaluate(() => {

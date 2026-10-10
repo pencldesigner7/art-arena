@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="68">
+<meta name="aa-ui-version" content="69">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=art-arena-mark-3">
 <script>
@@ -3812,8 +3812,15 @@ try {
     #msg-thread { position:relative; display:flex; flex-direction:column; border:1px solid var(--line); border-radius:14px; min-height:420px; max-height:76vh; overflow:hidden; background:var(--surface); }
     #msg-thread.hidden { display:none; }
     .aa-mh { display:flex; align-items:center; gap:10px; padding:9px 10px; border-bottom:1px solid var(--line); background:var(--header-bg, var(--surface)); z-index:3; }
-    .aa-mh-btn { width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); color:var(--pink); font-size:19px; line-height:1; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; }
+    .aa-mh-btn { width:34px; height:34px; aspect-ratio:1; padding:0; margin:0; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); color:var(--pink); font-size:19px; line-height:1; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; }
+    .aa-mh-btn svg { width:17px; height:17px; flex:0 0 auto; }
     .aa-mh-btn:hover, .aa-mh-btn:focus-visible { border-color:var(--pink); outline:2px solid var(--pink); outline-offset:2px; }
+    /* conversation-header controls: true circles that appear only on hover/focus
+       (no resting opaque oval top-right); always visible on touch devices */
+    .aa-mh .aa-mh-btn { opacity:0; transition:opacity .15s; }
+    .aa-mh:hover .aa-mh-btn, .aa-mh:focus-within .aa-mh-btn { opacity:1; }
+    @media (hover:none) { .aa-mh .aa-mh-btn { opacity:1; } }
+    @media (prefers-reduced-motion:reduce) { .aa-mh .aa-mh-btn { transition:none; } }
     .aa-mh-av { width:40px; height:40px; border-radius:50%; border:2px solid var(--purple); box-shadow:0 0 0 2px var(--surface), 0 0 12px -2px rgba(var(--purple-rgb),.7); background:var(--surface-2) center/cover no-repeat; display:inline-flex; align-items:center; justify-content:center; color:var(--text); font-weight:800; flex:0 0 auto; }
     .aa-mh-name { flex:1; min-width:0; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
@@ -4360,7 +4367,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v68</span>
+  <span id="ui-version-badge">v69</span>
 
 <script>
 'use strict';
