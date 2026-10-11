@@ -2,7 +2,10 @@
 
 Base: `76b2098` + uncommitted Community/v73 work (21-suite battery green before this task).
 Result: **24/24 suites green** (21 pre-existing + `chat-core` + `_shot-chat-v74` + `_shot-settings-v74`).
-**Nothing committed or pushed** — all changes left in the working tree for review.
+Commits (approved, on `main`, author pencldesigner7 — **not pushed**; delivered as
+`/home/user/art-arena-v74.bundle`, range `76b2098..main`):
+`9302d5f` (Community phases 1–6, v73 polish, v74 core) → `ffc8e98` (v69 header circles on hover)
+→ `64a74ca` (v70 composer refinement) → `ba3e97c` (battery-stability fixes, §9b below).
 
 ---
 
@@ -118,10 +121,13 @@ passes.
 
 ## 8. Modified & new files
 
-**Modified:** `server/server.js` (v74 migrations), `server/schema.sql`, `server/messages.js`
-(share payloads + uploads + catalogue + customization endpoints), `server/public/index.html`
-(chat view rebuild, appearance panel, Part-1 sync + sizing), `server/public/premium-themes.css`
-(finish-matched card backgrounds), `server/tests/_shot-messages.js` (new DOM selectors).
+**Modified:** `server/server.js` (v74 migrations + guarded v52/v53 boot wipes), `server/schema.sql`,
+`server/messages.js` (share payloads + uploads + catalogue + customization endpoints),
+`server/public/index.html` (chat view rebuild, appearance panel, Part-1 sync + sizing),
+`server/public/premium-themes.css` (finish-matched card backgrounds),
+`server/tests/_shot-messages.js` (new DOM selectors), `server/tests/schema-bootstrap.js`
+(health-ready poll), `server/tests/premium-mode.js` (disposable-DB isolation),
+`server/tests/room-regressions.js` (queue cleanup + seat-visibility retry).
 **New:** `server/tests/chat-core.js`, `server/tests/_shot-chat-v74.js`,
 `server/tests/_shot-settings-v74.js`, this report.
 
@@ -148,6 +154,38 @@ Previews (real components, live server): `/home/user/theme-previews/`
   3v3 auto-fill, premium, themes, schema parity, streams, navigation, network gate, …).
   No existing test deleted or weakened; `_shot-messages.js` only updated to the new DOM.
 
+### 9b. Battery-stability fix (commit `ba3e97c`)
+
+Mid-task, consecutive battery runs showed an intermittent `room-regressions` reroll failure
+(`500 No elements available for "character"`). It was **not** a v74 code defect — a DB-side
+`AFTER DELETE` statement trigger on `randomizer_elements` proved the cause: the pool was being
+emptied *during* the battery. Root-cause chain, all three links fixed:
+
+1. **No migration tracking** — `MIGRATION_STEPS` replays every boot by design (idempotent
+   statements), which is safe only while every step is non-destructive.
+2. **Unguarded destructive steps** — v52/v53 were bare `DELETE FROM randomizer_elements`
+   (whole-pool wipes, relying on the trailing `ensureRandomizerSeed()` to refill) plus v51's
+   325-row phrase deletion, leaving a seconds-wide empty pool at every boot.
+   **Fix:** both wipes are now guarded —
+   `DELETE … WHERE (SELECT count(*) … WHERE status='active') < 1000` — a healthy pool can
+   never be emptied at boot.
+3. **Test cross-contamination (the trigger)** — `tests/premium-mode.js` spawned real
+   `server.js` instances inheriting the battery's shared `DATABASE_URL`, so its boot replays
+   wiped the shared pool mid-battery (trigger log: 6 DELETEs by `art_arena_app` at 10:36:51
+   inside premium-mode's window, pool 1537→1212→0), racing `room-regressions`.
+   **Fix:** premium-mode now builds a **disposable database** (`aa_premium_mode_db` + role via
+   `TEST_PG_ADMIN_URL`), loads `server/schema.sql` into it, and spawns every server against
+   that URL only. The shared battery DB is never touched by spawned boots.
+
+Two companion hardenings (assertions unchanged): `schema-bootstrap` polls `/api/health` until
+the async schema check leaves `'unchecked'`; `room-regressions` clears unmatched
+`matchmaking_queue` leftovers at start and retries 3v3 seat visibility (≤ 3 s) instead of
+crashing on an undefined seat.
+
+**Verification:** `premium-mode` → `room-regressions` run back-to-back 3×: all PASS, pool
+stayed 1537 every time (previously wiped); **two consecutive full batteries: 24/24 and
+24/24**; diagnostic trigger/table dropped from the DB afterwards.
+
 ## 10. Known limitations
 
 - Swipe-to-act-on-bubbles (annotation in the mock) not implemented — message actions remain
@@ -155,5 +193,9 @@ Previews (real components, live server): `/home/user/theme-previews/`
 - Voice notes require a microphone; browsers without one get an honest toast (no fake send).
 - Wallpaper dim default is 35 %; extremely busy user uploads rely on the dim slider + opaque
   bubble surfaces for readability.
-- Boot log still shows benign owner-permission migration lines on the restricted app role
-  (objects exist via `schema.sql`; fresh-schema parity proven by `schema-bootstrap`).
+- Boot migrations replay every startup by design (idempotent statements; no completion
+  ledger). The destructive v52/v53 pool wipes are now guarded, but any future destructive
+  step must carry the same kind of guard — §9b documents why.
+- If the app database role does not own its tables, boot migration DDL lines fail with
+  "must be owner" (objects then exist only via `schema.sql`; fresh-schema parity is proven
+  by `schema-bootstrap`). The sandbox DB runs the app role as owner, so boot is clean.
