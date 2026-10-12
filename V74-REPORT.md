@@ -5,7 +5,10 @@ Result: **24/24 suites green** (21 pre-existing + `chat-core` + `_shot-chat-v74`
 Commits (approved, on `main`, author pencldesigner7 — **not pushed**; delivered as
 `/home/user/art-arena-v74.bundle`, range `76b2098..main`):
 `9302d5f` (Community phases 1–6, v73 polish, v74 core) → `ffc8e98` (v69 header circles on hover)
-→ `64a74ca` (v70 composer refinement) → `ba3e97c` (battery-stability fixes, §9b below).
+→ `64a74ca` (v70 composer refinement) → `ba3e97c` (battery-stability fixes, §9b below)
+→ `5d329a1` (v75 composer correction, §9c below).
+→ `fbcdf81` (v76 composer shape + tool placement, §9d below).
+→ `9ca1b8a` (v77 back button, strokes, message actions, §9e below).
 
 ---
 
@@ -185,6 +188,125 @@ crashing on an undefined seat.
 **Verification:** `premium-mode` → `room-regressions` run back-to-back 3×: all PASS, pool
 stayed 1537 every time (previously wiped); **two consecutive full batteries: 24/24 and
 24/24**; diagnostic trigger/table dropped from the DB afterwards.
+
+### 9c. v75 composer correction (user review of the live build)
+
+Two corrections from hands-on review, shipped as UI v71:
+
+- **Typing-space capacity 5 → 10 lines.** `#msg-input` `max-height` 112 px → 196 px and the
+  JS auto-grow clamp (`aaFit`) raised to the same value, so long messages show ~10 lines
+  before scrolling instead of ~5. Evidence: `v75-composer-10lines.png`.
+- **Unnecessary border removed.** The loud `#msg-input:focus-visible` outline (the purple
+  rectangle drawn around the text while typing) is gone — `outline:none` on the textarea in
+  every state. Keyboard focus stays visible through the pill's existing 1 px border, which
+  accents to the theme purple on `#msg-form:focus-within` (no new border added).
+- New browser contracts in `_shot-chat-v74`: grows to the 10-line capacity (196 px ± 6),
+  computed `outline-style:none` and `border-top-width:0` on the focused textarea, and the
+  pill border visibly accents on focus-within.
+
+**Premium-mode chat evidence (real app, three modes):** `v75-chat-manga.png` (Comic theme,
+Manga finish), `v75-chat-chrome-gold.png` (Chrome theme, Gold finish), `v75-chat-glitch.png`.
+**Rise/fall animation video:** `v75-rise-fall.webm` (8 s, recorded in a real browser: cluster
+rests in the pill → rises above it while "hello arena" is typed with the deliver button
+appearing → falls back on clear). Frame-verified with ffmpeg.
+
+### 9d. v76 composer shape + tool placement (user review of the live build)
+
+Two corrections after hands-on review of v75, shipped as UI v72:
+
+- **Pill only at rest.** With one line the typing space keeps its pill radius; as soon as
+  text wraps to a second line the form gains a `tall` class (JS toggles it on
+  `scrollHeight > 50`) and the radius becomes 16 px — a rounded rectangle like the user's
+  reference crop, with the deliver button resting vertically centred at the right edge and
+  the emoji button inside on the left (`#msg-form.tall { border-radius:16px }`).
+- **Tools never inside while text exists.** The cluster was re-anchored from
+  `top:50%`/translate to `bottom`-based geometry: at rest it rests inside the pill
+  (`bottom:9px`); with any text `#msg-form.ready .aa-cluster { bottom:calc(100% + 8px) }`
+  places it fully **above** the typing space at *any* height (the old −56 px translate kept
+  it inside a 10-line box). Rise/fall keyframes animate `bottom` with the same springy
+  overshoot; mobile media query mirrors the geometry.
+
+New browser contracts in `_shot-chat-v74`: rest radius `999px`; single line keeps the pill;
+multi-line ⇒ `tall` class + computed radius `16px`; and while 30 lines of text exist every
+tool button's bottom edge is above the form's top edge. Evidence: `v76-composer-rest.png`,
+`v76-composer-typing.png`, `v76-composer-tall.png`, `v76-rise-fall.webm`, plus the three
+premium-mode chats re-shot as `v76-chat-{manga,chrome-gold,glitch}.png`.
+
+### 9e. v77 back button, stroke colours/length, message actions (user review)
+
+Four corrections/features from hands-on review, shipped as UI v73:
+
+- **Back button always visible.** `#msg-back` keeps its circular shape but no longer waits
+  for hover (`opacity:1`); the appearance control stays hover/focus-revealed.
+- **Strokes wear clearly different colours per side.** New `--stroke-mine/--stroke-theirs`
+  pairs per theme with guaranteed contrast (default dark violet/white, light violet/black,
+  glitch keeps its cyan/magenta, comic yellow/black, chrome gold/silver, graffiti
+  white/spray-pink, …). Contract: RGB distance ≥ 150 between the two computed colours.
+- **Strokes end at the text, not the timestamp.** `.msg-grp::before` now spans exactly
+  `top:4px; bottom:26px` of the group (bubble area only — the 15 px timestamp row + 7 px
+  gaps are excluded); contracts assert stroke top/bottom coincide with first/last bubble
+  edges (±1.5 px) and never reach the timestamp.
+- **Message actions (edit / delete own messages), server-authoritative.**
+  `PUT/DELETE /api/messages/threads/:id/messages/:mid` — the SQL predicate
+  `sender_id = $me` makes both own-only by construction (404 otherwise); edits set
+  `messages.edited_at` (new v75 column in `schema.sql` + boot migration) and fan out
+  `chat.edit` / `chat.delete` over the existing realtime hub. UI: two small circles on the
+  sender's bubbles (hover/focus, always on touch); edit opens an inline editor with
+  save/cancel and leaves an honest "· edited" marker; delete is two-step ("sure?") and
+  removes the bubble (and the group when emptied). `chat-core` covers edit-own/edit-other/
+  delete-other/delete-own + reader visibility; both sides update live via WS.
+
+Evidence: `v77-strokes-default.png`, `v77-strokes-glitch.png`, and `v77-actions.webm`
+(8.6 s real-browser session: send → hover → edit → "· edited" → send → two-step delete).
+
+### 9f. v78 pink buttons, per-bubble strokes, text actions, saves, replies (user review)
+
+- **Pink is the button colour in the normal UI.** The base `button` rule dropped the
+  pink→purple gradient for solid `var(--pink)`; the default own-stroke also turned pink
+  (`--stroke-mine:#FF3CAC` vs white theirs) so pink creates the contrast. Contract: a fresh
+  `<button>` computes `rgb(255, 60, 172)`.
+- **Strokes never connect.** The line moved from the sender-group to each bubble
+  (`.msg-bub::before`, `top:0; bottom:0`), so consecutive messages keep separate strokes and
+  each line is exactly as long as its bubble (contracts: both bubbles own a 4 px stroke,
+  gap ≥ 4 px between them, last stroke above the timestamp).
+- **Actions are text beneath the bubble.** Tapping a bubble toggles a row of TEXT links
+  under it — Reply · Save (every message) plus Edit · Delete (own only); delete stays
+  two-step. Contracts assert transparent background, position beneath the bubble, and the
+  full label set.
+- **Save chats.** New personal `saved_messages` table (v77 migration + `schema.sql`),
+  `POST/DELETE /threads/:id/messages/:mid/save` (member-only, message must belong to the
+  conversation) and `GET /messages/saved`; a ★ Saved panel in the Messages view lists saves
+  and opens their thread. Saves are per-user (contract-checked invisible to others).
+- **Reply — swipe mostly, tap too.** Swiping a bubble (pointer drag > 48 px horizontal)
+  opens a reply chip above the composer; the Reply text action does the same for
+  keyboard/tap users. Sends carry a server-validated `reply_to` (must be a message of the
+  same conversation, 404 otherwise; new `messages.reply_to_id` v76 migration) and render a
+  "↳ @user: preview" quote in the bubble; both sides update live via `chat.message`.
+
+Evidence: `v78-strokes-default.png`, `v78-tap-actions.png`, `v78-reply-chip.png`,
+`v78-reply-quote.png`, `v78-saved-panel.png`.
+
+### 9g. v79 purple theirs-line, glow removed, saves live in the thread (user review)
+
+- **The white line is now purple.** `--stroke-theirs` changed from white to `#A855F7` in
+  the default theme and in every theme whose line was white/near-white (flame, glowing,
+  chrome); graffiti's white *own* line became purple too. Light/cloud/comic/magazine keep
+  their near-black lines (not white), glitch keeps its praised cyan/magenta pair.
+  Contract: theirs `::before` computes `rgb(168, 85, 247)`.
+- **The glow is gone.** Both stroke rules lost their `box-shadow` halos — the lines behind
+  the bubbles are flat 4 px bars now (contracts: `box-shadow: none` on both sides).
+- **Saved chats live in the regular chat page.** The ★ Saved header button and its panel
+  are removed entirely (no `#msg-saved`, no `#msg-savedbox`, no `.saved-row` anywhere in
+  `index.html`). Instead a saved message wears a **distinct gold outline** right on its
+  bubble inside the thread (`.msg-bub.saved { outline:2px solid #FFC94D; outline-offset:3px }`),
+  toggled live by Save/Unsave and restored on every render from the `saved` flag the API
+  returns. Contracts: saved bubble carries the class in-thread, outline `2px`
+  `rgb(255, 201, 77)`, and no separate panel exists.
+- **Demo video.** `theme-previews/v79-demo.webm` walks the whole feature set: tap a
+  bubble → text actions beneath it, Save → gold outline appears in the thread,
+  Unsave/Save round-trip, Edit via text buttons (`· edited` marker), two-step text Delete
+  removing a bubble, swipe → reply chip → quoted reply — all with pink own-lines,
+  purple theirs-lines, per-bubble strokes and no glow.
 
 ## 10. Known limitations
 

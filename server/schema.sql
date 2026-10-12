@@ -1028,6 +1028,9 @@ CREATE TABLE public.messages (
     payload jsonb,
     is_read boolean DEFAULT false NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    edited_at timestamp with time zone,
+    reply_to_id uuid,
+    CONSTRAINT messages_reply_to_fkey FOREIGN KEY (reply_to_id) REFERENCES public.messages(id) ON DELETE SET NULL,
     CONSTRAINT messages_body_check CHECK (((char_length(body) >= 1) AND (char_length(body) <= 4000))),
     CONSTRAINT messages_payload_type_check CHECK ((payload_type = ANY (ARRAY['battle_invitation'::text, 'artwork_share'::text, 'room_share'::text, 'profile_share'::text, 'stream_share'::text, 'sticker_share'::text, 'image_share'::text, 'audio_share'::text])))
 );
@@ -1050,6 +1053,14 @@ CREATE UNIQUE INDEX uq_one_dm_per_pair ON public.conversations (
     LEAST(participant_a, participant_b), GREATEST(participant_a, participant_b)
 ) WHERE NOT is_group;
 CREATE INDEX idx_messages_thread_time ON public.messages (conversation_id, created_at DESC);
+
+-- v77: personal chat saves
+CREATE TABLE public.saved_messages (
+    user_id uuid NOT NULL,
+    message_id uuid NOT NULL REFERENCES public.messages(id) ON DELETE CASCADE,
+    saved_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT saved_messages_pkey PRIMARY KEY (user_id, message_id)
+);
 
 
 --
@@ -1750,3 +1761,5 @@ CREATE TABLE IF NOT EXISTS chat_uploads (
     data bytea NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_chat_uploads_user ON chat_uploads (user_id, kind, created_at DESC);
+
+ALTER TABLE ONLY public.saved_messages ADD CONSTRAINT saved_messages_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;

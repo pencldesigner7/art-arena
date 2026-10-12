@@ -90,7 +90,7 @@ function png64() {
       sq: Math.abs(ra.width - ra.height) <= 1 && Math.abs(rb.width - rb.height) <= 1, icon: si.width >= 12 };
   });
   assert.equal(head.apOp, '0', 'appearance control hidden at rest (oval removed)');
-  assert.equal(head.bkOp, '0', 'back control hidden at rest');
+  assert.equal(head.bkOp, '1', 'back button always visible (v77 correction)');
   assert.ok(head.sq, 'header controls are circles');
   assert.ok(head.icon, 'appearance icon visible when revealed');
   await pa.hover('.aa-mh');
@@ -107,7 +107,8 @@ function png64() {
       const r = b.getBoundingClientRect(); const s2 = b.querySelector('svg').getBoundingClientRect();
       return { round: Math.abs(r.width - r.height) <= 2, inPill: r.top >= f.top - 1 && r.bottom <= f.bottom + 1, icon: s2.width >= 12 && s2.height >= 12 };
     });
-    return { n: tools.length, tools, sendHidden: getComputedStyle(document.querySelector('#msg-send')).opacity === '0' };
+    return { n: tools.length, tools, sendHidden: getComputedStyle(document.querySelector('#msg-send')).opacity === '0',
+      radius: getComputedStyle(document.querySelector('#msg-form')).borderRadius };
   });
   assert.equal(rest.n, 4, 'emoji + sticker + voice + image buttons present');
   for (const t of rest.tools) {
@@ -116,6 +117,7 @@ function png64() {
     assert.ok(t.icon, 'tool icons are visible');
   }
   assert.ok(rest.sendHidden, 'deliver button hidden at rest');
+  assert.equal(rest.radius, '999px', 'at rest the typing space is a pill');
 
   // reference composition: header, deliver-on-type, decorative strokes
   await pa.fill('#msg-input', 'Hello!');
@@ -129,6 +131,11 @@ function png64() {
     return up && em.top >= f.top - 1 && em.bottom <= f.bottom + 1;
   });
   assert.ok(risen, 'the three tools rise on typing while the emoji button stays in the typing space');
+  const oneLine = await pa.evaluate(() => ({
+    tall: document.querySelector('#msg-form').classList.contains('tall'),
+    r: getComputedStyle(document.querySelector('#msg-form')).borderRadius,
+  }));
+  assert.ok(!oneLine.tall && oneLine.r === '999px', 'a single line of text keeps the pill shape');
 
   // long text wraps to new lines and ends at the back of the deliver button
   await pa.fill('#msg-input', 'a'.repeat(160));
@@ -140,19 +147,70 @@ function png64() {
   assert.equal(wrap.tag, 'TEXTAREA', 'typing space grows with content');
   assert.ok(wrap.multi, 'long text moves to a new line inside the typing space');
   assert.ok(wrap.pr >= 44, 'text ends at the back of the deliver button (no dead gap)');
+
+  // v75 correction: typing-space capacity raised 5→10 lines; the loud focus border is gone
+  // (keyboard focus stays visible via the pill's border accent).
+  const cap = await pa.evaluate(() => new Promise((resolve) => {
+    const i = document.querySelector('#msg-input'); const f = document.querySelector('#msg-form');
+    i.focus(); i.value = 'line\n'.repeat(30); i.dispatchEvent(new Event('input'));
+    requestAnimationFrame(() => {
+      const cs = getComputedStyle(i);
+      const pillFocus = getComputedStyle(f).borderTopColor;
+      const h = i.getBoundingClientRect().height;
+      i.blur();
+      requestAnimationFrame(() => resolve({
+        h, os: cs.outlineStyle, ow: cs.outlineWidth, bw: cs.borderTopWidth,
+        focusCue: pillFocus !== getComputedStyle(f).borderTopColor,
+      }));
+    });
+  }));
+  assert.ok(cap.h >= 190 && cap.h <= 202, 'typing space grows to the new 10-line capacity (196px), was 5');
+  assert.equal(cap.os, 'none', 'no focus outline drawn around the typing space');
+  assert.equal(cap.bw, '0px', 'no border on the typing space itself');
+  assert.ok(cap.focusCue, 'keyboard focus still visible: pill border accents on focus-within');
+  const tallShape = await pa.evaluate(() => {
+    const f = document.querySelector('#msg-form'); const fr = f.getBoundingClientRect();
+    return {
+      tall: f.classList.contains('tall'), r: getComputedStyle(f).borderRadius,
+      up: [...f.querySelectorAll('.aa-cluster .aa-cbtn')].every((b) => b.getBoundingClientRect().bottom < fr.top),
+    };
+  });
+  assert.ok(tallShape.tall, 'multi-line text switches the typing space to the rounded-rectangle shape');
+  assert.equal(tallShape.r, '16px', 'tall typing space is a 16px rounded rectangle, not a pill');
+  assert.ok(tallShape.up, 'tools ALWAYS sit above the typing space while a letter exists, at any height');
+  await pa.evaluate(() => { const i = document.querySelector('#msg-input'); i.value = ''; i.dispatchEvent(new Event('input')); });
+
   await pa.fill('#msg-input', 'Hello!');
   await pa.waitForTimeout(250);
   await pa.click('#msg-send');
   await pa.waitForSelector('.msg-grp.mine .msg-bub');
   const stroke = await pa.evaluate(() => {
     const g = document.querySelector('.msg-grp.mine');
-    const cs = getComputedStyle(g, '::before');
+    const cs = getComputedStyle(g.querySelector('.msg-bub'), '::before');
     const bub = getComputedStyle(g.querySelector('.msg-bub'));
-    return { w: cs.width, pe: cs.pointerEvents, bz: bub.zIndex, bg: cs.backgroundColor };
+    return { w: cs.width, pe: cs.pointerEvents, bz: bub.zIndex, bg: cs.backgroundColor, sh: cs.boxShadow };
   });
   assert.equal(stroke.w, '4px', 'decorative stroke present behind bubbles');
+  assert.equal(stroke.sh, 'none', 'v79: strokes do not glow');
   assert.equal(stroke.pe, 'none', 'stroke never intercepts pointer events');
   assert.equal(stroke.bz, '1', 'bubble layers above the stroke');
+  // v78: one stroke per bubble — lines never connect, never reach the time
+  await pa.fill('#msg-input', 'Second bubble for the stroke test');
+  await pa.click('#msg-send');
+  await pa.waitForTimeout(400);
+  const hug = await pa.evaluate(() => {
+    const g = document.querySelector('.msg-grp.mine');
+    const bubs = [...g.querySelectorAll('.msg-bub')];
+    const w0 = getComputedStyle(bubs[0], '::before').width;
+    const w1 = getComputedStyle(bubs[bubs.length - 1], '::before').width;
+    const sep = bubs.length > 1 ? bubs[1].getBoundingClientRect().top - bubs[0].getBoundingClientRect().bottom : 99;
+    const tss = g.querySelectorAll('.msg-ts'); const ts = tss[tss.length - 1].getBoundingClientRect();
+    return { w0, w1, sep, lastBottom: bubs[bubs.length - 1].getBoundingClientRect().bottom, tsTop: ts.top };
+  });
+  assert.equal(hug.w0, '4px', 'each bubble owns a stroke');
+  assert.equal(hug.w1, '4px', 'second bubble owns its own stroke');
+  assert.ok(hug.sep >= 4, 'strokes never connect between messages');
+  assert.ok(hug.lastBottom <= hug.tsTop + 0.5, 'stroke never stretches into the timestamp');
 
   // emoji + sticker tools
   await pa.click('#msg-emoji');
@@ -232,6 +290,82 @@ function png64() {
   await pb.fill('#msg-input', 'A very long message '.repeat(12) + '— wraps correctly over any wallpaper.');
   await pb.click('#msg-send');
   await pb.waitForSelector('.msg-grp.mine .msg-bub');
+  // v77: own vs their strokes must wear clearly different colours (glitch-style contrast)
+  await pa.waitForSelector('.msg-grp.theirs');
+  const cols = await pa.evaluate(() => {
+    const gm = document.querySelector('.msg-grp.mine'); const gt = document.querySelector('.msg-grp.theirs');
+    const pm = getComputedStyle(gm.querySelector('.msg-bub'), '::before').backgroundColor.match(/\d+/g).slice(0, 3).map(Number);
+    const pt = getComputedStyle(gt.querySelector('.msg-bub'), '::before').backgroundColor.match(/\d+/g).slice(0, 3).map(Number);
+    return { dist: Math.abs(pm[0] - pt[0]) + Math.abs(pm[1] - pt[1]) + Math.abs(pm[2] - pt[2]) };
+  });
+  assert.ok(cols.dist >= 150, 'own and their strokes are clearly different colours (rgb distance ' + cols.dist + ')');
+
+  // v78: pink is the button colour in the normal UI
+  const pinkBtn = await pa.evaluate(() => {
+    const b = document.createElement('button'); b.textContent = 'x'; document.body.appendChild(b);
+    const c = getComputedStyle(b).backgroundColor; b.remove(); return c;
+  });
+  assert.equal(pinkBtn, 'rgb(255, 60, 172)', 'default UI buttons are pink');
+
+  // v78: tap a bubble -> TEXT actions beneath it (reply/save [+edit/delete own])
+  await pa.locator('.msg-grp.mine .msg-bub').first().click();
+  await pa.waitForSelector('.msg-acts.open');
+  const acts = await pa.evaluate(() => {
+    const a = document.querySelector('.msg-acts.open');
+    const b = a.closest('.msg-grp').querySelector('.msg-bub');
+    const btn = a.querySelector('button');
+    return {
+      labels: [...a.querySelectorAll('button')].map((x) => x.textContent),
+      below: a.getBoundingClientRect().top >= b.getBoundingClientRect().bottom - 1,
+      bg: getComputedStyle(btn).backgroundColor,
+    };
+  });
+  assert.ok(acts.labels.includes('Reply') && acts.labels.includes('Save'), 'tap reveals Reply + Save');
+  assert.ok(acts.labels.includes('Edit') && acts.labels.includes('Delete'), 'own bubble adds Edit + Delete');
+  assert.ok(acts.below, 'actions sit beneath the bubble');
+  assert.ok(acts.bg === 'rgba(0, 0, 0, 0)' || acts.bg === 'transparent', 'actions are text, not buttons');
+  await pa.locator('.msg-grp.mine .msg-bub').first().click(); // close again (toggle)
+  await pa.waitForTimeout(200);
+
+  // v78: swipe a bubble (mostly) to reply; the quote renders on send
+  const theirBub = pa.locator('.msg-grp.theirs .msg-bub').first();
+  const bbx = await theirBub.boundingBox();
+  await pa.mouse.move(bbx.x + 20, bbx.y + 10); await pa.mouse.down();
+  await pa.mouse.move(bbx.x + 95, bbx.y + 12, { steps: 6 }); await pa.mouse.up();
+  await pa.waitForSelector('#msg-replychip.on');
+  await pa.click('#msg-input'); await pa.keyboard.type('replying!');
+  await pa.click('#msg-send');
+  await pa.waitForFunction(() => !!document.querySelector('.msg-grp.mine .msg-quote'));
+  assert.ok(!(await pa.evaluate(() => document.querySelector('#msg-replychip').classList.contains('on'))), 'reply chip clears after send');
+
+  // v79: the other side's line is purple (not white) and glow-free
+  const tstroke = await pa.evaluate(() => {
+    const cs = getComputedStyle(document.querySelector('.msg-grp.theirs .msg-bub'), '::before');
+    return { bg: cs.backgroundColor, sh: cs.boxShadow };
+  });
+  assert.equal(tstroke.bg, 'rgb(168, 85, 247)', 'theirs stroke is purple, not white');
+  assert.equal(tstroke.sh, 'none', 'theirs stroke does not glow');
+
+  // v78: save a chat -> personal saved list
+  await pa.locator('.msg-grp.mine .msg-bub').first().click();
+  await pa.waitForSelector('.msg-acts.open');
+  await pa.click('.msg-acts.open [data-act="save"]');
+  await pa.waitForFunction(() => [...document.querySelectorAll('.msg-acts [data-act="save"]')].some((x) => x.textContent === 'Unsave'));
+  const savedCount = await pa.evaluate(async () => {
+    const r = await fetch('/api/messages/saved', { headers: { Authorization: 'Bearer ' + sessionStorage.getItem('arena_session_token') } });
+    return (await r.json()).saved.length;
+  });
+  assert.ok(savedCount >= 1, 'saved chats list contains the saved message');
+  // v79: saved chats live in the REGULAR thread with a distinct outline — no separate panel
+  const savedUI = await pa.evaluate(() => {
+    const bub = document.querySelector('.msg-grp.mine .msg-bub');
+    const cs = getComputedStyle(bub);
+    return { cls: bub.classList.contains('saved'), ow: cs.outlineWidth, oc: cs.outlineColor, panelBtn: !!document.querySelector('#msg-saved'), panel: !!document.querySelector('#msg-savedbox') };
+  });
+  assert.ok(savedUI.cls, 'saved bubble carries the saved class in-thread');
+  assert.equal(savedUI.ow, '2px', 'saved chats wear a distinct outline');
+  assert.equal(savedUI.oc, 'rgb(255, 201, 77)', 'saved outline colour is distinct');
+  assert.ok(!savedUI.panelBtn && !savedUI.panel, 'no separate saved panel anywhere');
 
   // light theme over a busy wallpaper: bubbles must stay readable (Part 4)
   await pa.setViewportSize({ width: 1100, height: 820 });

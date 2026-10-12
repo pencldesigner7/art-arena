@@ -64,6 +64,34 @@ function png16() {
   let r = await fetch(base + '/api/messages/uploads', { method: 'POST', headers: { Authorization: 'Bearer ' + b.token }, body: fd });
   assert.equal(r.status, 403, 'non-premium wallpaper upload rejected');
 
+  // ---- 1b) v77: edit + delete are own-message-only, server-authoritative
+  const m1 = await api(a, '/messages/threads/' + t.id + '/messages', { body: 'original text' }, 201);
+  const ed = await api(a, '/messages/threads/' + t.id + '/messages/' + m1.id, { body: 'corrected text' }, 200, 'PUT');
+  assert.ok(ed.edited_at, 'edit returns edited_at');
+  let pg1 = await api(b, '/messages/threads/' + t.id + '/messages');
+  assert.equal(pg1.messages.find((x) => x.id === m1.id).body, 'corrected text', 'reader sees corrected text');
+  assert.ok(pg1.messages.find((x) => x.id === m1.id).edited_at, 'reader sees edited marker');
+  await api(b, '/messages/threads/' + t.id + '/messages/' + m1.id, { body: 'hijack' }, 404, 'PUT');
+  await api(b, '/messages/threads/' + t.id + '/messages/' + m1.id, undefined, 404, 'DELETE');
+  const dl = await api(a, '/messages/threads/' + t.id + '/messages/' + m1.id, undefined, 200, 'DELETE');
+  assert.ok(dl.ok, 'own delete succeeds');
+  pg1 = await api(b, '/messages/threads/' + t.id + '/messages');
+  assert.ok(!pg1.messages.some((x) => x.id === m1.id), 'deleted message gone for both');
+
+  // ---- 1c) v76/v77: replies are server-validated; saves are personal
+  const anchor = await api(a, '/messages/threads/' + t.id + '/messages', { body: 'anchor for reply' }, 201);
+  const rep = await api(b, '/messages/threads/' + t.id + '/messages', { body: 'answering you', reply_to: anchor.id }, 201);
+  assert.ok(rep.reply_to && rep.reply_to.id === anchor.id, 'reply carries the validated target');
+  await api(b, '/messages/threads/' + t.id + '/messages', { body: 'x', reply_to: '00000000-0000-0000-0000-000000000000' }, 404);
+  const sv = await api(b, '/messages/threads/' + t.id + '/messages/' + anchor.id + '/save', {}, 200);
+  assert.equal(sv.saved, true, 'any member can save a message personally');
+  const lstB = await api(b, '/messages/saved');
+  assert.ok(lstB.saved.some((x) => x.id === anchor.id), 'saved list contains the message');
+  const lstA = await api(a, '/messages/saved');
+  assert.ok(!lstA.saved.some((x) => x.id === anchor.id), 'saves are personal (invisible to others)');
+  const un = await api(b, '/messages/threads/' + t.id + '/messages/' + anchor.id + '/save', undefined, 200, 'DELETE');
+  assert.equal(un.saved, false, 'unsave works');
+
   // ---- 2) activate premium for a ONLY (explicit, existing mechanism)
   await api(a, '/premium/test-activate', {}, 200);
 

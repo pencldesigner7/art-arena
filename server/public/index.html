@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="70">
+<meta name="aa-ui-version" content="75">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=art-arena-mark-3">
 <script>
@@ -59,7 +59,7 @@ try {
   label { display:block; margin:12px 0; font-size:14px; color:var(--muted); }
   input, textarea, select { width:100%; margin-top:4px; padding:10px 12px; background:var(--surface); color:var(--text); border:1px solid var(--line); border-radius:8px; font:inherit; }
   input:focus, textarea:focus, select:focus { outline:none; border-color:var(--purple); }
-  button { background:linear-gradient(90deg,var(--pink),var(--purple)); border:0; color:#fff; font-weight:700; padding:11px 20px; border-radius:8px; cursor:pointer; font-size:15px; margin-top:8px; }
+  button { background:var(--pink); border:0; color:#fff; font-weight:700; padding:11px 20px; border-radius:8px; cursor:pointer; font-size:15px; margin-top:8px; } /* v78: pink is THE button colour in the normal UI */
   button:hover { filter:brightness(1.15); }
   button.secondary { background:transparent; border:1px solid var(--pink); color:var(--text); }
   button.secondary:hover { filter:none; background:rgba(var(--purple-rgb),.15); }
@@ -3764,6 +3764,7 @@ try {
           <div id="msg-flow" role="log" aria-live="polite" aria-label="Messages"></div>
         </div>
         <div id="msg-pop" class="hidden" role="menu"></div>
+        <div id="msg-replychip" aria-live="polite"><span id="msg-replychip-t"></span><button type="button" id="msg-reply-x" aria-label="Cancel reply">×</button></div>
         <form id="msg-form">
           <button type="button" id="msg-emoji" class="aa-cbtn" aria-label="Insert emoji" title="Emoji">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0"/><circle cx="9.2" cy="9.8" r="1.3" fill="currentColor" stroke="none"/><circle cx="14.8" cy="9.8" r="1.3" fill="currentColor" stroke="none"/></svg>
@@ -3819,6 +3820,8 @@ try {
        (no resting opaque oval top-right); always visible on touch devices */
     .aa-mh .aa-mh-btn { opacity:0; transition:opacity .15s; }
     .aa-mh:hover .aa-mh-btn, .aa-mh:focus-within .aa-mh-btn { opacity:1; }
+    /* v77: the back button is always visible (user correction); appearance stays hover-revealed */
+    #msg-back { opacity:1; }
     @media (hover:none) { .aa-mh .aa-mh-btn { opacity:1; } }
     @media (prefers-reduced-motion:reduce) { .aa-mh .aa-mh-btn { transition:none; } }
     .aa-mh-av { width:40px; height:40px; border-radius:50%; border:2px solid var(--purple); box-shadow:0 0 0 2px var(--surface), 0 0 12px -2px rgba(var(--purple-rgb),.7); background:var(--surface-2) center/cover no-repeat; display:inline-flex; align-items:center; justify-content:center; color:var(--text); font-weight:800; flex:0 0 auto; }
@@ -3833,12 +3836,28 @@ try {
     /* conversation groups carry the reference's decorative stroke BEHIND the
        bubbles — pointer-transparent, never above text */
     .msg-grp { position:relative; display:flex; flex-direction:column; gap:7px; padding:4px 12px; max-width:min(560px, 86%); }
-    .msg-grp::before { content:''; position:absolute; top:-2px; bottom:-2px; width:4px; border-radius:4px; pointer-events:none; }
+    /* v77: strokes hug the bubbles only (never the timestamp) and each side
+       always wears a clearly different colour (per-theme pairs, §9e). */
+    :root { --stroke-mine:#FF3CAC; --stroke-theirs:#A855F7; }
+    html[data-theme="light"] { --stroke-mine:#E0186F; --stroke-theirs:#101014; }
+    body[data-ptheme="flame"] { --stroke-mine:#FFC300; --stroke-theirs:#A855F7; }
+    body[data-ptheme="cloud"] { --stroke-mine:#2F7ED8; --stroke-theirs:#101014; }
+    body[data-ptheme="glitch"] { --stroke-mine:#FF2BD1; --stroke-theirs:#00F0FF; }
+    body[data-ptheme="graffiti"] { --stroke-mine:#A855F7; --stroke-theirs:#FF2E88; }
+    body[data-ptheme="comic"] { --stroke-mine:#FFB500; --stroke-theirs:#101014; }
+    body[data-ptheme="chrome"] { --stroke-mine:#FFD766; --stroke-theirs:#A855F7; }
+    body[data-ptheme="glowing"] { --stroke-mine:#6ED4BF; --stroke-theirs:#A855F7; }
+    body[data-ptheme="magazine"] { --stroke-mine:#FF2E88; --stroke-theirs:#101014; }
+    body[data-ptheme="pixel"] { --stroke-mine:#E337C4; --stroke-theirs:#77D5DF; }
+    /* v78: one stroke per bubble — the lines never connect between messages */
+    .msg-bub::before { content:''; position:absolute; top:0; bottom:0; width:4px; border-radius:4px; pointer-events:none; }
     .msg-grp.mine { align-self:flex-end; align-items:flex-end; }
-    .msg-grp.mine::before { right:0; background:var(--purple); box-shadow:0 0 10px -1px rgba(var(--purple-rgb),.8); }
+    .msg-grp.mine .msg-bub::before { right:-10px; background:var(--stroke-mine); }
     .msg-grp.theirs { align-self:flex-start; align-items:flex-start; }
-    .msg-grp.theirs::before { left:0; background:var(--pink); box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.8); }
-    .msg-bub { position:relative; z-index:1; max-width:100%; border:2px solid var(--purple); border-radius:14px; padding:8px 13px; font-size:13.5px; line-height:1.45; white-space:pre-wrap; overflow-wrap:anywhere; background:var(--surface); color:var(--text); box-shadow:0 2px 10px -4px rgba(0,0,0,.5); }
+    .msg-grp.theirs .msg-bub::before { left:-10px; background:var(--stroke-theirs); }
+    /* v79: saved chats stay in the regular thread, marked by a distinct outline */
+    .msg-bub.saved { outline:2px solid #FFC94D; outline-offset:3px; }
+    .msg-bub { position:relative; z-index:1; max-width:100%; border:2px solid var(--purple); border-radius:14px; padding:8px 13px; font-size:13.5px; line-height:1.45; white-space:pre-wrap; overflow-wrap:anywhere; background:var(--surface); color:var(--text); box-shadow:0 2px 10px -4px rgba(0,0,0,.5); touch-action:pan-y; }
     .msg-grp.theirs .msg-bub { border-color:var(--pink); }
     .msg-bub .who { display:block; color:var(--muted); font-size:11px; margin-bottom:2px; }
     .msg-bub img.aa-stick { max-width:120px; display:block; border-radius:8px; }
@@ -3846,7 +3865,23 @@ try {
     .msg-bub audio { max-width:220px; display:block; }
     .msg-bub .aa-card { display:flex; gap:8px; align-items:center; border:1px solid var(--line); border-radius:10px; padding:6px 8px; margin-top:4px; background:var(--surface-2); color:var(--text); font:inherit; cursor:pointer; text-align:left; }
     .msg-bub .aa-card img { width:40px; height:40px; border-radius:8px; object-fit:cover; flex:0 0 auto; }
-    .msg-ts { font-size:10.5px; color:var(--muted); margin:0 2px; }
+    .msg-ts { font-size:10.5px; color:var(--muted); margin:0 2px; height:15px; line-height:15px; flex:0 0 auto; }
+    /* v78: message actions are TEXT links beneath the bubble, opened by tapping it */
+    .msg-acts { display:none; gap:12px; padding:1px 6px 0; }
+    .msg-acts.open { display:flex; }
+    .msg-acts button, .msg-etxt { background:none; border:none; color:var(--muted); font-size:11px; font-weight:600; padding:0; margin:0; cursor:pointer; }
+    .msg-acts button:hover, .msg-acts button:focus-visible, .msg-etxt:hover, .msg-etxt:focus-visible { color:var(--pink); }
+    .msg-acts button.armed { color:#fff; background:var(--pink); border-radius:8px; padding:1px 7px; }
+    .msg-edited { font-size:10px; color:var(--muted); margin-left:6px; font-style:italic; }
+    .msg-quote { display:block; font-size:11px; color:var(--muted); border-left:2px solid var(--stroke-mine); padding:2px 6px; margin-bottom:4px; border-radius:2px; white-space:normal; }
+    #msg-replychip { display:none; margin:0 10px 6px; padding:6px 10px; border-left:3px solid var(--pink); background:var(--surface-2); border-radius:8px; font-size:12px; color:var(--muted); align-items:center; gap:8px; }
+    #msg-replychip.on { display:flex; }
+    #msg-replychip span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    #msg-reply-x { background:none; border:none; color:var(--muted); font-size:14px; padding:0; margin:0; cursor:pointer; }
+    #msg-reply-x:hover { color:var(--pink); }
+    .msg-editor { display:flex; flex-direction:column; gap:6px; width:100%; }
+    .msg-editor textarea { font:inherit; font-size:14px; color:var(--text); background:var(--surface-2); border:1px solid var(--purple); border-radius:10px; padding:8px 10px; resize:none; max-height:160px; outline:none; }
+    .msg-editor .row { display:flex; gap:10px; justify-content:flex-end; }
 
     /* composer — reference: emoji left, typing space, tool cluster, deliver */
     /* composer IS the typing-space pill; every tool rests INSIDE it (reference) */
@@ -3854,22 +3889,27 @@ try {
     .aa-cbtn { width:38px; height:38px; aspect-ratio:1; padding:0; margin:0; border-radius:50%; border:1px solid var(--purple); background:transparent; color:var(--purple); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; position:relative; z-index:6; transition:transform .22s cubic-bezier(.34,1.56,.64,1), background .2s, box-shadow .2s; }
     .aa-cbtn svg { width:19px; height:19px; flex:0 0 auto; }
     .aa-cbtn:hover, .aa-cbtn:focus-visible { border-color:var(--pink); color:var(--pink); outline:2px solid var(--pink); outline-offset:2px; }
-    .aa-cluster { position:absolute; right:8px; top:50%; translate:0 -50%; display:inline-flex; gap:6px; z-index:6; }
-    /* typing a letter makes the three tools rise out of the typing space;
-       the emoji button permanently rests in the typing space */
-    #msg-form.ready .aa-cluster { translate:0 calc(-50% - 56px); animation:aa-rise .5s cubic-bezier(.3,1.4,.4,1); }
+    .aa-cluster { position:absolute; right:8px; bottom:9px; display:inline-flex; gap:6px; z-index:6; }
+    /* typing a letter makes the three tools rise out of the typing space and stay
+       ABOVE it at any height; the emoji button permanently rests inside */
+    #msg-form.ready .aa-cluster { bottom:calc(100% + 8px); animation:aa-rise .5s cubic-bezier(.3,1.4,.4,1); }
     #msg-form.ready .aa-cluster .aa-cbtn { background:var(--surface); box-shadow:0 6px 16px -6px rgba(0,0,0,.65); }
     #msg-form.falling .aa-cluster { animation:aa-fall .45s cubic-bezier(.3,1.4,.4,1); }
-    @keyframes aa-rise { 0% { translate:0 -50%; scale:1; } 55% { translate:0 calc(-50% - 66px); scale:1.07; } 78% { translate:0 calc(-50% - 51px); scale:.97; } 100% { translate:0 calc(-50% - 56px); scale:1; } }
-    @keyframes aa-fall { 0% { translate:0 calc(-50% - 56px); scale:1; } 60% { translate:0 calc(-50% + 4px); scale:.97; } 100% { translate:0 -50%; scale:1; } }
+    /* v76: multi-line text turns the pill into a rounded rectangle (user correction) */
+    #msg-form.tall { border-radius:16px; }
+    @keyframes aa-rise { 0% { bottom:9px; scale:1; } 55% { bottom:calc(100% + 16px); scale:1.07; } 78% { bottom:calc(100% + 4px); scale:.97; } 100% { bottom:calc(100% + 8px); scale:1; } }
+    @keyframes aa-fall { 0% { bottom:calc(100% + 8px); scale:1; } 60% { bottom:4px; scale:.97; } 100% { bottom:9px; scale:1; } }
     @media (prefers-reduced-motion:reduce) { #msg-form.ready .aa-cluster, #msg-form.falling .aa-cluster { animation:none; transition:none; } .aa-send { transition:none !important; } }
-    #msg-input { flex:1; min-width:0; font:inherit; font-size:14px; line-height:1.4; color:var(--text); background:transparent; border:none; border-radius:0; padding:11px 142px 11px 14px; margin:0; resize:none; overflow-y:auto; max-height:112px; align-self:center; }
+    #msg-input { flex:1; min-width:0; font:inherit; font-size:14px; line-height:1.4; color:var(--text); background:transparent; border:none; border-radius:0; padding:11px 142px 11px 14px; margin:0; resize:none; overflow-y:auto; max-height:196px; align-self:center; }
     #msg-form.ready #msg-input { padding-right:48px; }
-    #msg-input:focus-visible { outline:2px solid var(--purple); outline-offset:4px; border-radius:8px; }
+    /* v75: the loud focus outline around the typing space is gone (user correction);
+       keyboard focus is still visible via the pill's own border accent. */
+    #msg-input:focus, #msg-input:focus-visible { outline:none; }
+    #msg-form:focus-within { border-color:var(--purple); }
     /* deliver button rests at the typing space's right edge (as the reference) */
     .aa-send { position:absolute; right:7px; top:50%; transform:translateY(-50%) scale(.3); width:40px; height:40px; padding:0; margin:0; border:none; border-radius:50%; background:transparent; color:var(--purple); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; }
     #msg-form.ready .aa-send { opacity:1; transform:translateY(-50%) scale(1); pointer-events:auto; }
-    @media (max-width:480px) { .aa-cbtn { width:32px; height:32px; } .aa-cbtn svg { width:16px; height:16px; } #msg-input { padding-right:118px; } #msg-form.ready #msg-input { padding-right:44px; } #msg-form.ready .aa-cluster { translate:0 calc(-50% - 48px); } @keyframes aa-rise { 0% { translate:0 -50%; scale:1; } 55% { translate:0 calc(-50% - 57px); scale:1.07; } 78% { translate:0 calc(-50% - 44px); scale:.97; } 100% { translate:0 calc(-50% - 48px); scale:1; } } .aa-cluster { gap:4px; right:6px; } #msg-form { gap:4px; margin:8px; } }
+    @media (max-width:480px) { .aa-cbtn { width:32px; height:32px; } .aa-cbtn svg { width:16px; height:16px; } #msg-input { padding-right:118px; } #msg-form.ready #msg-input { padding-right:44px; } .aa-cluster { gap:4px; right:6px; bottom:10px; } #msg-form.ready .aa-cluster { bottom:calc(100% + 6px); } @keyframes aa-rise { 0% { bottom:10px; scale:1; } 55% { bottom:calc(100% + 13px); scale:1.07; } 78% { bottom:calc(100% + 2px); scale:.97; } 100% { bottom:calc(100% + 6px); scale:1; } } @keyframes aa-fall { 0% { bottom:calc(100% + 6px); scale:1; } 60% { bottom:5px; scale:.97; } 100% { bottom:10px; scale:1; } } #msg-form { gap:4px; margin:8px; } }
     .aa-send:focus-visible { outline:2px solid var(--pink); }
     .aa-visually-hidden { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
     #msg-voice.rec { color:#fff; background:var(--pink); border-color:var(--pink); animation:aa-rec-pulse 1.2s infinite; }
@@ -4371,7 +4411,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v70</span>
+  <span id="ui-version-badge">v75</span>
 
 <script>
 'use strict';
@@ -7089,6 +7129,8 @@ function rtHandle(msg) {
   // side) — no notification row, but every friend control must follow live.
   if (msg.type === 'friends.changed') { onFriendRelationChanged(); if (currentView === 'friends') friendsPageLoad(); return; }
   if (msg.type === 'chat.message') { window.dispatchEvent(new CustomEvent('aa-chat', { detail: msg })); return; } // v73 phase 6
+  if (msg.type === 'chat.edit') { window.dispatchEvent(new CustomEvent('aa-chat-edit', { detail: msg })); return; } // v77
+  if (msg.type === 'chat.delete') { window.dispatchEvent(new CustomEvent('aa-chat-delete', { detail: msg })); return; } // v77
   if (msg.type === 'team.changed') { return; } // v67: the Create Room team builder was removed — nothing to refresh
   // v51: kicked from a room (server-side removal) — leave instantly with a
   // gentle explanation, never a dead room view.
@@ -7217,7 +7259,7 @@ function rtConnect() {
     try { parsed = JSON.parse(m.data); } catch (_) { return; }
     // v51: direct user messages (notifications, room.kicked) are routed too —
     // the dispatcher used to whitelist only the room/list feeds.
-    if (parsed && (parsed.type === 'error' || parsed.type === 'room.event' || parsed.type === 'rooms.list' || parsed.type === 'matchmaking' || parsed.type === 'notification' || parsed.type === 'room.kicked' || parsed.type === 'team.changed' || parsed.type === 'friends.changed' || parsed.type === 'chat.message')) rtHandle(parsed); // v63: team draft + friend relation changes are routed to the dispatcher too
+    if (parsed && (parsed.type === 'error' || parsed.type === 'room.event' || parsed.type === 'rooms.list' || parsed.type === 'matchmaking' || parsed.type === 'notification' || parsed.type === 'room.kicked' || parsed.type === 'team.changed' || parsed.type === 'friends.changed' || parsed.type === 'chat.message' || parsed.type === 'chat.edit' || parsed.type === 'chat.delete')) rtHandle(parsed); // v63: team draft + friend relation changes are routed to the dispatcher too
   };
   ws.onclose = () => {
     if (rt.ws === ws) rt.ws = null;
@@ -11075,8 +11117,17 @@ window.__aaTwitchHandoff = null;
   function bubbleHTML(m) {
     const mine = m.sender_id === me.id;
     const card = m.payload_type ? shareCard(m) : '';
-    return `<div class="msg-bub">${mine ? '' : `<span class="who">@${esc(m.username || (m.sender && m.sender.username) || '')}</span>`}${m.body && m.body !== '·' && !(m.payload_type === 'sticker_share') ? esc(m.body) : ''}${card}</div>`;
+    const rq = m.reply_to || (m.reply_to_id ? { username: m.reply_username, body: m.reply_body } : null);
+    const quote = rq ? `<span class="msg-quote">↳ @${esc(rq.username || '')}: ${esc(String(rq.body || '').slice(0, 80))}</span>` : '';
+    return `<div class="msg-bub${m.saved ? ' saved' : ''}" data-mid="${m.id}" data-body="${esc(m.body || '')}">${mine ? '' : `<span class="who">@${esc(m.username || (m.sender && m.sender.username) || '')}</span>`}${quote}${m.body && m.body !== '·' && !(m.payload_type === 'sticker_share') ? esc(m.body) : ''}${m.edited_at ? '<span class="msg-edited">· edited</span>' : ''}${card}</div>`;
   }
+  // v78: tap-to-open TEXT actions beneath the bubble (reply/save for all,
+  // edit/delete for your own); swipe on a bubble replies.
+  const actsHTML = (m) => {
+    const mine = m.sender_id === me.id;
+    return `<span class="msg-acts" data-acts="${m.id}"><button type="button" data-act="reply" data-mid="${m.id}">Reply</button><button type="button" data-act="save" data-mid="${m.id}">${m.saved ? 'Unsave' : 'Save'}</button>${mine ? `<button type="button" data-act="edit" data-mid="${m.id}">Edit</button><button type="button" data-act="del" data-mid="${m.id}">Delete</button>` : ''}</span>`;
+  };
+  const flowItemHTML = (m) => bubbleHTML(m) + actsHTML(m) + tsHTML(m);
   const tsHTML = (m) => `<span class="msg-ts">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   const dayKey = (ts) => new Date(ts).toDateString();
   const dayLabel = (ts) => { const d = new Date(ts); const today = new Date(); const yest = new Date(Date.now() - 864e5); if (d.toDateString() === today.toDateString()) return 'Today'; if (d.toDateString() === yest.toDateString()) return 'Yesterday'; return d.toLocaleDateString([], { month: 'long', day: 'numeric' }); };
@@ -11094,7 +11145,7 @@ window.__aaTwitchHandoff = null;
         out.push(`<div class="msg-grp ${mine ? 'mine' : 'theirs'}" data-sender="${m.sender_id}">`);
         grp = { sender: m.sender_id };
       }
-      out.push(bubbleHTML(m) + tsHTML(m));
+      out.push(flowItemHTML(m));
     }
     closeGrp();
     return out.join('');
@@ -11112,8 +11163,8 @@ window.__aaTwitchHandoff = null;
       box.insertAdjacentHTML('beforeend', `<span class="msg-day" data-k="${dk}">${dayLabel(m.created_at)}</span>`);
     }
     const g2 = box.lastElementChild && box.lastElementChild.classList.contains('msg-grp') && box.lastElementChild.dataset.sender === m.sender_id ? box.lastElementChild : null;
-    if (g2 && dk === lastDay) g2.insertAdjacentHTML('beforeend', bubbleHTML(m) + tsHTML(m));
-    else box.insertAdjacentHTML('beforeend', `<div class="msg-grp ${m.sender_id === me.id ? 'mine' : 'theirs'}" data-sender="${m.sender_id}">${bubbleHTML(m) + tsHTML(m)}</div>`);
+    if (g2 && dk === lastDay) g2.insertAdjacentHTML('beforeend', flowItemHTML(m));
+    else box.insertAdjacentHTML('beforeend', `<div class="msg-grp ${m.sender_id === me.id ? 'mine' : 'theirs'}" data-sender="${m.sender_id}">${flowItemHTML(m)}</div>`);
   }
 
   // ---- wallpaper ------------------------------------------------------------
@@ -11366,6 +11417,44 @@ window.__aaTwitchHandoff = null;
       box.classList.remove('hidden');
       return;
     }
+    const aaAct = e.target.closest('.msg-acts [data-act]');
+    if (aaAct && M.thread) {
+      const mid = aaAct.dataset.mid;
+      const bub = document.querySelector(`.msg-bub[data-mid="${mid}"]`);
+      const act = aaAct.dataset.act;
+      if (act === 'reply') { aaReplyTo(mid); return; }
+      if (act === 'save') {
+        const on = aaAct.textContent === 'Unsave';
+        try {
+          const r = await api('/api/messages/threads/' + M.thread + '/messages/' + mid + '/save', on ? undefined : {}, on ? 'DELETE' : 'POST');
+          aaAct.textContent = r.saved ? 'Unsave' : 'Save';
+          if (bub) bub.classList.toggle('saved', !!r.saved);
+        } catch (err) { toast(err.message); }
+        return;
+      }
+      if (act === 'edit') { aaStartEdit(bub); return; }
+      if (act === 'del') {
+        if (!aaAct.classList.contains('armed')) {
+          aaAct.classList.add('armed'); aaAct.textContent = 'sure?';
+          setTimeout(() => { aaAct.classList.remove('armed'); aaAct.textContent = 'Delete'; }, 2500);
+          return;
+        }
+        try {
+          await api('/api/messages/threads/' + M.thread + '/messages/' + mid, undefined, 'DELETE');
+          aaRemoveBubble(bub);
+        } catch (err) { toast(err.message); }
+        return;
+      }
+    }
+    // v78: tapping a bubble toggles its text action row beneath it
+    const tapBub = e.target.closest('.msg-bub');
+    if (tapBub && M.thread && !aaSwiped && !e.target.closest('.aa-card') && !e.target.closest('.msg-acts') && !e.target.closest('.msg-editor')) {
+      const acts = tapBub.nextElementSibling && tapBub.nextElementSibling.classList.contains('msg-acts') ? tapBub.nextElementSibling : null;
+      document.querySelectorAll('.msg-acts.open').forEach((x) => { if (x !== acts) x.classList.remove('open'); });
+      if (acts) acts.classList.toggle('open');
+      return;
+    }
+    if (e.target.closest('#msg-reply-x')) { M.replyTo = null; q('#msg-replychip').classList.remove('on'); return; }
     if (e.target.closest('#msg-back')) { q('#msg-thread').classList.add('hidden'); q('#view-messages').classList.remove('thread-open'); M.thread = null; return; }
     const row = e.target.closest('[data-thread]');
     if (row) { msgOpen(row.dataset.thread); return; }
@@ -11393,11 +11482,11 @@ window.__aaTwitchHandoff = null;
   });
 
   const inp = q('#msg-input');
-  function aaFit() { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 112) + 'px'; }
+  function aaFit() { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 196) + 'px'; }
   inp && inp.addEventListener('input', () => {
     const f = q('#msg-form'); const on = inp.value.trim().length > 0;
     if (!on && f.classList.contains('ready')) { f.classList.add('falling'); setTimeout(() => f.classList.remove('falling'), 500); }
-    f.classList.toggle('ready', on); aaFit();
+    f.classList.toggle('ready', on); aaFit(); f.classList.toggle('tall', inp.scrollHeight > 50);
   });
   inp && inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); inp.closest('form').requestSubmit(); } });
 
@@ -11409,10 +11498,74 @@ window.__aaTwitchHandoff = null;
     if (!body) return;
     input.value = ''; fit(); const fm = q('#msg-form'); fm.classList.add('falling'); setTimeout(() => fm.classList.remove('falling'), 500); fm.classList.remove('ready');
     try {
-      const r = await api('/api/messages/threads/' + M.thread + '/messages', { body }, 'POST');
+      const replyTo = M.replyTo;
+      const r = await api('/api/messages/threads/' + M.thread + '/messages', Object.assign({ body }, replyTo ? { reply_to: replyTo.id } : {}), 'POST');
       appendFlow({ ...r, sender_id: me.id, body });
       q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
+      M.replyTo = null; q('#msg-replychip').classList.remove('on');
     } catch (err) { toast(err.message); input.value = body; fit(); q('#msg-form').classList.add('ready'); }
+  });
+
+  // v77: message actions — edit / delete own messages (server-authoritative;
+  // the server only ever applies these to the sender's own rows).
+  function aaApplyEdit(bub, body, editedAt) {
+    if (!bub) return;
+    const who = bub.querySelector('.who'); const card = bub.querySelector('.aa-card'); const quote = bub.querySelector('.msg-quote');
+    bub.dataset.body = body;
+    bub.innerHTML = (who ? who.outerHTML : '') + (quote ? quote.outerHTML : '') + esc(body) + (editedAt ? '<span class="msg-edited">· edited</span>' : '') + (card ? card.outerHTML : '');
+  }
+  function aaRemoveBubble(bub) {
+    if (!bub) return;
+    const grp = bub.closest('.msg-grp');
+    let nx = bub.nextElementSibling;
+    if (nx && nx.classList.contains('msg-acts')) { const a = nx; nx = a.nextElementSibling; a.remove(); }
+    if (nx && nx.classList.contains('msg-ts')) nx.remove();
+    bub.remove();
+    if (grp && !grp.querySelector('.msg-bub')) grp.remove();
+  }
+  function aaStartEdit(bub) {
+    const mid = bub.dataset.mid; const body = bub.dataset.body || '';
+    const old = bub.innerHTML;
+    bub.innerHTML = `<div class="msg-editor"><textarea maxlength="4000" aria-label="Edit message text"></textarea><div class="row"><button type="button" class="msg-etxt" data-e="cancel">Cancel</button><button type="button" class="msg-etxt" data-e="save">Save</button></div></div>`;
+    const ta = bub.querySelector('textarea'); ta.value = body; ta.focus();
+    bub.querySelector('[data-e="cancel"]').addEventListener('click', () => { bub.innerHTML = old; });
+    bub.querySelector('[data-e="save"]').addEventListener('click', async () => {
+      const nb = ta.value.trim();
+      if (!nb) { toast('Message is empty.'); return; }
+      try {
+        const r = await api('/api/messages/threads/' + M.thread + '/messages/' + mid, { body: nb }, 'PUT');
+        aaApplyEdit(bub, nb, r.edited_at);
+      } catch (err) { toast(err.message); }
+    });
+  }
+  // v78: swipe a bubble (mostly touch, mouse drag too) to reply
+  let aaPtr = null; let aaSwiped = false;
+  q('#msg-thread').addEventListener('pointerdown', (e) => {
+    const b = e.target.closest('.msg-bub');
+    aaPtr = b ? { x: e.clientX, y: e.clientY, mid: b.dataset.mid } : null;
+  });
+  window.addEventListener('pointerup', (e) => {
+    if (!aaPtr) return;
+    const dx = e.clientX - aaPtr.x, dy = e.clientY - aaPtr.y;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > 2 * Math.abs(dy)) { aaSwiped = true; aaReplyTo(aaPtr.mid); setTimeout(() => { aaSwiped = false; }, 0); }
+    aaPtr = null;
+  });
+  function aaReplyTo(mid) {
+    const bub = document.querySelector(`.msg-bub[data-mid="${mid}"]`); if (!bub) return;
+    const mine = bub.closest('.msg-grp').classList.contains('mine');
+    const name = mine ? (me.username || 'you') : ((bub.querySelector('.who') || {}).textContent || '@').replace('@', '');
+    M.replyTo = { id: mid, name, preview: (bub.dataset.body || '').slice(0, 80) };
+    q('#msg-replychip-t').textContent = 'Replying to @' + name + ': ' + M.replyTo.preview;
+    q('#msg-replychip').classList.add('on');
+    q('#msg-input').focus();
+  }
+  window.addEventListener('aa-chat-edit', (ev) => {
+    const d = ev.detail; if (d.thread_id !== M.thread) return;
+    aaApplyEdit(document.querySelector(`.msg-bub[data-mid="${d.message_id}"]`), d.body, d.edited_at);
+  });
+  window.addEventListener('aa-chat-delete', (ev) => {
+    const d = ev.detail; if (d.thread_id !== M.thread) return;
+    aaRemoveBubble(document.querySelector(`.msg-bub[data-mid="${d.message_id}"]`));
   });
 
   // realtime: the existing WS hub pushes chat.message — zero polling.

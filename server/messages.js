@@ -138,12 +138,16 @@ router.get('/threads/:id', ah(async (req, res) => {
 router.get('/threads/:id/messages', ah(async (req, res) => {
   const me = req.user.id, id = req.params.id;
   await assertMember(me, id);
-  const args = [id];
+  const args = [id, me];
   let where = '';
-  if (req.query.before) { args.push(req.query.before); where = ` AND m.created_at < $2::timestamptz`; }
+  if (req.query.before) { args.push(req.query.before); where = ` AND m.created_at < $3::timestamptz`; }
   const { rows } = await pool.query(
-    `SELECT m.id, m.body, m.sender_id, m.created_at, m.payload_type, m.payload, u.username, u.display_name, up.avatar_storage_key, up.updated_at
+    `SELECT m.id, m.body, m.sender_id, m.created_at, m.edited_at, m.payload_type, m.payload, m.reply_to_id,
+            r.body AS reply_body, ru.username AS reply_username, (s.message_id IS NOT NULL) AS saved,
+            u.username, u.display_name, up.avatar_storage_key, up.updated_at
        FROM messages m JOIN users u ON u.id = m.sender_id LEFT JOIN user_profiles up ON up.user_id = u.id
+       LEFT JOIN messages r ON r.id = m.reply_to_id LEFT JOIN users ru ON ru.id = r.sender_id
+       LEFT JOIN saved_messages s ON s.message_id = m.id AND s.user_id = $2
       WHERE m.conversation_id = $1 ${where}
       ORDER BY m.created_at DESC LIMIT 51`, args);
   const hasMore = rows.length > 50;
@@ -218,18 +222,81 @@ router.post('/threads/:id/messages', ah(async (req, res) => {
       throw new HttpError(403, 'Messaging is unavailable between you two.');
   }
   const share = await buildShare(me, id, (req.body || {}).share);
+  // v76: replies reference a message of THIS conversation (server-validated)
+  let replyTo = null;
+  const rtId = String((req.body || {}).reply_to || '');
+  if (rtId) {
+    const rr = await pool.query(
+      `SELECT m.id, m.body, u.username FROM messages m JOIN users u ON u.id = m.sender_id
+        WHERE m.id = $1 AND m.conversation_id = $2`, [rtId, id]);
+    if (!rr.rows[0]) throw new HttpError(404, 'Reply target not found in this conversation.');
+    replyTo = rr.rows[0];
+  }
   const { rows: [msg] } = await pool.query(
-    `INSERT INTO messages (conversation_id, sender_id, body, payload_type, payload) VALUES ($1,$2,$3,$4,$5) RETURNING id, created_at`,
-    [id, me, body, share ? share.type : null, share ? JSON.stringify(share.payload) : null]);
+    `INSERT INTO messages (conversation_id, sender_id, body, payload_type, payload, reply_to_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, created_at`,
+    [id, me, body, share ? share.type : null, share ? JSON.stringify(share.payload) : null, replyTo ? replyTo.id : null]);
   await pool.query(`UPDATE conversations SET updated_at = now() WHERE id=$1`, [id]);
-  const wire = { id: msg.id, body, sender_id: me, created_at: msg.created_at, payload_type: share ? share.type : null, payload: share ? share.payload : null };
+  const wire = { id: msg.id, body, sender_id: me, created_at: msg.created_at, payload_type: share ? share.type : null, payload: share ? share.payload : null, reply_to: replyTo ? { id: replyTo.id, username: replyTo.username, body: replyTo.body } : null };
   const meRow = members.find((m) => m.user_id === me);
   for (const m of members) {
     if (m.user_id === me) continue;
     rt.sendToUser(m.user_id, { type: 'chat.message', thread_id: id, message: { ...wire, sender: { id: me, username: meRow.username, display_name: meRow.display_name, avatar_url: av(meRow) } } });
     notifyUser(m.user_id, 'message', { thread_id: id, from_username: meRow.username, preview: body.slice(0, 80), actor: me });
   }
-  res.status(201).json({ id: msg.id, created_at: msg.created_at, payload_type: share ? share.type : null, payload: share ? share.payload : null });
+  res.status(201).json({ id: msg.id, created_at: msg.created_at, payload_type: share ? share.type : null, payload: share ? share.payload : null, reply_to: wire.reply_to });
+}));
+
+// ---- v77: personal chat saves (any member may save; purely personal) --------
+router.post('/threads/:id/messages/:mid/save', ah(async (req, res) => {
+  const me = req.user.id, id = req.params.id, mid = req.params.mid;
+  await assertMember(me, id);
+  const chk = await pool.query(`SELECT id FROM messages WHERE id=$1 AND conversation_id=$2`, [mid, id]);
+  if (!chk.rows[0]) throw new HttpError(404, 'Message not found in this conversation.');
+  await pool.query(`INSERT INTO saved_messages (user_id, message_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`, [me, mid]);
+  res.json({ ok: true, saved: true });
+}));
+router.delete('/threads/:id/messages/:mid/save', ah(async (req, res) => {
+  const me = req.user.id;
+  await pool.query(`DELETE FROM saved_messages WHERE user_id=$1 AND message_id=$2`, [me, req.params.mid]);
+  res.json({ ok: true, saved: false });
+}));
+router.get('/saved', ah(async (req, res) => {
+  const { rows } = await pool.query(
+    `SELECT s.saved_at, m.id, m.conversation_id, m.body, m.created_at, u.username
+       FROM saved_messages s JOIN messages m ON m.id = s.message_id JOIN users u ON u.id = m.sender_id
+      WHERE s.user_id = $1 ORDER BY s.saved_at DESC LIMIT 100`, [req.user.id]);
+  res.json({ saved: rows });
+}));
+
+// ---- v77: edit own message (text-only; share payloads stay immutable) -----
+router.put('/threads/:id/messages/:mid', ah(async (req, res) => {
+  const me = req.user.id, id = req.params.id, mid = req.params.mid;
+  const body = String((req.body || {}).body || '').trim();
+  if (body.length < 1) throw new HttpError(400, 'Message is empty.');
+  if (body.length > 4000) throw new HttpError(400, 'Message is too long (4000 max).');
+  await assertMember(me, id);
+  const { rows } = await pool.query(
+    `UPDATE messages SET body=$1, edited_at=now() WHERE id=$2 AND conversation_id=$3 AND sender_id=$4 RETURNING id, edited_at`,
+    [body, mid, id, me]);
+  if (!rows[0]) throw new HttpError(404, 'Only your own messages can be edited.');
+  const members = await memberRows(id);
+  for (const m of members) if (m.user_id !== me)
+    rt.sendToUser(m.user_id, { type: 'chat.edit', thread_id: id, message_id: mid, body, edited_at: rows[0].edited_at });
+  res.json({ id: mid, body, edited_at: rows[0].edited_at });
+}));
+
+// ---- v77: delete own message ------------------------------------------------
+router.delete('/threads/:id/messages/:mid', ah(async (req, res) => {
+  const me = req.user.id, id = req.params.id, mid = req.params.mid;
+  await assertMember(me, id);
+  const { rows } = await pool.query(
+    `DELETE FROM messages WHERE id=$1 AND conversation_id=$2 AND sender_id=$3 RETURNING id`,
+    [mid, id, me]);
+  if (!rows[0]) throw new HttpError(404, 'Only your own messages can be deleted.');
+  const members = await memberRows(id);
+  for (const m of members) if (m.user_id !== me)
+    rt.sendToUser(m.user_id, { type: 'chat.delete', thread_id: id, message_id: mid });
+  res.json({ ok: true });
 }));
 
 // ---- mark read (also happens on every page fetch) -------------------------

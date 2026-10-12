@@ -1614,6 +1614,12 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
         mime text NOT NULL, width integer, height integer,
         data bytea NOT NULL, created_at timestamptz NOT NULL DEFAULT now())`],
     ['v74 chat_uploads user lookup index', `CREATE INDEX IF NOT EXISTS idx_chat_uploads_user ON chat_uploads (user_id, kind, created_at DESC)`],
+    ['v76 messages.reply_to_id (in-chat replies, swipe-to-reply)',
+     `ALTER TABLE messages ADD COLUMN IF NOT EXISTS reply_to_id uuid REFERENCES messages(id) ON DELETE SET NULL`],
+    ['v77 saved_messages (personal chat saves)',
+     `CREATE TABLE IF NOT EXISTS saved_messages (user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, message_id uuid NOT NULL REFERENCES messages(id) ON DELETE CASCADE, saved_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (user_id, message_id))`],
+    ['v75 messages.edited_at (honest edit marker)',
+     `ALTER TABLE messages ADD COLUMN IF NOT EXISTS edited_at timestamptz`],
     ['v74 messages payload vocabulary (chat shares + attachments)',
      `DO $$ BEGIN ALTER TABLE messages DROP CONSTRAINT IF EXISTS messages_payload_type_check;
         ALTER TABLE messages ADD CONSTRAINT messages_payload_type_check
