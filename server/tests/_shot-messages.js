@@ -20,9 +20,14 @@ async function user() {
   const login = await api(null, '/auth/login', { login: name, password });
   return { id: d.user.id, token: login.session_token, name };
 }
+// v80: Messages is no longer a top-level drawer destination — it is reached
+// from Community → Friends. Same view, same view id, new way in.
 async function openMessages(p) {
-  await p.click('#btn-menu');
-  await p.click('#drawer-nav [data-view="messages"]');
+  await p.click('#bottom-nav .tab[data-tab="community"]');
+  await p.waitForSelector('.cm-side-item', { timeout: 15000 });
+  await p.click('.cm-side-item[data-cm="friends"]');
+  await p.waitForSelector('.cm-open-messages', { timeout: 15000 });
+  await p.click('.cm-open-messages');
   await p.waitForSelector('#view-messages:not(.hidden)');
 }
 (async () => {

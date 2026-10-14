@@ -3632,55 +3632,270 @@ try {
   </section>
 
   <!-- ============================= COMMUNITY =========================== -->
-  <!-- v73 COMMUNITY (phases 1-2): the social layer of the Arena — artwork
-       first, Arena signals everywhere, no Instagram clones. Tabs map to the
-       spec's sections; Live/Upcoming reuse the canonical /api/live states. -->
+  <!-- v80 COMMUNITY: the gallery of the Arena — artwork first, Arena signals
+       everywhere, no Instagram clones. Eight destinations; competition lives
+       in the Arena itself and surfaces here as a feed refinement. Live and
+       Upcoming reuse the canonical /api/live states (YouTube + Twitch). -->
   <section id="view-community" class="view hidden">
-    <div class="cm-top">
-      <h1 style="margin:0">Community</h1>
-      <input id="cm-search" type="search" placeholder="Search artists, art, battles, tags, live…" aria-label="Search the community" autocomplete="off" style="flex:1;min-width:0;font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px">
-      <button id="cm-publish" class="mini" type="button">＋ Share art</button>
+    <div class="cm-shell">
+
+      <!-- LEFT RAIL — the section switcher, exactly as the reference draws it -->
+      <aside class="cm-side" role="navigation" aria-label="Community sections">
+        <button type="button" class="cm-side-back" id="cm-back-arena">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>
+          Back to Arena
+        </button>
+        <button type="button" class="cm-side-item active" data-cm="for-you" aria-current="page">Community</button>
+        <button type="button" class="cm-side-item" data-cm="discover">Discover</button>
+        <button type="button" class="cm-side-item" data-cm="friends">Friends</button>
+        <button type="button" class="cm-side-item" id="cm-side-profile">Community Profile</button>
+        <button type="button" class="cm-side-item" data-cm="following">Following</button>
+        <button type="button" class="cm-side-item" data-cm="saves">Saved</button>
+        <button type="button" class="cm-side-item" id="cm-side-settings" data-cm="settings">Community settings</button>
+      </aside>
+
+      <div class="cm-main">
+
+        <!-- top strip: the community search, as a pill -->
+        <div class="cm-bar">
+          <span class="cm-search-wrap">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+            <input id="cm-search" type="search" placeholder="Search community" aria-label="Search the community" autocomplete="off">
+          </span>
+          <button id="cm-publish" class="cm-publish" type="button">＋ Share art</button>
+        </div>
+        <div id="cm-searchres" class="hidden"></div>
+
+        <!-- HERO — a real Arena artwork leads; falls back to a welcome panel -->
+        <div class="cm-hero" id="cm-hero" aria-live="polite"></div>
+
+        <div class="cm-grid">
+          <div class="cm-col">
+
+            <!-- Featured in Community -->
+            <div class="cm-featured">
+              <img class="cm-feat-art" src="/community-gallery.png" alt="" aria-hidden="true" loading="lazy">
+              <span class="cm-feat-label">Featured in Community</span>
+              <p class="cm-feat-copy">Discover amazing artworks from the Art Arena™ Community and support your favourite artists.</p>
+              <div class="cm-feat-foot">
+                <button type="button" class="cm-btn" data-cm="trending">Explore now →</button>
+                <button type="button" class="cm-chev" data-cm="trending" aria-label="Open Trending">›</button>
+              </div>
+            </div>
+
+            <!-- v80: Battle Art is no longer its own section — the Arena hosts
+                 competition. This refinement reuses the same battle-art query. -->
+            <div id="cm-filters" class="hidden" role="group" aria-label="Refine this feed">
+              <span class="cm-filter-label">Refine</span>
+              <button class="cm-filter" type="button" data-cm-filter="all" aria-pressed="true">All work</button>
+              <button class="cm-filter" type="button" data-cm-filter="battle" aria-pressed="false">&#9876; From the Arena</button>
+            </div>
+
+            <!-- Discover rail (folded in from the retired Artists section) -->
+            <div id="cm-rail"></div>
+
+            <div id="cm-feed"></div>
+            <div id="cm-empty" class="cm-empty hidden"></div>
+            <button id="cm-more" class="secondary hidden" type="button" style="width:100%;margin:14px 0">Load more</button>
+          </div>
+
+          <!-- RIGHT RAIL — friends with Chat, and the guidelines -->
+          <aside class="cm-col cm-rail-col">
+            <section class="cm-card cm-friends-card" aria-label="Friends">
+              <h2 class="cm-card-title">Friends</h2>
+              <div id="cm-friends-mini" class="cm-friends-mini"></div>
+            </section>
+            <section class="cm-card cm-guide-card" aria-label="Community guidelines">
+              <h2 class="cm-card-title">Community Guidelines</h2>
+              <ul class="cm-guide-list">
+                <li>Share your own work — credit collaborations.</li>
+                <li>Critique the art, never the artist.</li>
+                <li>No harassment, hate or plagiarism.</li>
+                <li>Report anything that breaks these — moderators see every report.</li>
+              </ul>
+            </section>
+          </aside>
+        </div>
+      </div>
     </div>
-    <div id="cm-searchres" class="hidden"></div>
-    <div id="cm-tabs" role="tablist" aria-label="Community sections">
-      <button class="cm-tab active" data-cm="for-you" role="tab" aria-selected="true">For You</button>
-      <button class="cm-tab" data-cm="following" role="tab" aria-selected="false">Following</button>
-      <button class="cm-tab" data-cm="trending" role="tab" aria-selected="false">Trending</button>
-      <button class="cm-tab" data-cm="new" role="tab" aria-selected="false">New</button>
-      <button class="cm-tab" data-cm="battle" role="tab" aria-selected="false">Battle Art</button>
-      <button class="cm-tab" data-cm="artists" role="tab" aria-selected="false">Artists</button>
-      <button class="cm-tab" data-cm="live" role="tab" aria-selected="false">Live</button>
-      <button class="cm-tab" data-cm="upcoming" role="tab" aria-selected="false">Upcoming</button>
-      <button class="cm-tab" data-cm="saves" role="tab" aria-selected="false">Saved</button>
-    </div>
-    <div id="cm-feed"></div>
-    <div id="cm-empty" class="cm-empty hidden"></div>
-    <button id="cm-more" class="secondary hidden" type="button" style="width:100%;margin:10px 0">Load more</button>
   </section>
 
   <style>
-    /* v73 COMMUNITY — theme tokens only; no hard-coded chrome */
-    #view-community { padding: 12px 14px 90px; }
-    .cm-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
-    #cm-tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; scrollbar-width:thin; }
-    .cm-tab { flex:0 0 auto; border:1px solid var(--line); background:transparent; color:var(--muted); border-radius:999px; padding:6px 13px; font:inherit; font-size:12px; letter-spacing:.6px; text-transform:uppercase; cursor:pointer; }
-    .cm-tab.active { color:var(--pink); border-color:var(--pink); }
-    .cm-tab:focus-visible, .cm-post:focus-visible, .cm-art-box button:focus-visible { outline:2px solid var(--pink); outline-offset:2px; }
-    #cm-feed { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
-    .cm-post { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card, transparent); display:flex; flex-direction:column; text-align:left; padding:0; font:inherit; color:inherit; cursor:pointer; }
+    /* v80 COMMUNITY — built to the supplied reference: a dark gallery shell
+       with a left rail, a hero, an outlined card grid and a friends rail.
+       Every colour comes from theme tokens (--pink/--purple/--line/--surface/
+       --text/--muted), so the layout follows Light/Dark and all six themes
+       instead of hard-coding the reference's magenta. */
+    #view-community { padding: 0; }
+    /* The app shell caps every view at 560px (index.html: main { max-width }).
+       Right for forms, wrong for a gallery — widened only while Community is
+       open, and scoped to this view alone. */
+    body.cm-wide main { max-width: 1320px; padding: 0 16px; }
+    body.cm-wide .view#view-community { border:0; background:transparent; padding:0; }
+
+    .cm-shell { display:grid; grid-template-columns:212px minmax(0,1fr); gap:22px; align-items:start; }
+    .cm-main { min-width:0; }
+
+    /* ---- LEFT RAIL ---- */
+    .cm-side { display:flex; flex-direction:column; gap:2px; position:sticky; top:74px; padding:6px 0 20px; }
+    .cm-side-back { display:inline-flex; align-items:center; gap:9px; margin:0 0 14px; padding:8px 6px; background:none; border:0; color:var(--text); font:inherit; font-size:15px; font-weight:700; cursor:pointer; text-align:left; }
+    .cm-side-back:hover { filter:none; color:var(--pink); }
+    .cm-side-item { position:relative; margin:0; padding:13px 16px; background:none; border:0; border-radius:999px; color:var(--text); font:inherit; font-size:15px; font-weight:700; text-align:left; cursor:pointer; letter-spacing:.2px; }
+    .cm-side-item:hover { filter:none; color:var(--pink); }
+    /* the active pill bleeds to the left edge, exactly like the reference */
+    .cm-side-item.active { background:var(--pink); color:#0b0713; margin-left:-18px; padding-left:34px; }
+    .cm-side-item.active:hover { color:#0b0713; }
+    .cm-side-item:focus-visible, .cm-side-back:focus-visible, .cm-btn:focus-visible, .cm-chev:focus-visible { outline:2px solid var(--pink); outline-offset:2px; }
+
+    /* ---- TOP STRIP ---- */
+    .cm-bar { display:flex; align-items:center; gap:12px; margin:4px 0 20px; }
+    .cm-search-wrap { flex:1; min-width:0; display:flex; align-items:center; gap:10px; border:2px solid var(--pink); border-radius:999px; padding:9px 18px; color:var(--pink); }
+    .cm-search-wrap input { flex:1; min-width:0; background:transparent; border:0; outline:none; color:var(--text); font:inherit; font-size:14.5px; }
+    .cm-search-wrap input::placeholder { color:var(--muted); font-style:italic; }
+    .cm-publish { margin:0; flex:0 0 auto; border:0; border-radius:999px; background:var(--pink); color:#0b0713; font:inherit; font-size:13.5px; font-weight:800; padding:11px 20px; cursor:pointer; }
+    .cm-publish:hover { filter:brightness(1.08); }
+
+    /* ---- HERO ---- */
+    .cm-hero { position:relative; border:2px solid var(--pink); border-radius:4px; overflow:hidden; min-height:210px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; background:var(--surface); }
+    .cm-hero.welcome { background:linear-gradient(135deg, rgba(var(--pink-rgb),.14), rgba(var(--purple-rgb),.10)); }
+    .cm-hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    /* v80: the veil is derived from the ACTIVE THEME's own --bg, so the hero
+       caption stays readable in Light Mode and in the light premium themes
+       (Cloud, Magazine) without hard-coding any colour. */
+    .cm-hero .cm-hero-veil { position:absolute; inset:0; background:linear-gradient(to top, var(--bg) 5%, transparent 62%); }
+    .cm-hero-body { position:relative; width:100%; padding:20px 24px; align-self:flex-end; }
+    .cm-hero-kicker { display:inline-flex; align-items:center; gap:7px; font-size:10.5px; font-weight:800; letter-spacing:1.6px; text-transform:uppercase; color:var(--pink); }
+    .cm-hero-title { margin:6px 0 2px; font-size:clamp(22px,3.4vw,38px); font-weight:800; letter-spacing:.4px; }
+    .cm-hero-sub { margin:0; font-size:13.5px; color:var(--muted); }
+    .cm-hero.welcome .cm-hero-body { align-self:center; text-align:center; }
+    .cm-hero.welcome .cm-hero-title { font-size:clamp(24px,4vw,42px); }
+
+    /* ---- CONTENT GRID ---- */
+    .cm-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; align-items:start; }
+    .cm-col { min-width:0; }
+    .cm-rail-col { display:flex; flex-direction:column; gap:16px; }
+
+    .cm-card { border:2px solid var(--pink); border-radius:4px; padding:16px; background:transparent; }
+    .cm-card-title { margin:0 0 12px; font-size:19px; font-weight:800; font-style:italic; letter-spacing:.2px; color:var(--text); text-transform:none; }
+
+    /* Featured in Community */
+    /* v80: the Featured card carries the gallery artwork behind its copy —
+       background keyed out, held well back in opacity so the text stays the
+       thing you read. It is anchored bottom-right so the arcade opens AWAY
+       from the copy rather than sitting under it. */
+    .cm-featured { position:relative; overflow:hidden; border:2px solid var(--pink); border-radius:4px; padding:20px 22px; margin-bottom:20px; }
+    .cm-feat-art { position:absolute; right:-4%; bottom:-6%; width:min(62%,620px); height:auto; opacity:.16; pointer-events:none; user-select:none; z-index:0; }
+    .cm-featured > *:not(.cm-feat-art) { position:relative; z-index:1; }
+    .cm-feat-label { font-size:14.5px; color:var(--text); }
+    .cm-feat-copy { margin:16px 0 18px; font-size:15px; line-height:1.45; color:var(--text); max-width:46ch; }
+    .cm-feat-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .cm-btn { margin:0; border:0; border-radius:999px; background:var(--pink); color:#0b0713; font:inherit; font-size:13.5px; font-weight:800; padding:10px 18px; cursor:pointer; }
+    .cm-btn:hover { filter:brightness(1.08); }
+    .cm-chev { margin:0; background:none; border:0; color:var(--pink); font-size:30px; line-height:1; cursor:pointer; padding:0 6px; }
+    .cm-chev:hover { filter:none; }
+
+    /* ---- FRIENDS (right rail) ---- */
+    .cm-friends-mini { display:flex; flex-direction:column; gap:4px; }
+    .cm-friend-row { display:flex; align-items:center; gap:10px; padding:9px 2px; }
+    .cm-friend-row .fr-ava { width:38px; height:38px; font-size:14px; }
+    .cm-friend-row .cm-fr-name { flex:1; min-width:0; font-size:13.5px; font-style:italic; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cm-chat { flex:0 0 auto; margin:0; border:1.5px solid var(--pink); border-radius:999px; background:transparent; color:var(--pink); font:inherit; font-size:12.5px; font-style:italic; font-weight:700; padding:6px 16px; cursor:pointer; }
+    .cm-chat:hover { filter:none; background:rgba(var(--pink-rgb),.14); }
+    .cm-friend-note { font-size:11.5px; color:var(--muted); margin:10px 0 0; line-height:1.4; }
+
+    /* ---- GUIDELINES ---- */
+    .cm-guide-list { margin:0; padding-left:17px; display:flex; flex-direction:column; gap:9px; font-size:12.5px; color:var(--muted); line-height:1.45; }
+    .cm-guide-list li::marker { color:var(--pink); }
+
+    /* ---- SECTION HEADINGS + GALLERY ---- */
+    .cm-sec-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 14px; }
+    .cm-sec-head h2 { margin:0; font-size:24px; font-weight:800; letter-spacing:.2px; color:var(--text); text-transform:none; }
+    .cm-sec-next { margin:0; width:40px; height:40px; flex:0 0 auto; border:0; border-radius:50%; background:var(--pink); color:#0b0713; font-size:22px; font-weight:800; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .cm-sec-next:hover { filter:brightness(1.08); }
+
+    .cm-filter-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+    #cm-filters { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:0 0 16px; }
+    #cm-filters.hidden { display:none; }
+    .cm-filter-label { font-size:10.5px; letter-spacing:1.4px; text-transform:uppercase; color:var(--muted); margin-right:2px; }
+    .cm-filter { border:1px solid var(--line); background:transparent; color:var(--muted); border-radius:999px; padding:4px 11px; font:inherit; font-size:11.5px; cursor:pointer; }
+    .cm-filter[aria-pressed="true"] { color:var(--pink); border-color:var(--pink); background:rgba(var(--pink-rgb),.07); }
+    .cm-filter:focus-visible { outline:2px solid var(--pink); outline-offset:2px; }
+
+    /* the gallery: outlined frames, artwork at real size */
+    #cm-feed { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:16px; }
+    .cm-post { position:relative; border:2px solid var(--pink); border-radius:4px; overflow:hidden; background:var(--surface); display:flex; flex-direction:column; text-align:left; padding:0; font:inherit; color:inherit; cursor:pointer; transition:transform .16s ease; }
+    .cm-post:hover { transform:translateY(-2px); }
     .cm-post img.cm-thumb { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:var(--line); }
-    .cm-post .cm-meta { padding:9px 10px 10px; display:flex; flex-direction:column; gap:5px; }
+    .cm-post .cm-meta { padding:10px 12px 12px; display:flex; flex-direction:column; gap:6px; }
     .cm-post .cm-artist { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--muted); }
     .cm-post .cm-artist img { width:20px; height:20px; border-radius:50%; }
-    .cm-post .cm-artist b { color:inherit; }
-    .cm-post .cm-title { font-weight:700; font-size:13.5px; }
+    .cm-post .cm-title { font-weight:700; font-size:14px; }
     .cm-post .cm-counts { display:flex; gap:12px; font-size:12px; color:var(--muted); }
-    .cm-post .cm-counts [aria-pressed="true"] { color:var(--pink); }
     .cm-post .cm-battlechip { font-size:11px; border:1px solid var(--line); border-radius:999px; padding:2px 8px; color:var(--muted); align-self:flex-start; }
-    .cm-livecard { border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px; background:var(--card, transparent); }
+    #cm-feed .cm-post.cm-hero { grid-column:span 2; }
+    #cm-feed .cm-post.cm-hero img.cm-thumb { aspect-ratio:16/9; }
+    @media (max-width:900px) { #cm-feed .cm-post.cm-hero { grid-column:span 1; } #cm-feed .cm-post.cm-hero img.cm-thumb { aspect-ratio:1; } }
+
+    /* ---- SAVED: a collection, not a feed ---- */
+    #cm-feed.cm-saves { display:flex; flex-direction:column; gap:12px; }
+    .cm-savedrow { display:flex; align-items:center; gap:14px; border:2px solid var(--pink); border-radius:4px; padding:12px; background:var(--surface); }
+    .cm-savedthumb { flex:0 0 auto; width:132px; height:132px; padding:0; margin:0; border:1px solid var(--line); border-radius:3px; overflow:hidden; background:var(--line); cursor:pointer; }
+    .cm-savedthumb img.cm-thumb { width:100%; height:100%; object-fit:cover; display:block; aspect-ratio:auto; }
+    .cm-savedinfo { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
+    .cm-savedinfo .cm-title { font-weight:700; font-size:15px; }
+    .cm-savedacts { flex:0 0 auto; display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+    .cm-savedacts .cm-unsave { border-color:var(--pink); color:var(--pink); font-weight:800; }
+    .cm-savedacts .cm-unsave:hover { filter:none; background:rgba(var(--pink-rgb),.14); }
+
+    /* ---- FRIENDS section (full width) ---- */
+    #cm-feed.cm-friends { display:flex; flex-direction:column; gap:8px; }
+    .fr-actions .fr-chat { border-color:var(--pink); color:var(--pink); font-weight:800; }
+    .fr-actions .fr-chat:hover { filter:none; background:rgba(var(--pink-rgb),.14); }
+    .cm-friendnote { color:var(--muted); font-size:12.5px; margin:2px 0 10px; }
+
+    /* ---- DISCOVER rail ---- */
+    #cm-rail:empty { display:none; }
+    .cm-rail { margin:0 0 22px; }
+    .cm-rail-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:0 0 11px; }
+    .cm-rail-head h2 { margin:0; font-size:24px; font-weight:800; color:var(--text); text-transform:none; }
+    .cm-rail-head span { font-size:11.5px; color:var(--muted); }
+    .cm-rail-track { display:flex; gap:12px; overflow-x:auto; padding:2px 2px 12px; scroll-snap-type:x proximity; scrollbar-width:thin; }
+    .cm-artistcard { flex:0 0 auto; width:164px; scroll-snap-align:start; border:2px solid var(--pink); border-radius:4px; padding:14px 12px; text-align:center; background:var(--surface); display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .cm-artistcard img, .cm-artistcard .fallback { width:58px; height:58px; border-radius:50%; object-fit:cover; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--pink); background:var(--surface-2); border:1.5px solid var(--pink); }
+    .cm-artistcard .u { font-weight:800; font-size:13px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cm-artistcard .s { font-size:11px; color:var(--muted); line-height:1.35; }
+    .cm-artistcard .mini { margin:0; }
+
+    /* ---- hub: stacked sections, each a horizontal row of real artwork ---- */
+    #cm-feed.cm-hub { display:flex; flex-direction:column; gap:26px; }
+    .cm-sec { min-width:0; }
+    .cm-row { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(210px,1fr); gap:16px; overflow-x:auto; padding:2px 2px 12px; scroll-snap-type:x proximity; scrollbar-width:thin; }
+    .cm-row .cm-post { scroll-snap-align:start; }
+    #cm-feed.cm-hub .cm-row { grid-auto-columns:minmax(200px,235px); }
+    #cm-feed.cm-artists { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; }
+    /* v80: Community settings — one card per real concern. */
+    #cm-feed.cm-settings { display:flex; flex-direction:column; gap:12px; }
+    .cm-set-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; }
+    .cm-set-card { display:flex; flex-direction:column; gap:7px; text-align:left; align-items:flex-start; background:var(--surface); border:2px solid var(--pink); border-radius:4px; padding:16px 18px; color:var(--text); font-weight:400; }
+    .cm-set-card:hover { background:var(--surface-hover); }
+    .cm-set-card.cm-set-static { border-color:var(--line); }
+    .cm-set-title { font-size:15.5px; font-weight:800; letter-spacing:.3px; }
+    .cm-set-sub { font-size:12.5px; font-weight:700; color:var(--pink); }
+    .cm-set-copy { font-size:13px; line-height:1.5; color:var(--muted); }
+    .cm-open-messages { flex:0 0 auto; }
+
+    /* ---- LIVE / UPCOMING ---- */
+    .cm-livecard { border:2px solid var(--pink); border-radius:4px; padding:15px; display:flex; flex-direction:column; gap:7px; background:var(--surface); }
     .cm-livebadge { display:inline-flex; align-items:center; gap:6px; color:#ff4d5e; font-weight:800; font-size:11px; letter-spacing:1px; }
     .cm-livebadge i { width:8px; height:8px; border-radius:50%; background:currentColor; }
-    .cm-empty { border:1px dashed var(--line); border-radius:12px; padding:26px 16px; text-align:center; color:var(--muted); margin-top:12px; }
+
+    /* v80: an honest empty state, not a stand-in. The dashed frame read as a
+       mockup placeholder waiting to be filled; the message is the honest part
+       and it stays, without the empty box pretending to be an artwork. */
+    .cm-empty { padding:30px 20px 34px; text-align:center; color:var(--muted); font-size:14px; }
+    .cm-empty::before { content:''; display:block; width:44px; height:2px; margin:0 auto 14px; background:var(--pink); }
+
+    /* ---- artwork overlay (unchanged behaviour) ---- */
     .cm-overlay { position:fixed; inset:0; background:rgba(5,4,10,.72); z-index:300; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:26px 12px; }
     .cm-overlay.hidden { display:none; }
     .cm-art-box { position:relative; width:min(680px,100%); border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--bg, #0d0b14); }
@@ -3700,21 +3915,43 @@ try {
     #cm-compose-form { display:flex; flex-direction:column; gap:8px; }
     #cm-compose-form input, #cm-compose-form textarea, #cm-compose-form select { font:inherit; color:inherit; background:transparent; border:1px solid var(--line); border-radius:9px; padding:8px 10px; }
     #cm-compose-form select option { color:#111; }
-    #drawer-nav [data-view="moderation"] { display:none; } /* v73 phase 7: shown only after role check */
+    #drawer-nav [data-view="moderation"] { display:none; }
     #drawer-nav [data-view="moderation"].sf-on { display:flex; }
-    #cm-searchres { margin:4px 0 10px; display:flex; flex-direction:column; gap:10px; }
+    #cm-searchres { margin:4px 0 14px; display:flex; flex-direction:column; gap:10px; }
     #cm-searchres h4 { margin:2px 0 0; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
-    .cm-srow { display:flex; align-items:center; gap:9px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--card,transparent); cursor:pointer; font:inherit; color:inherit; text-align:left; width:100%; }
+    .cm-srow { display:flex; align-items:center; gap:9px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--surface); cursor:pointer; font:inherit; color:inherit; text-align:left; width:100%; }
     .cm-srow img { width:26px; height:26px; border-radius:6px; object-fit:cover; }
     .cm-srow img.round { border-radius:50%; }
     .cm-file { border:1px dashed var(--line); border-radius:10px; padding:12px; display:block; cursor:pointer; font-size:12.5px; color:var(--muted); }
     .cm-file input { position:absolute; width:1px; height:1px; opacity:0; }
     #cm-preview { max-height:220px; object-fit:contain; border-radius:9px; }
-    .cm-artistrow { border:1px solid var(--line); border-radius:12px; padding:11px; display:flex; align-items:center; gap:10px; background:var(--card, transparent); }
+    .cm-artistrow { border:1px solid var(--line); border-radius:12px; padding:11px; display:flex; align-items:center; gap:10px; background:var(--surface); }
     .cm-artistrow img { width:40px; height:40px; border-radius:50%; }
     .cm-artistrow .grow { flex:1; min-width:0; }
     .cm-artistrow .stats { color:var(--muted); font-size:12px; }
-    @media (max-width:560px) { #cm-feed { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:9px; } }
+
+    /* ---- responsive: the rails fold away, the artwork never shrinks ---- */
+    @media (max-width:1080px) { .cm-grid { grid-template-columns:minmax(0,1fr); } .cm-rail-col { order:-1; } .cm-friends-mini { flex-direction:row; overflow-x:auto; } .cm-friend-row { flex:0 0 auto; } }
+    /* v80: the Friends section already lists every friend with a Chat button,
+       so on narrow screens the stacked rail card would just repeat it. */
+    @media (max-width:1080px) { body.cm-sec-friends .cm-rail-col .cm-friends-card { display:none; } }
+    @media (max-width:860px) {
+      .cm-shell { grid-template-columns:1fr; gap:0; }
+      .cm-side { position:static; flex-direction:row; overflow-x:auto; padding:0 0 12px; gap:7px; }
+      .cm-side-back { margin:0 8px 0 0; flex:0 0 auto; }
+      .cm-side-item { flex:0 0 auto; border:1px solid var(--line); border-radius:999px; padding:8px 15px; font-size:13px; }
+      .cm-side-item.active { margin-left:0; padding-left:15px; border-color:var(--pink); }
+    }
+    @media (max-width:560px) {
+      #cm-feed { grid-template-columns:1fr; gap:14px; }
+      .cm-side-item { font-size:12.5px; padding:7px 13px; }
+      .cm-hero { min-height:170px; }
+      .cm-card-title, .cm-rail-head h2, .cm-sec-head h2 { font-size:19px; }
+      .cm-savedrow { flex-wrap:wrap; }
+      .cm-savedthumb { width:88px; height:88px; }
+      .cm-savedacts { width:100%; }
+      .cm-publish { padding:10px 15px; font-size:12.5px; }
+    }
     @media (prefers-reduced-motion:reduce) { .cm-overlay, .cm-post { animation:none !important; transition:none !important; } }
   </style>
 
@@ -4443,8 +4680,10 @@ const DRAWER_NAV = [
   { id: 'community',     label: 'Community',     view: 'community' },
   { id: 'live',          label: 'LIVE',           view: 'live' },
   { id: 'friends',       label: 'Friends',       view: 'friends' }, // v61
-  { id: 'messages',     label: 'Messages',      view: 'messages' }, // v73 phase 6
-  { id: 'safety',       label: 'Safety',        view: 'safety' }, // v73 phase 7
+  // v80: Messages and Safety are no longer top-level destinations. Messages
+  // lives inside Community → Friends (where your friends already are), and
+  // Safety lives inside Community → Community settings. Both VIEWS still
+  // exist and are reached from those places — nothing was removed.
   { id: 'moderation',   label: 'Moderation',    view: 'moderation' }, // v73 phase 7 (mods only)
   { id: '__divider' },
   { id: 'profile',       label: 'Profile',       view: 'account' },
@@ -4488,11 +4727,16 @@ const BACK_TARGETS = {
   rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena', live: 'arena',
   account: 'arena', quickmatch: 'arena', findartist: 'arena', grandarena: 'arena',
   notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena',
+  // v80: Messages and Safety are reached from inside Community, so their
+  // static fallback (fresh load / exhausted history) is Community rather than
+  // the Arena. Reached normally, the real history is popped first and Back
+  // returns to wherever you actually came from.
+  messages: 'community', safety: 'community',
   battlehistory: 'account', savedartworks: 'account', settings: 'account',
 };
 
 // Destination screens that live UNDER a tab (they keep that tab highlighted).
-const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena' };
+const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', messages: 'community', safety: 'community', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena' };
 
 function renderNav() {
   $('#bottom-nav').innerHTML = NAV.map((t) =>
@@ -5429,7 +5673,10 @@ document.addEventListener('click', (e) => {
   // no reload, no redirect, no state reset (no scroll jump, no polling
   // restart, no refetch burst). Tabs still navigate from anywhere else,
   // including child destinations under the same tab.
-  if (a.dataset.view === currentView) { closeDrawer(); return; }
+  if (a.dataset.view === currentView) {
+    if (a.dataset.view === 'community' && window.cmArenaHome) window.cmArenaHome();
+    closeDrawer(); return;
+  }
   show(a.dataset.view);
   closeDrawer();
 });
@@ -9656,6 +9903,28 @@ function frAvatar(f) {
   const ini = String((f.display_name || f.username || '?').charAt(0)).toUpperCase();
   return '<span class="fr-ava">' + (f.avatar_url ? '<img src="' + esc(f.avatar_url) + '" alt="" data-initial="' + esc(ini) + '" onerror="this.onerror=null;avatarImgFailed(this)">' : esc(ini)) + '<i class="dot" title="' + (f.online ? 'Online' : 'Offline') + '"></i></span>';
 }
+// v80: ONE friend-row component, used by the Friends page AND the Community
+// Friends section, so the Chat button can never exist in only one place.
+// Chat is deliberately LAST in .fr-actions — .fr-actions already justifies to
+// flex-end, so on desktop the Chat button sits at the far right of the row.
+// opts.invite: 'context' (room-invite flow) | 'modal' (choose a room) | 'none'
+function aaFriendRowHTML(f, opts) {
+  opts = opts || {};
+  const inviteMode = opts.invite || 'modal';
+  const sub = f.online ? (f.room_code ? 'Online · in room #' + esc(f.room_code) : 'Online') : 'Offline';
+  let invite = '';
+  if (inviteMode === 'context' && roomInviteContext && roomInviteContext.code) {
+    invite = '<button type="button" data-fr-room-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">' + IC.userplus + ' Invite</button>';
+  } else if (inviteMode !== 'none') {
+    invite = '<button type="button" data-fr-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">Invite to room</button>';
+  }
+  return '<div class="fr-row' + (f.online ? ' online' : '') + '" data-uid="' + esc(f.id) + '">' + frAvatar(f) +
+    '<div class="fr-info"><div class="fr-name">' + esc(f.display_name || f.username) + ' <span class="muted" style="font-weight:500">@' + esc(f.username) + '</span></div><div class="fr-sub">' + sub + '</div></div>' +
+    '<div class="fr-actions">' + invite +
+    '<button type="button" class="mini util-btn" data-fr-profile="' + esc(f.id) + '">Profile</button>' +
+    '<button type="button" class="mini fr-chat" data-fr-chat="' + esc(f.id) + '" data-name="' + esc(f.username) + '" title="Chat with @' + esc(f.username) + '">Chat</button>' +
+    '</div></div>';
+}
 async function friendsPageLoad() {
   if (currentView !== 'friends') return;
   try { frData = await api('/api/friends/list'); }
@@ -9676,23 +9945,26 @@ function friendsPageRender() {
     }
   }
   $('#fr-count').textContent = fs.length ? fs.length + ' friend' + (fs.length === 1 ? '' : 's') + ' · ' + frData.online_count + ' online' : '';
-  $('#fr-list').innerHTML = fs.map((f) => {
-    const sub = f.online ? (f.room_code ? 'Online · in room #' + esc(f.room_code) : 'Online') : 'Offline';
-    const actionBtn = roomInviteContext
-      ? '<button type="button" data-fr-room-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">' + IC.userplus + ' Invite</button>'
-      : '<button type="button" data-fr-invite="' + esc(f.id) + '" data-name="' + esc(f.username) + '">Invite to room</button>';
-    return '<div class="fr-row' + (f.online ? ' online' : '') + '" data-uid="' + esc(f.id) + '">' + frAvatar(f) +
-      '<div class="fr-info"><div class="fr-name">' + esc(f.display_name || f.username) + ' <span class="muted" style="font-weight:500">@' + esc(f.username) + '</span></div><div class="fr-sub">' + sub + '</div></div>' +
-      '<div class="fr-actions">' +
-      actionBtn +
-      '<button type="button" class="mini util-btn" data-fr-profile="' + esc(f.id) + '">Profile</button>' +
-      '</div></div>';
-  }).join('');
+  // v80: same component as Community, so the Chat button can never exist in
+  // only one of the two places friends are listed.
+  $('#fr-list').innerHTML = fs.map((f) => aaFriendRowHTML(f, { invite: 'context' })).join('');
   $('#fr-empty').classList.toggle('hidden', fs.length > 0);
 }
 
 $('#view-friends').addEventListener('click', async (e) => {
   const prof = e.target.closest('[data-fr-profile]'); if (prof) { openProfile(prof.dataset.frProfile); return; }
+  // v80: Chat — opens (or creates) the real conversation with this friend via
+  // the established process. It resolves server-side and needs no live socket,
+  // so it works while the friend is offline. Delegated at the VIEW level so it
+  // keeps working after the list re-renders (presence polling redraws often).
+  const chat = e.target.closest('[data-fr-chat]');
+  if (chat) {
+    chat.disabled = true;
+    try { await window.msgOpenDmWith(chat.dataset.frChat); }
+    catch (err) { toast((err && err.message) || 'Could not open that conversation.'); }
+    finally { chat.disabled = false; }
+    return;
+  }
   const rInv = e.target.closest('[data-fr-room-invite]');
   if (rInv && roomInviteContext && roomInviteContext.code) {
     const uid = rInv.dataset.frRoomInvite;
@@ -10057,6 +10329,11 @@ $('#comic-finish').addEventListener('click', async (event) => {
     const r = await api('/api/premium/theme', { theme:'comic', custom:{ finish:btn.dataset.comicFinish } }, 'PUT');
     // If the user navigated to another theme meanwhile, do not overwrite it.
     if (activeThemeKey === 'comic') applyPremiumTheme(r.ui_theme,r.ui_custom);
+    // v80: re-render the shelf so the Comic card mirrors the finish that is now
+    // active (v73 item 2: "with the Manga finish selected, the preview is the
+    // Manga wordmark"). Without this the card kept the previous artwork until
+    // the view happened to re-render. The preset grid does this for themes.
+    renderSettingsThemes();
   } catch (err) { toast(err.message); }
   finally { buttons.forEach(b => b.disabled = false); }
 });
@@ -11592,25 +11869,29 @@ window.__aaTwitchHandoff = null;
 // Single delegated listener set; no polling; overlays clean up on close.
 // ---------------------------------------------------------------------------
 (function () {
-  const CM = { tab: 'for-you', cursor: null, busy: false, art: null };
+  const CM = { tab: 'for-you', filter: 'all', cursor: null, seq: 0, art: null };
   const q = (s) => document.querySelector(s);
   const EMPTY = {
     'for-you': 'No artwork yet — discover artists, battles and live creators as the Arena fills up.',
+    'friends': 'No friends yet — add artists from a room seat or their profile and they will appear here with a Chat button.',
     'following': 'Follow artists to build your Community feed.',
     'trending': 'Nothing trending in the last 7 days yet.',
     'new': 'Nothing published yet — be the first to share your work.',
-    'battle': 'Battle artwork appears here when artists share their Arena pieces.',
-    'artists': 'No artists to discover yet.',
+    'battle': 'No Arena artwork in this feed yet — pieces appear here when artists share them from a battle.',
     'live': 'No live streams right now.',
     'upcoming': 'No upcoming streams yet.',
     'saves': 'Save artwork you want to come back to.',
   };
+  // v80: the Arena is the home of competition; the battle refinement here
+  // reuses the canonical battle-art query the retired tab used.
+  const FEED_SORT = { 'for-you': '?sort=for-you', 'trending': '?sort=trending', 'new': '' };
   const avImg = (a, cls) => (a && a.avatar_url) ? `<img class="${cls || ''}" src="${esc(a.avatar_url)}" alt="">` : '';
 
-  function postCard(p) {
+  function postCard(p, opts) {
+    opts = opts || {};
     const b = p.battle;
     const winner = b && b.winner_id ? (b.artists || []).find((x) => x.user_id === b.winner_id) : null;
-    return `<button class="cm-post" data-open="${p.id}" aria-label="Open artwork by @${esc(p.author.username)}">
+    return `<button class="cm-post${opts.hero ? ' cm-hero' : ''}" data-open="${p.id}" aria-label="Open artwork by @${esc(p.author.username)}">
       <img class="cm-thumb" loading="lazy" src="${esc(p.image_url)}" alt="${esc(p.title || p.caption || 'Artwork by @' + p.author.username)}">
       <span class="cm-meta">
         <span class="cm-artist">${avImg(p.author)}<b>@${esc(p.author.username)}</b></span>
@@ -11618,6 +11899,27 @@ window.__aaTwitchHandoff = null;
         ${b ? `<span class="cm-battlechip">⚔ Battle · ${esc(b.theme || 'challenge')}${winner ? ' · won by @' + esc(winner.username) : ''}</span>` : ''}
         <span class="cm-counts"><span aria-label="${p.like_count} likes">♥ ${p.like_count}</span><span aria-label="${p.comment_count} comments"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${p.comment_count}</span></span>
       </span></button>`;
+  }
+  // v80 SAVED — a collection, not a feed: real artwork size, one obvious
+  // removal per piece. Buttons stay siblings (never nested) so the markup is
+  // valid and each control is independently keyboard-reachable.
+  function savedRow(p) {
+    const b = p.battle;
+    return `<div class="cm-savedrow">
+      <button class="cm-savedthumb" data-open="${p.id}" aria-label="Open artwork by @${esc(p.author.username)}">
+        <img class="cm-thumb" loading="lazy" src="${esc(p.image_url)}" alt="${esc(p.title || 'Artwork by @' + p.author.username)}">
+      </button>
+      <div class="cm-savedinfo">
+        <span class="cm-title">${esc(p.title || 'Untitled')}</span>
+        <span class="cm-artist">${avImg(p.author)}<b>@${esc(p.author.username)}</b></span>
+        ${b ? `<span class="cm-battlechip">⚔ Battle · ${esc(b.theme || 'challenge')}</span>` : ''}
+        <span class="cm-counts"><span>♥ ${p.like_count}</span><span>${p.comment_count} comments</span></span>
+      </div>
+      <div class="cm-savedacts">
+        <button class="mini util-btn" data-open="${p.id}">Open</button>
+        <button class="mini cm-unsave" data-cm-unsave="${p.id}" data-title="${esc(p.title || 'this artwork')}">Remove</button>
+      </div>
+    </div>`;
   }
   function artistRow(a) {
     return `<div class="cm-artistrow">${avImg(a)}
@@ -11633,39 +11935,260 @@ window.__aaTwitchHandoff = null;
     </div>`;
   }
 
+  // v80 FRIENDS — real friendships from /api/friends/list, rendered with the
+  // SAME row component (and therefore the same Chat button) as the Friends
+  // page. Chat opens or creates the thread, so it works offline too.
+  async function cmLoadFriends(feed, empty) {
+    const d = await api('/api/friends/list');
+    const fs = d.friends || [];
+    // v80: the Messages entry lives in the section HEADER, not with the rows —
+    // otherwise an artist with no friends yet would have no way into Messages
+    // at all.
+    feed.innerHTML =
+      '<div class="cm-sec-head"><h2>Friends</h2>' +
+      '<button type="button" class="mini cm-open-messages">Messages &rsaquo;</button></div>' +
+      (fs.length
+        ? '<p class="cm-friendnote">' + fs.length + ' friend' + (fs.length === 1 ? '' : 's') +
+          ' · ' + d.online_count + ' online · Chat works whether they are online or not.</p>' +
+          fs.map((f) => aaFriendRowHTML(f)).join('')
+        : '');
+    empty.textContent = EMPTY.friends; empty.classList.toggle('hidden', fs.length > 0);
+  }
+
+  // v80 COMMUNITY SETTINGS — Community's own settings surface. Safety is a
+  // Community concern (how you handle other members), so it lives here rather
+  // than as a top-level drawer destination. The counts are the SAME real data
+  // the Safety view loads from /api/community/safety — no separate store.
+  async function cmLoadSettings(feed, empty) {
+    feed.classList.remove('cm-hub', 'cm-saves', 'cm-friends', 'cm-artists');
+    feed.classList.add('cm-settings');
+    let safety = null;
+    try { safety = await api('/api/community/safety'); } catch (_) {}
+    const n = (k) => (safety && Array.isArray(safety[k]) ? safety[k].length : null);
+    const count = (k) => (n(k) === null ? '—' : n(k) + (n(k) === 1 ? ' artist' : ' artists'));
+    feed.innerHTML =
+      '<div class="cm-sec-head"><h2>Community settings</h2></div>' +
+      '<div class="cm-set-grid">' +
+        '<button type="button" class="cm-set-card" data-cm-open="safety">' +
+          '<span class="cm-set-title">Safety</span>' +
+          '<span class="cm-set-sub">Blocked: ' + count('blocked') + ' · Muted: ' + count('muted') + '</span>' +
+          '<span class="cm-set-copy">Blocking hides you from each other everywhere and stops messaging, comments, follows and challenges. Muting only silences their notifications — they never know.</span>' +
+        '</button>' +
+        '<div class="cm-set-card cm-set-static">' +
+          '<span class="cm-set-title">Community guidelines</span>' +
+          '<span class="cm-set-copy">Share your own work and credit collaborations · critique the art, never the artist · no harassment, hate or plagiarism · report anything that breaks these — moderators see every report.</span>' +
+        '</div>' +
+      '</div>';
+    empty.classList.add('hidden');
+  }
+
+  // v80 DISCOVER — the Artists category is folded into For You (no redundant
+  // 10th destination). `discover=1` excludes artists you already follow, so
+  // this is genuine discovery rather than a restatement of Following.
+  async function cmLoadDiscoverRail(rail) {
+    if (!rail) return;
+    rail.innerHTML = '';
+    let d;
+    try { d = await api('/api/community/artists?sort=active&discover=1'); } catch (_) { return; }
+    const list = (d.artists || []).slice(0, 12);
+    if (!list.length) return;
+    rail.innerHTML = '<section class="cm-rail" aria-label="Artists to discover">' +
+      '<div class="cm-rail-head"><h2>Artists to discover</h2><span>Arena signals — not already in your Following</span></div>' +
+      '<div class="cm-rail-track">' + list.map((a) =>
+        '<div class="cm-artistcard">' +
+          (a.avatar_url
+            ? '<img src="' + esc(a.avatar_url) + '" alt="">'
+            : '<span class="fallback">' + esc(String(a.username || '?').charAt(0).toUpperCase()) + '</span>') +
+          '<span class="u">@' + esc(a.username) + '</span>' +
+          '<span class="s">' + a.battles_n + ' battles · ' + a.wins_n + ' wins · ' + a.posts_n + ' artworks</span>' +
+          '<button class="mini" data-cm-follow="' + esc(a.id) + '" aria-pressed="false">Follow</button>' +
+        '</div>').join('') +
+      '</div></section>';
+  }
+
+  // ---- v80: ONE place that switches Community section (rail + state agree)
+  function cmSetSection(key) {
+    CM.tab = key === 'saved' ? 'saves' : key;
+    CM.filter = 'all';
+    document.querySelectorAll('.cm-side-item').forEach((t) => {
+      const on = (t.dataset.cm === CM.tab) || (CM.tab === 'for-you' && t.dataset.cm === 'for-you');
+      t.classList.toggle('active', on);
+      if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    const f = q('#cm-filters');
+    if (f) {
+      f.classList.toggle('hidden', CM.tab !== 'following');
+      const all = q('[data-cm-filter="all"]');
+      if (all) all.setAttribute('aria-pressed', 'true');
+      const bat = q('[data-cm-filter="battle"]');
+      if (bat) bat.setAttribute('aria-pressed', 'false');
+    }
+  }
+
+  // ---- v80 hub layout: heading + a horizontal row of real artwork -------
+  function cmRowSection(title, posts, emptyMsg) {
+    if (!posts.length) {
+      return '<section class="cm-sec"><div class="cm-sec-head"><h2>' + esc(title) + '</h2></div><div class="cm-empty">' + esc(emptyMsg) + '</div></section>';
+    }
+    return '<section class="cm-sec">' +
+      '<div class="cm-sec-head"><h2>' + esc(title) + '</h2>' +
+        '<button type="button" class="cm-sec-next" data-cm-rownext aria-label="Scroll ' + esc(title) + '">›</button>' +
+      '</div>' +
+      '<div class="cm-row" data-cm-row>' + posts.map((p) => postCard(p, { row: true })).join('') + '</div>' +
+    '</section>';
+  }
+
+  async function cmLoadHub(feed) {
+    // real data only — four honest queries, no invented numbers
+    const [fy, tr, nw, live] = await Promise.all([
+      api('/api/community/posts?sort=for-you').catch(() => ({ posts: [] })),
+      api('/api/community/posts?sort=trending').catch(() => ({ posts: [] })),
+      api('/api/community/posts').catch(() => ({ posts: [] })),
+      api('/api/live').catch(() => ({ live: [], upcoming: [] })),
+    ]);
+    const lead = (tr.posts && tr.posts[0]) || (fy.posts && fy.posts[0]) || null;
+    const hero = q('#cm-hero');
+    if (hero) {
+      hero.classList.toggle('welcome', !lead);
+      hero.innerHTML = lead
+        ? '<img src="' + esc(lead.image_url) + '" alt="">' +
+          '<span class="cm-hero-veil"></span>' +
+          '<div class="cm-hero-body">' +
+            '<span class="cm-hero-kicker">Trending in the Arena</span>' +
+            '<h1 class="cm-hero-title">' + esc(lead.title || 'Untitled') + '</h1>' +
+            '<p class="cm-hero-sub">by @' + esc(lead.author.username) + ' · ♥ ' + lead.like_count + ' · ' + lead.comment_count + ' comments</p>' +
+          '</div>'
+        : '<div class="cm-hero-body"><span class="cm-hero-kicker">Art Arena™ Community</span>' +
+          '<h1 class="cm-hero-title">The gallery of the Arena</h1>' +
+          '<p class="cm-hero-sub">Share your work, follow the artists you rate, and watch battles unfold.</p></div>';
+      if (lead) hero.onclick = () => cmOpen(lead.id);
+    }
+    const liveRows = (live.live || []).slice(0, 8);
+    const upRows = (live.upcoming || []).slice(0, 8);
+    feed.classList.remove('cm-friends', 'cm-saves');
+    feed.classList.add('cm-hub');
+    feed.innerHTML =
+      cmRowSection('For You', (fy.posts || []).slice(0, 8), EMPTY['for-you']) +
+      cmRowSection('Trending', (tr.posts || []).slice(0, 8), EMPTY.trending) +
+      cmRowSection('New', (nw.posts || []).slice(0, 8), EMPTY.new) +
+      '<section class="cm-sec"><div class="cm-sec-head"><h2>Live</h2></div>' +
+        (liveRows.length ? '<div class="cm-row" data-cm-row>' + liveRows.map((s) => liveCard(s, false)).join('') + '</div>'
+                         : '<div class="cm-empty">' + esc(EMPTY.live) + '</div>') + '</section>' +
+      '<section class="cm-sec"><div class="cm-sec-head"><h2>Upcoming</h2></div>' +
+        (upRows.length ? '<div class="cm-row" data-cm-row>' + upRows.map((s) => liveCard(s, true)).join('') + '</div>'
+                       : '<div class="cm-empty">' + esc(EMPTY.upcoming) + '</div>') + '</section>';
+  }
+
+  // ---- right-rail friends: real friendships, Chat works offline too -------
+  async function cmLoadFriendsRail() {
+    const box = q('#cm-friends-mini');
+    if (!box) return;
+    let d;
+    try { d = await api('/api/friends/list'); } catch (_) { box.innerHTML = '<p class="cm-friend-note">Friends load when you are signed in.</p>'; return; }
+    const fs = (d.friends || []).slice(0, 6);
+    if (!fs.length) {
+      box.innerHTML = '<p class="cm-friend-note">No friends yet — add artists from a room seat or their profile and they appear here with a Chat button.</p>';
+      return;
+    }
+    box.innerHTML = fs.map((f) => {
+      const ini = String((f.display_name || f.username || '?').charAt(0)).toUpperCase();
+      return '<div class="cm-friend-row">' +
+        '<span class="fr-ava">' + (f.avatar_url
+          ? '<img src="' + esc(f.avatar_url) + '" alt="" onerror="this.onerror=null;avatarImgFailed(this)">'
+          : esc(ini)) + '<i class="dot" title="' + (f.online ? 'Online' : 'Offline') + '"></i></span>' +
+        '<span class="cm-fr-name">' + esc(f.display_name || f.username) + '</span>' +
+        '<button type="button" class="cm-chat" data-fr-chat="' + esc(f.id) + '" data-name="' + esc(f.username) + '" title="Chat with @' + esc(f.username) + '">Chat</button>' +
+      '</div>';
+    }).join('') + '<p class="cm-friend-note">Chat works whether they are online or not.</p>';
+  }
+
   async function cmLoad(reset) {
-    if (CM.busy) return; CM.busy = true;
-    const feed = q('#cm-feed'), empty = q('#cm-empty'), more = q('#cm-more');
-    if (reset) { CM.cursor = null; feed.innerHTML = ''; }
+    // v80: sequenced, not blocked. The old `busy` flag DROPPED a section switch
+    // that happened while another load was in flight (fast clicking left the
+    // previous section on screen). Now the newest request always wins and every
+    // older one discards its own result the moment it notices it is stale.
+    const seq = ++CM.seq;
+    const stale = () => seq !== CM.seq;
+    const feed = q('#cm-feed'), empty = q('#cm-empty'), more = q('#cm-more'), rail = q('#cm-rail');
+    if (reset) { CM.cursor = null; feed.innerHTML = ''; if (rail) rail.innerHTML = ''; }
     more.classList.add('hidden');
+    empty.classList.add('hidden');
+    // hub chrome (hero + Featured) is the Community front page only — every
+    // other section shows just its own content
+    const isHub = CM.tab === 'for-you';
+    for (const sel of ['#cm-hero', '.cm-featured']) {
+      const el = q(sel); if (el) el.classList.toggle('hidden', !isHub);
+    }
+    if (isHub) {
+      const rf = q('#cm-rail');
+      if (rf) rf.classList.remove('hidden');
+    }
+    // v80: on phones the right rail stacks ABOVE the feed, so the mini Friends
+    // card would repeat the Friends section list right underneath it. Mark the
+    // section and let the rail card stand down on narrow screens only — the
+    // desktop sidebar stays exactly as the reference shows it.
+    document.body.classList.toggle('cm-sec-friends', CM.tab === 'friends');
+    const filters = q('#cm-filters');
+    const filterable = ['following'].includes(CM.tab); // refinement applies to the Following feed
+    if (filters) filters.classList.toggle('hidden', !filterable);
+    if (!filterable) CM.filter = 'all';
     try {
-      if (CM.tab === 'artists') {
-        const d = await api('/api/community/artists?sort=recent');
-        feed.innerHTML = d.artists.map(artistRow).join('');
-        empty.textContent = EMPTY.artists; empty.classList.toggle('hidden', d.artists.length > 0);
+      if (CM.tab === 'for-you') {
+        // v80: Community is the hub — hero, featured, stacked real sections
+        await cmLoadHub(feed);
+        if (stale()) return;
+        cmLoadFriendsRail();
+      } else if (CM.tab === 'discover') {
+        // v80: the Artists category now lives here (discover=1 excludes artists
+        // you already follow, so this is discovery, not a Following restatement)
+        const d = await api('/api/community/artists?sort=active&discover=1');
+        if (stale()) return;
+        feed.classList.remove('cm-hub', 'cm-saves', 'cm-friends');
+        feed.classList.add('cm-artists');
+        feed.innerHTML = (d.artists || []).map(artistRow).join('');
+        empty.textContent = 'No new artists to discover yet — check back as the Arena grows.';
+        empty.classList.toggle('hidden', (d.artists || []).length > 0);
+      } else if (CM.tab === 'friends') {
+        feed.classList.remove('cm-hub', 'cm-saves', 'cm-artists');
+        feed.classList.add('cm-friends');
+        await cmLoadFriends(feed, empty);
+        if (stale()) return;
+      } else if (CM.tab === 'settings') {
+        // v80: Community's own settings surface. Safety lives HERE now (it is
+        // a Community concern — how you handle other members), instead of
+        // being a top-level destination in the drawer.
+        await cmLoadSettings(feed, empty);
+        if (stale()) return;
       } else if (CM.tab === 'live' || CM.tab === 'upcoming') {
         const d = await api('/api/live');
         const list = CM.tab === 'live' ? d.live : d.upcoming;
+        if (stale()) return;
+        feed.classList.remove('cm-hub', 'cm-saves', 'cm-friends', 'cm-artists');
         feed.innerHTML = list.map((s) => liveCard(s, CM.tab === 'upcoming')).join('');
         empty.textContent = EMPTY[CM.tab]; empty.classList.toggle('hidden', list.length > 0);
       } else if (CM.tab === 'saves') {
         const d = await api('/api/community/saves');
-        feed.innerHTML = d.saves.map(postCard).join('');
+        if (stale()) return;
+        feed.classList.remove('cm-hub', 'cm-friends', 'cm-artists');
+        feed.classList.add('cm-saves');
+        feed.innerHTML = d.saves.map(savedRow).join('');
         empty.textContent = EMPTY.saves; empty.classList.toggle('hidden', d.saves.length > 0);
       } else {
-        let path = CM.tab === 'following' ? '/api/community/posts/following'
-          : CM.tab === 'battle' ? '/api/community/posts/battle-art'
-          : '/api/community/posts' + (CM.tab === 'trending' ? '?sort=trending' : CM.tab === 'for-you' ? '?sort=for-you' : '');
+        feed.classList.remove('cm-hub', 'cm-saves', 'cm-friends', 'cm-artists');
+        let path = CM.filter === 'battle' ? '/api/community/posts/battle-art'
+          : CM.tab === 'following' ? '/api/community/posts/following'
+          : '/api/community/posts' + (FEED_SORT[CM.tab] || '');
         if (CM.cursor) path += (path.includes('?') ? '&' : '?') + 'cursor=' + encodeURIComponent(CM.cursor.cursor) + '&cursor_id=' + CM.cursor.cursor_id;
         const d = await api(path);
-        feed.insertAdjacentHTML('beforeend', d.posts.map(postCard).join(''));
+        if (stale()) return;
+        feed.insertAdjacentHTML('beforeend', d.posts.map((p, i) => postCard(p, { hero: reset && i === 0 })).join(''));
         CM.cursor = d.next_cursor;
         more.classList.toggle('hidden', !d.next_cursor);
         const total = feed.querySelectorAll('.cm-post').length;
-        empty.textContent = EMPTY[CM.tab]; empty.classList.toggle('hidden', total > 0);
+        empty.textContent = EMPTY[CM.filter === 'battle' ? 'battle' : CM.tab];
+        empty.classList.toggle('hidden', total > 0);
       }
-    } catch (e) { toast((e && e.message) || 'Could not load Community.'); }
-    CM.busy = false;
+    } catch (e) { if (!stale()) toast((e && e.message) || 'Could not load Community.'); }
   }
 
   async function cmCommentsHtml(postId) {
@@ -11722,11 +12245,36 @@ window.__aaTwitchHandoff = null;
 
   // ---- single delegated listener (no per-card handlers, no leaks)
   document.addEventListener('click', async (e) => {
-    const tab = e.target.closest('.cm-tab');
-    if (tab) {
-      document.querySelectorAll('.cm-tab').forEach((t) => { t.classList.toggle('active', t === tab); t.setAttribute('aria-selected', String(t === tab)); });
-      CM.tab = tab.dataset.cm; cmLoad(true); return;
+    // v80 left-rail section switcher (also serves the "Explore now" CTA and
+    // any [data-cm] control inside the view)
+    const side = e.target.closest('.cm-side-item[data-cm], [data-cm].cm-btn, [data-cm].cm-chev');
+    if (side && side.dataset.cm) { cmSetSection(side.dataset.cm); cmLoad(true); return; }
+    // rail "next" scrolls the row it belongs to (real scrolling, no fake paging)
+    const rowNext = e.target.closest('[data-cm-rownext]');
+    if (rowNext) {
+      const row = rowNext.closest('.cm-sec').querySelector('[data-cm-row]');
+      if (row) row.scrollBy({ left: row.clientWidth * 0.85, behavior: 'smooth' });
+      return;
     }
+    // right-rail Friends + Community Profile + Community settings
+    const chatBtn = e.target.closest('[data-fr-chat]');
+    if (chatBtn) {
+      chatBtn.disabled = true;
+      try { await window.msgOpenDmWith(chatBtn.dataset.frChat); }
+      catch (err) { toast((err && err.message) || 'Could not open that conversation.'); }
+      finally { chatBtn.disabled = false; }
+      return;
+    }
+    if (e.target.closest('#cm-back-arena')) { show('arena'); return; }
+    if (e.target.closest('#cm-side-profile')) { if (me) openProfile(me.id); return; }
+    // v80: "Community settings" opens Community's OWN settings section (with
+    // Safety inside it) instead of jumping out to the global Settings page.
+    if (e.target.closest('#cm-side-settings')) { cmSetSection('settings'); cmLoad(true); window.scrollTo({ top: 0 }); return; }
+    // v80: Messages now lives inside Community → Friends.
+    const openMsgs = e.target.closest('.cm-open-messages');
+    if (openMsgs) { show('messages'); return; }
+    const setCard = e.target.closest('[data-cm-open]');
+    if (setCard) { show(setCard.dataset.cmOpen); return; }
     if (e.target.closest('#cm-more')) { cmLoad(false); return; }
     if (e.target.closest('#cm-publish')) { cmOpenCompose(); return; }
     if (e.target.closest('#cm-compose-close')) { q('#cm-compose').classList.add('hidden'); return; }
@@ -11873,7 +12421,11 @@ window.__aaTwitchHandoff = null;
     const panel = q('#cm-searchres');
     const searching = query.length >= 2;
     panel.classList.toggle('hidden', !searching);
-    for (const id of ['cm-tabs', 'cm-feed', 'cm-empty', 'cm-more']) q('#' + id).classList.toggle('hidden', searching);
+    // v80: searching replaces the hub (which now also includes the hero and
+    // the Featured card). Null-safe — never assume an element exists.
+    for (const sel of ['#cm-feed', '#cm-empty', '#cm-more', '#cm-hero', '#cm-rail', '#cm-filters', '.cm-featured']) {
+      const el = q(sel); if (el) el.classList.toggle('hidden', searching);
+    }
     if (!searching) { panel.innerHTML = ''; return; }
     let d; try { d = await api('/api/community/search?q=' + encodeURIComponent(query)); } catch (e) { panel.innerHTML = '<div class="muted">' + esc(e.message) + '</div>'; return; }
     if (cmSearchInput.value.trim() !== query) return; // stale response
@@ -11892,7 +12444,13 @@ window.__aaTwitchHandoff = null;
     const sb = e.target.closest('[data-cm-sbattle]');
     if (sb && sb.dataset.cmSbattle) { openRoom(sb.dataset.cmSbattle); return; }
     const st = e.target.closest('[data-cm-stag]');
-    if (st) { cmSearchInput.value = '#' + st.dataset.cmStag; q('#cm-tabs').classList.add('hidden'); q('#cm-feed').classList.add('hidden'); cmSearchRun(); return; }
+    if (st) {
+      cmSearchInput.value = '#' + st.dataset.cmStag;
+      for (const sel of ['#cm-hero', '#cm-rail', '#cm-filters', '#cm-feed', '.cm-featured']) {
+        const el = q(sel); if (el) el.classList.add('hidden');
+      }
+      cmSearchRun(); return;
+    }
   });
 
   // ---- phase 4: composer battle link (only the publisher's own battles)
@@ -11919,8 +12477,30 @@ window.__aaTwitchHandoff = null;
   };
 
   // load the default tab whenever Community opens
+  // v80: tapping the ACTIVE Community nav tab returns to the hub. The nav
+  // handler short-circuits on the current view, so it needs a named hook.
+  window.cmArenaHome = function () {
+    cmSetSection('for-you');
+    cmLoad(true);
+    window.scrollTo(0, 0);
+  };
+
   const cmShow = show;
-  show = function (name) { cmShow(name); if (name === 'community' && me) cmLoad(true); };
+  show = function (name) {
+    // v80: the gallery needs a wider canvas than the app's 560px form column.
+    // Scoped toggle — only Community widens <main>, and it is removed the
+    // moment you leave, so every other view keeps its exact current layout.
+    document.body.classList.toggle('cm-wide', name === 'community');
+    cmShow(name);
+    if (name === 'community' && me) {
+      // v80: re-tapping the Community nav tab still opens the hub — that path
+      // calls cmArenaHome() and never reaches here. Reachable through show()
+      // only when coming BACK from somewhere else (Messages, Safety), so
+      // restore the section you left instead of dumping you on the hub.
+      cmSetSection(CM.tab || 'for-you');
+      cmLoad(true);
+    }
+  };
 })();
 </script>
 <script src="/premium-scenes.js?v=1"></script>

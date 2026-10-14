@@ -406,13 +406,21 @@ router.get('/artists', ah(async (req, res) => {
     winners: 'wins_n DESC, battles_n DESC',
     emerging: 'u.created_at DESC',
   }[sort];
+  // v80: discover=1 means genuine DISCOVERY — exclude artists you already
+  // follow, so "Discover" is not a restatement of the Following feed.
+  // Omitted (the default), the endpoint is byte-for-byte as it was before,
+  // so every existing caller keeps its current behaviour.
+  const discover = req.query.discover === '1' || req.query.discover === 'true';
+  const discoverWhere = discover
+    ? ` AND NOT EXISTS (SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.following_id = u.id)`
+    : '';
   const { rows } = await pool.query(
     `SELECT u.id, u.username, u.display_name, up.avatar_storage_key, u.created_at,
        (SELECT count(*) FROM battle_participants bp WHERE bp.user_id = u.id) AS battles_n,
        (SELECT count(*) FROM battle_participants bp WHERE bp.user_id = u.id AND bp.outcome = 'win') AS wins_n,
        (SELECT count(*) FROM community_posts p WHERE p.author_id = u.id AND p.status = 'visible') AS posts_n
        FROM users u LEFT JOIN user_profiles up ON up.user_id = u.id
-      WHERE ${noBlock('$1', 'u.id')} AND u.id <> $1
+      WHERE ${noBlock('$1', 'u.id')} AND u.id <> $1 ${discoverWhere}
         AND (EXISTS (SELECT 1 FROM community_posts p WHERE p.author_id = u.id AND p.status = 'visible')
              OR EXISTS (SELECT 1 FROM battle_participants bp WHERE bp.user_id = u.id))
       ORDER BY ${order} LIMIT 24`, [req.user.id]);

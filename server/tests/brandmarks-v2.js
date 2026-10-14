@@ -36,6 +36,40 @@ async function servedBytes(p, url) {
       assert.equal(got.readUInt8(25), 6, rel + ' keeps transparency (RGBA)'); // PNG IHDR color type
     }
 
+    // 1b) v80 MANGA LOGO ALPHA REGRESSION GUARD.
+    // The v72 rework keyed the white outline down to alpha 1-15 (~6% opacity),
+    // so the Japanese logo rendered with its white looking transparent.
+    // `served verbatim` and the RGBA header check CANNOT catch that — the file
+    // was byte-perfect and still had no visible white. Assert on real pixels,
+    // rendered by a real browser, from the real served bytes.
+    const pixelStats = async (url) => p.evaluate(async (u) => {
+      const img = new Image();
+      img.src = u;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      const d = ctx.getImageData(0, 0, c.width, c.height).data;
+      let white = 0, black = 0, clear = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        const a = d[i + 3], lum = (d[i] + d[i + 1] + d[i + 2]) / 3;
+        if (a === 0) clear++;
+        else if (a === 255 && lum > 235) white++;
+        else if (a === 255 && lum < 40) black++;
+      }
+      return { white, black, clear, total: c.width * c.height };
+    }, url);
+    await p.goto(base);
+    for (const [rel, minWhite] of [['/themes/comic-manga.png', 20000], ['/themes/marks/comic-manga-icon.png', 300]]) {
+      const s = await pixelStats(rel);
+      assert.ok(s.white >= minWhite,
+        rel + ' white outline must be OPAQUE and visible (found ' + s.white + ', need ' + minWhite + ')');
+      assert.ok(s.black > 0, rel + ' black artwork present (found ' + s.black + ')');
+      assert.ok(s.clear > s.total * 0.4,
+        rel + ' keeps its transparent background (clear ' + s.clear + '/' + s.total + ')');
+    }
+
     // 2) entry: single play, NO bounce (transform never leaves `none`), settled ≤ 4s
     await p.goto(base);
     const t0 = Date.now();
