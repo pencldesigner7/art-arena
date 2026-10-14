@@ -142,6 +142,17 @@ async function main() {
   assert.ok(disc.artists.some((x) => x.id === a.id), 'artist discovery lists posting artists');
   const discC = await api(c, '/community/artists?sort=recent');
   assert.ok(!discC.artists.some((x) => x.id === a.id), 'blocked artist hidden from discovery too');
+  // v80: discover=1 is genuine discovery — artists you already follow are
+  // excluded, and the default (no flag) keeps listing them exactly as before.
+  // A dedicated unfollowed artist keeps this independent of whatever else the
+  // disposable DB happens to contain.
+  const e = await user();
+  await publish(e, { title: 'discoverable' });
+  const discFollowed = await api(b, '/community/artists?sort=recent');
+  assert.ok(discFollowed.artists.some((x) => x.id === a.id), 'default discovery keeps followed artists (unchanged behaviour)');
+  const discNew = await api(b, '/community/artists?sort=recent&discover=1');
+  assert.ok(!discNew.artists.some((x) => x.id === a.id), 'discover=1 excludes artists already followed');
+  assert.ok(discNew.artists.some((x) => x.id === e.id), 'discover=1 still surfaces artists you do not follow');
   const prof = await api(b, '/community/artists/' + a.id);
   assert.equal(prof.posts.length, 1); // p3 removed
   assert.equal(prof.following, true);

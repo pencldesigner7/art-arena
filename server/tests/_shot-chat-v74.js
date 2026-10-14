@@ -71,11 +71,20 @@ function png64() {
     await p.waitForTimeout(1800);
     return p;
   };
+// v80: Messages moved out of the drawer into Community → Friends.
+async function openMessagesViaCommunity(p) {
+  await p.click('#bottom-nav .tab[data-tab="community"]');
+  await p.waitForSelector('.cm-side-item', { timeout: 15000 });
+  await p.click('.cm-side-item[data-cm="friends"]');
+  await p.waitForSelector('.cm-open-messages', { timeout: 15000 });
+  await p.click('.cm-open-messages');
+  await p.waitForSelector('#view-messages:not(.hidden)');
+}
+
   const pa = await mk(a);
 
-  // open the thread via drawer
-  await pa.click('#btn-menu');
-  await pa.click('#drawer-nav [data-view="messages"]');
+  // open the thread via Community → Friends (v80: Messages moved in there)
+  await openMessagesViaCommunity(pa);
   await pa.waitForSelector('#view-messages:not(.hidden)');
   await pa.click('.msg-row');
   await pa.waitForSelector('#msg-thread:not(.hidden)');
@@ -268,15 +277,13 @@ function png64() {
   // reload thread → wallpaper persists
   await pa.reload();
   await p2wait(pa);
-  await pa.click('#btn-menu');
-  await pa.click('#drawer-nav [data-view="messages"]');
+  await openMessagesViaCommunity(pa);
   await pa.click('.msg-row');
   await pa.waitForFunction(() => (document.querySelector('#msg-wall').style.backgroundImage || '').includes('/api/messages/uploads/'), null, { timeout: 10000 });
 
   // B: non-premium sees the lock, personal wallpaper stays default
   const pb = await mk(b);
-  await pb.click('#btn-menu');
-  await pb.click('#drawer-nav [data-view="messages"]');
+  await openMessagesViaCommunity(pb);
   await pb.click('.msg-row');
   await pb.waitForSelector('#msg-thread:not(.hidden)');
   const bWall = await pb.evaluate(() => document.querySelector('#msg-wall').style.backgroundImage || 'none');

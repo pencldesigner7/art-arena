@@ -64,8 +64,13 @@ async function user(p) {
   await pm.screenshot({ path: '/home/user/theme-previews/v73-moderation-queue.png' });
 
   // artist: safety view lists the block; unblock removes it
-  await pa.click('#btn-menu');
-  await pa.click('#drawer-nav [data-view="safety"]');
+  // v80: Safety moved into Community → Community settings. Reached the same
+  // way a member would, through the Community rail.
+  await pa.click('#bottom-nav .tab[data-tab="community"]');
+  await pa.waitForSelector('.cm-side-item', { timeout: 15000 });
+  await pa.click('#cm-side-settings');
+  await pa.waitForSelector('[data-cm-open="safety"]', { timeout: 15000 });
+  await pa.click('[data-cm-open="safety"]');
   await pa.waitForSelector('#view-safety:not(.hidden)');
   await pa.waitForSelector('[data-sf-unblock]');
   assert.ok((await pa.textContent('#sf-blocked')).includes('@' + mod.name));
@@ -75,6 +80,9 @@ async function user(p) {
 
   // non-mod never sees the moderation row (role gate applies the .sf-on class)
   assert.equal(await pa.locator('#drawer-nav [data-view="moderation"]').isVisible().catch(() => false), false);
+  // v80: neither Messages nor Safety is a drawer destination any more
+  assert.equal(await pa.locator('#drawer-nav [data-view="messages"]').count(), 0, 'Messages is not a drawer destination');
+  assert.equal(await pa.locator('#drawer-nav [data-view="safety"]').count(), 0, 'Safety is not a drawer destination');
 
   assert.deepEqual(errors.filter((e) => !e.includes('favicon')), [], 'no JS errors / 404s');
   await b.close();
