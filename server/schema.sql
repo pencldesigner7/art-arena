@@ -1030,6 +1030,7 @@ CREATE TABLE public.messages (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     edited_at timestamp with time zone,
     reply_to_id uuid,
+    client_id text,
     CONSTRAINT messages_reply_to_fkey FOREIGN KEY (reply_to_id) REFERENCES public.messages(id) ON DELETE SET NULL,
     CONSTRAINT messages_body_check CHECK (((char_length(body) >= 1) AND (char_length(body) <= 4000))),
     CONSTRAINT messages_payload_type_check CHECK ((payload_type = ANY (ARRAY['battle_invitation'::text, 'artwork_share'::text, 'room_share'::text, 'profile_share'::text, 'stream_share'::text, 'sticker_share'::text, 'image_share'::text, 'audio_share'::text])))
@@ -1061,6 +1062,9 @@ CREATE TABLE public.saved_messages (
     saved_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT saved_messages_pkey PRIMARY KEY (user_id, message_id)
 );
+
+-- (v81 DDL lives at the end of this file: it references users and
+-- notifications, which a dump-ordered schema only creates later.)
 
 
 --
@@ -1763,3 +1767,17 @@ CREATE TABLE IF NOT EXISTS chat_uploads (
 CREATE INDEX IF NOT EXISTS idx_chat_uploads_user ON chat_uploads (user_id, kind, created_at DESC);
 
 ALTER TABLE ONLY public.saved_messages ADD CONSTRAINT saved_messages_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+-- v81: offline send dedupe + message prefs + one open 3v3 team invite per pair.
+-- Placed at EOF because the dump-ordered schema above creates public.users
+-- (line ~1382) and public.notifications (line ~1082) AFTER public.messages.
+-- The messages.client_id column itself is declared in the messages table.
+CREATE UNIQUE INDEX uq_message_client_id ON public.messages (conversation_id, sender_id, client_id) WHERE client_id IS NOT NULL;
+CREATE TABLE public.user_message_prefs (
+    user_id uuid PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+    msg_notifications boolean NOT NULL DEFAULT true,
+    msg_sound boolean NOT NULL DEFAULT true,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+CREATE UNIQUE INDEX uq_mm_team_invite_open ON public.notifications (user_id, (payload->>'from_user_id'))
+    WHERE type = 'mm_team_invite' AND payload->>'handled' IS NULL;

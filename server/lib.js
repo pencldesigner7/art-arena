@@ -159,8 +159,8 @@ const PREMIUM_THEMES = [
   { key: 'flame',    name: 'Flame',           hint: 'Fire gradients · ember background · animated buttons', premium: true,  customizable: true, c1: '#FF5A00', c2: '#FFC300' },
   { key: 'cloud',    name: 'Cloud',           hint: 'Blue sky · drifting clouds · calm and smooth', premium: true,  customizable: false },
   { key: 'glitch',   name: 'Glitch',          hint: 'Neon RGB · occasional glitch pulses', premium: true,  customizable: true, c1: '#00F0FF', c2: '#FF2BD1' },
-  { key: 'graffiti', name: 'Graffiti',        hint: 'Black & white street art · raw wall', premium: true,  customizable: false },
-  { key: 'glowing',  name: 'Glowing',         hint: 'Green & blue glow · gradient buttons · luminous accents', premium: true,  customizable: true, c1: '#6ED4BF', c2: '#51A8D9' },
+  { key: 'graffiti', name: 'Graffiti',        hint: 'Vivid spray colour · raw street wall', premium: true,  customizable: false },
+  { key: 'glowing',  name: 'Glowing',         hint: 'Vivid neon glow · gradient buttons · luminous accents', premium: true,  customizable: true, c1: '#2BF5C8', c2: '#2EA8FF' },
   { key: 'magazine', name: 'Magazine Cutout', hint: 'Paper collage · cutout layers · editorial', premium: true,  customizable: false },
   { key: 'pixel',    name: 'Pixelated',        hint: 'Retro pixel art · dithered sky · chunky arcade UI', premium: true, customizable: false, c1: '#E337C4', c2: '#77D5DF' },
 ];

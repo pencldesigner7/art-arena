@@ -1626,6 +1626,36 @@ const httpServer = app.listen(PORT, '0.0.0.0', async () => {
         CHECK (payload_type = ANY (ARRAY['battle_invitation','artwork_share','room_share','profile_share','stream_share','sticker_share','image_share','audio_share'])); END $$`],
     ['v71 backfill matchmaking-generated rooms',
      `UPDATE battle_rooms SET origin = 'matchmaking' WHERE auto_start = true OR name = '3v3 Team Arena'`],
+    // ---------------- v81 ----------------
+    // Offline-safe messaging: the client stamps every send with a client_id;
+    // a retry after a dropped connection re-presents the SAME id and the
+    // unique index turns the duplicate into the original ack — never a
+    // second copy of the message.
+    ['v81 messages.client_id (offline send dedupe)',
+     `ALTER TABLE messages ADD COLUMN IF NOT EXISTS client_id text`],
+    ['v81 one message per (conversation, sender, client_id)',
+     `CREATE UNIQUE INDEX IF NOT EXISTS uq_message_client_id
+        ON messages (conversation_id, sender_id, client_id) WHERE client_id IS NOT NULL`],
+    // Message notification + sound preferences (Community settings toggles).
+    ['v81 user_message_prefs (notification / sound toggles)',
+     `CREATE TABLE IF NOT EXISTS user_message_prefs (
+        user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        msg_notifications boolean NOT NULL DEFAULT true,
+        msg_sound boolean NOT NULL DEFAULT true,
+        updated_at timestamptz NOT NULL DEFAULT now())`],
+    // One OPEN 3v3 team invite per (inviter -> friend): the partial unique
+    // index is the race-proof backstop behind the endpoint's dup check.
+    ['v81 one open mm_team_invite per pair',
+     `UPDATE notifications n SET payload = payload || '{"handled":"expired"}'::jsonb
+       WHERE n.type = 'mm_team_invite' AND n.payload->>'handled' IS NULL
+         AND EXISTS (SELECT 1 FROM notifications o
+                      WHERE o.type = 'mm_team_invite' AND o.payload->>'handled' IS NULL
+                        AND o.user_id = n.user_id
+                        AND o.payload->>'from_user_id' = n.payload->>'from_user_id'
+                        AND (o.created_at, o.id) < (n.created_at, n.id));
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_mm_team_invite_open
+        ON notifications (user_id, (payload->>'from_user_id'))
+        WHERE type = 'mm_team_invite' AND payload->>'handled' IS NULL`],
 ];
   const migrationFailures = [];
   for (const [label, sql] of MIGRATION_STEPS) {

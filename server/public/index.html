@@ -320,7 +320,11 @@ try {
   .pth-glitch-pulse main { animation:pth-glitch-jolt .2s steps(2) 1; }
   .pth-glitch-pulse #top-header { animation:pth-glitch-jolt .18s steps(2) 1; }
   @keyframes pth-glitch-jolt { 0% { transform:translateX(0); filter:none; } 25% { transform:translateX(-2.5px); filter:hue-rotate(18deg); } 60% { transform:translateX(2px); } 100% { transform:translateX(0); } }
-  body[data-ptheme="graffiti"] { --pink:#F4F4F4; --purple:#C7C7C7; --pink-rgb:244,244,244; --purple-rgb:199,199,199; --surface:#181818; --surface-hover:#202020; --surface-2:#282828; --bg:#101010; --panel:#151515; --line:#3d3d3d; --muted:#b0b0b0; --btn-line:#3d3d3d; --auth-card:rgba(14,14,14,.9); --auth-page-bg:#0d0d0d; }
+  /* v81 phase 15: vivid spray colour restored. The monochrome grey accent
+     variables (#F4F4F4/#C7C7C7) muted every accent in the theme; they are
+     now the vivid street pair. The white button slabs and hard shadows —
+     Graffiti's identity — are untouched. */
+  body[data-ptheme="graffiti"] { --pink:#FF2E88; --purple:#8B5CFF; --pink-rgb:255,46,136; --purple-rgb:139,92,255; --surface:#181818; --surface-hover:#202020; --surface-2:#282828; --bg:#101010; --panel:#151515; --line:#3d3d3d; --muted:#b0b0b0; --btn-line:#3d3d3d; --auth-card:rgba(14,14,14,.9); --auth-page-bg:#0d0d0d; }
   body[data-ptheme="graffiti"] .card, body[data-ptheme="graffiti"] .time-modal { border-width:2px; border-color:#3d3d3d; border-radius:14px 5px 13px 6px; background-color:rgba(16,16,16,.9); }
   body[data-ptheme="graffiti"] .home-card:hover, body[data-ptheme="graffiti"] .card:hover { transform:rotate(-.35deg) translateY(-2px); }
   body[data-ptheme="graffiti"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { position:relative; border-radius:9px 6px 10px 6px; background:#F4F4F4; color:#0d0d0d; font-weight:800; border:none; box-shadow:3px 3px 0 rgba(0,0,0,.55); overflow:visible; }
@@ -341,8 +345,8 @@ try {
   body[data-ptheme="graffiti"] .card, body[data-ptheme="graffiti"] .home-card, body[data-ptheme="graffiti"] .settings-appearance { background-color:rgba(13,13,13,.92); border-color:#4a4a4a; }
   body[data-ptheme="graffiti"] .badge.next, body[data-ptheme="graffiti"] .state-chip { transform:rotate(-1.4deg); }
   body[data-ptheme="graffiti"] .card::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.5; background:radial-gradient(circle at 88% 8%, rgba(var(--purple-rgb),.16) 0 2px, transparent 3px), radial-gradient(circle at 92% 14%, rgba(var(--pink-rgb),.2) 0 2.5px, transparent 4px), radial-gradient(circle at 85% 16%, rgba(var(--purple-rgb),.14) 0 1.6px, transparent 3px); }
-  body[data-ptheme="glowing"] { --pink:var(--pth-c1,#6ED4BF); --purple:var(--pth-c2,#51A8D9); --pink-rgb:var(--pth-c1-rgb,110,212,191); --purple-rgb:var(--pth-c2-rgb,81,168,217); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
-  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#6ED4BF), var(--pth-c2,#51A8D9)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.85), 0 0 26px -4px rgba(var(--purple-rgb),.6), 0 0 48px -12px rgba(var(--pink-rgb),.5); }
+  body[data-ptheme="glowing"] { --pink:var(--pth-c1,#2BF5C8); --purple:var(--pth-c2,#2EA8FF); --pink-rgb:var(--pth-c1-rgb,43,245,200); --purple-rgb:var(--pth-c2-rgb,46,168,255); --surface:#101024; --surface-hover:#14142e; --surface-2:#1c1c3e; --bg:#0a0a18; --panel:#12122a; --line:#31315e; --muted:#9090c9; --btn-line:#31315e; --auth-card:rgba(14,14,32,.86); --auth-page-bg:#0a0a18; }
+  body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { background:linear-gradient(var(--pth-dir,135deg), var(--pth-c1,#2BF5C8), var(--pth-c2,#2EA8FF)); border:none; color:#0b0b18; font-weight:800; box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.85), 0 0 26px -4px rgba(var(--purple-rgb),.6), 0 0 48px -12px rgba(var(--pink-rgb),.5); }
   body[data-ptheme="glowing"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):hover { box-shadow:0 0 12px 0 rgba(var(--pink-rgb),.95), 0 0 32px -4px rgba(var(--purple-rgb),.7), 0 0 64px -12px rgba(var(--pink-rgb),.55); }
   /* v68 (item 7): NEON pass — the flat "solid border, no halo" treatment is
      replaced by a real electric-neon look: a bright accent border plus a
@@ -362,7 +366,7 @@ try {
        (magenta #E337C4 + cyan #77D5DF) on the reference's dark navy. ---- */
   body[data-ptheme="pixel"] { --pink:#E337C4; --purple:#77D5DF; --pink-rgb:227,55,196; --purple-rgb:119,213,223; --surface:#16283A; --surface-hover:#1C3247; --surface-2:#243A52; --bg:#0E1E2C; --panel:#12243A; --line:#2E4A63; --muted:#9FB6C9; --btn-line:#2E4A63; --auth-card:rgba(14,30,44,.93); --auth-page-bg:#0E1E2C; }
   body[data-ptheme="pixel"] .card, body[data-ptheme="pixel"] .time-modal, body[data-ptheme="pixel"] .settings-appearance { border:3px solid #2E4A63; border-radius:0; box-shadow:4px 4px 0 rgba(0,0,0,.5); }
-  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { border-radius:0; border:3px solid #0A1420; background:linear-gradient(135deg, #E337C4, #77D5DF); color:#0A0A14; font-weight:800; box-shadow:4px 4px 0 #000; }
+  body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot) { border-radius:0; border:3px solid #0A1420; background:linear-gradient(135deg, #FF2ED1, #2BF0FF); color:#0A0A14; font-weight:800; box-shadow:4px 4px 0 #000; }
   body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 #000; }
   body[data-ptheme="pixel"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):active { transform:translate(2px,2px); box-shadow:1px 1px 0 #000; }
   body[data-ptheme="pixel"] h1, body[data-ptheme="pixel"] h2, body[data-ptheme="pixel"] .legal-title { text-shadow:2px 2px 0 rgba(0,0,0,.75); letter-spacing:.5px; }
@@ -542,7 +546,37 @@ try {
   body[data-ptheme="glowing"] #drawer-nav button.active { background-color:rgba(var(--pink-rgb),.12); border-color:var(--pink); color:var(--text); box-shadow:0 0 10px -3px rgba(var(--pink-rgb),.55); } /* v68: the active nav row gets the neon accent */
   body[data-ptheme="glowing"] #drawer-nav button.active svg { color:var(--pink); filter:drop-shadow(0 0 5px rgba(var(--pink-rgb),.9)) drop-shadow(0 0 12px rgba(var(--pink-rgb),.5)); }
   body[data-ptheme="glowing"] .room-ctxmenu button, body[data-ptheme="glowing"] .notif-actions button.secondary { box-shadow:none; }
-  body[data-ptheme="glowing"] input:focus, body[data-ptheme="glowing"] textarea:focus, body[data-ptheme="glowing"] select:focus { border-color:var(--pink); box-shadow:0 0 10px -1px rgba(var(--pink-rgb),.65), 0 0 26px -6px rgba(var(--purple-rgb),.45); }
+  /* v81 phase 16: the old focus style wrapped the field in a glowing
+     RECTANGLE (a hard neon box around the text input). Focus stays clearly
+     visible — pink keyline + a soft inset underline — without the box halo.
+     Scoped to Glowing only; no global outline behaviour changes. */
+  body[data-ptheme="glowing"] input:focus, body[data-ptheme="glowing"] textarea:focus:not(#msg-input), body[data-ptheme="glowing"] select:focus { border-color:rgba(var(--pink-rgb),.75); box-shadow:inset 0 -2px 0 var(--pink); }
+
+  /* v81 phase 14: RISING BUTTONS — icons must survive hover / active /
+     lift in Flame and Magazine.
+     Flame root cause: home-card icons are stroked with --pink, which under
+     Flame IS the button gradient's own orange — orange on orange, gone.
+     Icons now wear the button's dark ink in EVERY state (the gradient and
+     its 5s shift animation are untouched).
+     Magazine root cause: the icon plate is a light paper tile; states that
+     recoloured it with the card ink made the glyph vanish into the tile.
+     The plate + red glyph are now pinned through hover/active/focus. */
+  body[data-ptheme="flame"] .home-card .hc-ico > svg,
+  body[data-ptheme="flame"] .home-card:hover .hc-ico > svg,
+  body[data-ptheme="flame"] .home-card:active .hc-ico > svg,
+  body[data-ptheme="flame"] .home-card:focus-visible .hc-ico > svg { stroke:#1d0e02; color:#1d0e02; }
+  body[data-ptheme="flame"] .home-card .hc-chev svg,
+  body[data-ptheme="flame"] .home-card:hover .hc-chev svg,
+  body[data-ptheme="flame"] .home-card:active .hc-chev svg { stroke:#1d0e02; color:#1d0e02; }
+  body[data-ptheme="flame"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):active { filter:brightness(.94); }
+  body[data-ptheme="magazine"] .home-card .hc-ico > svg,
+  body[data-ptheme="magazine"] .home-card:hover .hc-ico > svg,
+  body[data-ptheme="magazine"] .home-card:active .hc-ico > svg,
+  body[data-ptheme="magazine"] .home-card:focus-visible .hc-ico > svg { stroke:var(--pink); color:var(--pink); background:var(--surface); border-color:var(--text); }
+  body[data-ptheme="magazine"] .home-card .hc-chev svg,
+  body[data-ptheme="magazine"] .home-card:hover .hc-chev svg,
+  body[data-ptheme="magazine"] .home-card:active .hc-chev svg { stroke:var(--pink); color:var(--pink); }
+  body[data-ptheme="magazine"] button:not(.secondary):not(.danger):not(.icon-btn):not(.tab):not(.mini):not(.nav-row):not(.util-btn):not(.pth-dot):active { box-shadow:1px 1px 0 #E6483E; }
   body[data-ptheme="glowing"] .theme-swatch.active { box-shadow:0 0 0 1px var(--pink) inset, 0 0 12px -2px rgba(var(--pink-rgb),.8), 0 0 30px -8px rgba(var(--purple-rgb),.5); }
 
   /* ---- Settings: theme cards carry the LOGO (not just two colours) ---- */
@@ -692,7 +726,7 @@ try {
   .sw-cloud { background:linear-gradient(180deg,#8ec9f5 0%, #c9e6fb 60%, #eef7ff); }
   .sw-glitch { background:linear-gradient(135deg,#060810 50%, #00F0FF 50.1%, #FF2BD1); }
   .sw-graffiti { background:linear-gradient(135deg,#100d1c 55%, #FF4FA3 55.1%, #25C4A9); }
-  .sw-glowing { background:radial-gradient(circle at 30% 45%, #6ED4BF 0%, #101024 62%), radial-gradient(circle at 75% 70%, #51A8D9 0%, transparent 45%); background-color:#0a0a18; }
+  .sw-glowing { background:radial-gradient(circle at 30% 45%, #2BF5C8 0%, #101024 62%), radial-gradient(circle at 75% 70%, #2EA8FF 0%, transparent 45%); background-color:#0a0a18; }
   .sw-magazine { background:#f4f1ea; position:relative; }
   .sw-default { background:linear-gradient(135deg,#09070d 50%, #FF3CAC 50.1%, #7B2CFF); }
   /* settings customization */
@@ -862,7 +896,24 @@ try {
   .inv-room { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin:0; text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:10px 12px; font-weight:700; }
   .inv-room:hover { filter:none; border-color:var(--pink); }
   .inv-room small { color:var(--muted); font-weight:500; }
-  @media (max-width:520px) { .team-board { grid-template-columns:1fr; } .team-vs { text-align:center; } .fr-row { flex-wrap:wrap; } .fr-actions { width:100%; justify-content:flex-start; } }
+  @media (max-width:520px) { .team-board { grid-template-columns:1fr; } .team-vs { text-align:center; } }
+  /* v82: on phones the friend row keeps the DESKTOP layout — one row:
+     avatar · name/status · actions pinned right. (The old rule wrapped the
+     buttons onto a full-width second line, which looked nothing like
+     desktop.) Space is bought back with tighter padding/buttons and an
+     ellipsised name instead of a wrap. */
+  @media (max-width:520px) {
+    .fr-row { flex-wrap:nowrap; gap:9px; padding:8px 10px; }
+    .fr-row .fr-ava { width:40px; height:40px; }
+    .fr-info { display:flex; align-items:baseline; gap:7px; min-width:0; }
+    .fr-name { flex:0 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    /* the @handle normally drops under the name (Friends-page rule) — in
+       the one-line mobile row it must sit beside the name instead */
+    .fr-name .muted { display:inline; font-size:11px; }
+    .fr-sub { flex:0 0 auto; margin:0; white-space:nowrap; }
+    .fr-actions { width:auto; flex:0 0 auto; flex-wrap:nowrap; justify-content:flex-end; }
+    .fr-actions button { padding:6px 8px; font-size:11.5px; }
+  }
   .notif-item { display:flex; gap:10px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 13px; font-size:14px; }
   .notif-item.unread { border-color:var(--pink); box-shadow:0 0 0 1px rgba(var(--pink-rgb),.28); }
   .notif-ico { flex:0 0 auto; width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(var(--pink-rgb),.2), rgba(var(--purple-rgb),.25)); color:var(--pink); }
@@ -2070,7 +2121,6 @@ try {
      LIGHT-surface themes that never overrode it, so the logo vanished on
      their near-white buttons. Only those (and Light mode, already handled)
      get a black glyph — dark themes keep white for contrast. */
-  body[data-ptheme="cloud"] .social-btn[data-social="apple"], body[data-ptheme="magazine"] .social-btn[data-social="apple"] { color:#000; }
   /* ---------------- login background structure -----------------------------
      The Glitter Wrap starfield (glitter-wrap.js, the vanilla port of the
      user-supplied component) renders its canvas into #login-bg: a full-
@@ -2751,7 +2801,6 @@ try {
     <div class="social-divider">Or continue with</div>
     <div class="social-row">
       <button type="button" class="social-btn" data-social="google" title="Continue with Google"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg></button>
-      <button type="button" class="social-btn" data-social="apple" title="Continue with Apple"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></button>
       <button type="button" class="social-btn" data-social="discord" title="Continue with Discord"><svg viewBox="0 0 24 24" width="24" height="24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></button>
     </div>
     <p class="auth-signup">Don't have an account? <a href="#" data-view="register">Sign up</a></p>
@@ -3064,20 +3113,11 @@ try {
     </div>
   </section>
 
-  <!-- ===================== ARENA DESTINATIONS (to be built) ============= -->
-  <section id="view-quickmatch" class="view dest hidden">
-    <div class="dest-ico"><svg class="ic ic-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/></svg></div>
-    <h1>Quick Match</h1>
-    <p class="muted dest-desc">Random opponent. Randomized challenge. One deadline. Win.</p>
-    <span class="badge next">COMING SOON</span>
-  </section>
-
-  <section id="view-findartist" class="view dest hidden">
-    <div class="dest-ico"><svg class="ic ic-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-    <h1>Find Artist</h1>
-    <p class="muted dest-desc">Browse artists, compare ratings, and connect with the people you want to battle.</p>
-    <span class="badge next">COMING SOON</span>
-  </section>
+  <!-- v81: the old "Quick Match" / "Find Artist" COMING SOON placeholder
+       sections were removed per the no-placeholders directive. Their real
+       equivalents already exist and are what the UI routes to: matchmaking
+       (view-matchmaking) for finding opponents, and Community discovery
+       for finding artists. -->
 
   <!-- ============================= NOTIFICATIONS ============================= -->
   <!-- v38 (dashboard reference): real drawer destination. The bell in the top
@@ -3311,12 +3351,10 @@ try {
     </div>
   </section>
 
-  <section id="view-grandarena" class="view dest hidden">
-    <div class="dest-ico"><svg class="ic ic-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10"/><path d="M17 6h2.5A2.5 2.5 0 0 1 17 10"/><path d="M12 14v3"/><path d="M8 20h8"/></svg></div>
-    <h1>Grand Arena</h1>
-    <p class="muted dest-desc">32 artists · single elimination · 5 rounds · one champion.</p>
-    <span class="badge next">COMING SOON</span>
-  </section>
+  <!-- v81: the standalone "Grand Arena" COMING SOON placeholder page was
+       removed per the no-placeholders directive. Grand Arena itself is not
+       removed: it lives in the data model (competition_type 'grand_arena'),
+       Arena stats and Community profile records, which all remain. -->
 
   <!-- ============ MATCHMAKING (v35: the "Battle" button) ==================
        Dedicated player-connection page — NOT the create-room page. Real
@@ -3749,7 +3787,7 @@ try {
 
     /* ---- TOP STRIP ---- */
     .cm-bar { display:flex; align-items:center; gap:12px; margin:4px 0 20px; }
-    .cm-search-wrap { flex:1; min-width:0; display:flex; align-items:center; gap:10px; border:2px solid var(--pink); border-radius:999px; padding:9px 18px; color:var(--pink); }
+    .cm-search-wrap { flex:1; min-width:0; display:flex; align-items:center; gap:10px; border:2px solid var(--pink); border-radius:999px; padding:9px 18px; color:var(--pink); background:var(--surface); }
     .cm-search-wrap input { flex:1; min-width:0; background:transparent; border:0; outline:none; color:var(--text); font:inherit; font-size:14.5px; }
     .cm-search-wrap input::placeholder { color:var(--muted); font-style:italic; }
     .cm-publish { margin:0; flex:0 0 auto; border:0; border-radius:999px; background:var(--pink); color:#0b0713; font:inherit; font-size:13.5px; font-weight:800; padding:11px 20px; cursor:pointer; }
@@ -3758,7 +3796,22 @@ try {
     /* ---- HERO ---- */
     .cm-hero { position:relative; border:2px solid var(--pink); border-radius:4px; overflow:hidden; min-height:210px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; background:var(--surface); }
     .cm-hero.welcome { background:linear-gradient(135deg, rgba(var(--pink-rgb),.14), rgba(var(--purple-rgb),.10)); }
+    /* v81 phase 3: graceful fallback — if either hero art layer fails to load,
+       the hero keeps a themed gradient surface instead of a broken box. */
+    .cm-hero.plain { background:linear-gradient(135deg, rgba(var(--pink-rgb),.14), rgba(var(--purple-rgb),.10)); }
     .cm-hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    /* v81 phase 3: the Community hero is a deliberate two-layer composition —
+       the supplied Colosseum artwork (its sky keyed out to transparent) held
+       over a painted arena backdrop. The backdrop COVERS the hero area; the
+       cutout keeps its aspect ratio (contain, never stretched) and anchors to
+       the bottom-right with a small bleed so its base sits under the veil. */
+    .cm-hero img.cm-hero-back { object-fit:cover; object-position:center; }
+    /* v82: the lead Arena artwork itself, full-bleed — the hero is the gallery */
+    .cm-hero img.cm-hero-art { object-fit:cover; object-position:center; }
+    /* v82: the Colosseum now sits IN the backdrop instead of pasted over it —
+       half opacity plus a left-edge fade, so the monument melts into the
+       painted arena scene behind it (its base still tucks under the veil). */
+    .cm-hero img.cm-hero-cut { inset:auto -2% 0 auto; width:auto; height:122%; max-width:none; object-fit:contain; object-position:bottom right; opacity:.5; filter:saturate(.94); -webkit-mask-image:linear-gradient(to left, #000 60%, transparent 98%); mask-image:linear-gradient(to left, #000 60%, transparent 98%); }
     /* v80: the veil is derived from the ACTIVE THEME's own --bg, so the hero
        caption stays readable in Light Mode and in the light premium themes
        (Cloud, Magazine) without hard-coding any colour. */
@@ -3775,7 +3828,11 @@ try {
     .cm-col { min-width:0; }
     .cm-rail-col { display:flex; flex-direction:column; gap:16px; }
 
-    .cm-card { border:2px solid var(--pink); border-radius:4px; padding:16px; background:transparent; }
+    /* v81 phase 12: panels sit on the theme's own surface colour — never
+       transparent over the animated backgrounds, which made rail text
+       unreadable in several themes. The surface IS the theme colour, so
+       each theme keeps its identity; nothing is flattened. */
+    .cm-card { border:2px solid var(--pink); border-radius:4px; padding:16px; background:var(--surface); }
     .cm-card-title { margin:0 0 12px; font-size:19px; font-weight:800; font-style:italic; letter-spacing:.2px; color:var(--text); text-transform:none; }
 
     /* Featured in Community */
@@ -3783,8 +3840,11 @@ try {
        background keyed out, held well back in opacity so the text stays the
        thing you read. It is anchored bottom-right so the arcade opens AWAY
        from the copy rather than sitting under it. */
-    .cm-featured { position:relative; overflow:hidden; border:2px solid var(--pink); border-radius:4px; padding:20px 22px; margin-bottom:20px; }
-    .cm-feat-art { position:absolute; right:-4%; bottom:-6%; width:min(62%,620px); height:auto; opacity:.16; pointer-events:none; user-select:none; z-index:0; }
+    .cm-featured { position:relative; overflow:hidden; border:2px solid var(--pink); border-radius:4px; padding:20px 22px; margin-bottom:20px; background:var(--surface); }
+    /* v82: the Featured artwork runs the FULL HEIGHT of the card (top edge
+       to bottom edge) as a right-hand panel, dissolving into the card on
+       its left so the copy stays readable — no floating corner watermark. */
+    .cm-feat-art { position:absolute; top:0; right:0; bottom:0; width:min(54%,580px); height:100%; object-fit:cover; object-position:center; opacity:.9; pointer-events:none; user-select:none; z-index:0; -webkit-mask-image:linear-gradient(to right, transparent, #000 42%); mask-image:linear-gradient(to right, transparent, #000 42%); }
     .cm-featured > *:not(.cm-feat-art) { position:relative; z-index:1; }
     .cm-feat-label { font-size:14.5px; color:var(--text); }
     .cm-feat-copy { margin:16px 0 18px; font-size:15px; line-height:1.45; color:var(--text); max-width:46ch; }
@@ -3883,6 +3943,10 @@ try {
     .cm-set-sub { font-size:12.5px; font-weight:700; color:var(--pink); }
     .cm-set-copy { font-size:13px; line-height:1.5; color:var(--muted); }
     .cm-open-messages { flex:0 0 auto; }
+    /* v81 phase 8: message preference toggles (independent, persistent) */
+    .cm-toggle-row { display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; }
+    .cm-toggle-row small { display:block; font-weight:400; font-size:12px; color:var(--muted); margin-top:2px; }
+    .cm-toggle-row input { width:20px; height:20px; flex:0 0 auto; accent-color:var(--pink); cursor:pointer; }
 
     /* ---- LIVE / UPCOMING ---- */
     .cm-livecard { border:2px solid var(--pink); border-radius:4px; padding:15px; display:flex; flex-direction:column; gap:7px; background:var(--surface); }
@@ -3935,6 +3999,10 @@ try {
     /* v80: the Friends section already lists every friend with a Chat button,
        so on narrow screens the stacked rail card would just repeat it. */
     @media (max-width:1080px) { body.cm-sec-friends .cm-rail-col .cm-friends-card { display:none; } }
+    /* v82 (cont.): in the Friends tab on phones the whole side rail goes —
+       on desktop it sits beside the list, but stacked on mobile it only
+       pushed the actual friend rows below a guidelines card. */
+    @media (max-width:1080px) { body.cm-sec-friends .cm-rail-col { display:none; } }
     @media (max-width:860px) {
       .cm-shell { grid-template-columns:1fr; gap:0; }
       .cm-side { position:static; flex-direction:row; overflow-x:auto; padding:0 0 12px; gap:7px; }
@@ -3946,11 +4014,19 @@ try {
       #cm-feed { grid-template-columns:1fr; gap:14px; }
       .cm-side-item { font-size:12.5px; padding:7px 13px; }
       .cm-hero { min-height:170px; }
+      /* v81 phase 3: on phones the monument shares the strip with the caption —
+         pull it right and shrink slightly so the text always has clear air. */
+      .cm-hero img.cm-hero-cut { height:106%; right:-14%; }
+      .cm-hero-body { padding:16px 16px; }
       .cm-card-title, .cm-rail-head h2, .cm-sec-head h2 { font-size:19px; }
       .cm-savedrow { flex-wrap:wrap; }
       .cm-savedthumb { width:88px; height:88px; }
       .cm-savedacts { width:100%; }
       .cm-publish { padding:10px 15px; font-size:12.5px; }
+      /* v81 phase 6: on phones the Featured artwork FILLS the card
+         (cover, no letterbox gaps at the edges); the copy keeps its
+         own readable layer above it. */
+      .cm-feat-art { inset:0; right:0; bottom:0; width:100%; height:100%; object-fit:cover; object-position:center; }
     }
     @media (prefers-reduced-motion:reduce) { .cm-overlay, .cm-post { animation:none !important; transition:none !important; } }
   </style>
@@ -3996,11 +4072,24 @@ try {
             <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 3-3 3h-2.5a2.5 2.5 0 0 0-2.5 2.5c0 .6.2 1.1.6 1.5.4.5.4 1.5-.6 2-.6.3-1.3.5-2 .5z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="15.5" cy="9.5" r="1"/></svg>
           </button>
         </div>
-        <div id="msg-scroll">
+        <!-- v81 phase 9: the wallpaper is a STATIC sibling layer behind the
+             scroller — it can never scroll away with the messages. -->
+        <div id="msg-scrollwrap">
           <div id="msg-wall" aria-hidden="true"></div>
-          <div id="msg-flow" role="log" aria-live="polite" aria-label="Messages"></div>
+          <div id="msg-scroll">
+            <div id="msg-flow" role="log" aria-live="polite" aria-label="Messages"></div>
+          </div>
         </div>
         <div id="msg-pop" class="hidden" role="menu"></div>
+        <!-- v81 phase 13: a recording becomes a DRAFT first. It is only
+             uploaded and sent when the user taps Send; Discard throws it
+             away. Nothing auto-sends. -->
+        <div id="msg-voicedraft" class="hidden" role="group" aria-label="Voice note draft">
+          <span class="vvd-label">🎙 Voice note ready — listen, then choose:</span>
+          <audio id="msg-voicedraft-audio" controls preload="metadata"></audio>
+          <button type="button" id="msg-voicedraft-send">Send voice note</button>
+          <button type="button" id="msg-voicedraft-discard" class="secondary">Discard</button>
+        </div>
         <div id="msg-replychip" aria-live="polite"><span id="msg-replychip-t"></span><button type="button" id="msg-reply-x" aria-label="Cancel reply">×</button></div>
         <form id="msg-form">
           <button type="button" id="msg-emoji" class="aa-cbtn" aria-label="Insert emoji" title="Emoji">
@@ -4021,7 +4110,7 @@ try {
           <button id="msg-send" type="submit" class="aa-send" aria-label="Deliver message">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 20.5l19-8.5L3 3.5l3 8.5-3 8.5z"/><path d="M6 12h8" stroke="var(--surface)" stroke-width="1.4"/></svg>
           </button>
-          <input type="file" id="msg-file" accept="image/png,image/jpeg,image/webp" class="aa-visually-hidden" tabindex="-1" aria-hidden="true">
+          <input type="file" id="msg-file" accept="image/png,image/jpeg,image/webp,image/gif" class="aa-visually-hidden" tabindex="-1" aria-hidden="true">
         </form>
         <div id="msg-ap-panel" class="hidden" role="dialog" aria-modal="false" aria-label="Chat appearance">
           <div class="aa-ap-head"><b>Chat appearance</b><button type="button" class="aa-mh-btn" id="msg-ap-close" aria-label="Close appearance panel">×</button></div>
@@ -4065,7 +4154,8 @@ try {
     .aa-mh-name { flex:1; min-width:0; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
     /* scroll + wallpaper + flow */
-    #msg-scroll { position:relative; flex:1; overflow-y:auto; }
+    #msg-scrollwrap { position:relative; flex:1; min-height:0; }
+    #msg-scroll { position:relative; height:100%; overflow-y:auto; }
     #msg-wall { position:absolute; inset:0; z-index:0; pointer-events:none; background-position:center; }
     #msg-wall::after { content:''; position:absolute; inset:0; background:var(--bg); opacity:var(--wall-dim,.35); }
     #msg-flow { position:relative; z-index:1; display:flex; flex-direction:column; gap:12px; padding:16px 14px 12px; min-height:100%; box-sizing:border-box; }
@@ -4083,7 +4173,7 @@ try {
     body[data-ptheme="graffiti"] { --stroke-mine:#A855F7; --stroke-theirs:#FF2E88; }
     body[data-ptheme="comic"] { --stroke-mine:#FFB500; --stroke-theirs:#101014; }
     body[data-ptheme="chrome"] { --stroke-mine:#FFD766; --stroke-theirs:#A855F7; }
-    body[data-ptheme="glowing"] { --stroke-mine:#6ED4BF; --stroke-theirs:#A855F7; }
+    body[data-ptheme="glowing"] { --stroke-mine:#2BF5C8; --stroke-theirs:#A855F7; }
     body[data-ptheme="magazine"] { --stroke-mine:#FF2E88; --stroke-theirs:#101014; }
     body[data-ptheme="pixel"] { --stroke-mine:#E337C4; --stroke-theirs:#77D5DF; }
     /* v78: one stroke per bubble — the lines never connect between messages */
@@ -4094,6 +4184,17 @@ try {
     .msg-grp.theirs .msg-bub::before { left:-10px; background:var(--stroke-theirs); }
     /* v79: saved chats stay in the regular thread, marked by a distinct outline */
     .msg-bub.saved { outline:2px solid #FFC94D; outline-offset:3px; }
+    /* v81 phase 13: voice-note draft bar */
+    #msg-voicedraft { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 10px 6px; padding:8px 10px; border:1px dashed var(--pink); border-radius:12px; background:var(--surface-2); font-size:12.5px; }
+    #msg-voicedraft.hidden { display:none; }
+    #msg-voicedraft audio { flex:1; min-width:160px; height:34px; }
+    .aa-voice-note { display:flex; align-items:center; gap:8px; min-width:170px; }
+    .aa-voice-note audio { flex:1; height:34px; }
+    .aa-voice-note .vn-ico { font-size:15px; }
+    /* v81 phase 11: an un-acked send is visibly provisional, never a fake sent message */
+    .msg-bub.pending { opacity:.55; }
+    .msg-bub.failed { opacity:.75; border:1px dashed var(--pink); }
+    .msg-sendstat button { margin:0 0 0 6px; padding:2px 9px; font-size:11px; }
     .msg-bub { position:relative; z-index:1; max-width:100%; border:2px solid var(--purple); border-radius:14px; padding:8px 13px; font-size:13.5px; line-height:1.45; white-space:pre-wrap; overflow-wrap:anywhere; background:var(--surface); color:var(--text); box-shadow:0 2px 10px -4px rgba(0,0,0,.5); touch-action:pan-y; }
     .msg-grp.theirs .msg-bub { border-color:var(--pink); }
     .msg-bub .who { display:block; color:var(--muted); font-size:11px; margin-bottom:2px; }
@@ -4131,6 +4232,29 @@ try {
        ABOVE it at any height; the emoji button permanently rests inside */
     #msg-form.ready .aa-cluster { bottom:calc(100% + 8px); animation:aa-rise .5s cubic-bezier(.3,1.4,.4,1); }
     #msg-form.ready .aa-cluster .aa-cbtn { background:var(--surface); box-shadow:0 6px 16px -6px rgba(0,0,0,.65); }
+    /* v82: FLOATING cluster icons. Root cause: the theme button rules paint
+       each theme's button INK colour (near-black for the bright Flame /
+       Glowing gradients, paper-white for Magazine's black slab) onto these
+       buttons, and the floating state then swaps their background to the
+       theme SURFACE — dark ink on near-black (Flame/Glowing/Chrome/Pixel/
+       Graffiti) or white on identical white (Magazine): the icons vanish
+       or go dull exactly while floating. While floating, the discs now
+       wear the theme's own ACCENT on its raised surface — vivid and
+       theme-true in every theme. (ID selector: it must outrank the
+       themes' long :not() button chains.) */
+    body #msg-form.ready .aa-cluster .aa-cbtn { background:var(--surface-2); border-color:var(--pink); color:var(--pink); box-shadow:0 6px 16px -6px rgba(0,0,0,.65), 0 0 10px -2px rgba(var(--pink-rgb),.45); }
+    /* v82: Cloud + Graffiti composer buttons keep their ORIGINAL theme
+       styles (user decision) — no restyling here. */
+    body[data-ptheme="cloud"] #msg-input::placeholder, body[data-ptheme="graffiti"] #msg-input::placeholder { color:var(--muted); opacity:.9; }
+    /* v82: the send button must stay an absolute overlay at the pill's right
+       edge in EVERY theme — Graffiti's global button rule otherwise drags it
+       back into the flex row (invisible at rest, but eating 44px and
+       squeezing the "Send a chat" hint). */
+    body #msg-form .aa-send { position:absolute; }
+    /* v82: the deliver button is a plain accent arrow in EVERY theme —
+       exactly how it looks in Cloud. The themes' gradient discs / slabs
+       must not paint a filled circle behind it. */
+    body #msg-form .aa-send { background-color:transparent; background-image:none; border:none; box-shadow:none; color:var(--purple); }
     #msg-form.falling .aa-cluster { animation:aa-fall .45s cubic-bezier(.3,1.4,.4,1); }
     /* v76: multi-line text turns the pill into a rounded rectangle (user correction) */
     #msg-form.tall { border-radius:16px; }
@@ -4138,6 +4262,9 @@ try {
     @keyframes aa-fall { 0% { bottom:calc(100% + 8px); scale:1; } 60% { bottom:4px; scale:.97; } 100% { bottom:9px; scale:1; } }
     @media (prefers-reduced-motion:reduce) { #msg-form.ready .aa-cluster, #msg-form.falling .aa-cluster { animation:none; transition:none; } .aa-send { transition:none !important; } }
     #msg-input { flex:1; min-width:0; font:inherit; font-size:14px; line-height:1.4; color:var(--text); background:transparent; border:none; border-radius:0; padding:11px 142px 11px 14px; margin:0; resize:none; overflow-y:auto; max-height:196px; align-self:center; }
+    /* v82: the "Send a chat" hint never wraps — it stays on one line even
+       though the emoji + attachment buttons narrow the field at rest */
+    #msg-input::placeholder { white-space:nowrap; }
     #msg-form.ready #msg-input { padding-right:48px; }
     /* v75: the loud focus outline around the typing space is gone (user correction);
        keyboard focus is still visible via the pill's own border accent. */
@@ -4146,7 +4273,10 @@ try {
     /* deliver button rests at the typing space's right edge (as the reference) */
     .aa-send { position:absolute; right:7px; top:50%; transform:translateY(-50%) scale(.3); width:40px; height:40px; padding:0; margin:0; border:none; border-radius:50%; background:transparent; color:var(--purple); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; }
     #msg-form.ready .aa-send { opacity:1; transform:translateY(-50%) scale(1); pointer-events:auto; }
-    @media (max-width:480px) { .aa-cbtn { width:32px; height:32px; } .aa-cbtn svg { width:16px; height:16px; } #msg-input { padding-right:118px; } #msg-form.ready #msg-input { padding-right:44px; } .aa-cluster { gap:4px; right:6px; bottom:10px; } #msg-form.ready .aa-cluster { bottom:calc(100% + 6px); } @keyframes aa-rise { 0% { bottom:10px; scale:1; } 55% { bottom:calc(100% + 13px); scale:1.07; } 78% { bottom:calc(100% + 2px); scale:.97; } 100% { bottom:calc(100% + 6px); scale:1; } } @keyframes aa-fall { 0% { bottom:calc(100% + 6px); scale:1; } 60% { bottom:5px; scale:.97; } 100% { bottom:10px; scale:1; } } #msg-form { gap:4px; margin:8px; } }
+    @media (max-width:480px) { .aa-cbtn { width:32px; height:32px; } .aa-cbtn svg { width:16px; height:16px; } #msg-input { padding-right:104px; } #msg-form.ready #msg-input { padding-right:44px; } .aa-cluster { gap:4px; right:6px; bottom:10px; } #msg-form.ready .aa-cluster { bottom:calc(100% + 6px); } @keyframes aa-rise { 0% { bottom:10px; scale:1; } 55% { bottom:calc(100% + 13px); scale:1.07; } 78% { bottom:calc(100% + 2px); scale:.97; } 100% { bottom:calc(100% + 6px); scale:1; } } @keyframes aa-fall { 0% { bottom:calc(100% + 6px); scale:1; } 60% { bottom:5px; scale:.97; } 100% { bottom:10px; scale:1; } } #msg-form { gap:4px; margin:8px; } }
+    /* v82: very narrow phones — reclaim space from the form's own margins
+       and the hint (never the buttons) so "Send a chat" fits on one line */
+    @media (max-width:380px) { #msg-form { margin:5px; } #msg-input { padding-left:9px; } #msg-input::placeholder { font-size:12.5px; } }
     .aa-send:focus-visible { outline:2px solid var(--pink); }
     .aa-visually-hidden { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
     #msg-voice.rec { color:#fff; background:var(--pink); border-color:var(--pink); animation:aa-rec-pulse 1.2s infinite; }
@@ -4725,7 +4855,7 @@ function navPush(name) {
 
 const BACK_TARGETS = {
   rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', community: 'arena', live: 'arena',
-  account: 'arena', quickmatch: 'arena', findartist: 'arena', grandarena: 'arena',
+  account: 'arena',
   notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena',
   // v80: Messages and Safety are reached from inside Community, so their
   // static fallback (fresh load / exhausted history) is Community rather than
@@ -4736,7 +4866,7 @@ const BACK_TARGETS = {
 };
 
 // Destination screens that live UNDER a tab (they keep that tab highlighted).
-const TAB_CHILDREN = { quickmatch: 'arena', findartist: 'arena', rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', grandarena: 'arena', messages: 'community', safety: 'community', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena' };
+const TAB_CHILDREN = { rooms: 'arena', room: 'arena', matchmaking: 'arena', join: 'arena', messages: 'community', safety: 'community', battlehistory: 'profile', savedartworks: 'profile', settings: 'profile', notifications: 'arena', help: 'arena', about: 'arena', premium: 'arena', friends: 'arena' };
 
 function renderNav() {
   $('#bottom-nav').innerHTML = NAV.map((t) =>
@@ -7619,8 +7749,10 @@ async function renderAccount(d) {
   const apps = await api('/api/drawing-apps');
   appsCache = apps.drawing_apps; // v33: reuse the same fetch for the canvas step
   const sel = $('#app-select');
+  // v81 (no-placeholders): only apps that can actually be selected are
+  // offered as a preferred canvas — coming_soon entries are not listed.
   sel.innerHTML = '<option value="">— none —</option>' +
-    apps.drawing_apps.map((a) => '<option value="' + a.app_key + '">' + a.display_name + '</option>').join('');
+    apps.drawing_apps.filter((a) => a.selectable).map((a) => '<option value="' + a.app_key + '">' + a.display_name + '</option>').join('');
   sel.value = pf.drawing_app_key || '';
   fp.querySelector('[name=is_discoverable]').checked = pf.is_discoverable;
 
@@ -7759,31 +7891,32 @@ async function enterAccount() {
 // own /api/auth/google — the consent URL is built server-side, and the
 // Google client secret never touches this page.
 // v59: Discord follows the exact same contract (/api/auth/discord/*).
-// Apple is NOT implemented — it keeps the honest "coming soon" toast.
+// v81 (no-placeholders): providers that are not implemented — or not
+// configured on this deployment — are HIDDEN, never shown as dead buttons
+// with a "coming soon" toast. (The Apple button was removed entirely.)
 const SOCIAL_LIVE = { google: 'Google', discord: 'Discord' };
 document.querySelectorAll('[data-social]').forEach((b) => {
   if (SOCIAL_LIVE[b.dataset.social]) return; // handled by initSocialButton()
-  const name = b.dataset.social;
-  b.addEventListener('click', () =>
-    toast(name.charAt(0).toUpperCase() + name.slice(1) + ' sign-in is coming soon.'));
+  b.hidden = true; // unimplemented provider: no placeholder button
 });
 function initSocialButton(key) {
   const b = document.querySelector('[data-social="' + key + '"]');
   if (!b) return;
   const label = SOCIAL_LIVE[key];
-  const comingSoon = () => toast(label + ' sign-in is coming soon.');
+  const hide = () => { b.hidden = true; };
   const arm = () => {
+    b.hidden = false;
     b.classList.add(key + '-live');
     b.title = 'Continue with ' + label;
     b.addEventListener('click', () => location.assign('/api/auth/' + key));
   };
-  if (typeof fetch !== 'function') { b.addEventListener('click', comingSoon); return; }
+  if (typeof fetch !== 'function') { hide(); return; }
   try {
     fetch('/api/auth/' + key + '/status', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j) => (j && j.available ? arm() : b.addEventListener('click', comingSoon)))
-      .catch(() => b.addEventListener('click', comingSoon));
-  } catch (_) { b.addEventListener('click', comingSoon); }
+      .then((j) => (j && j.available ? arm() : hide()))
+      .catch(hide);
+  } catch (_) { hide(); }
 }
 Object.keys(SOCIAL_LIVE).forEach(initSocialButton);
 
@@ -8614,7 +8747,9 @@ const canvasModal = (() => {
     // v34: the free-form "External" (Other) card is a profile-level
     // preference, not a battle canvas — keep the card list short with the
     // real products only (registry-driven; future apps appear automatically).
-    const list = (appsCache || []).filter((a) => a.status !== 'external');
+    // v81 (no-placeholders): coming_soon registry entries are not shown as
+    // dead cards at all — only apps that can actually be picked appear.
+    const list = (appsCache || []).filter((a) => a.status !== 'external' && a.status !== 'coming_soon');
     cardsEl.innerHTML = list.map((a) => {
       const sel = selected === a.app_key;
       const dis = !a.selectable;
@@ -9330,11 +9465,9 @@ $('#notif-list').addEventListener('click', async (e) => {
   // v73 phase 6: profile Message button → DM thread
   const pmm = e.target.closest('[data-pm-message]');
   if (pmm) { show('messages'); if (window.msgOpenDmWith) window.msgOpenDmWith(pmm.dataset.pmMessage); return; }
-  // v73 COMMUNITY phase 4: challenge hands off to the EXISTING Arena — a
-  // battle with a specific artist starts by inviting them to one of your
-  // rooms (friends-only, exactly as before; no second battle system).
-  const pmc2 = e.target.closest('[data-pm-challenge]');
-  if (pmc2) { show('rooms'); toast('Invite @' + pmc2.dataset.pmChallenge + ' to one of your rooms to start the battle.'); return; }
+  // v81 phase 2: the profile Challenge button is a [data-cm-challenge]
+  // control — the Community delegated listener runs the real challenge
+  // flow (existing room invitations; no friendship is created).
   const jro = e.target.closest('[data-jr-open]');
   if (jro) { openRoom(jro.dataset.jrOpen); return; } // v65: requester enters the room they were seated into
   // v68: 3v3 matchmaking team invite → accepting really seats you with the
@@ -9495,7 +9628,7 @@ async function openProfile(userId) {
     (cm ? (
       '<div style="display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 4px">' +
       (!isMe ? '<button type="button" class="mini" data-cm-follow="' + esc(cm.user.id) + '" aria-pressed="' + cm.following + '">' + (cm.following ? 'Following' : 'Follow') + '</button>' : '') +
-      (!isMe ? '<button type="button" class="mini" data-pm-challenge="' + esc(u.username) + '">Challenge</button>' : '') +
+      (!isMe ? '<button type="button" class="mini" data-cm-challenge="' + esc(cm.user.id) + '">⚔ Challenge</button>' : '') +
       (!isMe && isFriend ? '<button type="button" class="mini" data-pm-message="' + esc(cm.user.id) + '">Message</button>' : '') +
       (!isMe ? '<button type="button" class="mini" data-sf-mute="' + esc(cm.user.id) + '">Mute</button><button type="button" class="mini" data-sf-block="' + esc(cm.user.id) + '">Block</button>' : '') +
       (cm.live ? '<span class="cm-livebadge"><i></i>LIVE · ' + esc(cm.live.title || cm.live.platform) + '</span>' : '') +
@@ -9511,6 +9644,7 @@ async function openProfile(userId) {
           (b.post_id ? '<button type="button" class="mini" data-open="' + esc(b.post_id) + '">View art</button>' : '') +
           '</div>').join('') + '</div>' : '')
     ) : '');
+  if (window.cmHydrateChallenges) window.cmHydrateChallenges($('#pm-body'));
   const btn = $('#pm-friend'), dec = $('#pm-friend-decline');
   btn.classList.remove('is-remove', 'secondary'); dec.classList.add('hidden');
   // v59: the button says what it DOES in every state (never a dead label)
@@ -11363,10 +11497,27 @@ window.__aaTwitchHandoff = null;
 // ---------------------------------------------------------------------------
 (function () {
   const q = (s) => document.querySelector(s);
-  const M = { thread: null, hasMore: false, nextBefore: null, wall: null, cat: null, prevWall: null, rec: null, recChunks: null, pendingShare: null, premium: false };
-  const EMOJI = ['😀','😁','😂','🤣','😊','😍','😘','😎','🤩','🥳','😅','😉','🙃','😇','🤔','🤨','😐','😴','🥱','😪','😷','🤒','🤯','🤠','😢','😭','😤','😡','🤬','😱','🤫','🤭','😬','🙄','😮','😲','🥺','😳','😶','🤐','😋','🤓','👍','👎','👏','🙌','💪','🙏','✌️','🤞','👌','❤️','💜','💙','🔥','✨','⚡','🎨','🖌️','🏆','️'];
+  const M = { thread: null, hasMore: false, nextBefore: null, wall: null, cat: null, prevWall: null, rec: null, recChunks: null, pendingShare: null, premium: false,
+    prefs: { notifications: true, sound: true }, prefsLoaded: false, outbox: new Map(), voiceDraft: null };
+  // v81 phase 8: one prefs truth shared with Community settings. The chime
+  // is a shipped asset (/message-chime.wav); browsers only let it play after
+  // the user has interacted, which the preview button guarantees.
+  async function loadMsgPrefs() {
+    try { M.prefs = await api('/api/messages/prefs'); M.prefsLoaded = true; } catch (_) {}
+  }
+  window.aaMsgPrefsSet = (p) => { M.prefs = { notifications: !!p.notifications, sound: !!p.sound }; M.prefsLoaded = true; };
+  window.aaPlayMsgChime = () => { try { const a = new Audio('/message-chime.wav'); a.volume = 0.6; const r = a.play(); if (r) r.catch(() => {}); } catch (_) {} };
+  function playMsgChime() { if (!M.prefsLoaded) loadMsgPrefs(); if (M.prefs.sound) window.aaPlayMsgChime(); }
+  // v81 phase 10: native emoji only — including multi-codepoint sequences
+  // (ZWJ families & professions), skin-tone modifiers and regional-indicator
+  // flags, which the previous set lacked. The OS renders them; we just insert.
+  const EMOJI = ['😀','😁','😂','🤣','😊','😍','😘','😎','🤩','🥳','😅','😉','🙃','😇','🤔','😐','😴','🥱','🤯','😢','😭','😤','😡','😱','🥺','😳','😋','🤓',
+    '👍','👍🏻','👍🏽','👍🏿','👎','👏','👏🏽','🙌','🙌🏿','💪','💪🏻','🙏','🙏🏽','✌️','🤞','👌','👋','👋🏻','👋🏽','👋🏿','🤝','🧑‍🎨','👩‍🎨','👨‍🎨','🧑‍💻','👩‍🎤','🧑‍🚀','👨‍👩‍👧','👨‍👨‍👦','👩‍👩‍👧‍👦','🏳️‍🌈','🏴‍☠️',
+    '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','❤️‍🔥','🔥','✨','⚡','🎨','🖌️','🖼️','✏️','🏆','🥇','🎉','🎊','🚀','🌈','☀️','🌙','⭐',
+    '🇳🇬','🇬🇭','🇿🇦','🇰🇪','🇬🇧','🇺🇸','🇨🇦','🇫🇷','🇩🇪','🇮🇹','🇪🇸','🇵🇹','🇧🇷','🇲🇽','🇦🇷','🇯🇵','🇰🇷','🇮🇳','🇦🇺','🇳🇿','🇯🇲','🇹🇹','🇪🇬','🇲🇦','🇪🇹','🇸🇳','🇨🇲','🇺🇬','🇹🇿','🇦🇴'];
 
   async function msgLoadList() {
+    if (!M.prefsLoaded) loadMsgPrefs();
     let d; try { d = await api('/api/messages/threads'); } catch (e) { toast(e.message); return; }
     q('#msg-list').innerHTML = d.threads.map((t) => {
       const other = t.members.find((m) => m.id !== me.id) || t.members[0] || {};
@@ -11383,7 +11534,7 @@ window.__aaTwitchHandoff = null;
     const p = m.payload || {};
     if (m.payload_type === 'sticker_share') return `<img class="aa-stick" src="${esc(p.src)}" alt="${esc(p.label || 'sticker')}">`;
     if (m.payload_type === 'image_share') return `<img class="aa-attach" loading="lazy" src="/api/messages/uploads/${esc(p.upload_id)}?arena_token=${encodeURIComponent(sessionToken)}" alt="shared image">`;
-    if (m.payload_type === 'audio_share') return `<audio controls preload="metadata" src="/api/messages/uploads/${esc(p.upload_id)}?arena_token=${encodeURIComponent(sessionToken)}"></audio>`;
+    if (m.payload_type === 'audio_share') return `<span class="aa-voice-note"><span class="vn-ico" aria-hidden="true">🎙</span><audio controls preload="metadata" aria-label="Voice note" src="/api/messages/uploads/${esc(p.upload_id)}?arena_token=${encodeURIComponent(sessionToken)}"></audio></span>`;
     if (m.payload_type === 'artwork_share') return `<button type="button" class="aa-card" data-open-art="${esc(p.post_id)}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : ''}<span>🎨 ${esc(p.title || 'Artwork')} · @${esc(p.author_username || '')}</span></button>`;
     if (m.payload_type === 'profile_share') return `<button type="button" class="aa-card" data-open-prof="${esc(p.user_id)}">${p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="">` : ''}<span>Artist · @${esc(p.username || '')}</span></button>`;
     if (m.payload_type === 'battle_invitation') return `<span class="aa-card" style="cursor:default">⚔ Battle · ${esc(p.theme || 'challenge')}</span>`;
@@ -11394,9 +11545,10 @@ window.__aaTwitchHandoff = null;
   function bubbleHTML(m) {
     const mine = m.sender_id === me.id;
     const card = m.payload_type ? shareCard(m) : '';
+    if (m.pending) return `<div class="msg-bub pending" data-mid="${m.id}">${esc(m.body || '')}</div>`;
     const rq = m.reply_to || (m.reply_to_id ? { username: m.reply_username, body: m.reply_body } : null);
     const quote = rq ? `<span class="msg-quote">↳ @${esc(rq.username || '')}: ${esc(String(rq.body || '').slice(0, 80))}</span>` : '';
-    return `<div class="msg-bub${m.saved ? ' saved' : ''}" data-mid="${m.id}" data-body="${esc(m.body || '')}">${mine ? '' : `<span class="who">@${esc(m.username || (m.sender && m.sender.username) || '')}</span>`}${quote}${m.body && m.body !== '·' && !(m.payload_type === 'sticker_share') ? esc(m.body) : ''}${m.edited_at ? '<span class="msg-edited">· edited</span>' : ''}${card}</div>`;
+    return `<div class="msg-bub${m.saved ? ' saved' : ''}" data-mid="${m.id}" data-body="${esc(m.body || '')}">${mine ? '' : `<span class="who">@${esc(m.username || (m.sender && m.sender.username) || '')}</span>`}${quote}${m.body && m.body !== '·' && !(m.payload_type === 'sticker_share') && !(m.payload_type === 'audio_share') ? esc(m.body) : ''}${m.edited_at ? '<span class="msg-edited">· edited</span>' : ''}${card}</div>`;
   }
   // v78: tap-to-open TEXT actions beneath the bubble (reply/save for all,
   // edit/delete for your own); swipe on a bubble replies.
@@ -11404,7 +11556,9 @@ window.__aaTwitchHandoff = null;
     const mine = m.sender_id === me.id;
     return `<span class="msg-acts" data-acts="${m.id}"><button type="button" data-act="reply" data-mid="${m.id}">Reply</button><button type="button" data-act="save" data-mid="${m.id}">${m.saved ? 'Unsave' : 'Save'}</button>${mine ? `<button type="button" data-act="edit" data-mid="${m.id}">Edit</button><button type="button" data-act="del" data-mid="${m.id}">Delete</button>` : ''}</span>`;
   };
-  const flowItemHTML = (m) => bubbleHTML(m) + actsHTML(m) + tsHTML(m);
+  const flowItemHTML = (m) => m.pending
+    ? bubbleHTML(m) + `<span class="msg-ts msg-sendstat" data-sendstat="${m.id}">Sending…</span>`
+    : bubbleHTML(m) + actsHTML(m) + tsHTML(m);
   const tsHTML = (m) => `<span class="msg-ts">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   const dayKey = (ts) => new Date(ts).toDateString();
   const dayLabel = (ts) => { const d = new Date(ts); const today = new Date(); const yest = new Date(Date.now() - 864e5); if (d.toDateString() === today.toDateString()) return 'Today'; if (d.toDateString() === yest.toDateString()) return 'Yesterday'; return d.toLocaleDateString([], { month: 'long', day: 'numeric' }); };
@@ -11426,6 +11580,11 @@ window.__aaTwitchHandoff = null;
     }
     closeGrp();
     return out.join('');
+  }
+  // v81 phase 9: "near the bottom" = within 180px of the end of the scroll.
+  function aaNearBottom() {
+    const box = q('#msg-scroll');
+    return !box || (box.scrollHeight - box.scrollTop - box.clientHeight) < 180;
   }
   function appendFlow(m) {
     const box = q('#msg-flow');
@@ -11467,7 +11626,7 @@ window.__aaTwitchHandoff = null;
   }
 
   async function msgOpen(id) {
-    M.thread = id; M.pendingShare = null;
+    M.thread = id; M.pendingShare = null; aaClearVoiceDraft();
     let meta; try { meta = await api('/api/messages/threads/' + id); } catch (e) { toast(e.message); return; }
     q('#msg-thread-title').textContent = meta.is_group ? (meta.name || 'Group') : meta.title;
     const other = meta.members.find((m) => m.id !== me.id);
@@ -11531,8 +11690,9 @@ window.__aaTwitchHandoff = null;
     const stk = e.target.closest('[data-stick]');
     if (stk && M.thread) {
       closePop();
+      if (!navigator.onLine) { toast('You are offline — the sticker was not sent.'); return; }
       try {
-        const r = await api('/api/messages/threads/' + M.thread + '/messages', { body: '·', share: { type: 'sticker', ref: stk.dataset.stick } }, 'POST');
+        const r = await api('/api/messages/threads/' + M.thread + '/messages', { body: '·', client_id: newClientId(), share: { type: 'sticker', ref: stk.dataset.stick } }, 'POST');
         appendFlow({ ...r, sender_id: me.id });
         q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
       } catch (err) { toast(err.message); }
@@ -11552,24 +11712,49 @@ window.__aaTwitchHandoff = null;
     const rec = new MediaRecorder(stream);
     M.rec = rec;
     rec.ondataavailable = (ev) => { if (ev.data && ev.data.size) M.recChunks.push(ev.data); };
-    rec.onstop = async () => {
+    rec.onstop = () => {
       M.rec = null; q('#msg-voice').classList.remove('rec');
+      // Stop every mic track and release the stream into the draft only.
       stream.getTracks().forEach((t) => t.stop());
       const blob = new Blob(M.recChunks, { type: rec.mimeType || 'audio/webm' });
+      M.recChunks = null;
       if (!blob.size) return toast('Nothing was recorded.');
-      const fd = new FormData(); fd.append('kind', 'audio'); fd.append('file', blob, 'voicenote.webm');
-      try {
-        const r = await fetch('/api/messages/uploads', { method: 'POST', headers: { Authorization: 'Bearer ' + sessionToken }, body: fd });
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error || 'Upload failed');
-        const sent = await api('/api/messages/threads/' + M.thread + '/messages', { body: 'voice note', share: { type: 'audio', ref: d.id } }, 'POST');
-        appendFlow({ ...sent, sender_id: me.id });
-        q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
-      } catch (err) { toast(err.message); }
+      // v81 phase 13: do NOT upload or send yet — hold a local draft with a
+      // preview player. Only the Send button uploads and posts.
+      aaClearVoiceDraft();
+      const url = URL.createObjectURL(blob);
+      M.voiceDraft = { blob, url, type: blob.type || 'audio/webm', thread: M.thread };
+      const bar = q('#msg-voicedraft'); const au = q('#msg-voicedraft-audio');
+      au.src = url; bar.classList.remove('hidden');
     };
     rec.start();
     q('#msg-voice').classList.add('rec');
   }
+  // ---- v81 phase 13: voice draft Send / Discard -----------------------------
+  function aaClearVoiceDraft() {
+    if (M.voiceDraft && M.voiceDraft.url) { try { URL.revokeObjectURL(M.voiceDraft.url); } catch (_) {} }
+    M.voiceDraft = null;
+    const au = q('#msg-voicedraft-audio'); if (au) { au.removeAttribute('src'); try { au.load(); } catch (_) {} }
+    const bar = q('#msg-voicedraft'); if (bar) bar.classList.add('hidden');
+  }
+  document.addEventListener('click', async (e) => {
+    if (e.target.id === 'msg-voicedraft-discard') { aaClearVoiceDraft(); toast('Voice note discarded — nothing was sent.'); return; }
+    if (e.target.id !== 'msg-voicedraft-send') return;
+    const draft = M.voiceDraft;
+    if (!draft) return;
+    if (!navigator.onLine) { toast('You are offline — the voice note was not sent. It stays here as a draft.'); return; }
+    const btn = e.target; btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const fd = new FormData(); fd.append('kind', 'audio'); fd.append('file', draft.blob, 'voicenote.webm');
+      const r = await fetch('/api/messages/uploads', { method: 'POST', headers: { Authorization: 'Bearer ' + sessionToken }, body: fd });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Upload failed');
+      const sent = await api('/api/messages/threads/' + draft.thread + '/messages', { body: 'voice note', client_id: newClientId(), share: { type: 'audio', ref: d.id } }, 'POST');
+      if (draft.thread === M.thread) { appendFlow({ ...sent, sender_id: me.id }); q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight; }
+      aaClearVoiceDraft();
+    } catch (err) { toast('Voice note not sent: ' + err.message + ' — it is still here as a draft.'); }
+    finally { btn.disabled = false; btn.textContent = 'Send voice note'; }
+  });
 
   // ---- image attach ----------------------------------------------------------
   document.addEventListener('change', async (e) => {
@@ -11577,12 +11762,13 @@ window.__aaTwitchHandoff = null;
     const f = e.target.files && e.target.files[0];
     e.target.value = '';
     if (!f) return;
+    if (!navigator.onLine) { toast('You are offline — the image was not sent.'); return; }
     const fd = new FormData(); fd.append('kind', 'image'); fd.append('file', f);
     try {
       const r = await fetch('/api/messages/uploads', { method: 'POST', headers: { Authorization: 'Bearer ' + sessionToken }, body: fd });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Upload failed');
-      const sent = await api('/api/messages/threads/' + M.thread + '/messages', { body: 'image', share: { type: 'image', ref: d.id } }, 'POST');
+      const sent = await api('/api/messages/threads/' + M.thread + '/messages', { body: 'image', client_id: newClientId(), share: { type: 'image', ref: d.id } }, 'POST');
       appendFlow({ ...sent, sender_id: me.id });
       q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
     } catch (err) { toast(err.message); }
@@ -11767,6 +11953,62 @@ window.__aaTwitchHandoff = null;
   });
   inp && inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); inp.closest('form').requestSubmit(); } });
 
+  // ---- v81 phase 11: offline-safe sending --------------------------------
+  // A composed message is stamped with ONE client_id and shown as a
+  // provisional bubble until the server acks it. Offline (or a dropped
+  // request) it stays visibly unsent with a manual Retry — reconnecting
+  // NEVER auto-resends, and a retry re-presents the same client_id so the
+  // server dedupes it into the original ack.
+  const newClientId = () => (crypto.randomUUID ? crypto.randomUUID() : 'c' + Date.now() + Math.random().toString(16).slice(2));
+  function aaSetSendState(entry, state, label) {
+    const stat = q(`[data-sendstat="${entry.tempId}"]`);
+    const bub = q(`.msg-bub[data-mid="${entry.tempId}"]`);
+    if (bub) { bub.classList.toggle('failed', state === 'failed'); bub.classList.toggle('pending', state !== 'done'); }
+    if (stat) stat.innerHTML = state === 'failed'
+      ? `${esc(label || 'Not sent')} <button type="button" data-retry="${entry.clientId}">Retry</button>` : 'Sending…';
+  }
+  function aaDropTemp(entry) {
+    const bub = q(`.msg-bub[data-mid="${entry.tempId}"]`);
+    if (!bub) return;
+    const grp = bub.closest('.msg-grp');
+    const stat = q(`[data-sendstat="${entry.tempId}"]`); if (stat) stat.remove();
+    bub.remove();
+    if (grp && !grp.querySelector('.msg-bub')) grp.remove();
+  }
+  async function aaDeliver(entry) {
+    if (!navigator.onLine) { aaSetSendState(entry, 'failed', 'Offline — not sent.'); return; }
+    aaSetSendState(entry, 'sending');
+    try {
+      const r = await api('/api/messages/threads/' + entry.thread + '/messages',
+        Object.assign({ body: entry.body, client_id: entry.clientId }, entry.replyTo ? { reply_to: entry.replyTo } : {}), 'POST');
+      M.outbox.delete(entry.clientId);
+      aaDropTemp(entry);
+      appendFlow({ ...r, sender_id: me.id, body: entry.body, reply_to: entry.replyPreview || r.reply_to || null });
+      q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
+    } catch (err) {
+      aaSetSendState(entry, 'failed', 'Not sent — ' + ((err && err.message) || 'connection failed') + '.');
+    }
+  }
+  function aaCompose(body, replyTo) {
+    const entry = { clientId: newClientId(), tempId: 'tmp-' + Math.random().toString(36).slice(2, 10), body, replyTo: replyTo ? replyTo.id : null, replyPreview: replyTo || null, thread: M.thread };
+    M.outbox.set(entry.clientId, entry);
+    appendFlow({ id: entry.tempId, body, sender_id: me.id, created_at: new Date().toISOString(), pending: true });
+    q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
+    aaDeliver(entry);
+  }
+  document.addEventListener('click', (e) => {
+    const rt2 = e.target.closest('[data-retry]');
+    if (rt2) { const entry = M.outbox.get(rt2.dataset.retry); if (entry) aaDeliver(entry); }
+  });
+  window.addEventListener('online', () => {
+    // honesty rule: nothing is resent automatically — the user taps Retry.
+    for (const entry of M.outbox.values()) aaSetSendState(entry, 'failed', 'Back online — tap Retry when ready.');
+    if (M.outbox.size) toast('Back online — your unsent messages are waiting on Retry (nothing was auto-sent).');
+  });
+  window.addEventListener('offline', () => {
+    for (const entry of M.outbox.values()) aaSetSendState(entry, 'failed', 'Offline — not sent.');
+  });
+
   document.addEventListener('submit', async (e) => {
     if (e.target.id !== 'msg-form' || !M.thread) return;
     e.preventDefault();
@@ -11774,13 +12016,9 @@ window.__aaTwitchHandoff = null;
     const fit = () => { input.style.height = 'auto'; };
     if (!body) return;
     input.value = ''; fit(); const fm = q('#msg-form'); fm.classList.add('falling'); setTimeout(() => fm.classList.remove('falling'), 500); fm.classList.remove('ready');
-    try {
-      const replyTo = M.replyTo;
-      const r = await api('/api/messages/threads/' + M.thread + '/messages', Object.assign({ body }, replyTo ? { reply_to: replyTo.id } : {}), 'POST');
-      appendFlow({ ...r, sender_id: me.id, body });
-      q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
-      M.replyTo = null; q('#msg-replychip').classList.remove('on');
-    } catch (err) { toast(err.message); input.value = body; fit(); q('#msg-form').classList.add('ready'); }
+    const replyTo = M.replyTo;
+    M.replyTo = null; q('#msg-replychip').classList.remove('on');
+    aaCompose(body, replyTo);
   });
 
   // v77: message actions — edit / delete own messages (server-authoritative;
@@ -11817,24 +12055,49 @@ window.__aaTwitchHandoff = null;
   }
   // v78: swipe a bubble (mostly touch, mouse drag too) to reply
   let aaPtr = null; let aaSwiped = false;
-  q('#msg-thread').addEventListener('pointerdown', (e) => {
+  // v81 phase 7: swipe-to-reply rebuilt. The old version kept its start
+  // point until ANY later pointerup, so a scroll ending in pointercancel
+  // left a STALE target and the next release could reply to the wrong
+  // message; it also fired for provisional bubbles and for drags starting
+  // on audio players/buttons. Now: rightward, horizontal-dominant swipe on
+  // a real bubble only; pointercancel clears the gesture; vertical motion
+  // abandons the swipe so list scrolling is never fought.
+  const aaThread = q('#msg-thread');
+  aaThread.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('audio,button,a,input,textarea,select,.msg-acts,.msg-editor')) { aaPtr = null; return; }
     const b = e.target.closest('.msg-bub');
-    aaPtr = b ? { x: e.clientX, y: e.clientY, mid: b.dataset.mid } : null;
+    aaPtr = (b && !b.classList.contains('pending')) ? { x: e.clientX, y: e.clientY, mid: b.dataset.mid, bub: b } : null;
+    aaSwiped = false;
   });
-  window.addEventListener('pointerup', (e) => {
+  aaThread.addEventListener('pointermove', (e) => {
     if (!aaPtr) return;
     const dx = e.clientX - aaPtr.x, dy = e.clientY - aaPtr.y;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > 2 * Math.abs(dy)) { aaSwiped = true; aaReplyTo(aaPtr.mid); setTimeout(() => { aaSwiped = false; }, 0); }
-    aaPtr = null;
+    if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) { aaPtr.bub.style.transform = ''; aaPtr = null; return; }
+    if (dx > 0) aaPtr.bub.style.transform = 'translateX(' + Math.min(dx, 72) + 'px)';
   });
+  function aaEndSwipe(e, commit) {
+    if (!aaPtr) return;
+    const dx = e.clientX - aaPtr.x, dy = e.clientY - aaPtr.y;
+    const bub = aaPtr.bub; const mid = aaPtr.mid;
+    bub.style.transform = '';
+    aaPtr = null;
+    if (commit && dx > 56 && Math.abs(dx) > 2 * Math.abs(dy)) {
+      aaSwiped = true;
+      aaReplyTo(mid);
+      setTimeout(() => { aaSwiped = false; }, 0);
+    }
+  }
+  aaThread.addEventListener('pointerup', (e) => aaEndSwipe(e, true));
+  aaThread.addEventListener('pointercancel', (e) => aaEndSwipe(e, false));
   function aaReplyTo(mid) {
     const bub = document.querySelector(`.msg-bub[data-mid="${mid}"]`); if (!bub) return;
-    const mine = bub.closest('.msg-grp').classList.contains('mine');
+    const grp2 = bub.closest('.msg-grp');
+    const mine = !!(grp2 && grp2.classList.contains('mine'));
     const name = mine ? (me.username || 'you') : ((bub.querySelector('.who') || {}).textContent || '@').replace('@', '');
     M.replyTo = { id: mid, name, preview: (bub.dataset.body || '').slice(0, 80) };
     q('#msg-replychip-t').textContent = 'Replying to @' + name + ': ' + M.replyTo.preview;
     q('#msg-replychip').classList.add('on');
-    q('#msg-input').focus();
+    try { q('#msg-input').focus({ preventScroll: true }); } catch (_) { q('#msg-input').focus(); }
   }
   window.addEventListener('aa-chat-edit', (ev) => {
     const d = ev.detail; if (d.thread_id !== M.thread) return;
@@ -11848,13 +12111,18 @@ window.__aaTwitchHandoff = null;
   // realtime: the existing WS hub pushes chat.message — zero polling.
   window.addEventListener('aa-chat', (ev) => {
     const { thread_id, message } = ev.detail;
+    const incoming = message.sender_id !== me.id;
     const viewing = M.thread === thread_id && !q('#msg-thread').classList.contains('hidden') && currentView === 'messages';
+    if (incoming) playMsgChime(); // v81 phase 8 (sound toggle; independent of notifications)
     if (viewing) {
       appendFlow(message);
-      q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
-      if (message.sender_id !== me.id) api('/api/messages/threads/' + thread_id + '/read', {}, 'POST').catch(() => {});
-    } else if (message.sender_id !== me.id) {
-      toast('@' + ((message.sender && message.sender.username) || 'message') + ': ' + String(message.body || '').slice(0, 60));
+      // v81 phase 9: never yank the scroll — only follow new messages when
+      // the reader is already near the bottom (or it is their own send).
+      if (!incoming || aaNearBottom()) q('#msg-scroll').scrollTop = q('#msg-scroll').scrollHeight;
+      if (incoming) api('/api/messages/threads/' + thread_id + '/read', {}, 'POST').catch(() => {});
+    } else if (incoming) {
+      if (!M.prefsLoaded) loadMsgPrefs();
+      if (M.prefs.notifications) toast('@' + ((message.sender && message.sender.username) || 'message') + ': ' + String(message.body || '').slice(0, 60));
     }
     if (currentView === 'messages') msgLoadList();
   });
@@ -11921,10 +12189,34 @@ window.__aaTwitchHandoff = null;
       </div>
     </div>`;
   }
+  // v81 phase 2: every eligible artist carries a Challenge action beside
+  // Follow — friends and non-friends alike. The button's state is hydrated
+  // from the server (pending / invited / accepted / declined) and hidden
+  // for self / blocked artists.
+  const cmChallengeBtn = (id) => `<button class="mini" data-cm-challenge="${id}">⚔ Challenge</button>`;
+  async function cmHydrateChallenges(root) {
+    const btns = [...(root || document).querySelectorAll('[data-cm-challenge]')];
+    const ids = [...new Set(btns.map((b) => b.dataset.cmChallenge))];
+    for (const id of ids) {
+      let st = null;
+      try { st = await api('/api/community/challenge/state/' + id); } catch (_) {}
+      for (const b of btns.filter((x) => x.dataset.cmChallenge === id)) {
+        if (!st) { b.style.display = 'none'; continue; }
+        if (!st.eligible && st.state !== 'invited') { b.style.display = 'none'; continue; }
+        b.style.display = '';
+        if (st.state === 'pending') { b.textContent = '⏳ Pending'; b.disabled = true; }
+        else if (st.state === 'invited') { b.textContent = '⚔ Invited you'; b.disabled = true; b.title = 'This artist already challenged you — answer from your notifications.'; }
+        else if (st.state === 'accepted') { b.textContent = '✓ Accepted'; b.disabled = true; }
+        else if (st.state === 'declined') { b.textContent = '⚔ Challenge again'; b.disabled = false; }
+        else { b.textContent = '⚔ Challenge'; b.disabled = false; }
+      }
+    }
+  }
+  window.cmHydrateChallenges = cmHydrateChallenges;
   function artistRow(a) {
     return `<div class="cm-artistrow">${avImg(a)}
       <span class="grow"><b>@${esc(a.username)}</b><div class="stats">${a.battles_n} battles · ${a.wins_n} wins · ${a.posts_n} artworks</div></span>
-      <button class="mini" data-cm-follow="${a.id}" aria-pressed="false">Follow</button></div>`;
+      <button class="mini" data-cm-follow="${a.id}" aria-pressed="false">Follow</button>${cmChallengeBtn(a.id)}</div>`;
   }
   function liveCard(s, upcoming) {
     return `<div class="cm-livecard">
@@ -11949,7 +12241,7 @@ window.__aaTwitchHandoff = null;
       '<button type="button" class="mini cm-open-messages">Messages &rsaquo;</button></div>' +
       (fs.length
         ? '<p class="cm-friendnote">' + fs.length + ' friend' + (fs.length === 1 ? '' : 's') +
-          ' · ' + d.online_count + ' online · Chat works whether they are online or not.</p>' +
+          ' · ' + d.online_count + ' online</p>' +
           fs.map((f) => aaFriendRowHTML(f)).join('')
         : '');
     empty.textContent = EMPTY.friends; empty.classList.toggle('hidden', fs.length > 0);
@@ -11964,6 +12256,9 @@ window.__aaTwitchHandoff = null;
     feed.classList.add('cm-settings');
     let safety = null;
     try { safety = await api('/api/community/safety'); } catch (_) {}
+    // v81 phase 8: message notification + sound preferences (server-persisted)
+    let prefs = { notifications: true, sound: true };
+    try { prefs = await api('/api/messages/prefs'); } catch (_) {}
     const n = (k) => (safety && Array.isArray(safety[k]) ? safety[k].length : null);
     const count = (k) => (n(k) === null ? '—' : n(k) + (n(k) === 1 ? ' artist' : ' artists'));
     feed.innerHTML =
@@ -11975,10 +12270,27 @@ window.__aaTwitchHandoff = null;
           '<span class="cm-set-copy">Blocking hides you from each other everywhere and stops messaging, comments, follows and challenges. Muting only silences their notifications — they never know.</span>' +
         '</button>' +
         '<div class="cm-set-card cm-set-static">' +
+          '<span class="cm-set-title">Messages</span>' +
+          '<label class="cm-toggle-row"><span>Message notifications<small>New-message alerts in your bell. Off means messages still arrive — silently.</small></span><input type="checkbox" id="cm-pf-notif"' + (prefs.notifications ? ' checked' : '') + '></label>' +
+          '<label class="cm-toggle-row"><span>Message sound<small>The short chime when a message lands. Independent of notifications.</small></span><input type="checkbox" id="cm-pf-sound"' + (prefs.sound ? ' checked' : '') + '></label>' +
+          '<span><button type="button" class="mini" id="cm-pf-preview">▶ Preview sound</button></span>' +
+        '</div>' +
+        '<div class="cm-set-card cm-set-static">' +
           '<span class="cm-set-title">Community guidelines</span>' +
           '<span class="cm-set-copy">Share your own work and credit collaborations · critique the art, never the artist · no harassment, hate or plagiarism · report anything that breaks these — moderators see every report.</span>' +
         '</div>' +
       '</div>';
+    const pfN = feed.querySelector('#cm-pf-notif'), pfS = feed.querySelector('#cm-pf-sound'), pfP = feed.querySelector('#cm-pf-preview');
+    const savePrefs = async () => {
+      try {
+        const r = await api('/api/messages/prefs', { notifications: pfN.checked, sound: pfS.checked }, 'PUT');
+        if (window.aaMsgPrefs) window.aaMsgPrefsSet(r); // the chat layer shares the same truth
+        toast('Message preferences saved.');
+      } catch (err) { toast((err && err.message) || 'Could not save preferences.'); }
+    };
+    if (pfN) pfN.addEventListener('change', savePrefs);
+    if (pfS) pfS.addEventListener('change', savePrefs);
+    if (pfP) pfP.addEventListener('click', () => { if (window.aaPlayMsgChime) window.aaPlayMsgChime(); });
     empty.classList.add('hidden');
   }
 
@@ -12001,7 +12313,7 @@ window.__aaTwitchHandoff = null;
             : '<span class="fallback">' + esc(String(a.username || '?').charAt(0).toUpperCase()) + '</span>') +
           '<span class="u">@' + esc(a.username) + '</span>' +
           '<span class="s">' + a.battles_n + ' battles · ' + a.wins_n + ' wins · ' + a.posts_n + ' artworks</span>' +
-          '<button class="mini" data-cm-follow="' + esc(a.id) + '" aria-pressed="false">Follow</button>' +
+          '<span style="display:flex; gap:6px"><button class="mini" data-cm-follow="' + esc(a.id) + '" aria-pressed="false">Follow</button>' + cmChallengeBtn(a.id) + '</span>' +
         '</div>').join('') +
       '</div></section>';
   }
@@ -12049,19 +12361,44 @@ window.__aaTwitchHandoff = null;
     const lead = (tr.posts && tr.posts[0]) || (fy.posts && fy.posts[0]) || null;
     const hero = q('#cm-hero');
     if (hero) {
-      hero.classList.toggle('welcome', !lead);
-      hero.innerHTML = lead
-        ? '<img src="' + esc(lead.image_url) + '" alt="">' +
-          '<span class="cm-hero-veil"></span>' +
-          '<div class="cm-hero-body">' +
-            '<span class="cm-hero-kicker">Trending in the Arena</span>' +
-            '<h1 class="cm-hero-title">' + esc(lead.title || 'Untitled') + '</h1>' +
-            '<p class="cm-hero-sub">by @' + esc(lead.author.username) + ' · ♥ ' + lead.like_count + ' · ' + lead.comment_count + ' comments</p>' +
-          '</div>'
-        : '<div class="cm-hero-body"><span class="cm-hero-kicker">Art Arena™ Community</span>' +
-          '<h1 class="cm-hero-title">The gallery of the Arena</h1>' +
-          '<p class="cm-hero-sub">Share your work, follow the artists you rate, and watch battles unfold.</p></div>';
+      // v82 (supersedes the phase-3 note): the hero is the GALLERY of the
+      // Arena — the lead artwork renders full-bleed and the click opens it.
+      // The Colosseum/backdrop composition (Colosseum faded into the
+      // backdrop, per the owner's direction) survives as the welcome scene
+      // and as the fallback if the artwork image fails; if a backdrop layer
+      // fails the hero degrades to the themed gradient (.plain) — never a
+      // broken image box.
+      hero.classList.remove('welcome', 'plain');
+      hero.innerHTML =
+        '<img class="cm-hero-back" src="/community-hero-backdrop.jpg" alt="" aria-hidden="true">' +
+        '<img class="cm-hero-cut" src="/community-hero-colosseum.png" alt="" aria-hidden="true">' +
+        // v82: the hero IS the gallery of the Arena — when a lead artwork
+        // exists, the artwork itself is the hero visual (full-bleed). The
+        // backdrop composition stays underneath purely as the failure
+        // fallback (the artwork layer removes itself on error) and as the
+        // no-posts welcome scene.
+        (lead && lead.image_url
+          ? '<img class="cm-hero-art" src="' + esc(lead.image_url) + '" alt="' + esc(lead.title || 'Trending artwork') + '">'
+          : '') +
+        '<span class="cm-hero-veil"></span>' +
+        (lead
+          ? '<div class="cm-hero-body">' +
+              '<span class="cm-hero-kicker">Trending in the Arena</span>' +
+              '<h1 class="cm-hero-title">' + esc(lead.title || 'Untitled') + '</h1>' +
+              '<p class="cm-hero-sub">by @' + esc(lead.author.username) + ' · ♥ ' + lead.like_count + ' · ' + lead.comment_count + ' comments</p>' +
+            '</div>'
+          : '<div class="cm-hero-body"><span class="cm-hero-kicker">Art Arena™ Community</span>' +
+            '<h1 class="cm-hero-title">The gallery of the Arena</h1>' +
+            '<p class="cm-hero-sub">Share your work, follow the artists you rate, and watch battles unfold.</p></div>');
+      hero.querySelectorAll('img.cm-hero-back, img.cm-hero-cut').forEach((im) => {
+        im.addEventListener('error', () => { hero.classList.add('plain'); im.remove(); });
+      });
+      // artwork failure → reveal the backdrop composition beneath, captions intact
+      hero.querySelectorAll('img.cm-hero-art').forEach((im) => {
+        im.addEventListener('error', () => { im.remove(); });
+      });
       if (lead) hero.onclick = () => cmOpen(lead.id);
+      else hero.onclick = null;
     }
     const liveRows = (live.live || []).slice(0, 8);
     const upRows = (live.upcoming || []).slice(0, 8);
@@ -12079,7 +12416,7 @@ window.__aaTwitchHandoff = null;
                        : '<div class="cm-empty">' + esc(EMPTY.upcoming) + '</div>') + '</section>';
   }
 
-  // ---- right-rail friends: real friendships, Chat works offline too -------
+  // ---- right-rail friends: real friendships, each with a Chat button ------
   async function cmLoadFriendsRail() {
     const box = q('#cm-friends-mini');
     if (!box) return;
@@ -12099,7 +12436,7 @@ window.__aaTwitchHandoff = null;
         '<span class="cm-fr-name">' + esc(f.display_name || f.username) + '</span>' +
         '<button type="button" class="cm-chat" data-fr-chat="' + esc(f.id) + '" data-name="' + esc(f.username) + '" title="Chat with @' + esc(f.username) + '">Chat</button>' +
       '</div>';
-    }).join('') + '<p class="cm-friend-note">Chat works whether they are online or not.</p>';
+    }).join('');
   }
 
   async function cmLoad(reset) {
@@ -12188,6 +12525,7 @@ window.__aaTwitchHandoff = null;
         empty.textContent = EMPTY[CM.filter === 'battle' ? 'battle' : CM.tab];
         empty.classList.toggle('hidden', total > 0);
       }
+      if (!stale()) cmHydrateChallenges(feed);
     } catch (e) { if (!stale()) toast((e && e.message) || 'Could not load Community.'); }
   }
 
@@ -12222,6 +12560,7 @@ window.__aaTwitchHandoff = null;
         <button data-cm-share>Share</button>
         ${mine ? `<button data-cm-delart>Delete</button>` : `<button data-cm-report='{"t":"post","id":"${p.id}"}'>Report</button>`}
         ${mine ? '' : `<button data-cm-profile="${p.author.id}">View artist</button>`}
+        ${mine ? '' : cmChallengeBtn(p.author.id)}
       </div>
       <div id="cm-art-report" class="hidden" style="margin:6px 0"></div>
       <div id="cm-art-comments"></div>
@@ -12230,6 +12569,7 @@ window.__aaTwitchHandoff = null;
         <button class="mini" type="submit">Post</button>
       </form>`;
     q('#cm-art').classList.remove('hidden');
+    cmHydrateChallenges(q('#cm-art-body'));
     q('#cm-art-comments').innerHTML = await cmCommentsHtml(p.id);
   }
 
@@ -12245,6 +12585,23 @@ window.__aaTwitchHandoff = null;
 
   // ---- single delegated listener (no per-card handlers, no leaks)
   document.addEventListener('click', async (e) => {
+    // v81 phase 2: Challenge — the existing room-invitation flow, never a
+    // friendship. The server is the state truth; we just reflect it.
+    const chal = e.target.closest('[data-cm-challenge]');
+    if (chal && !chal.disabled) {
+      const id = chal.dataset.cmChallenge;
+      chal.disabled = true; const old = chal.textContent; chal.textContent = 'Sending…';
+      try {
+        await api('/api/community/challenge/' + id, {}, 'POST');
+        chal.textContent = '⏳ Pending';
+        toast('Challenge sent — if they accept, you will meet them in the battle room.');
+      } catch (err) {
+        chal.textContent = old; chal.disabled = false;
+        toast((err && err.message) || 'Could not send that challenge.');
+        cmHydrateChallenges(document);
+      }
+      return;
+    }
     // v80 left-rail section switcher (also serves the "Explore now" CTA and
     // any [data-cm] control inside the view)
     const side = e.target.closest('.cm-side-item[data-cm], [data-cm].cm-btn, [data-cm].cm-chev');

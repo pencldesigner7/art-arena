@@ -755,9 +755,9 @@
   ThemeScene.PALETTE = {
     flame: { c1: '#FF5A00', c2: '#FFC300' },
     glitch: { c1: '#00F0FF', c2: '#FF2BD1' },
-    glowing: { c1: '#6ED4BF', c2: '#51A8D9' },   // v55: green+blue derived from the supplied logo
+    glowing: { c1: '#2BF5C8', c2: '#2EA8FF' },   // v55: green+blue derived from the supplied logo
     pixel: { c1: '#E337C4', c2: '#77D5DF' },      // v56: arcade magenta+cyan from the supplied pixel logo
-    graffiti: { c1: '#F2F2F2', c2: '#BFBFBF' },  // v55: pure black & white world
+    graffiti: { c1: '#FF2E88', c2: '#8B5CFF' },  // v55: pure black & white world
     cloud: { c1: '#4A9FE8', c2: '#8EC9F5' },
     magazine: { c1: '#FF5A5A', c2: '#222228' }
   };

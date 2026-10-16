@@ -589,6 +589,70 @@ router.get('/profile/:id', ah(async (req, res) => {
   });
 }));
 
+// ---- v81 phase 2: challenge an artist (the EXISTING room-invitation flow) --
+// A Community challenge is not a second battle system: it seats the
+// challenger in a real 1v1 room and invites the artist through the same
+// room_invitation notification friends use — accept joins the room, decline
+// marks it handled. It works for non-friends and NEVER creates a friendship.
+// Self / blocked / already-seated artists are ineligible, honestly reported.
+async function challengeStateFor(me, id) {
+  if (id === me) return { eligible: false, state: 'self', reason: 'You cannot challenge yourself.' };
+  const { rows: [u] } = await pool.query(
+    `SELECT id, username, account_status FROM users WHERE id = $1`, [id]);
+  if (!u || u.account_status !== 'active') return null;
+  if (await blockPair(me, id)) return { eligible: false, state: 'blocked', reason: 'Challenges are unavailable between you two.' };
+  const { rows: [n] } = await pool.query(
+    `SELECT payload->>'handled' AS handled, payload->>'from_user_id' AS from_id, created_at
+       FROM notifications
+      WHERE type = 'room_invitation'
+        AND ((user_id = $1::uuid AND payload->>'from_user_id' = $2::text) OR (user_id = $2::uuid AND payload->>'from_user_id' = $1::text))
+        AND created_at > now() - interval '24 hours'
+      ORDER BY created_at DESC LIMIT 1`, [id, me]);
+  if (n) {
+    const incoming = n.from_id === id;
+    if (!n.handled) return { eligible: !incoming, state: incoming ? 'invited' : 'pending', room_pending: true };
+    if (n.handled === 'accepted' || n.handled === 'declined')
+      return { eligible: true, state: n.handled };
+  }
+  return { eligible: true, state: 'none' };
+}
+router.get('/challenge/state/:id', ah(async (req, res) => {
+  const id = String(req.params.id || '');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Invalid artist id.');
+  const st = await challengeStateFor(req.user.id, id);
+  if (!st) throw new HttpError(404, 'Artist not found.');
+  res.json(st);
+}));
+router.post('/challenge/:id', ah(async (req, res) => {
+  const me = req.user.id, id = String(req.params.id || '');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Invalid artist id.');
+  if (id === me) throw new HttpError(400, 'You cannot challenge yourself.');
+  const st = await challengeStateFor(me, id);
+  if (!st) throw new HttpError(404, 'Artist not found.');
+  if (!st.eligible) throw new HttpError(403, st.reason || 'This artist cannot be challenged right now.');
+  if (st.state === 'pending') throw new HttpError(409, 'Your challenge is already waiting for their answer.');
+  // Reuse my existing hosted 1v1 lobby room if there is one; otherwise
+  // create a private 1v1 room through the canonical rooms service. If I am
+  // seated somewhere else, room creation refuses honestly (409).
+  const { rows: mine } = await pool.query(
+    `SELECT r.code FROM battle_rooms r
+      WHERE r.deleted_at IS NULL AND r.host_id = $1 AND r.status = 'lobby'
+        AND COALESCE(r.battle_mode, '1v1') = '1v1'
+        AND (SELECT count(*) FROM room_participants rp
+              WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')) < r.max_players
+      ORDER BY r.created_at DESC LIMIT 1`, [me]);
+  let code = mine[0] && mine[0].code;
+  if (!code) {
+    const { createRoomForUser, newRoomCode } = require('./rooms');
+    const room = await createRoomForUser(req.user, { battle_mode: '1v1', visibility: 'private', code: newRoomCode(), name: 'Challenge' });
+    code = room && room.code;
+    if (!code) throw new HttpError(500, 'Could not open a challenge room.');
+  }
+  const { inviteToRoom } = require('./friends');
+  const room = await inviteToRoom(req.user, id, code);
+  res.status(201).json({ ok: true, state: 'pending', room_code: room.code });
+}));
+
 // ---- phase 7: safety management (block/mute lists + toggles) -------------
 const personRow = (r) => ({ id: r.id, username: r.username, display_name: r.display_name, avatar_url: av(r) });
 router.get('/safety', ah(async (req, res) => {

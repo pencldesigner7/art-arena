@@ -52,6 +52,35 @@ async function assertMember(me, threadId) {
   if (!rows[0]) throw new HttpError(404, 'Thread not found.');
 }
 
+// ---- v81 phase 8: message notification + sound preferences ----------------
+// One row per user; absence of a row means the defaults (both ON). The two
+// toggles are independent columns — neither implies the other.
+async function messagePrefs(userId) {
+  const { rows } = await pool.query(
+    `SELECT msg_notifications, msg_sound FROM user_message_prefs WHERE user_id = $1`, [userId]);
+  return rows[0]
+    ? { notifications: !!rows[0].msg_notifications, sound: !!rows[0].msg_sound }
+    : { notifications: true, sound: true };
+}
+router.get('/prefs', ah(async (req, res) => {
+  res.json(await messagePrefs(req.user.id));
+}));
+router.put('/prefs', ah(async (req, res) => {
+  const b = req.body || {};
+  const cur = await messagePrefs(req.user.id);
+  const next = {
+    notifications: b.notifications === undefined ? cur.notifications : !!b.notifications,
+    sound: b.sound === undefined ? cur.sound : !!b.sound,
+  };
+  await pool.query(
+    `INSERT INTO user_message_prefs (user_id, msg_notifications, msg_sound, updated_at)
+     VALUES ($1, $2, $3, now())
+     ON CONFLICT (user_id) DO UPDATE SET msg_notifications = EXCLUDED.msg_notifications,
+        msg_sound = EXCLUDED.msg_sound, updated_at = now()`,
+    [req.user.id, next.notifications, next.sound]);
+  res.json(next);
+}));
+
 function threadShape(c, members, me, last, unread) {
   const others = members.filter((m) => m.user_id !== me);
   return {
@@ -203,7 +232,10 @@ async function buildShare(me, threadId, share) {
     const { rows } = await pool.query(`SELECT id, kind FROM chat_uploads WHERE id=$1 AND user_id=$2`, [ref, me]);
     if (!rows[0] || rows[0].kind !== kind) throw new HttpError(404, 'Attachment not found.');
     await pool.query(`UPDATE chat_uploads SET conversation_id=$1 WHERE id=$2`, [threadId, ref]);
-    return { type: kind + '_share', payload: { upload_id: ref } };
+    // v81 phase 13: a voice note is an audio share the client recorded as a
+    // voice note — the flag lets every client render the dedicated voice
+    // component instead of a generic attachment bubble.
+    return { type: kind + '_share', payload: { upload_id: ref, voice: type === 'audio' && share.voice === true } };
   }
   throw new HttpError(400, 'Unknown share type.');
 }
@@ -215,6 +247,21 @@ router.post('/threads/:id/messages', ah(async (req, res) => {
   if (body.length < 1) throw new HttpError(400, 'Message is empty.');
   if (body.length > 4000) throw new HttpError(400, 'Message is too long (4000 max).');
   await assertMember(me, id);
+  // v81 phase 11: idempotent sends. The client generates one client_id per
+  // composed message and re-presents it on retry; if that send already
+  // landed, we return the ORIGINAL row as the ack — no duplicate, and the
+  // realtime fan-out below is not repeated.
+  const clientId = String((req.body || {}).client_id || '').slice(0, 80) || null;
+  if (clientId) {
+    const { rows: dup } = await pool.query(
+      `SELECT id, created_at, payload_type, payload, reply_to_id FROM messages
+        WHERE conversation_id = $1 AND sender_id = $2 AND client_id = $3`, [id, me, clientId]);
+    if (dup[0]) {
+      return res.status(200).json({ id: dup[0].id, created_at: dup[0].created_at, deduped: true,
+        payload_type: dup[0].payload_type, payload: dup[0].payload,
+        reply_to: dup[0].reply_to_id ? { id: dup[0].reply_to_id } : null });
+    }
+  }
   rate(me);
   const members = await memberRows(id);
   for (const m of members) {
@@ -233,15 +280,20 @@ router.post('/threads/:id/messages', ah(async (req, res) => {
     replyTo = rr.rows[0];
   }
   const { rows: [msg] } = await pool.query(
-    `INSERT INTO messages (conversation_id, sender_id, body, payload_type, payload, reply_to_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, created_at`,
-    [id, me, body, share ? share.type : null, share ? JSON.stringify(share.payload) : null, replyTo ? replyTo.id : null]);
+    `INSERT INTO messages (conversation_id, sender_id, body, payload_type, payload, reply_to_id, client_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, created_at`,
+    [id, me, body, share ? share.type : null, share ? JSON.stringify(share.payload) : null, replyTo ? replyTo.id : null, clientId]);
   await pool.query(`UPDATE conversations SET updated_at = now() WHERE id=$1`, [id]);
   const wire = { id: msg.id, body, sender_id: me, created_at: msg.created_at, payload_type: share ? share.type : null, payload: share ? share.payload : null, reply_to: replyTo ? { id: replyTo.id, username: replyTo.username, body: replyTo.body } : null };
   const meRow = members.find((m) => m.user_id === me);
   for (const m of members) {
     if (m.user_id === me) continue;
     rt.sendToUser(m.user_id, { type: 'chat.message', thread_id: id, message: { ...wire, sender: { id: me, username: meRow.username, display_name: meRow.display_name, avatar_url: av(meRow) } } });
-    notifyUser(m.user_id, 'message', { thread_id: id, from_username: meRow.username, preview: body.slice(0, 80), actor: me });
+    // v81 phase 8: the persistent message notification honours the
+    // recipient's own toggle (default ON). The realtime push above is not a
+    // notification — the client gates toast/sound on the same prefs.
+    if ((await messagePrefs(m.user_id)).notifications) {
+      notifyUser(m.user_id, 'message', { thread_id: id, from_username: meRow.username, preview: body.slice(0, 80), actor: me });
+    }
   }
   res.status(201).json({ id: msg.id, created_at: msg.created_at, payload_type: share ? share.type : null, payload: share ? share.payload : null, reply_to: wire.reply_to });
 }));
@@ -340,6 +392,7 @@ function sniff(buf) {
   if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) return 'image/png';
   if (buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) return 'image/jpeg';
   if (buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  if (buf.toString('ascii', 0, 6) === 'GIF89a' || buf.toString('ascii', 0, 6) === 'GIF87a') return 'image/gif'; // v81 phase 10: real GIFs via the image path
   if (buf[0] === 0x1A && buf[1] === 0x45 && buf[2] === 0xDF && buf[3] === 0xA3) return 'audio/webm';
   if (buf.toString('ascii', 0, 3) === 'ID3' || (buf[0] === 0xFF && (buf[1] & 0xE6) === 0xE0)) return 'audio/mpeg';
   if (buf.toString('ascii', 0, 4) === 'OggS') return 'audio/ogg';
@@ -348,6 +401,7 @@ function sniff(buf) {
 function imageDims(mime, buf) {
   try {
     if (mime === 'image/png') return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+    if (mime === 'image/gif') return { w: buf.readUInt16LE(6), h: buf.readUInt16LE(8) };
     if (mime === 'image/webp') {
       const f = buf.toString('ascii', 12, 16);
       if (f === 'VP8 ') return { w: buf.readUInt16LE(26) & 0x3fff, h: buf.readUInt16LE(28) & 0x3fff };
@@ -391,7 +445,7 @@ router.post('/uploads', wallUpload.single('file'), ah(async (req, res) => {
   upRate(me);
   const mime = sniff(req.file.buffer);
   const isImageKind = kind !== 'audio';
-  if (isImageKind && (!mime || !mime.startsWith('image/'))) throw new HttpError(415, 'Only PNG, JPEG or WebP images are accepted (validated by content, not filename).');
+  if (isImageKind && (!mime || !mime.startsWith('image/'))) throw new HttpError(415, 'Only PNG, JPEG, WebP or GIF images are accepted (validated by content, not filename).');
   if (!isImageKind && (!mime || !mime.startsWith('audio/'))) throw new HttpError(415, 'Only recorded audio (WebM/OGG/MP3) is accepted.');
   let w = null, h = null;
   if (isImageKind) {

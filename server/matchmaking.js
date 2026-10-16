@@ -878,6 +878,14 @@ async function handleDisconnect(userId) {
   try {
     const q = await queuedRow(userId);
     if (q) await pool.query(`UPDATE matchmaking_queue SET status = 'cancelled' WHERE id = $1`, [q.id]);
+    // v81 phase 4: a dropped connection ends the search — its pending team
+    // invitations must expire with it (same marking as /cancel and the
+    // deadline sweep), or invitees keep an actionable invite whose accept
+    // can only 409 against a search that no longer exists.
+    if (q) await pool.query(
+      `UPDATE notifications SET payload = payload || '{"handled":"expired"}'::jsonb
+        WHERE type = 'mm_team_invite' AND payload->>'from_user_id' = $1 AND payload->>'handled' IS NULL`,
+      [userId]).catch(() => {});
   } catch (_) { /* best effort (server shutdown) */ }
 }
 
