@@ -18,9 +18,22 @@
 const crypto = require('crypto');
 const { Pool } = require('pg');
 
-const DEV = (process.env.NODE_ENV || 'development') !== 'production';
+const PRODUCTION = process.env.NODE_ENV === 'production';
+const DEV = !PRODUCTION;
 const SESSION_TTL_DAYS = 30;   // session persistence window
 const COOKIE_NAME = 'arena_session';
+
+// ---------------------------------------------------------------------------
+// v83 — DEV MAILBOX IS AN EXPLICIT OPT-IN, NEVER A SIDE-EFFECT OF "not production".
+//   The simulated inbox (/api/dev/outbox) exposes one-time password-reset codes,
+//   so it is an account-takeover surface if it is ever reachable. Requiring two
+//   independent conditions means a deployment that forgets to set NODE_ENV, or a
+//   stray DEV flag, can never re-open it:
+//     • NODE_ENV must NOT be 'production', AND
+//     • DEV_MAILBOX must be explicitly enabled (DEV_MAILBOX=1).
+//   Production deployments therefore always 404 the route, whatever else is set.
+// ---------------------------------------------------------------------------
+const DEV_MAILBOX = !PRODUCTION && /^(1|true|yes|on)$/i.test(String(process.env.DEV_MAILBOX || '').trim());
 
 // DB connection: a full connection string (DATABASE_URL — e.g. Neon) takes
 // precedence; otherwise fall back to the individual PG* variables (sandbox).
@@ -320,12 +333,18 @@ function cookieOpts() {
     sameSite: 'lax',
     path: '/',
     maxAge: SESSION_TTL_DAYS * 86400 * 1000,
+    // v83 (security): over HTTPS the session cookie must never travel on a
+    // plain-http request. Tied to PRODUCTION rather than to req.secure so it
+    // also holds behind Render's TLS-terminating proxy.
+    ...(PRODUCTION ? { secure: true } : {}),
   };
 }
 
 module.exports = {
   pool,
   DEV,
+  PRODUCTION,
+  DEV_MAILBOX,
   SESSION_TTL_DAYS,
   COOKIE_NAME,
   sha256,

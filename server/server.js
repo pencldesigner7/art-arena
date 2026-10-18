@@ -36,7 +36,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { sendEmail, resolveProvider, outboxRead, TTL_HOURS } = require('./mail');
 const {
-  pool, DEV, SESSION_TTL_DAYS, COOKIE_NAME,
+  pool, DEV, PRODUCTION, DEV_MAILBOX, SESSION_TTL_DAYS, COOKIE_NAME,
   sha256, HttpError, ah, parseCookies, maskToken,
   sessionTokenFromRequest, requireAuth,
   authUserPayload, fullUser, avatarUrlOf, cookieOpts,
@@ -158,6 +158,8 @@ app.get('/api/health', ah(async (req, res) => {
     ok: true,
     db: rows.length ? 'up' : 'down',
     dev: DEV,
+    // v83: separate flag — the simulated inbox is opt-in, never implied by dev.
+    dev_mailbox: DEV_MAILBOX,
     // v45: schema migration state — 'ok', or the missing objects by name.
     // (Surfaced so a permissions-blocked migration on a managed DB is
     // visible in Render logs/dashboards instead of surfacing as 500s.)
@@ -467,7 +469,11 @@ app.get('/api/drawing-apps', ah(async (req, res) => {
 // Dev-only stand-in for the user's real inbox (what sendEmail() would send).
 // NEVER enabled in production.
 app.get('/api/dev/outbox', ah(async (req, res) => {
-  if (!DEV) throw new HttpError(404, 'Not found.');
+  // v83 (security): an unauthenticated read of this route hands out password-
+  // reset codes => account takeover. It now requires the EXPLICIT DEV_MAILBOX=1
+  // opt-in *and* a non-production NODE_ENV (see lib.js). 404 — not 403 — so a
+  // production probe cannot even confirm the route exists.
+  if (!DEV_MAILBOX) throw new HttpError(404, 'Not found.');
   const to = String(req.query.to || '').trim().toLowerCase();
   const all = outboxRead();
   const emails = to ? all.filter((e) => e.to.toLowerCase() === to) : all;

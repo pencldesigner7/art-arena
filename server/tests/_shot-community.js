@@ -67,11 +67,13 @@ async function publish(u, fields = {}) {
     assert.ok(heads.includes(want), 'hub renders the ' + want + ' section (got: ' + heads.join(', ') + ')');
   }
   // the reference's shell: left rail, hero, featured card, friends rail with Chat
+  // v83: the rail was renamed (Community → For You, Community Profile → My
+  // Profile) and Trending / New / Live / Upcoming became real destinations.
   assert.deepEqual(
     (await p.locator('.cm-side-item').allInnerTexts()).map((s) => s.trim()),
-    ['Community', 'Discover', 'Friends', 'Community Profile', 'Following', 'Saved', 'Community settings'],
-    'left rail lists exactly the reference sections, in order');
-  assert.equal(await p.locator('.cm-side-item.active').innerText(), 'Community', 'Community is the active rail item');
+    ['For You', 'Trending', 'New', 'Live', 'Upcoming', 'Discover', 'Friends', 'My Profile', 'Following', 'Saved', 'Community settings'],
+    'left rail lists every destination, in order');
+  assert.equal(await p.locator('.cm-side-item.active').innerText(), 'For You', 'For You is the active rail item');
   assert.ok(await p.locator('#cm-hero').count(), 'hero section present');
   assert.ok(await p.locator('.cm-featured').count(), 'Featured in Community card present');
   assert.ok(await p.locator('.cm-guide-card').count(), 'Community Guidelines card present');
