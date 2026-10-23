@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="aa-ui-version" content="75">
+<meta name="aa-ui-version" content="76">
 <title>Art Arena</title>
 <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=art-arena-mark-3">
 <script>
@@ -4062,6 +4062,16 @@ try {
       .cm-feat-art { inset:0; right:0; bottom:0; width:100%; height:100%; object-fit:cover; object-position:center; }
     }
     @media (prefers-reduced-motion:reduce) { .cm-overlay, .cm-post { animation:none !important; transition:none !important; } }
+    .aa-challenge-toast{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:18px;background:rgba(6,4,12,.42);backdrop-filter:blur(3px);animation:aaFadeIn .22s ease-out}.aa-challenge-toast.aa-accepted-toast{background:rgba(6,4,12,.24);backdrop-filter:blur(1px)}
+    .aa-accept-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:calc(100vw - 28px)}.aa-accept-stage{position:relative;width:min(430px,88vw);aspect-ratio:1;background:transparent;overflow:visible;box-shadow:none;isolation:isolate}.aa-ref-sequence{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 0 8px rgba(183,24,236,.22))}.aa-ref-copy{position:absolute;z-index:2;left:0;right:0;top:42%;width:max-content;max-width:94%;margin:0 auto;display:flex;flex-direction:column;align-items:center;line-height:1.03;text-align:center;white-space:nowrap;padding:8px 22px 9px;border:1px solid rgba(208,74,255,.42);border-radius:16px;background:rgba(9,6,17,.94);box-shadow:0 0 24px rgba(10,5,18,.9),0 0 16px rgba(179,30,232,.12);animation:aaRefCopy .95s .08s cubic-bezier(.18,.8,.2,1) both}.aa-ref-copy h2{font-size:clamp(24px,7vw,38px);font-weight:1000;letter-spacing:-.6px;color:#09aefa;margin:0}.aa-ref-copy strong{font-size:clamp(22px,5vw,28px);font-weight:900;color:#00db3b}.aa-ref-player{color:#39d6ff;font-size:clamp(13px,2.2vw,16px);font-weight:800;line-height:1.2;-webkit-text-stroke:.65px rgba(28,8,40,.95);paint-order:stroke fill;text-shadow:0 1px 5px rgba(0,0,0,.95)}.aa-ref-room{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#695b72;font-size:10px;font-weight:600}.aa-accept-exit{min-height:42px;padding:0 20px;border:1px solid rgba(var(--pink-rgb),.8);border-radius:999px;background:linear-gradient(105deg,var(--pink),var(--purple));color:#fff;font-weight:900;letter-spacing:.5px;cursor:pointer;box-shadow:0 8px 26px rgba(var(--pink-rgb),.24);animation:aaRefButton .20s 1.0s ease-out both}.aa-accept-exit:focus-visible{outline:3px solid #fff;outline-offset:3px}@keyframes aaRefSwordLeft{0%{opacity:.35;transform:translate(-190px,200px) rotate(-8deg)}65%{opacity:1;transform:translate(4px,-3px) rotate(2deg)}84%{transform:translate(-2px,1px)}100%{opacity:1;transform:none}}@keyframes aaRefSwordRight{0%{opacity:0;transform:translate(190px,200px) rotate(8deg)}65%{opacity:1;transform:translate(-4px,-3px) rotate(-2deg)}84%{transform:translate(2px,-1px)}100%{opacity:1;transform:none}}@keyframes aaRefCopy{0%{opacity:0;transform:scale(.58)}58%{opacity:1;transform:scale(1.08)}82%{transform:scale(.98)}100%{opacity:1;transform:scale(1)}}@keyframes aaRefButton{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    .aa-challenge-card{position:relative;width:min(440px,100%);text-align:center;padding:24px 22px;border:1px solid rgba(var(--pink-rgb),.62);border-radius:22px;color:var(--text);background:linear-gradient(150deg,var(--surface),color-mix(in srgb,var(--purple) 20%,var(--surface)));box-shadow:0 20px 80px rgba(0,0,0,.5),0 0 32px rgba(var(--pink-rgb),.18)}.aa-invitation-layout{width:min(860px,96vw);max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:15px 12px 12px;isolation:isolate}.aa-invitation-layout .aa-envelope{width:clamp(145px,20vw,185px);aspect-ratio:1962/2180;margin:0 auto -3px;flex:0 0 auto}.aa-invitation-card{position:relative;isolation:isolate;overflow:hidden;width:100%;aspect-ratio:1.82;padding:27px 44px 28px;border:6px solid #f10bc9;border-radius:42px;color:#f10bc9;background:linear-gradient(142deg,#341350 0%,#301049 60%,#290d40 100%);box-shadow:0 16px 42px #0008,0 0 27px #e311c31b;opacity:0;transform:translateY(22px)}.aa-invitation-card.aa-main-card-enter{animation:aaMainCardSlide .52s .05s cubic-bezier(.18,.8,.2,1) both}.aa-invitation-card.aa-main-card-idle{animation:aaCardFloat 4s ease-in-out infinite!important}.aa-invitation-card.aa-main-card-exit{animation:aaInvitationCardExit .24s .68s ease-in both!important}.aa-invitation-watermark{position:absolute;z-index:0;right:5%;bottom:-12%;display:flex;align-items:baseline;gap:.015em;opacity:.20;transform:skewX(-11deg);color:#7818c1;pointer-events:none;white-space:nowrap;font-size:clamp(220px,34vw,420px);line-height:.8;letter-spacing:-.11em}.aa-invitation-watermark .num{font-family:"Rockwell Extra Bold",Rockwell,Georgia,serif;font-weight:900}.aa-invitation-watermark .v{font-family:"Bauhaus 93","Bauhaus",Impact,sans-serif;font-weight:900;letter-spacing:-.18em}.aa-invitation-brand,.aa-invitation-sender,.aa-invitation-message,.aa-invitation-hint,.aa-invitation-actions,.aa-invitation-visibility{position:relative;z-index:1}.aa-invitation-brand{font-size:clamp(19px,2.7vw,28px);font-weight:950;letter-spacing:.075em;line-height:1;text-transform:uppercase;margin:0 0 38px}.aa-invitation-sender{font-size:clamp(31px,5.2vw,58px);font-weight:900;letter-spacing:-.035em;line-height:1.04;margin:0 0 23px;overflow-wrap:anywhere}.aa-invitation-message{font-size:clamp(30px,6.1vw,66px);font-weight:850;letter-spacing:-.04em;line-height:1.02;white-space:nowrap;margin:0}.aa-invitation-hint{font-size:clamp(15px,2.15vw,23px);font-weight:750;margin-top:21px;white-space:nowrap}.aa-invitation-actions{display:flex;gap:22px;margin-top:29px}.aa-invitation-actions button{min-width:172px;height:62px;display:grid;place-items:center;padding:0 22px;border:4px solid #17def5;border-radius:999px;background:linear-gradient(105deg,#f10acb,#e910c1);color:#321047;font-size:clamp(22px,2.7vw,31px);font-weight:850;box-shadow:0 0 14px #15dff32b;margin:0;cursor:pointer}.aa-invitation-actions button.secondary{background:linear-gradient(105deg,#f10acb,#e910c1);border-color:#17def5;color:#321047}.aa-invitation-actions button:disabled{opacity:.48;cursor:wait}.aa-invitation-visibility{position:absolute;right:23px;bottom:18px;color:#f10bc9;font-size:clamp(18px,2.6vw,30px);font-weight:950;letter-spacing:.06em;text-transform:uppercase}.aa-invitation-card .aa-card-sparkle{z-index:3}.aa-invitation-card.aa-idle-float .aa-card-sparkle{animation:aaIdleGlisten 2.8s ease-in-out infinite!important}.aa-invitation-card.aa-idle-float .aa-card-sparkle:nth-of-type(2){animation-delay:.7s!important}.aa-invitation-card.aa-idle-float .aa-card-sparkle:nth-of-type(3){animation-delay:1.4s!important}.aa-invitation-card.aa-idle-float .aa-card-sparkle:nth-of-type(4){animation-delay:2.1s!important}@keyframes aaMainCardSlide{0%{opacity:0;transform:translateY(22px)}72%{opacity:1;transform:translateY(-2px)}100%{opacity:1;transform:translateY(0)}}@keyframes aaInvitationCardExit{to{opacity:0;transform:translateY(12px)}}@media(max-width:720px){.aa-invitation-layout{width:min(560px,96vw);padding:8px 5px}.aa-invitation-layout .aa-envelope{width:clamp(132px,35vw,165px);margin-bottom:-2px}.aa-invitation-card{aspect-ratio:auto;min-height:435px;padding:23px 22px 29px;border-width:5px;border-radius:31px}.aa-invitation-brand{font-size:20px;margin-bottom:43px}.aa-invitation-sender{font-size:clamp(29px,8vw,46px);margin-bottom:24px}.aa-invitation-message{font-size:clamp(31px,8.6vw,48px);white-space:normal}.aa-invitation-hint{font-size:17px;white-space:normal;max-width:35ch;margin-top:19px}.aa-invitation-actions{gap:10px;margin-top:29px}.aa-invitation-actions button{min-width:0;flex:1;height:57px;padding:0 12px;border-width:4px;font-size:22px}.aa-invitation-visibility{right:17px;bottom:15px;font-size:19px}}.aa-envelope-idle{animation:aaEnvelopeFloat 3.6s ease-in-out infinite!important}.aa-envelope-idle .aa-envelope-sparkle{animation:aaIdleGlisten 2.8s ease-in-out infinite!important;transition:none!important}.aa-envelope-idle .aa-envelope-sparkle:nth-of-type(2){animation-delay:.7s!important}.aa-envelope-idle .aa-envelope-sparkle:nth-of-type(3){animation-delay:1.4s!important}.aa-envelope-idle .aa-envelope-sparkle:nth-of-type(4){animation-delay:2.1s!important}.aa-challenge-card.aa-idle-float{animation:aaCardFloat 4s ease-in-out infinite!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle{animation:aaIdleGlisten 2.8s ease-in-out infinite!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle:nth-of-type(2){animation-delay:.7s!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle:nth-of-type(3){animation-delay:1.4s!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle:nth-of-type(4){animation-delay:2.1s!important}@keyframes aaEnvelopeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes aaCardFloat{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}@keyframes aaIdleGlisten{0%,100%{opacity:.22;filter:brightness(.9);transform:scale(.78) rotate(0)}50%{opacity:.8;filter:brightness(1.25);transform:scale(1) rotate(12deg)}}.aa-card-sparkle{position:absolute;z-index:3;color:#fff;font:900 16px/1 Georgia,serif;text-shadow:0 0 7px rgba(var(--pink-rgb),.95),0 0 15px rgba(var(--purple-rgb),.8);opacity:0;pointer-events:none;animation:aaCardTwinkle .14s ease-in-out both;animation-delay:var(--spark-delay,0s)}.aa-card-sparkle.s1{top:18px;left:24px}.aa-card-sparkle.s2{top:34px;right:25px;color:#ef8bff}.aa-card-sparkle.s3{bottom:24px;left:19px;color:#ef8bff}.aa-card-sparkle.s4{bottom:29px;right:21px}@keyframes aaCardTwinkle{0%,100%{opacity:0;transform:scale(.45) rotate(0)}25%,58%{opacity:.9;transform:scale(1) rotate(35deg)}78%{opacity:.3;transform:scale(.7) rotate(70deg)}}
+    .aa-envelope{position:relative;isolation:isolate;width:clamp(180px,48vw,228px);aspect-ratio:1962/2180;height:auto;margin:0 auto 12px;filter:drop-shadow(0 8px 18px rgba(var(--pink-rgb),.24));transform-origin:50% 75%}.aa-envelope-opening{animation:aaEnvelopeIn .38s cubic-bezier(.18,.8,.2,1) both}.aa-envelope-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}.aa-envelope-sparkle{position:absolute;z-index:4;display:block;color:var(--pink);font:900 clamp(13px,3.8vw,20px)/1 Georgia,serif;text-shadow:0 0 7px rgba(var(--pink-rgb),.95),0 0 16px rgba(var(--purple-rgb),.68);opacity:0;transform:scale(.45) rotate(0deg);transition:opacity .017s linear,transform .017s ease-out;pointer-events:none}.aa-sparkle-a{top:8%;left:12%}.aa-sparkle-b{top:18%;right:9%;color:#fff}.aa-sparkle-c{top:51%;left:-2%;color:#d98aff}.aa-sparkle-d{top:58%;right:-3%;color:#fff}.aa-sparkle-e{bottom:7%;left:23%;color:#e988ff}.aa-sparkle-f{bottom:10%;right:18%;color:#fff}.aa-reversing .aa-envelope{animation:aaEnvelopeExit .36s .68s ease-in both!important}.aa-reversing .aa-challenge-kicker,.aa-reversing .aa-challenge-card h2,.aa-reversing .aa-challenge-card p,.aa-reversing .aa-challenge-actions{animation:aaChallengeReverse .2s ease-in both!important}.aa-reversing .aa-invitation-card{animation:aaInvitationCardExit .24s .68s ease-in both!important}
+    @keyframes aaFlapOpen{0%{transform:rotateX(0);opacity:1}72%{transform:rotateX(192deg);opacity:1}100%{transform:rotateX(180deg);opacity:.88}}@keyframes aaFlapClose{0%{transform:rotateX(180deg);opacity:.88}100%{transform:rotateX(0);opacity:1}}@keyframes aaEnvelopeIn{0%{opacity:0;transform:translateY(16px) scale(.88)}72%{opacity:1;transform:translateY(-2px) scale(1.015)}100%{opacity:1;transform:none}}@keyframes aaLetterRise{0%{opacity:0;transform:translate(-50%,22px) rotate(-4deg)}58%{opacity:1;transform:translate(-50%,-38px) rotate(2deg)}82%{transform:translate(-50%,-31px) rotate(-.7deg)}100%{opacity:1;transform:translate(-50%,-34px) rotate(0)}}@keyframes aaInvitationCardSettle{0%{transform:rotate(-2deg) scale(.97)}55%{transform:rotate(1.4deg) scale(1.025)}100%{transform:rotate(0) scale(1)}}@keyframes aaLetterReturn{to{opacity:0;transform:translate(-50%,18px) rotate(-4deg)}}@keyframes aaEnvelopeExit{to{opacity:0;transform:translateY(12px) scale(.96)}}@keyframes aaChallengeReverse{to{opacity:0;transform:translateY(-7px) scale(.98)}}
+    .aa-swords{position:relative;width:clamp(108px,26vw,144px);height:clamp(108px,26vw,144px);margin:0 auto 8px;color:var(--pink);filter:drop-shadow(0 0 18px rgba(var(--pink-rgb),.5))}.aa-swords svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.aa-sword-left{transform-origin:center;animation:aaSwordLeft .62s cubic-bezier(.18,.8,.2,1) both}.aa-sword-right{transform-origin:center;animation:aaSwordRight .62s .05s cubic-bezier(.18,.8,.2,1) both}.aa-challenge-card.aa-accepted .aa-challenge-kicker,.aa-challenge-card.aa-accepted h2,.aa-challenge-card.aa-accepted p{opacity:0;animation:aaChallengeText .38s .62s ease-out forwards}.aa-challenge-card.aa-received .aa-challenge-kicker,.aa-challenge-card.aa-received h2,.aa-challenge-card.aa-received p,.aa-challenge-card.aa-received .aa-challenge-actions,.aa-challenge-card.aa-pending .aa-challenge-kicker,.aa-challenge-card.aa-pending h2,.aa-challenge-card.aa-pending p,.aa-challenge-card.aa-pending .aa-challenge-actions{opacity:0;animation:aaChallengeText .048s .134s ease-out forwards}.aa-challenge-card.aa-received{animation:aaCardSlideIn .52s .05s cubic-bezier(.18,.8,.2,1) both}@keyframes aaCardSlideIn{0%{opacity:0;transform:translateY(20px)}72%{opacity:1;transform:translateY(-2px)}100%{opacity:1;transform:translateY(0)}}.aa-challenge-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:16px}.aa-duel-names{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 8px;font-weight:800}.aa-duel-names b{color:var(--pink);font-size:20px}.aa-opponent{margin:0 0 6px!important;font-weight:700;color:var(--text)!important}
+    .aa-challenge-kicker{color:var(--pink);font-size:11px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase}.aa-challenge-card h2{margin:6px 0;font-size:clamp(24px,6vw,34px);line-height:1.1}.aa-challenge-card p{color:var(--muted);margin:8px 0 14px}.aa-challenge-card .aa-challenge-close{margin-top:12px}.challenge-envelope-icon{width:48px;height:40px;display:inline-grid;place-items:center;color:var(--pink);vertical-align:middle;margin-right:8px;animation:aaEnvelopeIn .8s cubic-bezier(.18,.8,.2,1) both}.challenge-envelope-icon img{width:48px;height:40px;object-fit:contain;filter:drop-shadow(0 0 7px rgba(var(--pink-rgb),.22))}.challenge-label{color:var(--pink);font-size:10px;letter-spacing:1.6px}
+    @keyframes aaFadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes aaChallengeText{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @media(prefers-reduced-motion:reduce){.aa-invitation-card{animation:none!important;opacity:1!important;transform:none!important}.aa-challenge-card.aa-received,.aa-challenge-card.aa-idle-float{animation:none!important}.aa-challenge-toast,.aa-envelope,.aa-envelope-frame,.aa-envelope-ref,.aa-env-back,.aa-env-front,.aa-env-flap,.challenge-envelope-icon,.aa-envelope-letter,.aa-envelope-letter img,.aa-swords,.aa-sword-left,.aa-sword-right,.aa-ref-sword-left,.aa-ref-sword-right,.aa-ref-copy,.aa-accept-exit{animation:none!important;transition:none!important}.aa-envelope-sparkle,.aa-card-sparkle{display:none!important}}
   </style>
 
   <!-- ============================= SAFETY ============================== -->
@@ -4811,7 +4821,7 @@ try {
       </div>
     </div>
   </div>
-  <span id="ui-version-badge">v75</span>
+  <span id="ui-version-badge">v76</span>
 
 <script>
 'use strict';
@@ -7538,6 +7548,7 @@ function rtHandle(msg) {
   // v61: silent relation change (declined / cancelled / removed by the other
   // side) — no notification row, but every friend control must follow live.
   if (msg.type === 'friends.changed') { onFriendRelationChanged(); if (currentView === 'friends') friendsPageLoad(); return; }
+  if (msg.type === 'challenge.status') { onChallengeStatus(msg); return; }
   if (msg.type === 'chat.message') { window.dispatchEvent(new CustomEvent('aa-chat', { detail: msg })); return; } // v73 phase 6
   if (msg.type === 'chat.edit') { window.dispatchEvent(new CustomEvent('aa-chat-edit', { detail: msg })); return; } // v77
   if (msg.type === 'chat.delete') { window.dispatchEvent(new CustomEvent('aa-chat-delete', { detail: msg })); return; } // v77
@@ -7669,7 +7680,7 @@ function rtConnect() {
     try { parsed = JSON.parse(m.data); } catch (_) { return; }
     // v51: direct user messages (notifications, room.kicked) are routed too —
     // the dispatcher used to whitelist only the room/list feeds.
-    if (parsed && (parsed.type === 'error' || parsed.type === 'room.event' || parsed.type === 'rooms.list' || parsed.type === 'matchmaking' || parsed.type === 'notification' || parsed.type === 'room.kicked' || parsed.type === 'team.changed' || parsed.type === 'friends.changed' || parsed.type === 'chat.message' || parsed.type === 'chat.edit' || parsed.type === 'chat.delete')) rtHandle(parsed); // v63: team draft + friend relation changes are routed to the dispatcher too
+    if (parsed && (parsed.type === 'error' || parsed.type === 'room.event' || parsed.type === 'rooms.list' || parsed.type === 'matchmaking' || parsed.type === 'notification' || parsed.type === 'room.kicked' || parsed.type === 'team.changed' || parsed.type === 'friends.changed' || parsed.type === 'challenge.status' || parsed.type === 'chat.message' || parsed.type === 'chat.edit' || parsed.type === 'chat.delete')) rtHandle(parsed); // v63: team draft + friend relation changes are routed to the dispatcher too
   };
   ws.onclose = () => {
     if (rt.ws === ws) rt.ws = null;
@@ -7678,6 +7689,105 @@ function rtConnect() {
   ws.onerror = () => { try { ws.close(); } catch (_) {} };
 }
 
+function playChallengeReferenceFrames(img){
+  const srcs=Array.from({length:8},(_,i)=>'/challenge-acceptance-frames/frame-'+String(i+1).padStart(2,'0')+'.png');
+  const preloaded=srcs.map(src=>{const frame=new Image();frame.src=src;return frame;});
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){img.src=srcs[srcs.length-1];return;}
+  const durations=[.12,.13,.13,.14,.14,.13,.13,.14],total=durations.reduce((a,b)=>a+b,0);let start=null,last=-1;
+  const step=now=>{if(start===null)start=now;const t=(now-start)/1000;let elapsed=0,index=0;for(;index<durations.length;index++){if(t<elapsed+durations[index])break;elapsed+=durations[index];}index=Math.min(index,preloaded.length-1);if(index!==last){img.src=preloaded[index].src;last=index;}if(t<total)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}
+function playEnvelopeSparkles(root) {
+  const stage=root.querySelector('.aa-envelope');if(!stage)return;
+  const img=stage.querySelector('.aa-envelope-frame'),stars=[...stage.querySelectorAll('.aa-envelope-sparkle')];
+  if(!img)return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){img.src='/challenge-envelope-emerging-reference.png';return;}
+  // Give the supplied closed-envelope keyframe a readable pause, then step
+  // through the exact extracted in-betweens at a calmer pace. The final card
+  // frame is deliberately left in place until the user dismisses the dialog.
+  let frame=0,closedTimer=null,stepTimer=null;
+  const finish=()=>{stage.classList.add('aa-envelope-idle');stars.forEach(star=>{star.style.opacity='';star.style.transform='';});const card=root.querySelector('.aa-challenge-card');if(card)window.setTimeout(()=>{if(root.isConnected)card.classList.add('aa-idle-float');},600);};
+  const animate=()=>{
+    if(!root.isConnected)return;
+    const t=frame/12;
+    stars.forEach((star,i)=>{const pulse=(Math.sin((frame+i*3)*Math.PI/6)+1)/2;star.style.opacity=String(.10+.48*pulse);star.style.transform=`scale(${.65+.35*pulse}) rotate(${(frame*5+i*41)%360}deg)`});
+    if(frame>=13){finish();return;}
+    frame++;
+    stepTimer=window.setTimeout(()=>{if(!root.isConnected)return;img.src='/challenge-envelope-sequence/frame-'+String(frame).padStart(2,'0')+'.png';animate();},20);
+  };
+  closedTimer=window.setTimeout(()=>{if(!root.isConnected)return;img.src='/challenge-envelope-sequence/frame-01.png';frame=1;animate();},114);
+}
+
+function showChallengeOverlay(kind, opponent, roomCode, challengeId, expiresAt) {
+  const previous=document.querySelector('.aa-challenge-toast'); if(previous&&previous.dataset.challengeKind==='received')return previous; if(previous)previous.remove();
+  const root=document.createElement('div'); root.className='aa-challenge-toast'; root.dataset.challengeKind=kind;
+  const accepted=kind==='accepted', received=kind==='received';
+  if(accepted)root.classList.add('aa-accepted-toast');
+  const envelopeAnimated=(received||kind==='pending');
+  const reduceEnvelopeMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const envelopeSource=envelopeAnimated?(reduceEnvelopeMotion?'/challenge-envelope-emerging-reference.png':'/challenge-envelope-sequence/frame-00.png'):'/challenge-envelope-closed-reference.png';
+  const envelopeClass=envelopeAnimated?' aa-envelope-opening':'';
+  const graphic=`<div class="aa-envelope${envelopeClass}" aria-hidden="true">
+    <img class="aa-envelope-frame" src="${envelopeSource}" alt="">
+    <span class="aa-envelope-sparkle aa-sparkle-a" aria-hidden="true">✦</span><span class="aa-envelope-sparkle aa-sparkle-b" aria-hidden="true">✧</span><span class="aa-envelope-sparkle aa-sparkle-e" aria-hidden="true">✦</span><span class="aa-envelope-sparkle aa-sparkle-d" aria-hidden="true">✧</span>
+  </div>`;
+  const title=accepted?'CHALLENGE ACCEPTED':received?'CHALLENGE INVITATION':kind==='declined'?'CHALLENGE DECLINED':kind==='cancelled'?'CHALLENGE CANCELLED':kind==='expired'?'CHALLENGE EXPIRED':kind==='failed'?'CHALLENGE FAILED':'INVITATION SENT';
+  const detail=accepted?'Both artists are confirmed. Entering the challenge room.':received?'Invited you to a private 1v1 challenge. Accept to join the room, or decline this invitation.':kind==='declined'?'The artist declined this challenge.':kind==='cancelled'?'The pending invitation was cancelled.':kind==='expired'?'The invitation expired before it was accepted.':kind==='failed'?'The invitation could not be completed.':'Your private 1v1 invitation is pending the opponent’s response.';
+  const buttons=received?'<button type="button" id="aa-challenge-accept">Accept Challenge</button><button type="button" class="secondary" id="aa-challenge-decline">Decline</button>':(kind==='pending'&&challengeId?'<button type="button" class="secondary" id="aa-challenge-cancel">Cancel Invitation</button> ':'')+'<button type="button" class="aa-challenge-close secondary">'+(received?'Later':'Continue')+'</button>';
+  if(accepted){
+    const ownDisplay=me&&(me.display_name||me.displayName||(me.username?'@'+me.username:''));
+    const otherDisplay=typeof opponent==='string'?opponent.trim():'';
+    const playerA=ownDisplay?esc(ownDisplay):'',playerB=otherDisplay?esc(otherDisplay):'';
+    const pairLabel=playerA&&playerB?'Challenge accepted between '+playerA+' and '+playerB:'Challenge accepted';
+    root.innerHTML=`<div class="aa-accept-wrap" role="dialog" aria-modal="true" aria-label="${pairLabel}"><div class="aa-accept-stage" role="status" aria-live="polite"><img class="aa-ref-sequence" src="/challenge-acceptance-frames/frame-01.png" alt=""><div class="aa-ref-copy"><span class="aa-ref-player">${playerA}</span><h2>CHALLENGE</h2><strong>Accepted</strong><span class="aa-ref-player">${playerB}</span></div></div><button type="button" class="aa-accept-exit">CONTINUE TO ROOM</button></div>`;
+    document.body.appendChild(root);playChallengeReferenceFrames(root.querySelector('.aa-ref-sequence'));const exit=root.querySelector('.aa-accept-exit');exit.addEventListener('click',()=>root.remove());root.addEventListener('click',e=>{if(e.target===root)root.remove()});root.addEventListener('keydown',e=>{if(e.key==='Escape')root.remove()});exit.focus({preventScroll:true});return root;
+  }
+  const names=opponent?'<p class="aa-opponent">Opponent · '+esc(opponent)+'</p>':'';
+  if(received){
+    const senderLabel=opponent?esc(opponent):'ARTIST';
+    const invitationButtons='<button type="button" id="aa-challenge-accept">Accept</button><button type="button" class="secondary" id="aa-challenge-decline">Decline</button>';
+    root.innerHTML='<div class="aa-invitation-layout" role="dialog" aria-modal="true" aria-label="Challenge invitation">'+graphic+'<article class="aa-invitation-card aa-main-card-enter" role="status" aria-live="polite"><div class="aa-invitation-watermark" aria-hidden="true"><span class="num">1</span><span class="v">V</span><span class="num">1</span></div><span class="aa-card-sparkle s1" style="--spark-delay:.05s" aria-hidden="true">✦</span><span class="aa-card-sparkle s2" style="--spark-delay:.07s" aria-hidden="true">✧</span><span class="aa-card-sparkle s3" style="--spark-delay:.086s" aria-hidden="true">✧</span><span class="aa-card-sparkle s4" style="--spark-delay:.062s" aria-hidden="true">✦</span><h2 class="aa-invitation-brand">Art Arena.</h2><div class="aa-invitation-sender">'+senderLabel+'</div><p class="aa-invitation-message">Challenged you!!!</p><div class="aa-invitation-hint">Accept to join room, Decline this invitation</div><div class="aa-invitation-actions">'+invitationButtons+'</div><div class="aa-invitation-visibility">Private</div></article></div>';
+  }else{
+    root.innerHTML='<div class="aa-challenge-card'+(kind==='pending'?' aa-pending':'')+'" role="status" aria-live="polite">'+graphic+'<span class="aa-card-sparkle s1" style="--spark-delay:.05s" aria-hidden="true">✦</span><span class="aa-card-sparkle s2" style="--spark-delay:.07s" aria-hidden="true">✧</span><span class="aa-card-sparkle s3" style="--spark-delay:.086s" aria-hidden="true">✧</span><span class="aa-card-sparkle s4" style="--spark-delay:.062s" aria-hidden="true">✦</span><div class="aa-challenge-kicker">ART ARENA · PRIVATE 1V1</div><h2>'+title+'</h2>'+names+'<p>'+detail+'</p><div class="aa-challenge-actions">'+buttons+'</div></div>';
+  }
+  document.body.appendChild(root);
+  if(envelopeAnimated)playEnvelopeSparkles(root);
+  const close=root.querySelector('.aa-challenge-close'); if(close)close.addEventListener('click',()=>root.remove());
+  const reverseInvitation=()=>{
+    root.classList.add('aa-reversing');
+    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();
+    const envelope=root.querySelector('.aa-envelope');if(!envelope)return Promise.resolve();
+    return new Promise(resolve=>{let settled=false;const done=e=>{if(e&&e.animationName!=='aaEnvelopeExit')return;if(settled)return;settled=true;clearTimeout(timer);envelope.removeEventListener('animationend',done);resolve()};const timer=setTimeout(()=>done(),1500);envelope.addEventListener('animationend',done)});
+  };
+  const finish=async(action)=>{
+    const controls=root.querySelectorAll('button');controls.forEach(b=>b.disabled=true);
+    const reversePromise=action==='decline'?reverseInvitation():null;
+    try{
+      if(action==='accept'){
+        if(expiresAt&&Date.parse(expiresAt)<=Date.now()){root.remove();showChallengeOverlay('expired',opponent);return;}
+        const joined=await api('/api/rooms/'+encodeURIComponent(roomCode)+'/join',{},'POST');
+        if(joined&&joined.room_full)throw new Error('That challenge room is full.');
+        const ack=await api('/api/friends/invitations/'+encodeURIComponent(challengeId)+'/accept',{},'POST');
+        root.remove();currentRoomCode=roomCode;showChallengeAccepted(ack.room_code||roomCode,opponent);show('room');if(joined&&joined.code)renderRoom(joined);
+      }else if(action==='decline'){
+        await api('/api/friends/invitations/'+encodeURIComponent(challengeId)+'/decline',{},'POST');
+        if(reversePromise)await reversePromise;root.remove();showChallengeOverlay('declined',opponent);if(currentView==='notifications')loadNotifications();
+      }else{
+        await api('/api/community/challenge/'+encodeURIComponent(challengeId)+'/cancel',{},'POST');
+        root.remove();showChallengeOverlay('cancelled',opponent);
+      }
+    }catch(e){if(action==='accept'&&roomCode)try{await api('/api/rooms/'+encodeURIComponent(roomCode)+'/leave',{},'POST')}catch(_){}if(reversePromise)await reversePromise;root.remove();const expired=/expired/i.test(e&&e.message||'');showChallengeOverlay(expired?'expired':'failed',opponent);if(currentView==='notifications')loadNotifications();toast(e.message||'Could not update the challenge.');}
+  };
+  const accept=root.querySelector('#aa-challenge-accept'),decline=root.querySelector('#aa-challenge-decline'),cancel=root.querySelector('#aa-challenge-cancel');
+  if(accept)accept.addEventListener('click',()=>finish('accept'));
+  if(decline)decline.addEventListener('click',()=>finish('decline'));
+  if(cancel)cancel.addEventListener('click',()=>finish('cancel'));
+  if(received&&accept)accept.focus({preventScroll:true});
+  root.addEventListener('click',e=>{if(e.target===root&&!received)root.remove()}); return root;
+}
+function showChallengeAccepted(roomCode,opponent){showChallengeOverlay('accepted',opponent||'',roomCode)}
+function onChallengeStatus(data){if(data.state==='accepted'){const name=data.from_display_name||(data.from_username?'@'+data.from_username:'');showChallengeAccepted(data.room_code,name);if(data.room_code)openRoom(data.room_code)}else if(data.state==='declined')showChallengeOverlay('declined');else if(data.state==='cancelled'){showChallengeOverlay('cancelled');if(currentView==='notifications')loadNotifications();}else if(data.state==='expired'){showChallengeOverlay('expired');if(currentView==='notifications')loadNotifications();}}
 // helper so rtHandle doesn't shadow the global msg() name
 function msgEl(id, text, ok) { msg(id, text, ok); }
 
@@ -9327,9 +9437,16 @@ function bellShake() {
   b.classList.add('bell-shake'); // 2 × 1.1 s — attention, then STILL (by spec)
   setTimeout(() => b.classList.remove('bell-shake'), 2400);
 }
-function onNotificationPush() {
+const challengePrompted = new Set();
+function onNotificationPush(notification) {
   pingUnread();
   if (currentView === 'notifications') loadNotifications();
+  const p=notification&&notification.payload;
+  if(notification&&notification.type==='room_invitation'&&p&&p.challenge_invite===true&&!p.handled&&p.room_code&&notification.id&&!challengePrompted.has(String(notification.id))){
+    challengePrompted.add(String(notification.id));
+    if(!p.expires_at||Date.parse(p.expires_at)>Date.now())
+      showChallengeOverlay('received',p.from_display_name||('@'+(p.from_username||'Artist')),p.room_code,String(notification.id),p.expires_at);
+  }
 }
 setInterval(pingUnread, 30000); // catches missed pushes (reconnects, sleep)
 
@@ -9404,7 +9521,9 @@ async function loadNotifications() {
     const isRR = n.type === 'rematch_request' && n.payload && n.payload.room_code && !n.payload.handled;
     const rrDone = n.type === 'rematch_request' && n.payload && n.payload.handled;
     const isPM = n.type === 'premium_activated';
-    const isRI = n.type === 'room_invitation' && n.payload && n.payload.room_code && !n.payload.handled;   // v61
+    const expiredChallenge = n.type === 'room_invitation' && n.payload && n.payload.challenge_invite && n.payload.expires_at && Date.parse(n.payload.expires_at) <= Date.now() && !n.payload.handled;
+    const isChallenge = n.type === 'room_invitation' && n.payload && n.payload.challenge_invite === true;
+    const isRI = n.type === 'room_invitation' && n.payload && n.payload.room_code && !n.payload.handled && !expiredChallenge;   // v61
     const riDone = n.type === 'room_invitation' && n.payload && n.payload.handled;
     const isTI = n.type === 'team_invitation' && n.payload && n.payload.draft_id && !n.payload.handled;    // v61
     const tiDone = n.type === 'team_invitation' && n.payload && n.payload.handled;
@@ -9414,15 +9533,16 @@ async function loadNotifications() {
     const jrDone = n.type === 'join_request' && n.payload && n.payload.handled; // v65: answer visible to both sides
     const isBR = n.type === 'battle_result' && n.payload && n.payload.battle_id; // v73 COMMUNITY
     const isLS = n.type === 'livestream_start'; // v73 phase 5
-    return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '"' + (n.payload && n.payload.from_user_id ? ' data-from-uid="' + esc(n.payload.from_user_id) + '"' : '') + '>' +
+    return '<div class="notif-item' + (n.read_at ? '' : ' unread') + (isChallenge ? ' challenge-invitation' : '') + '" data-nid="' + esc(n.id) + '"' + (n.payload && n.payload.from_user_id ? ' data-from-uid="' + esc(n.payload.from_user_id) + '"' : '') + '>' +
       '<span class="notif-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
       (n.type.startsWith('friend') || n.type === 'team_invitation' || n.type === 'room_invitation' || n.type === 'mm_team_invite' ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : n.type === 'premium_activated' ? '<path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.55L12 17.1l-5.9 3.15L7.25 13.7 2.5 9.3l6.6-1.04z"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
       '</svg></span>' +
-      '<div class="notif-body"><div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
+      '<div class="notif-body">' + (isChallenge ? '<div class="challenge-envelope-icon" aria-hidden="true"><img src="/challenge-envelope-gradient.svg" alt=""></div><b class="challenge-label">ARENA CHALLENGE</b>' : '') + '<div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
       (isPM ? '<div class="notif-actions"><button type="button" class="notif-cta" data-pm-customize="1">Customize UI</button></div>' : '') +
       (isReq ? '<div class="notif-actions"><button type="button" data-fr-accept="' + esc(n.payload.request_id) + '">Accept</button><button type="button" class="secondary" data-fr-decline="' + esc(n.payload.request_id) + '">Decline</button></div>' : '') +
-      (isRI ? '<div class="notif-actions"><button type="button" data-ri-join="' + esc(n.payload.room_code) + '" data-nid="' + esc(n.id) + '">Join room</button><button type="button" class="secondary" data-ri-decline="' + esc(n.id) + '">Decline</button></div>' : '') +
-      (riDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Joined</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
+      (isRI ? '<div class="notif-actions"><button type="button" data-ri-join="' + esc(n.payload.room_code) + '" data-nid="' + esc(n.id) + '" data-ri-opponent="' + esc(n.payload.from_display_name || ('@' + (n.payload.from_username || 'Opponent'))) + '">' + (isChallenge ? 'Accept Challenge' : 'Join room') + '</button><button type="button" class="secondary" data-ri-decline="' + esc(n.id) + '">Decline</button></div>' : '') +
+      (expiredChallenge ? '<div class="notif-actions"><span class="fr-final declined" aria-label="Challenge expired">Expired</span></div>' : '') +
+      (riDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Joined</button>' : n.payload.handled === 'cancelled' ? '<button type="button" class="fr-final declined" disabled>Challenge cancelled</button>' : n.payload.handled === 'expired' ? '<button type="button" class="fr-final declined" disabled>Challenge expired</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
       (isTI ? '<div class="notif-actions"><button type="button" data-ti-accept="' + esc(n.payload.draft_id) + '">Join team</button><button type="button" class="secondary" data-ti-decline="' + esc(n.payload.draft_id) + '">Decline</button></div>' : '') +
       (tiDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ On the team</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
       (isMMTI ? '<div class="notif-actions"><button type="button" data-mmti-accept="' + esc(n.id) + '">Join team</button><button type="button" class="secondary" data-mmti-decline="' + esc(n.id) + '">Decline</button></div>' : '') +
@@ -9532,9 +9652,17 @@ $('#notif-list').addEventListener('click', async (e) => {
         await api('/api/friends/invitations/' + rij.dataset.nid + '/accept', {}, 'POST');
         const d = await api('/api/rooms/' + rij.dataset.riJoin + '/join', {}, 'POST');
         if (d && d.room_full) { toast('That room filled up before you arrived.'); }
-        else { currentRoomCode = rij.dataset.riJoin; show('room'); if (d && d.code) renderRoom(d); return; }
-      } else { await api('/api/friends/invitations/' + rid.dataset.riDecline + '/decline', {}, 'POST'); toast('Invitation declined.'); }
-    } catch (err) { toast(err.message); }
+        else {
+          const accepted = await api('/api/friends/invitations/' + rij.dataset.nid + '/accept', {}, 'POST');
+          currentRoomCode = rij.dataset.riJoin;
+          if (accepted.challenge) showChallengeAccepted(accepted.room_code || rij.dataset.riJoin, rij.dataset.riOpponent || '');
+          show('room'); if (d && d.code) renderRoom(d); return;
+        }
+      } else {
+        const declined = await api('/api/friends/invitations/' + rid.dataset.riDecline + '/decline', {}, 'POST');
+        if (declined.challenge) showChallengeOverlay('declined'); else toast('Invitation declined.');
+      }
+    } catch (err) { if (rij) showChallengeOverlay('failed'); toast(err.message); }
     loadNotifications(); return;
   }
   const tia = e.target.closest('[data-ti-accept]'), tid = e.target.closest('[data-ti-decline]');
@@ -12241,6 +12369,8 @@ window.__aaTwitchHandoff = null;
         else if (st.state === 'invited') { b.textContent = '⚔ Invited you'; b.disabled = true; b.title = 'This artist already challenged you — answer from your notifications.'; }
         else if (st.state === 'accepted') { b.textContent = '✓ Accepted'; b.disabled = true; }
         else if (st.state === 'declined') { b.textContent = '⚔ Challenge again'; b.disabled = false; }
+        else if (st.state === 'expired') { b.textContent = '⌛ Expired · Challenge again'; b.disabled = false; }
+        else if (st.state === 'cancelled') { b.textContent = 'Challenge cancelled · Try again'; b.disabled = false; }
         else { b.textContent = '⚔ Challenge'; b.disabled = false; }
       }
     }
@@ -12655,11 +12785,13 @@ window.__aaTwitchHandoff = null;
       const id = chal.dataset.cmChallenge;
       chal.disabled = true; const old = chal.textContent; chal.textContent = 'Sending…';
       try {
-        await api('/api/community/challenge/' + id, {}, 'POST');
+        const result = await api('/api/community/challenge/' + id, {}, 'POST');
         chal.textContent = '⏳ Pending';
-        toast('Challenge sent — if they accept, you will meet them in the battle room.');
+        const h=document.querySelector('#pm-body .prof-modal-handle');
+        showChallengeOverlay('pending',h?h.textContent:'',result.room_code,id);
       } catch (err) {
         chal.textContent = old; chal.disabled = false;
+        showChallengeOverlay('failed');
         toast((err && err.message) || 'Could not send that challenge.');
         cmHydrateChallenges(document);
       }

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 76" role="img" aria-labelledby="title desc">
+  <title id="title">Art Arena challenge envelope</title>
+  <desc id="desc">A dimensional, clean-lined invitation envelope in the sword’s pink-purple gradient, with a single flap and connected front folds.</desc>
+  <style>
+    .envelope-sparkle{transform-box:fill-box;transform-origin:center;animation:envelope-glint 1.45s ease-in-out infinite}
+    .envelope-sparkle-b{animation-delay:.7s}
+    @keyframes envelope-glint{0%,100%{opacity:.25;transform:scale(.7);filter:brightness(.9)}48%{opacity:1;transform:scale(1.24);filter:brightness(1.8) drop-shadow(0 0 4px #ffd2ff)}68%{opacity:.78;transform:scale(.93);filter:brightness(1.15)}}
+    @media(prefers-reduced-motion:reduce){.envelope-sparkle{animation:none!important;opacity:.9}}
+  </style>
+  <defs>
+    <linearGradient id="envelope-gradient" x1="9" y1="70" x2="88" y2="9" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a900ff"/><stop offset=".52" stop-color="#d000f5"/><stop offset="1" stop-color="#f000ce"/>
+    </linearGradient>
+    <linearGradient id="envelope-fill" x1="48" y1="18" x2="48" y2="70" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#281338" stop-opacity=".72"/><stop offset="1" stop-color="#130c22" stop-opacity=".92"/>
+    </linearGradient>
+    <filter id="envelope-glow" x="-30%" y="-35%" width="160%" height="175%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.8" result="blur"/>
+      <feFlood flood-color="#d522ff" flood-opacity=".26" result="tint"/>
+      <feComposite in="tint" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g fill="none" stroke="url(#envelope-gradient)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#envelope-glow)">
+    <rect x="8" y="18" width="80" height="52" rx="8" fill="url(#envelope-fill)"/>
+    <path class="flap" d="M11.5 20.8 48 48 84.5 20.8" stroke-linecap="butt"/>
+    <path class="envelope-sparkle" d="m17 5 2.2 5 5 2.2-5 2.2-2.2 5-2.2-5-5-2.2 5-2.2Z" fill="url(#envelope-gradient)" stroke="none"/>
+    <path class="envelope-sparkle envelope-sparkle-b" d="m80 7 1.8 4 4 1.8-4 1.8-1.8 4-1.8-4-4-1.8 4-1.8Z" fill="url(#envelope-gradient)" stroke="none"/>
+  </g>
+</svg>

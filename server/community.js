@@ -13,6 +13,7 @@ const express = require('express');
 const multer = require('multer');
 const { pool, HttpError, ah, avatarUrlOf, requireAuth } = require("./lib");
 const { notifyUser } = require('./notify');
+const rt = require('./realtime');
 const router = express.Router();
 const av = (r) => avatarUrlOf(r.avatar_storage_key, r.updated_at);
 router.use(requireAuth); // artwork bytes are served app-level at /community-art/:key
@@ -606,12 +607,15 @@ async function challengeStateFor(me, id) {
        FROM notifications
       WHERE type = 'room_invitation'
         AND ((user_id = $1::uuid AND payload->>'from_user_id' = $2::text) OR (user_id = $2::uuid AND payload->>'from_user_id' = $1::text))
-        AND created_at > now() - interval '24 hours'
+        AND (payload->>'challenge_invite'='true' OR payload->>'room_name'='Challenge')
       ORDER BY created_at DESC LIMIT 1`, [id, me]);
   if (n) {
     const incoming = n.from_id === id;
-    if (!n.handled) return { eligible: !incoming, state: incoming ? 'invited' : 'pending', room_pending: true };
-    if (n.handled === 'accepted' || n.handled === 'declined')
+    if (!n.handled) {
+      if (Date.now() - new Date(n.created_at).getTime() >= 24*60*60*1000) return { eligible:true, state:'expired' };
+      return { eligible: !incoming, state: incoming ? 'invited' : 'pending', room_pending: true };
+    }
+    if (n.handled === 'accepted' || n.handled === 'declined' || n.handled === 'cancelled' || n.handled === 'expired')
       return { eligible: true, state: n.handled };
   }
   return { eligible: true, state: 'none' };
@@ -627,30 +631,55 @@ router.post('/challenge/:id', ah(async (req, res) => {
   const me = req.user.id, id = String(req.params.id || '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Invalid artist id.');
   if (id === me) throw new HttpError(400, 'You cannot challenge yourself.');
-  const st = await challengeStateFor(me, id);
-  if (!st) throw new HttpError(404, 'Artist not found.');
-  if (!st.eligible) throw new HttpError(403, st.reason || 'This artist cannot be challenged right now.');
-  if (st.state === 'pending') throw new HttpError(409, 'Your challenge is already waiting for their answer.');
-  // Reuse my existing hosted 1v1 lobby room if there is one; otherwise
-  // create a private 1v1 room through the canonical rooms service. If I am
-  // seated somewhere else, room creation refuses honestly (409).
-  const { rows: mine } = await pool.query(
-    `SELECT r.code FROM battle_rooms r
-      WHERE r.deleted_at IS NULL AND r.host_id = $1 AND r.status = 'lobby'
-        AND COALESCE(r.battle_mode, '1v1') = '1v1'
-        AND (SELECT count(*) FROM room_participants rp
-              WHERE rp.room_id = r.id AND rp.state IN ('waiting','ready')) < r.max_players
-      ORDER BY r.created_at DESC LIMIT 1`, [me]);
-  let code = mine[0] && mine[0].code;
-  if (!code) {
-    const { createRoomForUser, newRoomCode } = require('./rooms');
-    const room = await createRoomForUser(req.user, { battle_mode: '1v1', visibility: 'private', code: newRoomCode(), name: 'Challenge' });
-    code = room && room.code;
-    if (!code) throw new HttpError(500, 'Could not open a challenge room.');
-  }
-  const { inviteToRoom } = require('./friends');
-  const room = await inviteToRoom(req.user, id, code);
-  res.status(201).json({ ok: true, state: 'pending', room_code: room.code });
+  // Serialize same-pair requests; button disabling is only a UX aid, not the
+  // duplicate guard. The lock remains held until the real invite is inserted.
+  const lock = await pool.connect();
+  try {
+    await lock.query('BEGIN');
+    await lock.query(`SELECT pg_advisory_xact_lock(hashtextextended(LEAST($1::text,$2::text)||':'||GREATEST($1::text,$2::text),0))`, [me, id]);
+    const st = await challengeStateFor(me, id);
+    if (!st) throw new HttpError(404, 'Artist not found.');
+    if (!st.eligible) throw new HttpError(403, st.reason || 'This artist cannot be challenged right now.');
+    if (st.state === 'pending') throw new HttpError(409, 'Your challenge is already waiting for their answer.');
+    // Reuse the current hosted 1v1 lobby or open one via the canonical room API.
+    const { rows: mine } = await pool.query(
+      `SELECT r.code FROM battle_rooms r
+        WHERE r.deleted_at IS NULL AND r.host_id = $1 AND r.status = 'lobby'
+          AND COALESCE(r.battle_mode, '1v1') = '1v1' AND r.max_players = 2
+          AND (SELECT count(*) FROM room_participants rp WHERE rp.room_id=r.id AND rp.state IN ('waiting','ready')) = 1
+        ORDER BY r.created_at DESC LIMIT 1`, [me]);
+    let code = mine[0] && mine[0].code;
+    if (!code) {
+      const { createRoomForUser, newRoomCode } = require('./rooms');
+      const room = await createRoomForUser(req.user, { battle_mode: '1v1', visibility: 'private', code: newRoomCode(), name: 'Challenge' });
+      code = room && room.code;
+      if (!code) throw new HttpError(500, 'Could not open a challenge room.');
+    }
+    const { inviteToRoom } = require('./friends');
+    const room = await inviteToRoom(req.user, id, code, { challenge_invite: true, expires_at: new Date(Date.now()+24*60*60*1000).toISOString() });
+    await lock.query('COMMIT');
+    res.status(201).json({ ok:true, state:'pending', room_code:room.code, expires_at:new Date(Date.now()+24*60*60*1000).toISOString() });
+  } catch (e) {
+    try { await lock.query('ROLLBACK'); } catch (_) {}
+    throw e;
+  } finally { lock.release(); }
+}));
+router.post('/challenge/:id/cancel', ah(async (req, res) => {
+  const me=req.user.id, id=String(req.params.id||'');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400,'Invalid artist id.');
+  const { rows } = await pool.query(
+    `WITH target AS (
+       SELECT id FROM notifications
+        WHERE user_id=$1 AND type='room_invitation' AND payload->>'from_user_id'=$2
+          AND payload->>'challenge_invite'='true' AND payload->>'handled' IS NULL
+          AND created_at > now()-interval '24 hours'
+        ORDER BY created_at DESC LIMIT 1 FOR UPDATE
+     )
+     UPDATE notifications n SET payload=n.payload || jsonb_build_object('handled','cancelled')
+       FROM target WHERE n.id=target.id RETURNING n.id`, [me,id]);
+  if (!rows[0]) throw new HttpError(409,'That challenge is no longer pending.');
+  rt.sendToUser(id,{type:'challenge.status',state:'cancelled',from_user_id:me});
+  res.json({ok:true,state:'cancelled'});
 }));
 
 // ---- phase 7: safety management (block/mute lists + toggles) -------------

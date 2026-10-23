@@ -185,13 +185,27 @@ router.post('/friends/invitations/:notificationId/:action', ah(async (req, res) 
   const action = req.params.action === 'accept' ? 'accepted' : req.params.action === 'decline' ? 'declined' : null;
   if (!action) throw new HttpError(400, 'Unknown action.');
   const { rows } = await pool.query(
-    `UPDATE notifications SET payload = payload || jsonb_build_object('handled', $3::text)
+    `UPDATE notifications SET payload = payload || jsonb_build_object('handled',
+        CASE WHEN $3::text='accepted' AND payload->>'challenge_invite'='true'
+                  AND payload->>'expires_at' IS NOT NULL AND (payload->>'expires_at')::timestamptz <= now()
+             THEN 'expired' ELSE $3::text END)
       WHERE id = $1 AND user_id = $2 AND type IN ('room_invitation') AND payload->>'handled' IS NULL
       RETURNING payload`, [String(req.params.notificationId), req.user.id, action]);
   if (!rows[0]) throw new HttpError(409, 'That invitation was already handled.');
   const p = rows[0].payload || {};
-  if (p.from_user_id) rt.sendToUser(p.from_user_id, { type: 'friends.changed', reason: 'invitation_' + action, user_id: req.user.id });
-  res.json({ ok: true, handled: action, room_code: p.room_code || null });
+  if (p.handled === 'expired') {
+    if (p.from_user_id) rt.sendToUser(p.from_user_id, {type:'challenge.status',state:'expired',from_user_id:req.user.id,from_username:req.user.username,from_display_name:req.user.display_name});
+    throw new HttpError(410, 'That challenge invitation has expired.');
+  }
+  if (p.from_user_id) {
+    rt.sendToUser(p.from_user_id, { type: 'friends.changed', reason: 'invitation_' + action, user_id: req.user.id });
+    if (p.challenge_invite) rt.sendToUser(p.from_user_id, {
+      type: 'challenge.status', state: action, room_code: p.room_code || null,
+      from_user_id: req.user.id, from_username:req.user.username, from_display_name:req.user.display_name,
+      notification_id: String(req.params.notificationId),
+    });
+  }
+  res.json({ ok: true, handled: action, room_code: p.room_code || null, challenge: !!p.challenge_invite });
 }));
 
 // ---------------------------------------------------------------------------
