@@ -3828,18 +3828,10 @@ try {
        the hero keeps a themed gradient surface instead of a broken box. */
     .cm-hero.plain { background:linear-gradient(135deg, rgba(var(--pink-rgb),.14), rgba(var(--purple-rgb),.10)); }
     .cm-hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-    /* v81 phase 3: the Community hero is a deliberate two-layer composition —
-       the supplied Colosseum artwork (its sky keyed out to transparent) held
-       over a painted arena backdrop. The backdrop COVERS the hero area; the
-       cutout keeps its aspect ratio (contain, never stretched) and anchors to
-       the bottom-right with a small bleed so its base sits under the veil. */
+    /* Existing Community backdrop remains beneath the hero artwork and veil. */
     .cm-hero img.cm-hero-back { object-fit:cover; object-position:center; }
     /* v82: the lead Arena artwork itself, full-bleed — the hero is the gallery */
     .cm-hero img.cm-hero-art { object-fit:cover; object-position:center; }
-    /* v82: the Colosseum now sits IN the backdrop instead of pasted over it —
-       half opacity plus a left-edge fade, so the monument melts into the
-       painted arena scene behind it (its base still tucks under the veil). */
-    .cm-hero img.cm-hero-cut { inset:auto -2% 0 auto; width:auto; height:122%; max-width:none; object-fit:contain; object-position:bottom right; opacity:.5; filter:saturate(.94); -webkit-mask-image:linear-gradient(to left, #000 60%, transparent 98%); mask-image:linear-gradient(to left, #000 60%, transparent 98%); }
     /* v80: the veil is derived from the ACTIVE THEME's own --bg, so the hero
        caption stays readable in Light Mode and in the light premium themes
        (Cloud, Magazine) without hard-coding any colour. */
@@ -4047,9 +4039,6 @@ try {
       #cm-feed { grid-template-columns:1fr; gap:14px; }
       .cm-side-item { font-size:12.5px; padding:7px 13px; }
       .cm-hero { min-height:170px; }
-      /* v81 phase 3: on phones the monument shares the strip with the caption —
-         pull it right and shrink slightly so the text always has clear air. */
-      .cm-hero img.cm-hero-cut { height:106%; right:-14%; }
       .cm-hero-body { padding:16px 16px; }
       .cm-card-title, .cm-rail-head h2, .cm-sec-head h2 { font-size:19px; }
       .cm-savedrow { flex-wrap:wrap; }
@@ -4062,16 +4051,7 @@ try {
       .cm-feat-art { inset:0; right:0; bottom:0; width:100%; height:100%; object-fit:cover; object-position:center; }
     }
     @media (prefers-reduced-motion:reduce) { .cm-overlay, .cm-post { animation:none !important; transition:none !important; } }
-    .aa-challenge-toast{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:18px;background:rgba(6,4,12,.42);backdrop-filter:blur(3px);animation:aaFadeIn .22s ease-out}.aa-challenge-toast.aa-accepted-toast{background:rgba(6,4,12,.24);backdrop-filter:blur(1px)}
-    .aa-accept-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:calc(100vw - 28px)}.aa-accept-stage{position:relative;width:min(430px,88vw);aspect-ratio:1;background:transparent;overflow:visible;box-shadow:none;isolation:isolate}.aa-ref-sequence{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 0 8px rgba(183,24,236,.22))}.aa-ref-copy{position:absolute;z-index:2;left:0;right:0;top:42%;width:max-content;max-width:94%;margin:0 auto;display:flex;flex-direction:column;align-items:center;line-height:1.03;text-align:center;white-space:nowrap;padding:8px 22px 9px;border:1px solid rgba(208,74,255,.42);border-radius:16px;background:rgba(9,6,17,.94);box-shadow:0 0 24px rgba(10,5,18,.9),0 0 16px rgba(179,30,232,.12);animation:aaRefCopy .95s .08s cubic-bezier(.18,.8,.2,1) both}.aa-ref-copy h2{font-size:clamp(24px,7vw,38px);font-weight:1000;letter-spacing:-.6px;color:#09aefa;margin:0}.aa-ref-copy strong{font-size:clamp(22px,5vw,28px);font-weight:900;color:#00db3b}.aa-ref-player{color:#39d6ff;font-size:clamp(13px,2.2vw,16px);font-weight:800;line-height:1.2;-webkit-text-stroke:.65px rgba(28,8,40,.95);paint-order:stroke fill;text-shadow:0 1px 5px rgba(0,0,0,.95)}.aa-ref-room{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#695b72;font-size:10px;font-weight:600}.aa-accept-exit{min-height:42px;padding:0 20px;border:1px solid rgba(var(--pink-rgb),.8);border-radius:999px;background:linear-gradient(105deg,var(--pink),var(--purple));color:#fff;font-weight:900;letter-spacing:.5px;cursor:pointer;box-shadow:0 8px 26px rgba(var(--pink-rgb),.24);animation:aaRefButton .20s 1.0s ease-out both}.aa-accept-exit:focus-visible{outline:3px solid #fff;outline-offset:3px}@keyframes aaRefSwordLeft{0%{opacity:.35;transform:translate(-190px,200px) rotate(-8deg)}65%{opacity:1;transform:translate(4px,-3px) rotate(2deg)}84%{transform:translate(-2px,1px)}100%{opacity:1;transform:none}}@keyframes aaRefSwordRight{0%{opacity:0;transform:translate(190px,200px) rotate(8deg)}65%{opacity:1;transform:translate(-4px,-3px) rotate(-2deg)}84%{transform:translate(2px,-1px)}100%{opacity:1;transform:none}}@keyframes aaRefCopy{0%{opacity:0;transform:scale(.58)}58%{opacity:1;transform:scale(1.08)}82%{transform:scale(.98)}100%{opacity:1;transform:scale(1)}}@keyframes aaRefButton{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-    .aa-challenge-card{position:relative;width:min(440px,100%);text-align:center;padding:24px 22px;border:1px solid rgba(var(--pink-rgb),.62);border-radius:22px;color:var(--text);background:linear-gradient(150deg,var(--surface),color-mix(in srgb,var(--purple) 20%,var(--surface)));box-shadow:0 20px 80px rgba(0,0,0,.5),0 0 32px rgba(var(--pink-rgb),.18)}.aa-invitation-layout{width:min(860px,96vw);max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:15px 12px 12px;isolation:isolate}.aa-invitation-layout .aa-envelope{width:clamp(145px,20vw,185px);aspect-ratio:1962/2180;margin:0 auto -3px;flex:0 0 auto}.aa-invitation-card{position:relative;isolation:isolate;overflow:hidden;width:100%;aspect-ratio:1.82;padding:27px 44px 28px;border:6px solid #f10bc9;border-radius:42px;color:#f10bc9;background:linear-gradient(142deg,#341350 0%,#301049 60%,#290d40 100%);box-shadow:0 16px 42px #0008,0 0 27px #e311c31b;opacity:0;transform:translateY(22px)}.aa-invitation-card.aa-main-card-enter{animation:aaMainCardSlide .52s .05s cubic-bezier(.18,.8,.2,1) both}.aa-invitation-card.aa-main-card-idle{animation:aaCardFloat 4s ease-in-out infinite!important}.aa-invitation-card.aa-main-card-exit{animation:aaInvitationCardExit .24s .68s ease-in both!important}.aa-invitation-watermark{position:absolute;z-index:0;right:5%;bottom:-12%;display:flex;align-items:baseline;gap:.015em;opacity:.20;transform:skewX(-11deg);color:#7818c1;pointer-events:none;white-space:nowrap;font-size:clamp(220px,34vw,420px);line-height:.8;letter-spacing:-.11em}.aa-invitation-watermark .num{font-family:"Rockwell Extra Bold",Rockwell,Georgia,serif;font-weight:900}.aa-invitation-watermark .v{font-family:"Bauhaus 93","Bauhaus",Impact,sans-serif;font-weight:900;letter-spacing:-.18em}.aa-invitation-brand,.aa-invitation-sender,.aa-invitation-message,.aa-invitation-hint,.aa-invitation-actions,.aa-invitation-visibility{position:relative;z-index:1}.aa-invitation-brand{font-size:clamp(19px,2.7vw,28px);font-weight:950;letter-spacing:.075em;line-height:1;text-transform:uppercase;margin:0 0 38px}.aa-invitation-sender{font-size:clamp(31px,5.2vw,58px);font-weight:900;letter-spacing:-.035em;line-height:1.04;margin:0 0 23px;overflow-wrap:anywhere}.aa-invitation-message{font-size:clamp(30px,6.1vw,66px);font-weight:850;letter-spacing:-.04em;line-height:1.02;white-space:nowrap;margin:0}.aa-invitation-hint{font-size:clamp(15px,2.15vw,23px);font-weight:750;margin-top:21px;white-space:nowrap}.aa-invitation-actions{display:flex;gap:22px;margin-top:29px}.aa-invitation-actions button{min-width:172px;height:62px;display:grid;place-items:center;padding:0 22px;border:4px solid #17def5;border-radius:999px;background:linear-gradient(105deg,#f10acb,#e910c1);color:#321047;font-size:clamp(22px,2.7vw,31px);font-weight:850;box-shadow:0 0 14px #15dff32b;margin:0;cursor:pointer}.aa-invitation-actions button.secondary{background:linear-gradient(105deg,#f10acb,#e910c1);border-color:#17def5;color:#321047}.aa-invitation-actions button:disabled{opacity:.48;cursor:wait}.aa-invitation-visibility{position:absolute;right:23px;bottom:18px;color:#f10bc9;font-size:clamp(18px,2.6vw,30px);font-weight:950;letter-spacing:.06em;text-transform:uppercase}.aa-invitation-card .aa-card-sparkle{z-index:3}.aa-invitation-card.aa-idle-float .aa-card-sparkle{animation:aaIdleGlisten 2.8s ease-in-out infinite!important}.aa-invitation-card.aa-idle-float .aa-card-sparkle:nth-of-type(2){animation-delay:.7s!important}.aa-invitation-card.aa-idle-float .aa-card-sparkle:nth-of-type(3){animation-delay:1.4s!important}.aa-invitation-card.aa-idle-float .aa-card-sparkle:nth-of-type(4){animation-delay:2.1s!important}@keyframes aaMainCardSlide{0%{opacity:0;transform:translateY(22px)}72%{opacity:1;transform:translateY(-2px)}100%{opacity:1;transform:translateY(0)}}@keyframes aaInvitationCardExit{to{opacity:0;transform:translateY(12px)}}@media(max-width:720px){.aa-invitation-layout{width:min(560px,96vw);padding:8px 5px}.aa-invitation-layout .aa-envelope{width:clamp(132px,35vw,165px);margin-bottom:-2px}.aa-invitation-card{aspect-ratio:auto;min-height:435px;padding:23px 22px 29px;border-width:5px;border-radius:31px}.aa-invitation-brand{font-size:20px;margin-bottom:43px}.aa-invitation-sender{font-size:clamp(29px,8vw,46px);margin-bottom:24px}.aa-invitation-message{font-size:clamp(31px,8.6vw,48px);white-space:normal}.aa-invitation-hint{font-size:17px;white-space:normal;max-width:35ch;margin-top:19px}.aa-invitation-actions{gap:10px;margin-top:29px}.aa-invitation-actions button{min-width:0;flex:1;height:57px;padding:0 12px;border-width:4px;font-size:22px}.aa-invitation-visibility{right:17px;bottom:15px;font-size:19px}}.aa-envelope-idle{animation:aaEnvelopeFloat 3.6s ease-in-out infinite!important}.aa-envelope-idle .aa-envelope-sparkle{animation:aaIdleGlisten 2.8s ease-in-out infinite!important;transition:none!important}.aa-envelope-idle .aa-envelope-sparkle:nth-of-type(2){animation-delay:.7s!important}.aa-envelope-idle .aa-envelope-sparkle:nth-of-type(3){animation-delay:1.4s!important}.aa-envelope-idle .aa-envelope-sparkle:nth-of-type(4){animation-delay:2.1s!important}.aa-challenge-card.aa-idle-float{animation:aaCardFloat 4s ease-in-out infinite!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle{animation:aaIdleGlisten 2.8s ease-in-out infinite!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle:nth-of-type(2){animation-delay:.7s!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle:nth-of-type(3){animation-delay:1.4s!important}.aa-challenge-card.aa-idle-float .aa-card-sparkle:nth-of-type(4){animation-delay:2.1s!important}@keyframes aaEnvelopeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes aaCardFloat{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}@keyframes aaIdleGlisten{0%,100%{opacity:.22;filter:brightness(.9);transform:scale(.78) rotate(0)}50%{opacity:.8;filter:brightness(1.25);transform:scale(1) rotate(12deg)}}.aa-card-sparkle{position:absolute;z-index:3;color:#fff;font:900 16px/1 Georgia,serif;text-shadow:0 0 7px rgba(var(--pink-rgb),.95),0 0 15px rgba(var(--purple-rgb),.8);opacity:0;pointer-events:none;animation:aaCardTwinkle .14s ease-in-out both;animation-delay:var(--spark-delay,0s)}.aa-card-sparkle.s1{top:18px;left:24px}.aa-card-sparkle.s2{top:34px;right:25px;color:#ef8bff}.aa-card-sparkle.s3{bottom:24px;left:19px;color:#ef8bff}.aa-card-sparkle.s4{bottom:29px;right:21px}@keyframes aaCardTwinkle{0%,100%{opacity:0;transform:scale(.45) rotate(0)}25%,58%{opacity:.9;transform:scale(1) rotate(35deg)}78%{opacity:.3;transform:scale(.7) rotate(70deg)}}
-    .aa-envelope{position:relative;isolation:isolate;width:clamp(180px,48vw,228px);aspect-ratio:1962/2180;height:auto;margin:0 auto 12px;filter:drop-shadow(0 8px 18px rgba(var(--pink-rgb),.24));transform-origin:50% 75%}.aa-envelope-opening{animation:aaEnvelopeIn .38s cubic-bezier(.18,.8,.2,1) both}.aa-envelope-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}.aa-envelope-sparkle{position:absolute;z-index:4;display:block;color:var(--pink);font:900 clamp(13px,3.8vw,20px)/1 Georgia,serif;text-shadow:0 0 7px rgba(var(--pink-rgb),.95),0 0 16px rgba(var(--purple-rgb),.68);opacity:0;transform:scale(.45) rotate(0deg);transition:opacity .017s linear,transform .017s ease-out;pointer-events:none}.aa-sparkle-a{top:8%;left:12%}.aa-sparkle-b{top:18%;right:9%;color:#fff}.aa-sparkle-c{top:51%;left:-2%;color:#d98aff}.aa-sparkle-d{top:58%;right:-3%;color:#fff}.aa-sparkle-e{bottom:7%;left:23%;color:#e988ff}.aa-sparkle-f{bottom:10%;right:18%;color:#fff}.aa-reversing .aa-envelope{animation:aaEnvelopeExit .36s .68s ease-in both!important}.aa-reversing .aa-challenge-kicker,.aa-reversing .aa-challenge-card h2,.aa-reversing .aa-challenge-card p,.aa-reversing .aa-challenge-actions{animation:aaChallengeReverse .2s ease-in both!important}.aa-reversing .aa-invitation-card{animation:aaInvitationCardExit .24s .68s ease-in both!important}
-    @keyframes aaFlapOpen{0%{transform:rotateX(0);opacity:1}72%{transform:rotateX(192deg);opacity:1}100%{transform:rotateX(180deg);opacity:.88}}@keyframes aaFlapClose{0%{transform:rotateX(180deg);opacity:.88}100%{transform:rotateX(0);opacity:1}}@keyframes aaEnvelopeIn{0%{opacity:0;transform:translateY(16px) scale(.88)}72%{opacity:1;transform:translateY(-2px) scale(1.015)}100%{opacity:1;transform:none}}@keyframes aaLetterRise{0%{opacity:0;transform:translate(-50%,22px) rotate(-4deg)}58%{opacity:1;transform:translate(-50%,-38px) rotate(2deg)}82%{transform:translate(-50%,-31px) rotate(-.7deg)}100%{opacity:1;transform:translate(-50%,-34px) rotate(0)}}@keyframes aaInvitationCardSettle{0%{transform:rotate(-2deg) scale(.97)}55%{transform:rotate(1.4deg) scale(1.025)}100%{transform:rotate(0) scale(1)}}@keyframes aaLetterReturn{to{opacity:0;transform:translate(-50%,18px) rotate(-4deg)}}@keyframes aaEnvelopeExit{to{opacity:0;transform:translateY(12px) scale(.96)}}@keyframes aaChallengeReverse{to{opacity:0;transform:translateY(-7px) scale(.98)}}
-    .aa-swords{position:relative;width:clamp(108px,26vw,144px);height:clamp(108px,26vw,144px);margin:0 auto 8px;color:var(--pink);filter:drop-shadow(0 0 18px rgba(var(--pink-rgb),.5))}.aa-swords svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.aa-sword-left{transform-origin:center;animation:aaSwordLeft .62s cubic-bezier(.18,.8,.2,1) both}.aa-sword-right{transform-origin:center;animation:aaSwordRight .62s .05s cubic-bezier(.18,.8,.2,1) both}.aa-challenge-card.aa-accepted .aa-challenge-kicker,.aa-challenge-card.aa-accepted h2,.aa-challenge-card.aa-accepted p{opacity:0;animation:aaChallengeText .38s .62s ease-out forwards}.aa-challenge-card.aa-received .aa-challenge-kicker,.aa-challenge-card.aa-received h2,.aa-challenge-card.aa-received p,.aa-challenge-card.aa-received .aa-challenge-actions,.aa-challenge-card.aa-pending .aa-challenge-kicker,.aa-challenge-card.aa-pending h2,.aa-challenge-card.aa-pending p,.aa-challenge-card.aa-pending .aa-challenge-actions{opacity:0;animation:aaChallengeText .048s .134s ease-out forwards}.aa-challenge-card.aa-received{animation:aaCardSlideIn .52s .05s cubic-bezier(.18,.8,.2,1) both}@keyframes aaCardSlideIn{0%{opacity:0;transform:translateY(20px)}72%{opacity:1;transform:translateY(-2px)}100%{opacity:1;transform:translateY(0)}}.aa-challenge-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:16px}.aa-duel-names{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 8px;font-weight:800}.aa-duel-names b{color:var(--pink);font-size:20px}.aa-opponent{margin:0 0 6px!important;font-weight:700;color:var(--text)!important}
-    .aa-challenge-kicker{color:var(--pink);font-size:11px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase}.aa-challenge-card h2{margin:6px 0;font-size:clamp(24px,6vw,34px);line-height:1.1}.aa-challenge-card p{color:var(--muted);margin:8px 0 14px}.aa-challenge-card .aa-challenge-close{margin-top:12px}.challenge-envelope-icon{width:48px;height:40px;display:inline-grid;place-items:center;color:var(--pink);vertical-align:middle;margin-right:8px;animation:aaEnvelopeIn .8s cubic-bezier(.18,.8,.2,1) both}.challenge-envelope-icon img{width:48px;height:40px;object-fit:contain;filter:drop-shadow(0 0 7px rgba(var(--pink-rgb),.22))}.challenge-label{color:var(--pink);font-size:10px;letter-spacing:1.6px}
-    @keyframes aaFadeIn{from{opacity:0}to{opacity:1}}
-    @keyframes aaChallengeText{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-    @media(prefers-reduced-motion:reduce){.aa-invitation-card{animation:none!important;opacity:1!important;transform:none!important}.aa-challenge-card.aa-received,.aa-challenge-card.aa-idle-float{animation:none!important}.aa-challenge-toast,.aa-envelope,.aa-envelope-frame,.aa-envelope-ref,.aa-env-back,.aa-env-front,.aa-env-flap,.challenge-envelope-icon,.aa-envelope-letter,.aa-envelope-letter img,.aa-swords,.aa-sword-left,.aa-sword-right,.aa-ref-sword-left,.aa-ref-sword-right,.aa-ref-copy,.aa-accept-exit{animation:none!important;transition:none!important}.aa-envelope-sparkle,.aa-card-sparkle{display:none!important}}
+
   </style>
 
   <!-- ============================= SAFETY ============================== -->
@@ -4169,10 +4149,11 @@ try {
     .msg-wrap { display:grid; grid-template-columns:1fr; gap:10px; min-height:420px; }
     #view-messages.thread-open #msg-list, #view-messages.thread-open #msg-newbox, #view-messages.thread-open .cm-top { display:none; }
     #msg-list { display:flex; flex-direction:column; gap:7px; }
-    .msg-row { display:flex; align-items:center; gap:9px; border:1px solid var(--line); border-radius:11px; padding:9px 10px; cursor:pointer; background:var(--card,transparent); font:inherit; color:inherit; text-align:left; }
-    .msg-row img { width:32px; height:32px; border-radius:50%; }
-    .msg-row .grow { flex:1; min-width:0; }
-    .msg-row .prev { color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .msg-row { display:flex; align-items:center; gap:9px; width:100%; min-width:0; max-width:100%; box-sizing:border-box; overflow:hidden; border:1px solid var(--line); border-radius:11px; padding:9px 10px; cursor:pointer; background:var(--card,transparent); font:inherit; color:inherit; text-align:left; }
+    .msg-row img { width:32px; height:32px; flex:0 0 32px; border-radius:50%; object-fit:cover; }
+    .msg-row .grow { flex:1 1 0%; min-width:0; max-width:100%; overflow:hidden; }
+    .msg-row .grow > b { display:block; max-width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .msg-row .prev { display:block; width:100%; min-width:0; max-width:100%; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .msg-row .dot { width:9px; height:9px; border-radius:50%; background:var(--pink); flex:0 0 auto; }
     #msg-newbox { border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px; }
     #msg-newbox label { display:flex; gap:7px; align-items:center; font-size:13px; }
@@ -7689,105 +7670,24 @@ function rtConnect() {
   ws.onerror = () => { try { ws.close(); } catch (_) {} };
 }
 
-function playChallengeReferenceFrames(img){
-  const srcs=Array.from({length:8},(_,i)=>'/challenge-acceptance-frames/frame-'+String(i+1).padStart(2,'0')+'.png');
-  const preloaded=srcs.map(src=>{const frame=new Image();frame.src=src;return frame;});
-  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduce){img.src=srcs[srcs.length-1];return;}
-  const durations=[.12,.13,.13,.14,.14,.13,.13,.14],total=durations.reduce((a,b)=>a+b,0);let start=null,last=-1;
-  const step=now=>{if(start===null)start=now;const t=(now-start)/1000;let elapsed=0,index=0;for(;index<durations.length;index++){if(t<elapsed+durations[index])break;elapsed+=durations[index];}index=Math.min(index,preloaded.length-1);if(index!==last){img.src=preloaded[index].src;last=index;}if(t<total)requestAnimationFrame(step);};
-  requestAnimationFrame(step);
-}
-function playEnvelopeSparkles(root) {
-  const stage=root.querySelector('.aa-envelope');if(!stage)return;
-  const img=stage.querySelector('.aa-envelope-frame'),stars=[...stage.querySelectorAll('.aa-envelope-sparkle')];
-  if(!img)return;
-  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){img.src='/challenge-envelope-emerging-reference.png';return;}
-  // Give the supplied closed-envelope keyframe a readable pause, then step
-  // through the exact extracted in-betweens at a calmer pace. The final card
-  // frame is deliberately left in place until the user dismisses the dialog.
-  let frame=0,closedTimer=null,stepTimer=null;
-  const finish=()=>{stage.classList.add('aa-envelope-idle');stars.forEach(star=>{star.style.opacity='';star.style.transform='';});const card=root.querySelector('.aa-challenge-card');if(card)window.setTimeout(()=>{if(root.isConnected)card.classList.add('aa-idle-float');},600);};
-  const animate=()=>{
-    if(!root.isConnected)return;
-    const t=frame/12;
-    stars.forEach((star,i)=>{const pulse=(Math.sin((frame+i*3)*Math.PI/6)+1)/2;star.style.opacity=String(.10+.48*pulse);star.style.transform=`scale(${.65+.35*pulse}) rotate(${(frame*5+i*41)%360}deg)`});
-    if(frame>=13){finish();return;}
-    frame++;
-    stepTimer=window.setTimeout(()=>{if(!root.isConnected)return;img.src='/challenge-envelope-sequence/frame-'+String(frame).padStart(2,'0')+'.png';animate();},20);
+function onChallengeStatus(data) {
+  if (!data || !data.state) return;
+  if (data.state === 'accepted') {
+    toast('Challenge accepted — opening the room.');
+    if (data.room_code) openRoom(data.room_code);
+    return;
+  }
+  if (currentView === 'notifications') loadNotifications();
+  if (currentView === 'community' && window.cmHydrateChallenges)
+    window.cmHydrateChallenges(document);
+  const notices = {
+    declined: 'The artist declined your challenge.',
+    cancelled: 'The challenge invitation was cancelled.',
+    expired: 'The challenge invitation expired.',
   };
-  closedTimer=window.setTimeout(()=>{if(!root.isConnected)return;img.src='/challenge-envelope-sequence/frame-01.png';frame=1;animate();},114);
+  if (notices[data.state]) toast(notices[data.state]);
 }
 
-function showChallengeOverlay(kind, opponent, roomCode, challengeId, expiresAt) {
-  const previous=document.querySelector('.aa-challenge-toast'); if(previous&&previous.dataset.challengeKind==='received')return previous; if(previous)previous.remove();
-  const root=document.createElement('div'); root.className='aa-challenge-toast'; root.dataset.challengeKind=kind;
-  const accepted=kind==='accepted', received=kind==='received';
-  if(accepted)root.classList.add('aa-accepted-toast');
-  const envelopeAnimated=(received||kind==='pending');
-  const reduceEnvelopeMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const envelopeSource=envelopeAnimated?(reduceEnvelopeMotion?'/challenge-envelope-emerging-reference.png':'/challenge-envelope-sequence/frame-00.png'):'/challenge-envelope-closed-reference.png';
-  const envelopeClass=envelopeAnimated?' aa-envelope-opening':'';
-  const graphic=`<div class="aa-envelope${envelopeClass}" aria-hidden="true">
-    <img class="aa-envelope-frame" src="${envelopeSource}" alt="">
-    <span class="aa-envelope-sparkle aa-sparkle-a" aria-hidden="true">✦</span><span class="aa-envelope-sparkle aa-sparkle-b" aria-hidden="true">✧</span><span class="aa-envelope-sparkle aa-sparkle-e" aria-hidden="true">✦</span><span class="aa-envelope-sparkle aa-sparkle-d" aria-hidden="true">✧</span>
-  </div>`;
-  const title=accepted?'CHALLENGE ACCEPTED':received?'CHALLENGE INVITATION':kind==='declined'?'CHALLENGE DECLINED':kind==='cancelled'?'CHALLENGE CANCELLED':kind==='expired'?'CHALLENGE EXPIRED':kind==='failed'?'CHALLENGE FAILED':'INVITATION SENT';
-  const detail=accepted?'Both artists are confirmed. Entering the challenge room.':received?'Invited you to a private 1v1 challenge. Accept to join the room, or decline this invitation.':kind==='declined'?'The artist declined this challenge.':kind==='cancelled'?'The pending invitation was cancelled.':kind==='expired'?'The invitation expired before it was accepted.':kind==='failed'?'The invitation could not be completed.':'Your private 1v1 invitation is pending the opponent’s response.';
-  const buttons=received?'<button type="button" id="aa-challenge-accept">Accept Challenge</button><button type="button" class="secondary" id="aa-challenge-decline">Decline</button>':(kind==='pending'&&challengeId?'<button type="button" class="secondary" id="aa-challenge-cancel">Cancel Invitation</button> ':'')+'<button type="button" class="aa-challenge-close secondary">'+(received?'Later':'Continue')+'</button>';
-  if(accepted){
-    const ownDisplay=me&&(me.display_name||me.displayName||(me.username?'@'+me.username:''));
-    const otherDisplay=typeof opponent==='string'?opponent.trim():'';
-    const playerA=ownDisplay?esc(ownDisplay):'',playerB=otherDisplay?esc(otherDisplay):'';
-    const pairLabel=playerA&&playerB?'Challenge accepted between '+playerA+' and '+playerB:'Challenge accepted';
-    root.innerHTML=`<div class="aa-accept-wrap" role="dialog" aria-modal="true" aria-label="${pairLabel}"><div class="aa-accept-stage" role="status" aria-live="polite"><img class="aa-ref-sequence" src="/challenge-acceptance-frames/frame-01.png" alt=""><div class="aa-ref-copy"><span class="aa-ref-player">${playerA}</span><h2>CHALLENGE</h2><strong>Accepted</strong><span class="aa-ref-player">${playerB}</span></div></div><button type="button" class="aa-accept-exit">CONTINUE TO ROOM</button></div>`;
-    document.body.appendChild(root);playChallengeReferenceFrames(root.querySelector('.aa-ref-sequence'));const exit=root.querySelector('.aa-accept-exit');exit.addEventListener('click',()=>root.remove());root.addEventListener('click',e=>{if(e.target===root)root.remove()});root.addEventListener('keydown',e=>{if(e.key==='Escape')root.remove()});exit.focus({preventScroll:true});return root;
-  }
-  const names=opponent?'<p class="aa-opponent">Opponent · '+esc(opponent)+'</p>':'';
-  if(received){
-    const senderLabel=opponent?esc(opponent):'ARTIST';
-    const invitationButtons='<button type="button" id="aa-challenge-accept">Accept</button><button type="button" class="secondary" id="aa-challenge-decline">Decline</button>';
-    root.innerHTML='<div class="aa-invitation-layout" role="dialog" aria-modal="true" aria-label="Challenge invitation">'+graphic+'<article class="aa-invitation-card aa-main-card-enter" role="status" aria-live="polite"><div class="aa-invitation-watermark" aria-hidden="true"><span class="num">1</span><span class="v">V</span><span class="num">1</span></div><span class="aa-card-sparkle s1" style="--spark-delay:.05s" aria-hidden="true">✦</span><span class="aa-card-sparkle s2" style="--spark-delay:.07s" aria-hidden="true">✧</span><span class="aa-card-sparkle s3" style="--spark-delay:.086s" aria-hidden="true">✧</span><span class="aa-card-sparkle s4" style="--spark-delay:.062s" aria-hidden="true">✦</span><h2 class="aa-invitation-brand">Art Arena.</h2><div class="aa-invitation-sender">'+senderLabel+'</div><p class="aa-invitation-message">Challenged you!!!</p><div class="aa-invitation-hint">Accept to join room, Decline this invitation</div><div class="aa-invitation-actions">'+invitationButtons+'</div><div class="aa-invitation-visibility">Private</div></article></div>';
-  }else{
-    root.innerHTML='<div class="aa-challenge-card'+(kind==='pending'?' aa-pending':'')+'" role="status" aria-live="polite">'+graphic+'<span class="aa-card-sparkle s1" style="--spark-delay:.05s" aria-hidden="true">✦</span><span class="aa-card-sparkle s2" style="--spark-delay:.07s" aria-hidden="true">✧</span><span class="aa-card-sparkle s3" style="--spark-delay:.086s" aria-hidden="true">✧</span><span class="aa-card-sparkle s4" style="--spark-delay:.062s" aria-hidden="true">✦</span><div class="aa-challenge-kicker">ART ARENA · PRIVATE 1V1</div><h2>'+title+'</h2>'+names+'<p>'+detail+'</p><div class="aa-challenge-actions">'+buttons+'</div></div>';
-  }
-  document.body.appendChild(root);
-  if(envelopeAnimated)playEnvelopeSparkles(root);
-  const close=root.querySelector('.aa-challenge-close'); if(close)close.addEventListener('click',()=>root.remove());
-  const reverseInvitation=()=>{
-    root.classList.add('aa-reversing');
-    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();
-    const envelope=root.querySelector('.aa-envelope');if(!envelope)return Promise.resolve();
-    return new Promise(resolve=>{let settled=false;const done=e=>{if(e&&e.animationName!=='aaEnvelopeExit')return;if(settled)return;settled=true;clearTimeout(timer);envelope.removeEventListener('animationend',done);resolve()};const timer=setTimeout(()=>done(),1500);envelope.addEventListener('animationend',done)});
-  };
-  const finish=async(action)=>{
-    const controls=root.querySelectorAll('button');controls.forEach(b=>b.disabled=true);
-    const reversePromise=action==='decline'?reverseInvitation():null;
-    try{
-      if(action==='accept'){
-        if(expiresAt&&Date.parse(expiresAt)<=Date.now()){root.remove();showChallengeOverlay('expired',opponent);return;}
-        const joined=await api('/api/rooms/'+encodeURIComponent(roomCode)+'/join',{},'POST');
-        if(joined&&joined.room_full)throw new Error('That challenge room is full.');
-        const ack=await api('/api/friends/invitations/'+encodeURIComponent(challengeId)+'/accept',{},'POST');
-        root.remove();currentRoomCode=roomCode;showChallengeAccepted(ack.room_code||roomCode,opponent);show('room');if(joined&&joined.code)renderRoom(joined);
-      }else if(action==='decline'){
-        await api('/api/friends/invitations/'+encodeURIComponent(challengeId)+'/decline',{},'POST');
-        if(reversePromise)await reversePromise;root.remove();showChallengeOverlay('declined',opponent);if(currentView==='notifications')loadNotifications();
-      }else{
-        await api('/api/community/challenge/'+encodeURIComponent(challengeId)+'/cancel',{},'POST');
-        root.remove();showChallengeOverlay('cancelled',opponent);
-      }
-    }catch(e){if(action==='accept'&&roomCode)try{await api('/api/rooms/'+encodeURIComponent(roomCode)+'/leave',{},'POST')}catch(_){}if(reversePromise)await reversePromise;root.remove();const expired=/expired/i.test(e&&e.message||'');showChallengeOverlay(expired?'expired':'failed',opponent);if(currentView==='notifications')loadNotifications();toast(e.message||'Could not update the challenge.');}
-  };
-  const accept=root.querySelector('#aa-challenge-accept'),decline=root.querySelector('#aa-challenge-decline'),cancel=root.querySelector('#aa-challenge-cancel');
-  if(accept)accept.addEventListener('click',()=>finish('accept'));
-  if(decline)decline.addEventListener('click',()=>finish('decline'));
-  if(cancel)cancel.addEventListener('click',()=>finish('cancel'));
-  if(received&&accept)accept.focus({preventScroll:true});
-  root.addEventListener('click',e=>{if(e.target===root&&!received)root.remove()}); return root;
-}
-function showChallengeAccepted(roomCode,opponent){showChallengeOverlay('accepted',opponent||'',roomCode)}
-function onChallengeStatus(data){if(data.state==='accepted'){const name=data.from_display_name||(data.from_username?'@'+data.from_username:'');showChallengeAccepted(data.room_code,name);if(data.room_code)openRoom(data.room_code)}else if(data.state==='declined')showChallengeOverlay('declined');else if(data.state==='cancelled'){showChallengeOverlay('cancelled');if(currentView==='notifications')loadNotifications();}else if(data.state==='expired'){showChallengeOverlay('expired');if(currentView==='notifications')loadNotifications();}}
 // helper so rtHandle doesn't shadow the global msg() name
 function msgEl(id, text, ok) { msg(id, text, ok); }
 
@@ -9437,16 +9337,9 @@ function bellShake() {
   b.classList.add('bell-shake'); // 2 × 1.1 s — attention, then STILL (by spec)
   setTimeout(() => b.classList.remove('bell-shake'), 2400);
 }
-const challengePrompted = new Set();
-function onNotificationPush(notification) {
+function onNotificationPush() {
   pingUnread();
   if (currentView === 'notifications') loadNotifications();
-  const p=notification&&notification.payload;
-  if(notification&&notification.type==='room_invitation'&&p&&p.challenge_invite===true&&!p.handled&&p.room_code&&notification.id&&!challengePrompted.has(String(notification.id))){
-    challengePrompted.add(String(notification.id));
-    if(!p.expires_at||Date.parse(p.expires_at)>Date.now())
-      showChallengeOverlay('received',p.from_display_name||('@'+(p.from_username||'Artist')),p.room_code,String(notification.id),p.expires_at);
-  }
 }
 setInterval(pingUnread, 30000); // catches missed pushes (reconnects, sleep)
 
@@ -9533,14 +9426,14 @@ async function loadNotifications() {
     const jrDone = n.type === 'join_request' && n.payload && n.payload.handled; // v65: answer visible to both sides
     const isBR = n.type === 'battle_result' && n.payload && n.payload.battle_id; // v73 COMMUNITY
     const isLS = n.type === 'livestream_start'; // v73 phase 5
-    return '<div class="notif-item' + (n.read_at ? '' : ' unread') + (isChallenge ? ' challenge-invitation' : '') + '" data-nid="' + esc(n.id) + '"' + (n.payload && n.payload.from_user_id ? ' data-from-uid="' + esc(n.payload.from_user_id) + '"' : '') + '>' +
+    return '<div class="notif-item' + (n.read_at ? '' : ' unread') + '" data-nid="' + esc(n.id) + '"' + (n.payload && n.payload.from_user_id ? ' data-from-uid="' + esc(n.payload.from_user_id) + '"' : '') + '>' +
       '<span class="notif-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
       (n.type.startsWith('friend') || n.type === 'team_invitation' || n.type === 'room_invitation' || n.type === 'mm_team_invite' ? '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.4-3.1 2.8-4.9 5.8-4.9s5.4 1.8 5.8 4.9"/><circle cx="16.8" cy="10.2" r="2.4"/><path d="M16.2 14.8c2.6.3 4.3 1.9 4.6 4.2"/>' : n.type === 'premium_activated' ? '<path d="M12 2l2.9 6.26L21.5 9.3l-4.75 4.4 1.15 6.55L12 17.1l-5.9 3.15L7.25 13.7 2.5 9.3l6.6-1.04z"/>' : '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>') +
       '</svg></span>' +
-      '<div class="notif-body">' + (isChallenge ? '<div class="challenge-envelope-icon" aria-hidden="true"><img src="/challenge-envelope-gradient.svg" alt=""></div><b class="challenge-label">ARENA CHALLENGE</b>' : '') + '<div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
+      '<div class="notif-body"><div>' + esc(txt) + '</div><div class="notif-when">' + notifWhen(n.created_at) + '</div>' +
       (isPM ? '<div class="notif-actions"><button type="button" class="notif-cta" data-pm-customize="1">Customize UI</button></div>' : '') +
       (isReq ? '<div class="notif-actions"><button type="button" data-fr-accept="' + esc(n.payload.request_id) + '">Accept</button><button type="button" class="secondary" data-fr-decline="' + esc(n.payload.request_id) + '">Decline</button></div>' : '') +
-      (isRI ? '<div class="notif-actions"><button type="button" data-ri-join="' + esc(n.payload.room_code) + '" data-nid="' + esc(n.id) + '" data-ri-opponent="' + esc(n.payload.from_display_name || ('@' + (n.payload.from_username || 'Opponent'))) + '">' + (isChallenge ? 'Accept Challenge' : 'Join room') + '</button><button type="button" class="secondary" data-ri-decline="' + esc(n.id) + '">Decline</button></div>' : '') +
+      (isRI ? '<div class="notif-actions"><button type="button" data-ri-join="' + esc(n.payload.room_code) + '" data-nid="' + esc(n.id) + '">' + (isChallenge ? 'Accept Challenge' : 'Join room') + '</button><button type="button" class="secondary" data-ri-decline="' + esc(n.id) + '">Decline</button></div>' : '') +
       (expiredChallenge ? '<div class="notif-actions"><span class="fr-final declined" aria-label="Challenge expired">Expired</span></div>' : '') +
       (riDone ? '<div class="notif-actions">' + (n.payload.handled === 'accepted' ? '<button type="button" class="fr-final accepted" disabled>✓ Joined</button>' : n.payload.handled === 'cancelled' ? '<button type="button" class="fr-final declined" disabled>Challenge cancelled</button>' : n.payload.handled === 'expired' ? '<button type="button" class="fr-final declined" disabled>Challenge expired</button>' : '<button type="button" class="fr-final declined" disabled>Declined</button>') + '</div>' : '') +
       (isTI ? '<div class="notif-actions"><button type="button" data-ti-accept="' + esc(n.payload.draft_id) + '">Join team</button><button type="button" class="secondary" data-ti-decline="' + esc(n.payload.draft_id) + '">Decline</button></div>' : '') +
@@ -9649,20 +9542,25 @@ $('#notif-list').addEventListener('click', async (e) => {
     const box = (rij || rid).closest('.notif-actions'); box.querySelectorAll('button').forEach((b) => { b.disabled = true; });
     try {
       if (rij) {
-        await api('/api/friends/invitations/' + rij.dataset.nid + '/accept', {}, 'POST');
-        const d = await api('/api/rooms/' + rij.dataset.riJoin + '/join', {}, 'POST');
-        if (d && d.room_full) { toast('That room filled up before you arrived.'); }
-        else {
-          const accepted = await api('/api/friends/invitations/' + rij.dataset.nid + '/accept', {}, 'POST');
-          currentRoomCode = rij.dataset.riJoin;
-          if (accepted.challenge) showChallengeAccepted(accepted.room_code || rij.dataset.riJoin, rij.dataset.riOpponent || '');
-          show('room'); if (d && d.code) renderRoom(d); return;
+        const accepted = await api('/api/friends/invitations/' + rij.dataset.nid + '/accept', {}, 'POST');
+        const roomCode = accepted.room_code || rij.dataset.riJoin;
+        const d = await api('/api/rooms/' + encodeURIComponent(roomCode) + '/join', {}, 'POST');
+        if (d && d.room_full) {
+          toast('That room filled up before you arrived.');
+        } else {
+          currentRoomCode = roomCode;
+          toast(accepted.challenge ? 'Challenge accepted — opening the room.' : 'Invitation accepted — opening the room.');
+          show('room');
+          if (d && d.code) renderRoom(d);
+          return;
         }
       } else {
         const declined = await api('/api/friends/invitations/' + rid.dataset.riDecline + '/decline', {}, 'POST');
-        if (declined.challenge) showChallengeOverlay('declined'); else toast('Invitation declined.');
+        toast(declined.challenge ? 'Challenge declined.' : 'Invitation declined.');
       }
-    } catch (err) { if (rij) showChallengeOverlay('failed'); toast(err.message); }
+    } catch (err) {
+      toast(err.message || 'Could not update that invitation.');
+    }
     loadNotifications(); return;
   }
   const tia = e.target.closest('[data-ti-accept]'), tid = e.target.closest('[data-ti-decline]');
@@ -9784,8 +9682,8 @@ async function openProfile(userId) {
     '<div class="prof-stat-cell"><b>' + st.draws + '</b><span>DRAWS</span></div></div>' +
     (u.joined_at ? '<p class="muted prof-modal-joined" style="font-size:11.5px; margin:10px 0 0">Joined ' + new Date(u.joined_at).toLocaleDateString() + '</p>' : '') +
     // v73 COMMUNITY phase 4 — Arena links: follow, challenge hand-off, live
-    // status, Grand Arena record, artworks and battle history. Everything
-    // below comes from the authoritative /api/community/profile payload.
+    // status, Grand Arena record and artworks. Match-history rows are not
+    // shown on Community profiles; all other profile data remains server-fed.
     (cm ? (
       '<div style="display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 4px">' +
       (!isMe ? '<button type="button" class="mini" data-cm-follow="' + esc(cm.user.id) + '" aria-pressed="' + cm.following + '">' + (cm.following ? 'Following' : 'Follow') + '</button>' : '') +
@@ -9797,13 +9695,8 @@ async function openProfile(userId) {
       '</div>' +
       '<div class="muted" style="font-size:12px; margin:2px 0 8px">Community · ' + cm.stats.battles + ' battles · ' + cm.stats.wins + ' wins · ' + cm.stats.winrate + '% winrate</div>' +
       (cm.posts.length ? '<div style="display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 10px">' + cm.posts.slice(0, 6).map((p) =>
-        '<button type="button" data-open="' + esc(p.id) + '" style="border:1px solid var(--line); border-radius:8px; padding:0; background:none; cursor:pointer"><img src="' + esc(p.image_url) + '" alt="' + esc(p.title || 'Artwork') + '" style="width:64px; height:64px; object-fit:cover; border-radius:7px; display:block"></button>').join('') + '</div>' : '') +
-      (cm.battles.length ? '<div style="margin:4px 0 6px"><div class="muted" style="font-size:11px; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px">Battle history</div>' +
-        cm.battles.map((b) => '<div style="display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:9px; padding:7px 9px; margin-top:6px; font-size:12.5px">' +
-          '<span style="flex:1; min-width:0">' + (b.grand_arena ? '★ ' : '') + esc(b.theme || 'Battle') + '</span>' +
-          '<span style="color:' + (b.outcome === 'win' ? 'var(--ok-tx, #7ee2a8)' : b.outcome === 'loss' ? 'var(--muted)' : 'var(--muted)') + '; font-weight:700; text-transform:uppercase; font-size:11px">' + esc(b.outcome || '') + '</span>' +
-          (b.post_id ? '<button type="button" class="mini" data-open="' + esc(b.post_id) + '">View art</button>' : '') +
-          '</div>').join('') + '</div>' : '')
+        '<button type="button" data-open="' + esc(p.id) + '" style="border:1px solid var(--line); border-radius:8px; padding:0; background:none; cursor:pointer"><img src="' + esc(p.image_url) + '" alt="' + esc(p.title || 'Artwork') + '" style="width:64px; height:64px; object-fit:cover; border-radius:7px; display:block"></button>').join('') + '</div>' : '')
+
     ) : '');
   if (window.cmHydrateChallenges) window.cmHydrateChallenges($('#pm-body'));
   const btn = $('#pm-friend'), dec = $('#pm-friend-decline');
@@ -10957,27 +10850,43 @@ async function refreshMyStreams() {
   } catch (_) { myStreamsRooms = []; }
 
   // ---- YouTube (independent) ----
-  let ytConn = null, ytList = [];
+  let ytStatus = null, ytConn = null, ytList = [];
+  try { ytStatus = await api('/api/youtube/status'); } catch (_) {}
   try { ytConn = await api('/api/youtube/connection'); } catch (_) {}
-  try { ytList = (await api('/api/youtube/broadcasts')).broadcasts || []; } catch (_) {}
+  if (ytStatus && ytStatus.available) {
+    try { ytList = (await api('/api/youtube/broadcasts')).broadcasts || []; } catch (_) {}
+  }
   const ytLive = ytList.find((b) => b.last_known_status === 'live');
   const ytSoon = !ytLive && ytList.find((b) => !['ended', 'failed', 'cancelled', 'revoked'].includes(b.last_known_status));
   const ytCtl = $('#sc-yt-controls'), ytState = $('#sc-yt-state');
+  const ytHasConnection = !!(ytConn && (ytConn.connected || ytConn.revoked));
+  const ytDisconnect = ytHasConnection
+    ? '<button type="button" class="secondary" id="sc-yt-disconnect" style="margin-top:8px">Disconnect YouTube</button>' : '';
+  const ytConnect = ytStatus && ytStatus.available && !(ytConn && ytConn.connected)
+    ? '<button type="button" id="sc-yt-connect">Connect YouTube</button>' : '';
   ytState.classList.remove('err');
-  if (ytLive) {
+  if (!ytStatus || !ytStatus.available) {
+    ytState.classList.add('err');
+    const channelTitle = ytConn && ytConn.channel && ytConn.channel.title;
+    ytState.textContent = ytHasConnection
+      ? 'YouTube setup unavailable' + (channelTitle ? ' — ' + channelTitle : '')
+      : (ytStatus ? 'YouTube is not configured on this deployment' : 'Could not check YouTube setup');
+    ytCtl.innerHTML = '<span class="muted" style="font-size:12px">Set the Google OAuth client and YouTube callback URI on the server to enable account linking.</span>' + ytDisconnect;
+  } else if (ytLive) {
     ytState.textContent = 'Streaming live on YouTube';
     ytCtl.innerHTML = (ytLive.watch_url ? '<button type="button" data-watch="' + esc(ytLive.watch_url) + '">Watch Live</button>' : '') +
-      '<span class="muted" style="font-size:12px">End it from your encoder or YouTube Studio.</span>';
+      '<span class="muted" style="font-size:12px">End it from your encoder or YouTube Studio.</span>' + ytConnect + ytDisconnect;
   } else if (ytSoon) {
     ytState.textContent = 'Stream scheduled — starting soon';
     ytCtl.innerHTML = '<span class="sc-timer" data-live-start="' + esc(ytSoon.scheduled_start) + '"></span>' +
-      '<button type="button" class="danger" id="sc-yt-cancel" data-id="' + esc(ytSoon.id) + '">Cancel Stream</button>';
-  } else if (ytConn && ytConn.status === 'active') {
-    ytState.textContent = 'Connected' + (ytConn.channel_title ? ' — ' + ytConn.channel_title : '');
-    ytCtl.innerHTML = scGoLiveControls('yt');
+      '<button type="button" class="danger" id="sc-yt-cancel" data-id="' + esc(ytSoon.id) + '">Cancel Stream</button>' + ytConnect + ytDisconnect;
+  } else if (ytConn && ytConn.connected) {
+    const channelTitle = ytConn.channel && ytConn.channel.title;
+    ytState.textContent = 'Connected' + (channelTitle ? ' — ' + channelTitle : '');
+    ytCtl.innerHTML = scGoLiveControls('yt') + ytDisconnect;
   } else {
     ytState.textContent = ytConn && ytConn.revoked ? 'Authorization expired — reconnect' : 'Not connected';
-    ytCtl.innerHTML = '<button type="button" id="sc-yt-connect">Connect YouTube</button>';
+    ytCtl.innerHTML = '<button type="button" id="sc-yt-connect">Connect YouTube</button>' + ytDisconnect;
   }
   scSetDot('yt', !!ytLive);
 
@@ -11007,8 +10916,15 @@ async function refreshMyStreams() {
 }
 document.querySelector('.my-streams').addEventListener('click', async (e) => {
   const b = e.target.closest('button'); if (!b || !b.id) return;
-  if (b.id === 'sc-yt-connect') { location.assign('/api/youtube/connect'); return; }
+  if (b.id === 'sc-yt-connect') { try { sessionStorage.setItem('aa-yt-return-view', 'live'); sessionStorage.removeItem('aa-yt-return'); } catch (_) {} location.assign('/api/youtube/connect'); return; }
   if (b.id === 'sc-tw-connect') { location.assign('/api/twitch/connect'); return; }
+  if (b.id === 'sc-yt-disconnect') {
+    b.disabled = true; b.textContent = 'Disconnecting…';
+    try { await api('/api/youtube/disconnect', {}, 'POST'); toast('YouTube disconnected.'); }
+    catch (err) { toast(err.message || 'Could not disconnect YouTube.'); }
+    await refreshMyStreams();
+    return;
+  }
   if (b.id === 'sc-yt-go' || b.id === 'sc-tw-go') {
     const prefix = b.id === 'sc-yt-go' ? 'yt' : 'tw';
     const room = ($('#sc-' + prefix + '-room') || {}).value;
@@ -11064,10 +10980,12 @@ async function openGoLive() {
   try { conn = await api('/api/youtube/connection'); } catch (_) {}
   if (!status) return glvBody('<div class="glv-setup">Could not reach the server — please try again.</div>');
   if (!status.available) {
+    const storedConnection = conn && (conn.connected || conn.revoked);
     return glvBody(
       '<p class="muted" style="margin:10px 0 0">YouTube isn\'t configured on this deployment yet, so live broadcasts can\'t be created here.</p>' +
       '<div class="glv-setup"><b>Setup needed (developer):</b> set <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> and <code>YOUTUBE_REDIRECT_URI</code> in the server environment (Google Cloud OAuth client with the YouTube scope and redirect URI). See the v50 setup checklist.</div>' +
-      '<p class="glv-note">Nothing is streamed or stored in this state — the button stays honest instead of faking a connection.</p>');
+      '<p class="glv-note">Nothing is streamed or stored in this state — the button stays honest instead of faking a connection.</p>' +
+      (storedConnection ? '<button type="button" class="secondary" data-glv-disconnect style="width:100%; margin-top:10px">Disconnect YouTube</button>' : ''));
   }
   if (!conn || !conn.connected) {
     const revoked = conn && conn.revoked;
@@ -11076,7 +10994,8 @@ async function openGoLive() {
         ? 'Your YouTube authorization expired or was revoked — reconnect to continue.'
         : 'Connect your YouTube account to schedule a live broadcast for this battle from your own channel.') + '</p>' +
       '<p class="glv-note">Art Arena asks for permission to manage your live broadcasts (scope: youtube). Authorization tokens stay on our server — never in your browser — and you can disconnect anytime.</p>' +
-      '<button type="button" data-glv-connect style="width:100%">Connect YouTube Account</button>');
+      '<button type="button" data-glv-connect style="width:100%">Connect YouTube Account</button>' +
+      (revoked ? '<button type="button" class="secondary" data-glv-disconnect style="width:100%; margin-top:10px">Remove expired connection</button>' : ''));
   }
   glvPrepare(conn);
 }
@@ -11103,7 +11022,8 @@ async function glvPrepare(conn) {
     '<label>Scheduled start<input type="datetime-local" id="glv-when" value="' + when + '"></label>' +
     '<p class="glv-note">Battle: ROOM ' + esc(currentRoomCode || '—') + ' · this broadcast will be linked to it and can appear on the LIVE page.</p>' +
     '<button type="button" data-glv-create style="width:100%">Create Scheduled Broadcast</button>' +
-    '<p class="glv-note">This creates a real broadcast on your YouTube channel. Art Arena does not send video yet — creation is not streaming.</p>');
+    '<p class="glv-note">This creates a real broadcast on your YouTube channel. Art Arena does not send video yet — creation is not streaming.</p>' +
+    '<button type="button" class="secondary" data-glv-disconnect style="width:100%; margin-top:10px">Disconnect YouTube</button>');
 }
 
 function glvStatus(b, conn) {
@@ -11123,7 +11043,7 @@ function glvStatus(b, conn) {
 // One delegated listener covers every Go Live modal action.
 $('#glv-body').addEventListener('click', async (e) => {
   if (e.target.closest('[data-glv-connect]')) {
-    try { sessionStorage.setItem('aa-yt-return', currentRoomCode || ''); } catch (_) {}
+    try { sessionStorage.setItem('aa-yt-return', currentRoomCode || ''); sessionStorage.removeItem('aa-yt-return-view'); } catch (_) {}
     location.assign('/api/youtube/connect');
     return;
   }
@@ -11147,9 +11067,17 @@ $('#glv-body').addEventListener('click', async (e) => {
     return;
   }
   if (e.target.closest('[data-glv-disconnect]')) {
-    try { await api('/api/youtube/disconnect', {}, 'POST'); toast('YouTube disconnected.'); }
-    catch (err) { toast(err.message); }
-    glvClose();
+    const btn = e.target.closest('[data-glv-disconnect]');
+    btn.disabled = true; btn.textContent = 'Disconnecting…';
+    try {
+      await api('/api/youtube/disconnect', {}, 'POST');
+      toast('YouTube disconnected.');
+      glvClose();
+      if (currentView === 'live') await refreshMyStreams();
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Disconnect YouTube';
+      $('#glv-body').insertAdjacentHTML('beforeend', glvErr(err.message || 'Could not disconnect YouTube.'));
+    }
     return;
   }
 });
@@ -11164,7 +11092,18 @@ window.__aaYoutubeHandoff = null;
   if (!m) return;
   const q = parseHashQuery(m[2] || '');
   try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
+  const takeReturn = () => {
+    let room = null, view = null;
+    try {
+      room = sessionStorage.getItem('aa-yt-return');
+      view = sessionStorage.getItem('aa-yt-return-view');
+      sessionStorage.removeItem('aa-yt-return');
+      sessionStorage.removeItem('aa-yt-return-view');
+    } catch (_) {}
+    return { room, view };
+  };
   window.__aaYoutubeHandoff = (async () => {
+    const back = takeReturn();
     if (m[1] === 'error' || !sessionToken) {
       const why = {
         denied: 'YouTube connection was cancelled.',
@@ -11178,13 +11117,14 @@ window.__aaYoutubeHandoff = null;
       }[q.reason || 'other'] || 'YouTube connection did not complete — please try again.';
       try { if (sessionToken) await enterAccount(); else show('login'); } catch (_) { show('login'); }
       toast(why);
+      if (sessionToken && back.room) openRoom(back.room);
+      else if (sessionToken && back.view === 'live') { show('live'); await refreshLiveAll(); }
       return;
     }
     await enterAccount();
-    toast('YouTube connected — GO LIVE is ready in your battle.');
-    let back = null;
-    try { back = sessionStorage.getItem('aa-yt-return'); sessionStorage.removeItem('aa-yt-return'); } catch (_) {}
-    if (back) { openRoom(back); setTimeout(() => openGoLive(), 700); }
+    toast(back.room ? 'YouTube connected — GO LIVE is ready in your battle.' : 'YouTube connected.');
+    if (back.room) { openRoom(back.room); setTimeout(() => openGoLive(), 700); }
+    else if (back.view === 'live') { show('live'); await refreshLiveAll(); }
   })();
 })();
 
@@ -11648,6 +11588,7 @@ window.__aaTwitchHandoff = null;
   document.addEventListener('visibilitychange', () => { if (me && !document.hidden) sfRefreshRole(); });
 })();
 </script>
+<script src="/message-date-utils.js"></script>
 <script>
 'use strict';
 // ---------------------------------------------------------------------------
@@ -11658,7 +11599,7 @@ window.__aaTwitchHandoff = null;
 // ---------------------------------------------------------------------------
 (function () {
   const q = (s) => document.querySelector(s);
-  const M = { thread: null, hasMore: false, nextBefore: null, wall: null, cat: null, prevWall: null, rec: null, recChunks: null, pendingShare: null, premium: false,
+  const M = { thread: null, hasMore: false, nextBefore: null, loadingMore: false, historySeq: 0, wall: null, cat: null, prevWall: null, rec: null, recChunks: null, pendingShare: null, premium: false,
     prefs: { notifications: true, sound: true }, prefsLoaded: false, outbox: new Map(), voiceDraft: null };
   // v81 phase 8: one prefs truth shared with Community settings. The chime
   // is a shipped asset (/message-chime.wav); browsers only let it play after
@@ -11685,7 +11626,7 @@ window.__aaTwitchHandoff = null;
       return `<button class="msg-row" data-thread="${t.id}">
         ${!t.is_group && other.avatar_url ? `<img src="${esc(other.avatar_url)}" alt="">` : ''}
         <span class="grow"><b>${esc(t.title || 'Group')}</b>
-        <div class="prev">${t.last ? esc((t.last.sender_id === me.id ? 'You: ' : '') + t.last.body) : 'No messages yet'}</div></span>
+        <span class="prev">${t.last ? esc((t.last.sender_id === me.id ? 'You: ' : '') + t.last.body) : 'No messages yet'}</span></span>
         ${t.unread > 0 ? `<span class="dot" title="${t.unread} unread" aria-label="${t.unread} unread"></span>` : ''}</button>`;
     }).join('') || '<div class="muted" style="font-size:13px">No conversations yet — messages start between friends.</div>';
   }
@@ -11721,21 +11662,33 @@ window.__aaTwitchHandoff = null;
     ? bubbleHTML(m) + `<span class="msg-ts msg-sendstat" data-sendstat="${m.id}">Sending…</span>`
     : bubbleHTML(m) + actsHTML(m) + tsHTML(m);
   const tsHTML = (m) => `<span class="msg-ts">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
-  const dayKey = (ts) => new Date(ts).toDateString();
-  const dayLabel = (ts) => { const d = new Date(ts); const today = new Date(); const yest = new Date(Date.now() - 864e5); if (d.toDateString() === today.toDateString()) return 'Today'; if (d.toDateString() === yest.toDateString()) return 'Yesterday'; return d.toLocaleDateString([], { month: 'long', day: 'numeric' }); };
+  const dayKey = window.AAMessageDateUtils.dayKey;
+  const dayLabel = window.AAMessageDateUtils.dayLabel;
 
   function flowHTML(list) {
     const out = [];
+    const seen = new Set();
     let lastDay = null, grp = null;
-    const closeGrp = () => { if (grp) { out.push(`</div>`); grp = null; } };
-    for (const m of list) {
+    const closeGrp = () => { if (grp) { out.push('</div>'); grp = null; } };
+    for (const m of list || []) {
+      if (!m) continue;
+      if (m.id != null) {
+        const id = String(m.id);
+        if (seen.has(id)) continue;
+        seen.add(id);
+      }
       const dk = dayKey(m.created_at);
-      if (dk !== lastDay) { closeGrp(); out.push(`<span class="msg-day">${dayLabel(m.created_at)}</span>`); lastDay = dk; }
-      if (!grp || grp.sender !== m.sender_id) {
+      if (dk !== lastDay) {
+        closeGrp();
+        const label = dayLabel(m.created_at);
+        if (label) out.push(`<span class="msg-day" data-k="${esc(dk || '')}">${esc(label)}</span>`);
+        lastDay = dk;
+      }
+      if (!grp || grp.sender !== String(m.sender_id) || grp.day !== dk) {
         closeGrp();
         const mine = m.sender_id === me.id;
-        out.push(`<div class="msg-grp ${mine ? 'mine' : 'theirs'}" data-sender="${m.sender_id}">`);
-        grp = { sender: m.sender_id };
+        out.push(`<div class="msg-grp ${mine ? 'mine' : 'theirs'}" data-sender="${esc(m.sender_id)}" data-day="${esc(dk || '')}">`);
+        grp = { sender: String(m.sender_id), day: dk };
       }
       out.push(flowItemHTML(m));
     }
@@ -11749,19 +11702,80 @@ window.__aaTwitchHandoff = null;
   }
   function appendFlow(m) {
     const box = q('#msg-flow');
+    if (!box || !m) return;
+    if (m.id != null && Array.from(box.querySelectorAll('.msg-bub[data-mid]')).some((b) => b.dataset.mid === String(m.id))) return;
     const ph = box.querySelector(':scope > .muted'); if (ph) ph.remove();
     const dk = dayKey(m.created_at);
-    let lastDay = null;
-    const days = box.querySelectorAll('.msg-day');
-    if (days.length) lastDay = days[days.length - 1].dataset.k || null;
-    const lastGrp = box.lastElementChild && box.lastElementChild.classList.contains('msg-grp') ? box.lastElementChild : null;
-    if (dk !== lastDay) {
-      if (lastGrp) {} // groups close naturally by ordering
-      box.insertAdjacentHTML('beforeend', `<span class="msg-day" data-k="${dk}">${dayLabel(m.created_at)}</span>`);
+    const day = dk || '';
+    const sender = String(m.sender_id);
+    const groups = Array.from(box.querySelectorAll('.msg-grp'));
+    const dayGroups = groups.filter((g) => g.dataset.day === day);
+    const groupHTML = `<div class="msg-grp ${m.sender_id === me.id ? 'mine' : 'theirs'}" data-sender="${esc(sender)}" data-day="${esc(day)}">${flowItemHTML(m)}</div>`;
+
+    // Realtime can arrive after reconnect or out of order. Add it to its local
+    // calendar-day group instead of emitting a second separator for that day.
+    if (dayGroups.length) {
+      const lastDayGroup = dayGroups[dayGroups.length - 1];
+      if (lastDayGroup.dataset.sender === sender) lastDayGroup.insertAdjacentHTML('beforeend', flowItemHTML(m));
+      else lastDayGroup.insertAdjacentHTML('afterend', groupHTML);
+      return;
     }
-    const g2 = box.lastElementChild && box.lastElementChild.classList.contains('msg-grp') && box.lastElementChild.dataset.sender === m.sender_id ? box.lastElementChild : null;
-    if (g2 && dk === lastDay) g2.insertAdjacentHTML('beforeend', flowItemHTML(m));
-    else box.insertAdjacentHTML('beforeend', `<div class="msg-grp ${m.sender_id === me.id ? 'mine' : 'theirs'}" data-sender="${m.sender_id}">${flowItemHTML(m)}</div>`);
+
+    const existingSeparator = Array.from(box.querySelectorAll('.msg-day')).find((el) => el.dataset.k === day);
+    if (existingSeparator) {
+      existingSeparator.insertAdjacentHTML('afterend', groupHTML);
+      return;
+    }
+    const nextGroup = day && groups.find((g) => g.dataset.day && g.dataset.day > day);
+    const nextSeparator = nextGroup && nextGroup.previousElementSibling;
+    const before = nextSeparator && nextSeparator.classList.contains('msg-day') && nextSeparator.dataset.k === nextGroup.dataset.day
+      ? nextSeparator : nextGroup;
+    const label = dayLabel(m.created_at);
+    const separatorHTML = label ? `<span class="msg-day" data-k="${esc(day)}">${esc(label)}</span>` : '';
+    const markup = separatorHTML + groupHTML;
+    if (before) before.insertAdjacentHTML('beforebegin', markup);
+    else box.insertAdjacentHTML('beforeend', markup);
+  }
+
+  function prependFlow(list) {
+    const box = q('#msg-flow'), scroll = q('#msg-scroll');
+    if (!box || !scroll) return;
+    const known = new Set(Array.from(box.querySelectorAll('.msg-bub[data-mid]')).map((b) => b.dataset.mid));
+    const fresh = [];
+    for (const m of list || []) {
+      if (m && m.id != null) {
+        const id = String(m.id);
+        if (known.has(id)) continue;
+        known.add(id);
+      }
+      if (m) fresh.push(m);
+    }
+    if (!fresh.length) return;
+
+    const prevHeight = scroll.scrollHeight, prevTop = scroll.scrollTop;
+    const placeholder = box.querySelector(':scope > .muted');
+    const firstExisting = box.querySelector('.msg-grp');
+    const firstDay = firstExisting ? firstExisting.dataset.day : null;
+    const newestFreshDay = dayKey(fresh[fresh.length - 1].created_at);
+    const template = document.createElement('template');
+    template.innerHTML = flowHTML(fresh);
+    const fragment = template.content;
+    const newGroups = fragment.querySelectorAll('.msg-grp');
+    const lastFreshGroup = newGroups.length ? newGroups[newGroups.length - 1] : null;
+
+    // When a page boundary splits one calendar day, retain one separator and
+    // merge a same-sender group so pagination cannot create a duplicate date.
+    if (firstExisting && firstDay === (newestFreshDay || '') && lastFreshGroup) {
+      const existingSeparator = Array.from(box.querySelectorAll('.msg-day')).find((el) => el.dataset.k === firstDay);
+      if (existingSeparator) existingSeparator.remove();
+      if (lastFreshGroup.dataset.day === firstDay && lastFreshGroup.dataset.sender === firstExisting.dataset.sender) {
+        while (firstExisting.firstChild) lastFreshGroup.appendChild(firstExisting.firstChild);
+        firstExisting.remove();
+      }
+    }
+    if (placeholder) placeholder.remove();
+    box.insertBefore(fragment, box.firstChild);
+    scroll.scrollTop = prevTop + scroll.scrollHeight - prevHeight;
   }
 
   // ---- wallpaper ------------------------------------------------------------
@@ -11787,8 +11801,11 @@ window.__aaTwitchHandoff = null;
   }
 
   async function msgOpen(id) {
-    M.thread = id; M.pendingShare = null; aaClearVoiceDraft();
-    let meta; try { meta = await api('/api/messages/threads/' + id); } catch (e) { toast(e.message); return; }
+    const threadSeq = ++M.historySeq;
+    M.thread = id; M.hasMore = false; M.nextBefore = null; M.loadingMore = false;
+    M.pendingShare = null; aaClearVoiceDraft();
+    let meta; try { meta = await api('/api/messages/threads/' + id); } catch (e) { if (M.historySeq === threadSeq) toast(e.message); return; }
+    if (M.thread !== id || M.historySeq !== threadSeq) return;
     q('#msg-thread-title').textContent = meta.is_group ? (meta.name || 'Group') : meta.title;
     const other = meta.members.find((m) => m.id !== me.id);
     const avEl = q('#msg-thread-av');
@@ -11796,10 +11813,18 @@ window.__aaTwitchHandoff = null;
     else { avEl.style.backgroundImage = 'none'; avEl.textContent = esc((meta.title || 'G').charAt(0).toUpperCase()); }
     q('#msg-thread').classList.remove('hidden');
     q('#view-messages').classList.add('thread-open');
-    try { M.cat = await api('/api/messages/threads/' + id + '/walls'); M.premium = !!M.cat.premium; } catch (e) { M.cat = null; }
-    try { const c = await api('/api/messages/threads/' + id + '/customization'); M.wall = c.wallpaper || { kind: 'default' }; M.premium = !!c.premium; } catch (e) { M.wall = { kind: 'default' }; }
+    let cat = null;
+    try { cat = await api('/api/messages/threads/' + id + '/walls'); } catch (_) {}
+    if (M.thread !== id || M.historySeq !== threadSeq) return;
+    M.cat = cat; M.premium = !!(cat && cat.premium);
+    let customization = null;
+    try { customization = await api('/api/messages/threads/' + id + '/customization'); } catch (_) {}
+    if (M.thread !== id || M.historySeq !== threadSeq) return;
+    M.wall = (customization && customization.wallpaper) || { kind: 'default' };
+    M.premium = !!(customization && customization.premium);
     paintWall(M.wall);
     const d = await api('/api/messages/threads/' + id + '/messages');
+    if (M.thread !== id || M.historySeq !== threadSeq) return;
     M.hasMore = d.has_more; M.nextBefore = d.next_before;
     const box = q('#msg-flow');
     box.innerHTML = flowHTML(d.messages) || '<div class="muted" style="font-size:12.5px; text-align:center">Say hello.</div>';
@@ -11808,12 +11833,18 @@ window.__aaTwitchHandoff = null;
   }
   q('#msg-scroll') && q('#msg-scroll').addEventListener('scroll', async () => {
     const box = q('#msg-scroll');
-    if (box.scrollTop === 0 && M.hasMore && M.thread) {
-      const d = await api('/api/messages/threads/' + M.thread + '/messages?before=' + encodeURIComponent(M.nextBefore));
+    if (box.scrollTop !== 0 || !M.hasMore || !M.thread || M.loadingMore) return;
+    const threadId = M.thread, threadSeq = M.historySeq, cursor = M.nextBefore;
+    M.loadingMore = true;
+    try {
+      const d = await api('/api/messages/threads/' + threadId + '/messages?before=' + encodeURIComponent(cursor));
+      if (M.thread !== threadId || M.historySeq !== threadSeq) return;
       M.hasMore = d.has_more; M.nextBefore = d.next_before;
-      const prevH = box.scrollHeight;
-      q('#msg-flow').insertAdjacentHTML('afterbegin', flowHTML(d.messages));
-      box.scrollTop = box.scrollHeight - prevH;
+      prependFlow(d.messages);
+    } catch (err) {
+      if (M.thread === threadId && M.historySeq === threadSeq) toast(err.message || 'Could not load older messages.');
+    } finally {
+      if (M.thread === threadId && M.historySeq === threadSeq) M.loadingMore = false;
     }
   });
 
@@ -12079,7 +12110,7 @@ window.__aaTwitchHandoff = null;
       return;
     }
     if (e.target.closest('#msg-reply-x')) { M.replyTo = null; q('#msg-replychip').classList.remove('on'); return; }
-    if (e.target.closest('#msg-back')) { q('#msg-thread').classList.add('hidden'); q('#view-messages').classList.remove('thread-open'); M.thread = null; return; }
+    if (e.target.closest('#msg-back')) { q('#msg-thread').classList.add('hidden'); q('#view-messages').classList.remove('thread-open'); M.thread = null; M.historySeq++; M.hasMore = false; M.nextBefore = null; M.loadingMore = false; return; }
     const row = e.target.closest('[data-thread]');
     if (row) { msgOpen(row.dataset.thread); return; }
     if (e.target.closest('[data-msg-go]')) {
@@ -12134,7 +12165,14 @@ window.__aaTwitchHandoff = null;
     const grp = bub.closest('.msg-grp');
     const stat = q(`[data-sendstat="${entry.tempId}"]`); if (stat) stat.remove();
     bub.remove();
-    if (grp && !grp.querySelector('.msg-bub')) grp.remove();
+    if (grp && !grp.querySelector('.msg-bub')) {
+      const flow = grp.parentElement, day = grp.dataset.day;
+      grp.remove();
+      if (flow && day && !Array.from(flow.querySelectorAll('.msg-grp')).some((g) => g.dataset.day === day)) {
+        const separator = Array.from(flow.querySelectorAll('.msg-day')).find((el) => el.dataset.k === day);
+        if (separator) separator.remove();
+      }
+    }
   }
   async function aaDeliver(entry) {
     if (!navigator.onLine) { aaSetSendState(entry, 'failed', 'Offline — not sent.'); return; }
@@ -12197,7 +12235,14 @@ window.__aaTwitchHandoff = null;
     if (nx && nx.classList.contains('msg-acts')) { const a = nx; nx = a.nextElementSibling; a.remove(); }
     if (nx && nx.classList.contains('msg-ts')) nx.remove();
     bub.remove();
-    if (grp && !grp.querySelector('.msg-bub')) grp.remove();
+    if (grp && !grp.querySelector('.msg-bub')) {
+      const flow = grp.parentElement, day = grp.dataset.day;
+      grp.remove();
+      if (flow && day && !Array.from(flow.querySelectorAll('.msg-grp')).some((g) => g.dataset.day === day)) {
+        const separator = Array.from(flow.querySelectorAll('.msg-day')).find((el) => el.dataset.k === day);
+        if (separator) separator.remove();
+      }
+    }
   }
   function aaStartEdit(bub) {
     const mid = bub.dataset.mid; const body = bub.dataset.body || '';
@@ -12365,7 +12410,9 @@ window.__aaTwitchHandoff = null;
         if (!st) { b.style.display = 'none'; continue; }
         if (!st.eligible && st.state !== 'invited') { b.style.display = 'none'; continue; }
         b.style.display = '';
-        if (st.state === 'pending') { b.textContent = '⏳ Pending'; b.disabled = true; }
+        b.title = '';
+        delete b.dataset.cmCancel;
+        if (st.state === 'pending') { b.textContent = '⏳ Pending · Cancel'; b.disabled = false; b.dataset.cmCancel = 'true'; b.title = 'Cancel this pending challenge.'; }
         else if (st.state === 'invited') { b.textContent = '⚔ Invited you'; b.disabled = true; b.title = 'This artist already challenged you — answer from your notifications.'; }
         else if (st.state === 'accepted') { b.textContent = '✓ Accepted'; b.disabled = true; }
         else if (st.state === 'declined') { b.textContent = '⚔ Challenge again'; b.disabled = false; }
@@ -12533,20 +12580,17 @@ window.__aaTwitchHandoff = null;
     if (hero) {
       // v82 (supersedes the phase-3 note): the hero is the GALLERY of the
       // Arena — the lead artwork renders full-bleed and the click opens it.
-      // The Colosseum/backdrop composition (Colosseum faded into the
-      // backdrop, per the owner's direction) survives as the welcome scene
-      // and as the fallback if the artwork image fails; if a backdrop layer
-      // fails the hero degrades to the themed gradient (.plain) — never a
-      // broken image box.
+      // The existing backdrop remains the welcome scene and the fallback
+      // if the artwork image fails; if the backdrop fails, the hero degrades
+      // to the themed gradient (.plain) — never a broken image box.
       hero.classList.remove('welcome', 'plain');
       hero.innerHTML =
         '<img class="cm-hero-back" src="/community-hero-backdrop.jpg" alt="" aria-hidden="true">' +
-        '<img class="cm-hero-cut" src="/community-hero-colosseum.png" alt="" aria-hidden="true">' +
         // v82: the hero IS the gallery of the Arena — when a lead artwork
         // exists, the artwork itself is the hero visual (full-bleed). The
-        // backdrop composition stays underneath purely as the failure
-        // fallback (the artwork layer removes itself on error) and as the
-        // no-posts welcome scene.
+        // existing backdrop remains underneath as the failure fallback
+        // (the artwork layer removes itself on error) and as the no-posts
+        // welcome scene.
         (lead && lead.image_url
           ? '<img class="cm-hero-art" src="' + esc(lead.image_url) + '" alt="' + esc(lead.title || 'Trending artwork') + '">'
           : '') +
@@ -12560,10 +12604,10 @@ window.__aaTwitchHandoff = null;
           : '<div class="cm-hero-body"><span class="cm-hero-kicker">Art Arena™ Community</span>' +
             '<h1 class="cm-hero-title">The gallery of the Arena</h1>' +
             '<p class="cm-hero-sub">Share your work, follow the artists you rate, and watch battles unfold.</p></div>');
-      hero.querySelectorAll('img.cm-hero-back, img.cm-hero-cut').forEach((im) => {
+      hero.querySelectorAll('img.cm-hero-back').forEach((im) => {
         im.addEventListener('error', () => { hero.classList.add('plain'); im.remove(); });
       });
-      // artwork failure → reveal the backdrop composition beneath, captions intact
+      // Artwork failure → retain the backdrop and captions intact.
       hero.querySelectorAll('img.cm-hero-art').forEach((im) => {
         im.addEventListener('error', () => { im.remove(); });
       });
@@ -12783,15 +12827,25 @@ window.__aaTwitchHandoff = null;
     const chal = e.target.closest('[data-cm-challenge]');
     if (chal && !chal.disabled) {
       const id = chal.dataset.cmChallenge;
+      if (chal.dataset.cmCancel === 'true') {
+        chal.disabled = true;
+        chal.textContent = 'Cancelling…';
+        try {
+          await api('/api/community/challenge/' + id + '/cancel', {}, 'POST');
+          toast('Challenge cancelled.');
+        } catch (err) {
+          toast((err && err.message) || 'Could not cancel that challenge.');
+        }
+        await cmHydrateChallenges(document);
+        return;
+      }
       chal.disabled = true; const old = chal.textContent; chal.textContent = 'Sending…';
       try {
-        const result = await api('/api/community/challenge/' + id, {}, 'POST');
-        chal.textContent = '⏳ Pending';
-        const h=document.querySelector('#pm-body .prof-modal-handle');
-        showChallengeOverlay('pending',h?h.textContent:'',result.room_code,id);
+        await api('/api/community/challenge/' + id, {}, 'POST');
+        await cmHydrateChallenges(document);
+        toast('Challenge sent. You will receive a notification if the artist accepts.');
       } catch (err) {
         chal.textContent = old; chal.disabled = false;
-        showChallengeOverlay('failed');
         toast((err && err.message) || 'Could not send that challenge.');
         cmHydrateChallenges(document);
       }
